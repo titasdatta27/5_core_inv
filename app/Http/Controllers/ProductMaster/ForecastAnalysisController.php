@@ -145,6 +145,13 @@ class ForecastAnalysisController extends Controller
 
                 $item->{'Total'} = ($item->L30 ?? 0) + $totalSum;
                 $item->{'Total month'} = $totalMonthCount + ((isset($item->L30) && $item->L30 != 0) ? 1 : 0);
+                
+                // Calculate MSL
+                $msl = $item->{'Total month'} > 0 ? ($item->{'Total'} / $item->{'Total month'}) * 4 : 0;
+                
+                // Calculate MSL_C (MSL * LP)
+                $lp = is_numeric($item->{'LP'}) ? (float)$item->{'LP'} : 0;
+                $item->{'MSL_C'} = round($msl * $lp, 2);
             }
 
             $processedData[] = $item;
@@ -160,9 +167,19 @@ class ForecastAnalysisController extends Controller
         try {
             $processedData = $this->buildForecastAnalysisData();
 
+            // Calculate total MSL_C for non-parent items
+            $totalMslC = collect($processedData)
+                ->filter(function ($item) {
+                    return !$item->is_parent;
+                })
+                ->sum(function ($item) {
+                    return floatval($item->{'MSL_C'} ?? 0);
+                });
+
             return response()->json([
                 'message' => 'Data fetched successfully',
                 'data' => $processedData,
+                'total_msl_c' => round($totalMslC, 2),
                 'status' => 200,
             ]);
 
@@ -489,6 +506,14 @@ class ForecastAnalysisController extends Controller
                     }
                     $item->{'Total'} = ($item->L30 ?? 0) + $totalSum;
                     $item->{'Total month'} = $totalMonthCount + ((isset($item->L30) && $item->L30!=0)?1:0);
+                    
+                    // Calculate MSL
+                    $msl = $item->{'Total month'} > 0 ? ($item->{'Total'} / $item->{'Total month'}) * 4 : 0;
+                    
+                    // Calculate MSL_C (MSL * LP)
+                    $lp = is_numeric($item->{'LP'}) ? (float)$item->{'LP'} : 0;
+                    $item->{'MSL_C'} = (int)round($msl * $lp);
+
                 }
 
                 $skuStage = '';
