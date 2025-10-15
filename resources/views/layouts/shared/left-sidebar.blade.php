@@ -601,6 +601,9 @@
                                         <a href="{{ route('channel.master', ['channels', 'channel-masters']) }}"
                                             target="_blank">Active Channels</a>
                                     </li>
+                                     <li>
+                                        <a href="{{ route('channel.ads.master') }}">AD Masters</a>
+                                    </li>
                                     <li>
                                         <a href="{{ route('opportunity.index') }}">Opportunities</a>
                                     </li>
@@ -1629,6 +1632,9 @@
                                     </li>
                                     <li>
                                         <a href="{{ route('ebay.keywords.ads') }}">Ebay Keywords Ads</a>
+                                    </li>
+                                    <li>
+                                        <a href="{{ route('ebay.running.ads') }}">Ebay Running Ads</a>
                                     </li>
                                     <li>
                                         <a href="{{ route('ebay-over-uti') }}">Ebay OVER UTIL.</a>
