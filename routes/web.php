@@ -179,6 +179,7 @@ use App\Http\Controllers\Campaigns\EbayKwAdsController;
 use App\Http\Controllers\Campaigns\EbayOverUtilizedBgtController;
 use App\Http\Controllers\Campaigns\EbayPinkDilAdController;
 use App\Http\Controllers\Campaigns\EbayPMPAdsController;
+use App\Http\Controllers\Campaigns\EbayRunningAdsController;
 use App\Http\Controllers\Campaigns\GoogleShoppingAdsController;
 use App\Http\Controllers\Campaigns\WalmartMissingAdsController;
 use App\Http\Controllers\Campaigns\WalmartUtilisationController;
@@ -1895,6 +1896,11 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
         Route::get('/ebay/keywords/ads/less-than-twenty', 'ebayPriceLessThanTwentyAdsView')->name('ebay.keywords.ads.less-than-twenty');
         Route::get('/ebay/keywords/ads/less-than-twenty/data', 'ebayPriceLessThanTwentyAdsData');
 
+    });
+
+    Route::controller(EbayRunningAdsController::class)->group(function () {
+        Route::get('/ebay/ad-running/list', 'index')->name('ebay.running.ads');
+        Route::get('/ebay/ad-running/data', 'getEbayRunningAdsData');
     });
 
     // ebay 3 ads section
