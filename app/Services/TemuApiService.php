@@ -104,8 +104,7 @@ class TemuApiService
             $allitems[]=[
                 'sku'=>$skuId,
                 'quantity'=>$qty
-            ];
-           
+            ];           
         }
 
         $pageNumber++;
