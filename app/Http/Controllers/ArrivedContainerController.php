@@ -9,16 +9,18 @@ use App\Models\Supplier;
 use App\Models\TransitContainerDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Models\OnSeaTransit;
 
 class ArrivedContainerController extends Controller
 {
-    public function index(){
+    public function index()
+    {
 
-        $allRecords = ArrivedContainer::where(function($q){
+        $allRecords = ArrivedContainer::where(function ($q) {
             $q->whereNull('status')->orWhereRaw("TRIM(status) = ''");
         })->get();
 
-        $tabs = ArrivedContainer::where(function($q){
+        $tabs = ArrivedContainer::where(function ($q) {
             $q->whereNull('status')->orWhereRaw("TRIM(status) = ''");
         })->distinct()->pluck('tab_name')->toArray();
 
@@ -95,22 +97,23 @@ class ArrivedContainerController extends Controller
                     'tab_name' => $row['tab_name'] ?? $tabName,
                 ],
                 [
-                'supplier_name'     => $row['supplier_name'] ?? null,
-                'company_name'      => $row['company_name'] ?? null,
-                'parent'            => $row['parent'] ?? null,
-                'no_of_units'       => !empty($row['no_of_units']) ? (int) $row['no_of_units'] : null,
-                'total_ctn'         => !empty($row['total_ctn']) ? (int) $row['total_ctn'] : null,
-                'rate'              => !empty($row['rate']) ? (float) $row['rate'] : null,
-                'unit'              => $row['unit'] ?? null,
-                'changes'           => $row['changes'] ?? null,
-                'package_size'      => $row['package_size'] ?? null,
-                'product_size_link' => $row['product_size_link'] ?? null,
-                'comparison_link'   => $row['comparison_link'] ?? null,
-                'order_link'        => $row['order_link'] ?? null,
-                'image_src'         => $row['image_src'] ?? null,
-                'photos'            => $row['photos'] ?? null,
-                'specification'     => $row['specification'] ?? null,
-            ]);
+                    'supplier_name'     => $row['supplier_name'] ?? null,
+                    'company_name'      => $row['company_name'] ?? null,
+                    'parent'            => $row['parent'] ?? null,
+                    'no_of_units'       => !empty($row['no_of_units']) ? (int) $row['no_of_units'] : null,
+                    'total_ctn'         => !empty($row['total_ctn']) ? (int) $row['total_ctn'] : null,
+                    'rate'              => !empty($row['rate']) ? (float) $row['rate'] : null,
+                    'unit'              => $row['unit'] ?? null,
+                    'changes'           => $row['changes'] ?? null,
+                    'package_size'      => $row['package_size'] ?? null,
+                    'product_size_link' => $row['product_size_link'] ?? null,
+                    'comparison_link'   => $row['comparison_link'] ?? null,
+                    'order_link'        => $row['order_link'] ?? null,
+                    'image_src'         => $row['image_src'] ?? null,
+                    'photos'            => $row['photos'] ?? null,
+                    'specification'     => $row['specification'] ?? null,
+                ]
+            );
 
             if (!empty($row['id'])) {
                 TransitContainerDetail::where('id', $row['id'])->update([
@@ -124,5 +127,14 @@ class ArrivedContainerController extends Controller
             'message' => 'Inventory pushed successfully',
             'count'   => count($rows),
         ]);
+    }
+
+    public function containerSummary(Request $request)
+    {
+        $containers = ArrivedContainer::where(function ($q) {
+            $q->whereNull('status')->orWhereRaw("TRIM(status) = ''");
+        })->get();
+        //  OnSeaTransit::all();
+        return view('purchase-master.transit_container.container-summary', ['onSeaTransitData' => [], 'chinaLoadMap' => []]);
     }
 }

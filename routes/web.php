@@ -1082,6 +1082,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::controller(ArrivedContainerController::class)->group(function () {
         Route::get('/arrived/container', 'index')->name('arrived.container');
         Route::post('/arrived/container/push', 'pushArrivedContainer');
+        Route::get('/arrived/container/summary', 'containerSummary')->name('container.summary');
     });
 
 
@@ -1813,7 +1814,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
         Route::put('/update-amazon-sb-campaign-bgt-price', 'updateAmazonSbCampaignBgt');
     });
 
-    Route::controller(AmazonFbaAcosController::class)->group(function(){
+    Route::controller(AmazonFbaAcosController::class)->group(function () {
         Route::get('/amazon-fba/acos-kw-control', 'amazonFbaAcosKwView')->name('amazon.fba.acos.kw.control');
         Route::get('/amazon-fba/acos-kw-control-data', 'amazonFbaAcosKwControlData')->name('amazon.fba.acos.kw.control.data');
         Route::get('/amazon-fba/acos-pt-control', 'amazonFbaAcosPtView')->name('amazon.fba.acos.pt.control');
@@ -1827,7 +1828,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
         Route::get('/amazon-kw-ads/filter', 'filterKwAds')->name('amazonKwAds.filter');
 
         Route::get('/amazon/pt/ads', 'amazonPtAdsView')->name('amazon.pt.ads');
-    
+
         Route::get('/amazon/pt/ads/data', 'getAmazonPtAdsData');
         Route::get('/amazon-pt-ads/filter', 'filterPtAds')->name('amazonPtAds.filter');
         Route::get('/amazon/hl/ads', 'amazonHlAdsView')->name('amazon.hl.ads');
@@ -1836,7 +1837,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
         Route::get('/amazon/campaign/reports/data', 'getAmazonCampaignsData');
     });
 
-    Route::controller(AmazonFbaAdsController::class)->group(function(){
+    Route::controller(AmazonFbaAdsController::class)->group(function () {
         Route::get('/amazon/fba/over/kw/ads', 'amzFbaUtilizedBgtKw')->name('amazon.fba.over.kw.ads');
         Route::get('/amazon/fba/over/pt/ads', 'amzFbaUtilizedBgtPt')->name('amazon.fba.over.pt.ads');
         Route::get('/amazon/fba/under/kw/ads', 'amzFbaUnderUtilizedBgtKw')->name('amazon.fba.under.kw.ads');
@@ -1894,7 +1895,6 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
 
         Route::get('/ebay/keywords/ads/less-than-twenty', 'ebayPriceLessThanTwentyAdsView')->name('ebay.keywords.ads.less-than-twenty');
         Route::get('/ebay/keywords/ads/less-than-twenty/data', 'ebayPriceLessThanTwentyAdsData');
-
     });
 
     // ebay 3 ads section
@@ -1928,7 +1928,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
         Route::get('/ebay-3/utilized/ads/data', 'getEbay3UtilizedAdsData');
     });
 
-    Route::controller(Ebay3KeywordAdsController::class)->group(function(){
+    Route::controller(Ebay3KeywordAdsController::class)->group(function () {
         Route::get('/ebay-3/keywords/ads', 'ebay3KeywordAdsView')->name('ebay3.keywords.ads');
         Route::get('/ebay-3/keywords/ads/data', 'getEbay3KeywordAdsData');
 
@@ -1953,12 +1953,11 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     });
 
     // shopify amazon stock mapping
-     Route::controller(StockMappingController::class)->group(function () {
+    Route::controller(StockMappingController::class)->group(function () {
         Route::get('/stock/mapping/view', 'index')->name('view.stock.mapping');
         Route::get('/stock/mapping/inventory/data', 'getShopifyAmazonInventoryStock')->name('stock.mapping.inventory');
         Route::get('/stock/mapping/shopify/data', 'getShopifyStock')->name('stock.mapping.shopify');
         Route::get('/stock/mapping/amazon/data', 'getAmazonStock')->name('stock.mapping.amazon');
-        
     });
     // shopify amazon stock mapping
 
@@ -1972,17 +1971,16 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
         Route::get('/google/shopping/data', 'getGoogleShoppingAdsData');
     });
 
-    Route::controller(FbaDataController::class)->group(function() {
-        Route::get('fba-view-page' ,'fbaPageView');
+    Route::controller(FbaDataController::class)->group(function () {
+        Route::get('fba-view-page', 'fbaPageView');
         Route::get('fba-data-json', 'fbaDataJson');
         Route::get('fba-monthly-sales/{sku}', 'getFbaMonthlySales');
         Route::post('update-fba-manual-data', 'updateFbaManualData');
-
     });
 
     Route::post('/channel-promotion/store', [ChannelPromotionMasterController::class, 'storeOrUpdatePromotion']);
 
-  
+
 
 
     Route::get('', [RoutingController::class, 'index'])->name('root');
@@ -1990,10 +1988,10 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::get('{first}/{second}', [RoutingController::class, 'secondLevel'])->name('second');
     Route::get('{first}/{second}/{third}', [RoutingController::class, 'thirdLevel'])->name('third');
     Route::post('/ebay-product-price-update', [EbayDataUpdateController::class, 'updatePrice'])->name('ebay_product_price_update');
-    
+
     Route::get('{any}', [RoutingController::class, 'root'])->name('any');
-        
-    
+
+
     // Route::post('/auto-stock-balance-store', [AutoStockBalanceController::class, 'store'])->name('autostock.balance.store');
     // Route::get('/auto-stock-balance-data-list', [AutoStockBalanceController::class, 'list']);
 });
