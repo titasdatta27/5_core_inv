@@ -102,6 +102,15 @@ class ForecastAnalysisController extends Controller
 
             $item->INV = $shopify->inv ?? 0;
             $item->L30 = $shopify->quantity ?? 0;
+            
+            // Calculate shopifyb2c_price and inv_value
+            $shopifyb2c_price = $shopify->price ?? 0;
+            $item->shopifyb2c_price = $shopifyb2c_price;
+            $item->inv_value = $item->INV * $shopifyb2c_price;
+            
+            // Calculate lp_value (LP * INV)
+            $lp = is_numeric($item->{'LP'}) ? (float)$item->{'LP'} : 0;
+            $item->lp_value = $lp * $item->INV;
 
             if (!empty($item->Parent) && $jungleScoutData->has($item->Parent)) {
                 $item->scout_data = json_decode(json_encode($jungleScoutData[$item->Parent]), true);
@@ -459,6 +468,15 @@ class ForecastAnalysisController extends Controller
 
                 $item->INV = $shopify->inv ?? 0;
                 $item->L30 = $shopify->quantity ?? 0;
+                
+                // Calculate shopifyb2c_price and inv_value
+                $shopifyb2c_price = $shopify->price ?? 0;
+                $item->shopifyb2c_price = $shopifyb2c_price;
+                $item->inv_value = $item->INV * $shopifyb2c_price;
+                
+                // Calculate lp_value (LP * INV)
+                $lp = is_numeric($item->{'LP'}) ? (float)$item->{'LP'} : 0;
+                $item->lp_value = $lp * $item->INV;
 
                 // JungleScout
                 // if(!empty($item->Parent) && $jungleScoutData->has($item->Parent)){

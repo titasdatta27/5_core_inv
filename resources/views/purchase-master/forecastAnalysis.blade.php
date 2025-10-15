@@ -142,6 +142,14 @@
                             <button id="total_msl_c" class="btn btn-sm btn-success fw-semibold text-white">
                                 Total MSL_C: $<span id="total_msl_c_value" class="fw-semibold text-white">0.00</span>
                             </button>
+
+                            <button id="total_inv_value" class="btn btn-sm btn-info fw-semibold text-white">
+                                Total INV Value: $<span id="total_inv_value_display" class="fw-semibold text-white">0</span>
+                            </button>
+
+                            <button id="total_lp_value" class="btn btn-sm btn-warning fw-semibold text-white">
+                                Total LP Value: $<span id="total_lp_value_display" class="fw-semibold text-white">0</span>
+                            </button>
                         </div>
                     </div>
 
@@ -380,6 +388,26 @@
                     formatter: function(cell) {
                         const value = cell.getValue();
                         return `<span style="display:block; text-align:center;">${value}</span>`;
+                    }
+                },
+                {
+                    title: "INV Value",
+                    field: "inv_value",
+                    accessor: row => row["inv_value"],
+                    formatter: function(cell) {
+                        const value = cell.getValue() || 0;
+                        const roundedValue = Math.round(parseFloat(value));
+                        return `<span style="display:block; text-align:center; font-weight:bold;">$${roundedValue.toLocaleString()}</span>`;
+                    }
+                },
+                {
+                    title: "LP Value",
+                    field: "lp_value",
+                    accessor: row => row["lp_value"],
+                    formatter: function(cell) {
+                        const value = cell.getValue() || 0;
+                        const roundedValue = Math.round(parseFloat(value));
+                        return `<span style="display:block; text-align:center; font-weight:bold;">$${roundedValue.toLocaleString()}</span>`;
                     }
                 },
                 {
@@ -650,6 +678,32 @@
                 if (totalMslCElement && response.total_msl_c !== undefined) {
                     const wholeNumber = Math.round(parseFloat(response.total_msl_c));
                     totalMslCElement.textContent = wholeNumber.toLocaleString('en-US');
+                }
+
+                // Calculate and update total INV Value
+                const totalInvValue = response.data.reduce((sum, item) => {
+                    if (!item.is_parent) {
+                        return sum + (parseFloat(item.inv_value) || 0);
+                    }
+                    return sum;
+                }, 0);
+                const totalInvValueElement = document.getElementById('total_inv_value_display');
+                if (totalInvValueElement) {
+                    const roundedTotal = Math.round(totalInvValue);
+                    totalInvValueElement.textContent = roundedTotal.toLocaleString('en-US');
+                }
+
+                // Calculate and update total LP Value
+                const totalLpValue = response.data.reduce((sum, item) => {
+                    if (!item.is_parent) {
+                        return sum + (parseFloat(item.lp_value) || 0);
+                    }
+                    return sum;
+                }, 0);
+                const totalLpValueElement = document.getElementById('total_lp_value_display');
+                if (totalLpValueElement) {
+                    const roundedTotal = Math.round(totalLpValue);
+                    totalLpValueElement.textContent = roundedTotal.toLocaleString('en-US');
                 }
 
                 const groupedMSL = {};

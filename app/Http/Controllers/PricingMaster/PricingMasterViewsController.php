@@ -754,6 +754,7 @@ class PricingMasterViewsController extends Controller
             // Add inv_value and COGS calculations
             $item->inv_value = $inv * $item->shopifyb2c_price;
             $item->COGS = $lp * $inv;
+            $item->lp_value = $lp * $inv;
 
             // Add analysis action buttons
             $item->l30_analysis = '<button class="btn btn-sm btn-info" onclick="showL30Modal(this)" data-sku="' . $item->SKU . '">L30</button>';
