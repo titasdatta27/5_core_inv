@@ -60,7 +60,7 @@ class TemuApiService
         return array_merge($params, $requestBody);
     }
 
-    public function getInventory(){
+     public function getInventory(){
         $allitems=[];
         $pageNumber = 1;
         do {
@@ -121,5 +121,6 @@ class TemuApiService
         }
     return $allitems;
     } 
+
 
 }

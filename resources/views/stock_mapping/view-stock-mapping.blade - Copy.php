@@ -1008,9 +1008,12 @@
   
 
     <div class="row">
-        {{-- <div class="col-xxl-3 col-sm-6">
+        <div class="col-xxl-3 col-sm-6">
             <div class="card widget-flat text-bg-danger">
                 <div class="card-body">
+                    {{-- <div class="float-end">
+                        <i class="ri-eye-line widget-icon"></i>
+                    </div> --}}
                     <h4 class="my-3">Not Listed</h4>
                     <h6 class="text-uppercase mt-0" title="Customers">Shopify: <span id="shopifynotlisted"></span></h6>
                     <h6 class="text-uppercase mt-0" title="Customers">Amazon: <span id="amazonnotlisted"></span></h6>
@@ -1023,11 +1026,13 @@
                     <h6 class="text-uppercase mt-0" title="Customers">Ebay1: <span id="ebay1notlisted"></span></h6>
                     <h6 class="text-uppercase mt-0" title="Customers">Ebay2: <span id="ebay2notlisted"></span></h6>
                     <h6 class="text-uppercase mt-0" title="Customers">Ebay3: <span id="ebay3notlisted"></span></h6>
-                   
+                    <!-- <p class="mb-0">
+                        <span class="badge bg-white bg-opacity-10 me-1">2.97%</span>
+                        <span class="text-nowrap">Since last month</span>
+                    </p> -->
                 </div>
             </div>
-        </div>  --}}
-        <!-- end col-->
+        </div> <!-- end col-->
 
         <div class="col-xxl-3 col-sm-6">
             <div class="card widget-flat text-bg-danger">
@@ -1368,7 +1373,7 @@
                 <div class="modal-header bg-gradient">
                     <h5 class="modal-title d-flex align-items-center text-dark">
                         <i class="bi bi-bar-chart-line-fill me-2"></i>
-                        Stock Mapping Analysis for SKU:<span id="stockSkuLabel" class="badge  text-danger m-0 animate__animated animate__fadeIn fw-bold fs-3"></span>                        
+                        Stock Mapping Analysis for SKU:<span id="stockSkuLabel" class="badge  text-danger m-0 animate__animated animate__fadeIn fw-bold fs-3"></span>
                     </h5>
                     <div class="modal-actions">                    
                         <button type="button" class="btn-close" data-bs-dismiss="modal"
@@ -1377,15 +1382,8 @@
                 </div>
                 <div class="modal-body p-0">
                     <div class="row g-0">
-                        <div class="col-12">  
-                            <div class="row">
-                                <div class="col">
-                                    <div id="stockContent" class="p-3" style="color: #000000; width:100%; max-height: 70vh; overflow-y: auto;"></div>                            
-                                </div>
-                                <div class="col">
-                                    <div id="stockContent1" class="p-3" style="color: #000000; width:100%; max-height: 70vh; overflow-y: auto;"></div>                            
-                                </div>
-                            </div>                                                     
+                        <div class="col-12">                           
+                            <div id="stockContent" class="p-3" style="color: #000000; width:100%; max-height: 70vh; overflow-y: auto;"></div>
                         </div>
                     </div>
                 </div>
@@ -1965,16 +1963,14 @@ function moveImagePreview(e) {
     preview.style.left = x + 'px';
     preview.style.top = y + 'px';
 }
-    let row='';
+
 
     $(document).on('click', '.showStockModal', function () {
     const sku = $(this).data('sku');
     const item = $(this).data('item');
-    row =item;
         $('#stockSkuLabel').text("("+sku+")");
     // Render modal content
   $('#stockContent').html(buildStockTable(item));
-  $('#stockContent1').html(buildStockTable1(item));
 
 
     const modalEl = document.getElementById('stockModal');
@@ -2024,7 +2020,7 @@ function moveImagePreview(e) {
     modal.show();
 });
 
-function buildStockTable(data, showShopify = false) {
+function buildStockTable(data) {
     let html = `
         <div class="table-responsive">
             <div class="table-responsive" style="max-height: 600px; overflow-y: auto; position: relative;">
@@ -2037,18 +2033,25 @@ function buildStockTable(data, showShopify = false) {
                     </thead>
                     <tbody>`;
 
-    // Always show Shopify
-    if(showShopify==true)
-    {
+    if (data.INV_shopify === 'Not Listed') {
         html += `<tr>
-        <td>
-            <img src="https://inventory.5coremanagement.com/uploads/shopify.png" alt="Shopify" class="channel-logo mb-1" style="width:30px; height:30px; object-fit:contain;">
-            <p class="d-inline-block">Shopify</p>
-        </td>
-        <td>${data.INV_shopify}</td>
-    </tr>`;
+            <td>
+                <img src="https://inventory.5coremanagement.com/uploads/shopify.png" alt="Shopify" class="channel-logo mb-1" style="width:30px; height:30px; object-fit:contain;">
+                <p class="d-inline-block"> Shopify</p>
+            </td>
+            <td style="${(data.INV_amazon !== data.INV_shopify) ? 'color:red;' : ''}">${data.INV_shopify}</td>
+        </tr>`;
     }
-    
+
+    // if (data.INV_amazon === 'Not Listed') {
+    //     html += `<tr>
+    //         <td>
+    //             <img src="https://inventory.5coremanagement.com/uploads/amazon.png" alt="Amazon" class="channel-logo mb-1" style="width:30px; height:30px; object-fit:contain;">
+    //             <p class="d-inline-block">Amazon</p>
+    //         </td>
+    //         <td style="${(data.INV_amazon !== data.INV_shopify) ? 'color:red;' : ''}">${data.INV_amazon}</td>
+    //     </tr>`;
+    // }
 
     const channels = [
         { key: 'INV_amazon', name: 'Amazon', img: 'amazon.png' },
@@ -2064,85 +2067,20 @@ function buildStockTable(data, showShopify = false) {
     ];
 
     channels.forEach(channel => {
-        const value = data[channel.key];
-        const isMismatch = value !== data.INV_shopify;
-        const isNotListed = value === 'Not Listed';
-
-      if (!isNotListed) return;
-
-        html += `<tr>
-            <td>
-                <img src="https://inventory.5coremanagement.com/uploads/${channel.img}" alt="${channel.name}" class="channel-logo mb-1" style="width:50px; height:50px; object-fit:contain;">
-                <p class="d-inline-block">${channel.name}</p>
-            </td>
-            <td style="${isMismatch ? 'color:red;' : ''}">${value}</td>
-        </tr>`;
+        if (data[channel.key] === 'Not Listed') {
+            html += `<tr>
+                <td>
+                    <img src="https://inventory.5coremanagement.com/uploads/${channel.img}" alt="${channel.name}" class="channel-logo mb-1" style="width:50px; height:50px; object-fit:contain;">
+                    <p class="d-inline-block">${channel.name}</p>
+                </td>
+                <td style="${(data[channel.key] === 'Not Listed' || data.INV_shopify !== data[channel.key]) ? 'color:red;' : ''}">${data[channel.key]}</td>
+            </tr>`;
+        }
     });
 
     html += `</tbody></table></div></div>`;
     return html;
 }
-
-function buildStockTable1(data, showShopify = true) {
-    let html = `
-        <div class="table-responsive">
-            <div class="table-responsive" style="max-height: 600px; overflow-y: auto; position: relative;">
-                <table class="table table-sm table-bordered align-middle sortable-table">
-                    <thead class="table-light position-sticky" style="top: 0; z-index: 1000;">
-                        <tr>
-                            <th>Channel</th>
-                            <th>Stock Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>`;
-
-    // Always show Shopify
-    if(showShopify==true)
-    {
-        html += `<tr>
-        <td>
-            <img src="https://inventory.5coremanagement.com/uploads/shopify.png" alt="Shopify" class="channel-logo mb-1" style="width:30px; height:30px; object-fit:contain;">
-            <p class="d-inline-block">Shopify</p>
-        </td>
-        <td>${data.INV_shopify}</td>
-    </tr>`;
-    }
-    
-
-    const channels = [
-        { key: 'INV_amazon', name: 'Amazon', img: 'amazon.png' },
-        { key: 'INV_walmart', name: 'Walmart', img: 'walmart.png' },
-        { key: 'INV_reverb', name: 'Reverb', img: 'reverb.png' },
-        { key: 'INV_shein', name: 'Shein', img: 'Shein.jpg' },
-        { key: 'INV_doba', name: 'Doba', img: 'doba.png' },
-        { key: 'INV_temu', name: 'Temu', img: 'temu.jpeg' },
-        { key: 'INV_macy', name: 'Macy', img: 'macy.png' },
-        { key: 'INV_ebay1', name: 'Ebay1', img: '1.png' },
-        { key: 'INV_ebay2', name: 'Ebay2', img: '2.png' },
-        { key: 'INV_ebay3', name: 'Ebay3', img: '3.png' },
-    ];
-
-    channels.forEach(channel => {
-        const value = data[channel.key];
-        const isMismatch = value !== data.INV_shopify;
-        const isNotListed = value === 'Not Listed';
-
-       if (!isMismatch || isNotListed) return;
-
-        html += `<tr>
-            <td>
-                <img src="https://inventory.5coremanagement.com/uploads/${channel.img}" alt="${channel.name}" class="channel-logo mb-1" style="width:50px; height:50px; object-fit:contain;">
-                <p class="d-inline-block">${channel.name}</p>
-            </td>
-            <td style="${isMismatch ? 'color:red;' : ''}">${value}</td>
-        </tr>`;
-    });
-
-    html += `</tbody></table></div></div>`;
-    return html;
-}
-
-
 
 
 $(document).on('click', '#updatenotrequired', function (e) {
@@ -2178,7 +2116,7 @@ $(document).on('click', '#reFetchliveData', function (e) {
     showLoader();
     e.preventDefault();
      $.ajax({
-        url: '/stock/missing/inventory/refetch_live_data',
+        url: '/stock/mapping/inventory/refetch_live_data',
         type: 'GET',
         headers: {
             "Content-Type": "application/json",

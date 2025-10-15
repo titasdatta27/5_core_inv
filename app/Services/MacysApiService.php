@@ -13,15 +13,12 @@ class MacysApiService
 {
     private function getAccessToken()
     {
-        
             $response = Http::withoutVerifying()->asForm()->post('https://auth.mirakl.net/oauth/token', [
                 'grant_type' => 'client_credentials',
                 'client_id' => config('services.macy.client_id'),
                 'client_secret' => config('services.macy.client_secret'),
             ]);
-
-            return $response->successful() ? $response->json()['access_token'] : null;
-        
+            return $response->successful() ? $response->json()['access_token'] : null;        
     }
 
     public function getInventory(){
