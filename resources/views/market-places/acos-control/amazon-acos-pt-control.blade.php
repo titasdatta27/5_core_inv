@@ -490,43 +490,49 @@
                             var tpftInt = Math.floor(tpft);
                             var sbgt;
                             
-                            if(acos >= 100){
-                                sbgt = 1;
-                            }else if(acos >= 50 && acos <= 100){
-                                sbgt = 2;
-                            }else if(acos >= 40 && acos <= 50){
-                                sbgt = 3;
-                            }else if(acos >= 35 && acos <= 40){
-                                sbgt = 4;
-                            }else if(acos >= 30 && acos <= 35){
-                                sbgt = 5;
-                            }else if(acos >= 25 && acos <= 30){
-                                sbgt = 6;
-                            }else if(acos >= 20 && acos <= 25){
-                                sbgt = 7;
-                            }else if(acos >= 15 && acos <= 20){
-                                sbgt = 8;
-                            }else if(acos >= 10 && acos <= 15){
-                                sbgt = 9;
-                            }else if(acos < 10 && acos > 0){
-                                sbgt = 10;
+                            const clicks = parseFloat(row.clicks_L30) || 0;
+
+                            if(clicks > 25){
+                                if(acos >= 100){
+                                    sbgt = 1;
+                                }else if(acos >= 50 && acos <= 100){
+                                    sbgt = 2;
+                                }else if(acos >= 40 && acos <= 50){
+                                    sbgt = 3;
+                                }else if(acos >= 35 && acos <= 40){
+                                    sbgt = 4;
+                                }else if(acos >= 30 && acos <= 35){
+                                    sbgt = 5;
+                                }else if(acos >= 25 && acos <= 30){
+                                    sbgt = 6;
+                                }else if(acos >= 20 && acos <= 25){
+                                    sbgt = 7;
+                                }else if(acos >= 15 && acos <= 20){
+                                    sbgt = 8;
+                                }else if(acos >= 10 && acos <= 15){
+                                    sbgt = 9;
+                                }else if(acos < 10 && acos > 0){
+                                    sbgt = 10;
+                                }else{
+                                    sbgt = 3;
+                                }
+
+                                const l30 = parseFloat(row.L30);
+                                const inv = parseFloat(row.INV);
+                                let dilColor = "";
+                                if (!isNaN(l30) && !isNaN(inv) && inv !== 0) {
+                                    const dilDecimal = l30 / inv;
+                                    dilColor = getDilColor(dilDecimal);
+                                }
+
+                                if ((dilColor === "red" && tpftInt > 10) ||
+                                    (dilColor === "yellow" && tpftInt > 22) ||
+                                    (dilColor === "green" && tpftInt > 26) ||
+                                    (dilColor === "pink" && tpftInt > 30)) {
+                                    sbgt = sbgt * 2;
+                                }
                             }else{
-                                sbgt = 3;
-                            }
-
-                            const l30 = parseFloat(row.L30);
-                            const inv = parseFloat(row.INV);
-                            let dilColor = "";
-                            if (!isNaN(l30) && !isNaN(inv) && inv !== 0) {
-                                const dilDecimal = l30 / inv;
-                                dilColor = getDilColor(dilDecimal);
-                            }
-
-                            if ((dilColor === "red" && tpftInt > 10) ||
-                                (dilColor === "yellow" && tpftInt > 22) ||
-                                (dilColor === "green" && tpftInt > 26) ||
-                                (dilColor === "pink" && tpftInt > 30)) {
-                                sbgt = sbgt * 2;
+                                sbgt = 5;
                             }
 
                             return `

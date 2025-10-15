@@ -492,35 +492,25 @@
 
                             const spend = parseFloat(row.spend_L30) || 0;
                             const sales = parseFloat(row.ad_sales_L30) || 0;
+                            const clicks = parseFloat(row.clicks_L30) || 0;
                             
-                            if (spend > 0 && sales === 0) {
-                                sbgt = 1;
-                            } else if (acos < 10) {
-                                sbgt = 10;        
-                            } else if (acos >= 10 && acos < 15) {
-                                sbgt = 9;         
-                            } else if (acos >= 15 && acos < 20) {
-                                sbgt = 8;         
-                            } else if (acos >= 20 && acos <= 50) {
-                                sbgt = 2;        
-                            } else {  
-                                sbgt = 1;
+                            if(clicks > 25){
+                                if (spend > 0 && sales === 0) {
+                                    sbgt = 1;
+                                } else if (acos < 10) {
+                                    sbgt = 10;        
+                                } else if (acos >= 10 && acos < 15) {
+                                    sbgt = 9;         
+                                } else if (acos >= 15 && acos < 20) {
+                                    sbgt = 8;         
+                                } else if (acos >= 20 && acos <= 50) {
+                                    sbgt = 2;        
+                                } else {  
+                                    sbgt = 1;
+                                }
+                            }else{
+                                sbgt = 5;
                             }
-                            // console.log("Initial SBGT for campaign", row.sku, "with ACOS", acos, "is:", sbgt);
-                            // const l30 = parseFloat(row.L30);
-                            // const inv = parseFloat(row.INV);
-                            // let dilColor = "";
-                            // if (!isNaN(l30) && !isNaN(inv) && inv !== 0) {
-                            //     const dilDecimal = l30 / inv;
-                            //     dilColor = getDilColor(dilDecimal);
-                            // }
-
-                            // if ((dilColor === "red" && tpftInt > 18) ||
-                            //     (dilColor === "yellow" && tpftInt > 22) ||
-                            //     (dilColor === "green" && tpftInt > 26) ||
-                            //     (dilColor === "pink" && tpftInt > 30)) {
-                            //     sbgt = sbgt * 2;
-                            // }
 
                             return `
                                 <input type="number" class="form-control form-control-sm text-center sbgt-input"  value="${sbgt}" min="1" max="10"  data-campaign-id="${row.campaign_id}">

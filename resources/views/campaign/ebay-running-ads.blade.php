@@ -882,7 +882,7 @@
                     });
                 }
                 if (e.target.classList.contains("toggle-salesL30-btn")) {
-                    let colsToToggle = ["kw_sales_L30", "pt_sales_L30"];
+                    let colsToToggle = ["kw_sales_L30", "pmt_sales_L30"];
 
                     colsToToggle.forEach(colField => {
                         let col = table.getColumn(colField);
@@ -964,7 +964,7 @@
                 XLSX.writeFile(wb, "ebay_ad_running.xlsx");
             });
 
-            document.body.style.zoom = "85%";
+            document.body.style.zoom = "80%";
         });
     </script>
 @endsection
