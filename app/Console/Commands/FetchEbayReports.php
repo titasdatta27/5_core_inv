@@ -35,14 +35,32 @@ class FetchEbayReports extends Command
      */
     public function handle()
     {
+        $this->info('🔄 Starting FetchEbayReports (eBay1) command...');
         $token = $this->generateEbayToken();
         if (!$token) {
-            $this->error('Failed to generate token.');
+            $this->error('❌ Failed to generate eBay1 token.');
             return;
+        }
+
+        $this->info('✅ eBay1 token generated successfully.');
+        
+        // Validate this is the correct eBay account
+        $accountInfo = Http::withToken($token)->get('https://api.ebay.com/sell/account/v1/seller');
+        if ($accountInfo->ok()) {
+            $username = $accountInfo->json()['username'] ?? 'Unknown';
+            $this->info("🔍 eBay1 Account: {$username}");
+            logger()->info('eBay1 account validated', ['username' => $username]);
         }
 
         $dateRanges = $this->getDateRanges();
         $listingData = $this->fetchAndParseReport('LMS_ACTIVE_INVENTORY_REPORT', null, $token);
+        
+        if (empty($listingData)) {
+            $this->error('⚠️ No eBay1 listing data found!');
+            return;
+        }
+        
+        $this->info("📎 Found " . count($listingData) . " listings for eBay1 account");
 
         // 1. Gather all item_ids from listingData
         $itemIdToSku = [];
@@ -74,15 +92,22 @@ class FetchEbayReports extends Command
                 }
             }
 
-            // 3. Store views in EbayMetric table for each SKU
+            // 3. Store views in EbayMetric table for each SKU (eBay1 only)
             foreach ($viewsByItemId as $itemId => $views) {
                 $sku = $itemIdToSku[$itemId] ?? null;
                 if ($sku) {
-                    EbayMetric::where('item_id', $itemId)->update(['views' => $views]);
+                    // Only update records that belong to eBay1 account
+                    $updated = EbayMetric::where('item_id', $itemId)
+                        ->where('sku', $sku)
+                        ->update(['views' => $views]);
+                    if ($updated) {
+                        logger()->info('eBay1: Updated views for item', ['item_id' => $itemId, 'sku' => $sku, 'views' => $views]);
+                    }
                 }
             }
         }
 
+        $processedCount = 0;
         foreach ($listingData as $row) {
             $itemId = $row['item_id'] ?? null;
             if (!$itemId) continue;
@@ -107,24 +132,23 @@ class FetchEbayReports extends Command
             $percentage = MarketplacePercentage::where("marketplace", "EBay")->value("percentage") ?? 100;
             $percentage = $percentage / 100;
 
+            // Ensure we only update eBay1 account data
             $metric = EbayMetric::updateOrCreate(
-                ['item_id' => $itemId],
                 [
-                    'sku'         => $row['sku'] ?? '',
+                    'item_id' => $itemId,
+                    'sku' => $row['sku'] ?? ''
+                ],
+                [
                     'ebay_price'  => $row['price'] ?? null,
                     'report_date' => now()->toDateString(),
                 ]
             );
-            // $metric = EbayMetric::updateOrCreate(
-            //     [
-            //         'item_id' => $itemId,
-            //         'sku'     => $row['sku'] ?? '',
-            //     ],
-            //     [
-            //         'ebay_price'  => $row['price'] ?? null,
-            //         'report_date' => now()->toDateString(),
-            //     ]
-            // );
+            
+            logger()->info('eBay1: Processed item', [
+                'item_id' => $itemId, 
+                'sku' => $row['sku'] ?? '', 
+                'price' => $row['price'] ?? null
+            ]);
 
             try {
                 $processor = new EbayDataProcessor();
@@ -135,7 +159,10 @@ class FetchEbayReports extends Command
                 ]);
                 continue;
             }
+            $processedCount++;
         }
+        
+        $this->info("📊 Processed {$processedCount} items for eBay1 account.");
 
        
 
@@ -152,9 +179,16 @@ class FetchEbayReports extends Command
             $record->ebay_l30 = $l30Qty[$sku] ?? 0;
             $record->ebay_l60 = $l60Qty[$sku] ?? 0;
             $record->save();
+            
+            logger()->info('eBay1: Updated quantities', [
+                'sku' => $sku,
+                'l30' => $l30Qty[$sku] ?? 0,
+                'l60' => $l60Qty[$sku] ?? 0
+            ]);
         }
 
-        $this->info('eBay metrics fetched and stored successfully.');
+        $this->info('✅ eBay1 metrics fetched and stored successfully.');
+        $this->info("📈 Final eBay1 metrics: {$processedCount} items processed, " . count($l30Qty) . " L30 quantities, " . count($l60Qty) . " L60 quantities");
     }
 
     private function getDateRanges(): array
@@ -425,8 +459,21 @@ class FetchEbayReports extends Command
                 ]);
 
             if ($response->successful()) {
-                Log::error('eBay token', ['response' => 'Token generated!']);
-                return $response->json()['access_token'];
+                Log::info('eBay1 token', ['response' => 'Token generated!']);
+                $token = $response->json()['access_token'];
+                
+                $sellerResponse = Http::withToken($token)->get('https://api.ebay.com/sell/account/v1/seller');
+                $sellerInfo = $sellerResponse->json();
+                Log::info('eBay1 Seller info', $sellerInfo);
+                
+                // Validate seller account to ensure we have the right token
+                if (isset($sellerInfo['username'])) {
+                    Log::info('✅ eBay1 Account validated', ['username' => $sellerInfo['username']]);
+                } else {
+                    Log::warning('⚠️ eBay1 Account validation failed - no username found');
+                }
+                
+                return $token;
             }
 
             Log::error('eBay token refresh error', ['response' => $response->json()]);
