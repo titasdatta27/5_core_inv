@@ -486,8 +486,16 @@ protected function filterParentSKU(array $data): array
         return response()->json(['status' => 'success']);
     }
 
-    public function refetchLiveData(Request $request){
-        $freshData=$this->fetchFreshData($request->source);   
+
+    public function refetchLiveData(){
+        $freshData=$this->fetchFreshData();   
+        if($freshData){
+            return response()->json(['status' => 'success']);
+        }
+    }
+
+    public function refetchLiveDataU(Request $request){
+        $freshData=$this->fetchFreshDataU($request->source);   
         if($freshData){
             return response()->json(['status' => 'success']);
         }

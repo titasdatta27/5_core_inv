@@ -2378,7 +2378,7 @@ $(document).on('click', '#reFetchliveData', function (e) {
     showLoader();
     e.preventDefault();
      $.ajax({
-        url: '/stock/mapping/inventory/refetch_live_data',
+        url: '/stock/missing/inventory/refetch_live_data',
         type: 'GET',        
         headers: {
             "Content-Type": "application/json",
