@@ -150,6 +150,10 @@
                             <button id="total_lp_value" class="btn btn-sm btn-warning fw-semibold text-dark">
                                  LP Value: $<span id="total_lp_value_display" class="fw-semibold text-dark">0</span>
                             </button>
+
+                            <button id="total_restock_msl" class="btn btn-sm btn fw-semibold text-dark" style="background-color: rgb(169, 178, 251);">
+                                 Restock MSL: $<span id="total_restock_msl_value" class="fw-semibold text-dark">0</span>
+                            </button>
                         </div>
                     </div>
 
@@ -902,6 +906,32 @@
 
             document.getElementById('yellow-count-box').textContent = `Approval Pending: ${yellowCount}`;
             document.getElementById('toggle-nr-rows').textContent = hideNRYes ? "Show NR" : "Hide NR";
+
+            // Update total MSL_C for visible rows
+            const totalMslCVisible = visibleRows.reduce((sum, item) => {
+                if (!item.is_parent) {
+                    return sum + (parseFloat(item.MSL_C) || 0);
+                }
+                return sum;
+            }, 0);
+            const totalMslCElement = document.getElementById('total_msl_c_value');
+            if (totalMslCElement) {
+                const wholeNumber = Math.round(parseFloat(totalMslCVisible));
+                totalMslCElement.textContent = wholeNumber.toLocaleString('en-US');
+            }
+
+            // Calculate total MSL_C for restock items (INV === 0)
+            const totalRestockMsl = visibleRows.reduce((sum, item) => {
+                if (!item.is_parent && parseFloat(item.INV) === 0) {
+                    return sum + (parseFloat(item.MSL_C) || 0);
+                }
+                return sum;
+            }, 0);
+            const totalRestockMslElement = document.getElementById('total_restock_msl_value');
+            if (totalRestockMslElement) {
+                const wholeNumber = Math.round(parseFloat(totalRestockMsl));
+                totalRestockMslElement.textContent = wholeNumber.toLocaleString('en-US');
+            }
         }
 
         function updateParentTotalsBasedOnVisibleRows() {
