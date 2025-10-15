@@ -1620,6 +1620,9 @@
                                         <a href="{{ route('ebay.keywords.ads') }}">Ebay Keywords Ads</a>
                                     </li>
                                     <li>
+                                        <a href="{{ route('ebay.running.ads') }}">Ebay Running Ads</a>
+                                    </li>
+                                    <li>
                                         <a href="{{ route('ebay-over-uti') }}">Ebay OVER UTIL.</a>
                                     </li>
                                     <li>
