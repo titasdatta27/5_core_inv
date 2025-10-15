@@ -8,6 +8,7 @@ use App\Models\EbayMetric;
 use App\Models\EbayPriorityReport;
 use App\Models\ProductMaster;
 use App\Models\ShopifySku;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class EbayKwAdsController extends Controller
@@ -143,7 +144,7 @@ class EbayKwAdsController extends Controller
 
         $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy(fn($item) => $normalizeSku($item->sku));
 
-        $ebayMetricData = EbayMetric::whereIn('sku', $skus)->get()->keyBy(fn($item) => $normalizeSku($item->sku));
+        $ebayMetricData = DB::connection('apicentral')->table('ebay_one_metrics')->select('sku', 'ebay_price')->whereIn('sku', $skus)->get()->keyBy(fn($item) => $normalizeSku($item->sku));
 
         $nrValues = EbayDataView::whereIn('sku', $skus)->pluck('value', 'sku');
 
@@ -199,7 +200,7 @@ class EbayKwAdsController extends Controller
             $row['INV']    = $shopify->inv ?? 0;
             $row['L30']    = $shopify->quantity ?? 0;
             $row['e_l30']  = $ebay->ebay_l30 ?? 0;
-            $row['price']  = $ebay->ebay_data_price ?? 0;
+            $row['price']  = $ebay->ebay_price ?? 0;
             $row['campaign_id'] = $matchedCampaignL7->campaign_id ?? ($matchedCampaignL1->campaign_id ?? '');
             $row['campaignName'] = $matchedCampaignL7->campaign_name ?? ($matchedCampaignL1->campaign_name ?? '');
             $row['campaignStatus'] = $matchedCampaignL7->campaignStatus ?? ($matchedCampaignL1->campaignStatus ?? '');
