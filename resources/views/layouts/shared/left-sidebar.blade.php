@@ -1,6 +1,6 @@
 <!-- ========== Left Sidebar Start ========== -->
 <div class="leftside-menu">
-
+ 
     <!-- Brand Logo Light -->
     <a href="{{ route('any', 'index') }}" class="logo logo-light">
         <span class="logo">
@@ -11,6 +11,11 @@
         <!--    <img src="/images/HR5LOGO.png" alt="small logo">-->
         <!--</span>-->
     </a>
+
+     <div class="side-nav-title m-2">
+                <input type="text" placeholder="Search Menu" class="form-control form-control-sm" id="searchMenuItem"/>
+  </div>
+
 
     <!-- Brand Logo Dark -->
     <a href="{{ route('any', 'index') }}" class="logo logo-dark">
@@ -27,6 +32,8 @@
         <!--- Sidemenu -->
         <ul class="side-nav">
 
+
+          
             <li class="side-nav-title">Main</li>
 
 
