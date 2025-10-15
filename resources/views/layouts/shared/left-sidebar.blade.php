@@ -1141,6 +1141,13 @@
 
             {{-- Inventory Management --}}
               <li class="side-nav-item">
+                <a href="{{ route('view.missing.listing') }}" class="side-nav-link">
+                    <i class="ri-dashboard-3-line"></i>
+                    <span> Missing Listing </span>
+                </a>
+            </li>
+
+            <li class="side-nav-item">
                 <a href="{{ route('view.stock.mapping') }}" class="side-nav-link">
                     <i class="ri-dashboard-3-line"></i>
                     <span> Stock Mapping </span>

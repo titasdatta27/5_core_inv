@@ -237,6 +237,7 @@ use App\Http\Controllers\MarketingMaster\MovementPricingMaster;
 use App\Http\Controllers\MarketingMaster\OverallCvrLqsController;
 use App\Http\Controllers\PurchaseMaster\SupplierRFQController;
 use App\Http\Controllers\StockMappingController;
+use App\Http\Controllers\MissingListingController;
 /*  
 |--------------------------------------------------------------------------
 | Web Routes
@@ -1952,15 +1953,31 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
         Route::get('/walmart/missing/ads/data', 'getWalmartMissingAdsData');
     });
 
+    // stock missing listing
+    Route::controller(MissingListingController::class)->group(function () {
+        Route::get('/stock/missing/listing', 'index')->name('view.missing.listing');
+        Route::get('/stock/missing/listing/data', 'getShopifyMissingInventoryStock')->name('stock.missing.inventory');
+        Route::post('/stock/missing/inventory/refetch_live_data', 'refetchLiveData')->name('stock.mapping.refetch_live_data');
+        Route::post('/stock/missing/inventory/refetch_live_data_u', 'refetchLiveDataU')->name('stock.mapping.refetch_live_data');
+
+        // Route::get('/stock/mapping/shopify/data', 'getShopifyStock')->name('stock.mapping.shopify');
+        // Route::get('/stock/mapping/amazon/data', 'getAmazonStock')->name('stock.mapping.amazon');
+        // Route::post('/stock/mapping/inventory/update_not_required', 'updateNotRequired')->name('stock.mapping.update.notrequired');
+        // Route::get('/stock/mapping/inventory/refetch_live_data', 'refetchLiveData')->name('stock.mapping.refetch_live_data');        
+    });    
+    // stock missing listing
+    
     // shopify amazon stock mapping
      Route::controller(StockMappingController::class)->group(function () {
         Route::get('/stock/mapping/view', 'index')->name('view.stock.mapping');
         Route::get('/stock/mapping/inventory/data', 'getShopifyAmazonInventoryStock')->name('stock.mapping.inventory');
         Route::get('/stock/mapping/shopify/data', 'getShopifyStock')->name('stock.mapping.shopify');
         Route::get('/stock/mapping/amazon/data', 'getAmazonStock')->name('stock.mapping.amazon');
-        
+        Route::post('/stock/mapping/inventory/update_not_required', 'updateNotRequired')->name('stock.mapping.update.notrequired');
+        Route::post('/stock/mapping/inventory/refetch_live_data', 'refetchLiveData')->name('stock.mapping.refetch_live_data');        
     });
     // shopify amazon stock mapping
+    
 
     Route::controller(GoogleShoppingAdsController::class)->group(function () {
         Route::get('/google/shopping', 'index')->name('google.shopping');
@@ -1982,7 +1999,6 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
 
     Route::post('/channel-promotion/store', [ChannelPromotionMasterController::class, 'storeOrUpdatePromotion']);
 
-  
 
 
     Route::get('', [RoutingController::class, 'index'])->name('root');

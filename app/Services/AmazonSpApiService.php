@@ -139,7 +139,7 @@ class AmazonSpApiService
     }
 
 
-  public function getinventory()
+ public function getinventory()
 {
     try {
         

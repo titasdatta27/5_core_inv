@@ -1,4 +1,4 @@
-@extends('layouts.vertical', ['title' => 'View Stock Mapping', 'mode' => $mode ?? '', 'demo' => $demo ?? ''])
+@extends('layouts.vertical', ['title' => 'View Missing Listing', 'mode' => $mode ?? '', 'demo' => $demo ?? ''])
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
 @section('css')
@@ -1004,32 +1004,47 @@
 @endsection
 
 @section('content')
-    @include('layouts.shared/page-title', ['page_title' => 'Stock Mapping', 'sub_title' => 'View Stock'])
+    @include('layouts.shared/page-title', ['page_title' => 'View Missing Listing', 'sub_title' => 'Missing Stock'])
   
 
     <div class="row">
-        {{-- <div class="col-xxl-3 col-sm-6">
-            <div class="card widget-flat text-bg-danger">
+        <div class="col-xxl-3 col-sm-6">
+            <button id="NotListed" class="text-danger btn btn-primary btn-sm" style="font-size:22px;background:#fff;cursor: pointer;margin:3px;">Not Listed Total: <span id="totalNotListed"></span></button>
+            
+            <div class="card widget-flat text-bg-danger" style="display:none;" id="showNotListed">
                 <div class="card-body">
+                    {{-- <div class="float-end">
+                        <i class="ri-eye-line widget-icon"></i>
+                    </div> --}}
                     <h4 class="my-3">Not Listed</h4>
-                    <h6 class="text-uppercase mt-0" title="Customers">Shopify: <span id="shopifynotlisted"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Amazon: <span id="amazonnotlisted"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Walmart: <span id="walmartnotlisted"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Reverb: <span id="reverbnotlisted"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Shein: <span id="sheinnotlisted"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Doba: <span id="dobanotlisted"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Temu: <span id="temunotlisted"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Macy: <span id="macynotlisted"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Ebay1: <span id="ebay1notlisted"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Ebay2: <span id="ebay2notlisted"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Ebay3: <span id="ebay3notlisted"></span></h6>
-                   
+                    <div class="row">
+                        <div class="col">
+                            <h5 class="text-uppercase mt-0" title="Shopify Not Listed">Shopify: <span id="shopifynotlisted"></span></h5>
+                            <h5 class="text-uppercase mt-0" title="Customers">Amazon: <span id="amazonnotlisted"></span></h5>
+                            <h5 class="text-uppercase mt-0" title="Customers">Walmart: <span id="walmartnotlisted"></span></h5>
+                            <h5 class="text-uppercase mt-0" title="Customers">Reverb: <span id="reverbnotlisted"></span></h5>
+                            <h5 class="text-uppercase mt-0" title="Customers">Shein: <span id="sheinnotlisted"></span></h5>
+                            <h5 class="text-uppercase mt-0" title="Customers">Doba: <span id="dobanotlisted"></span></h5>
+                        </div>
+                        <div class="col">
+                            <h5 class="text-uppercase mt-0" title="Customers">Temu: <span id="temunotlisted"></span></h5>
+                            <h5 class="text-uppercase mt-0" title="Customers">Macy: <span id="macynotlisted"></span></h5>
+                            <h5 class="text-uppercase mt-0" title="Customers">Ebay1: <span id="ebay1notlisted"></span></h5>
+                            <h5 class="text-uppercase mt-0" title="Customers">Ebay2: <span id="ebay2notlisted"></span></h5>
+                            <h5 class="text-uppercase mt-0" title="Customers">Ebay3: <span id="ebay3notlisted"></span></h5>
+                        </div>
+                    </div>
+                    
+                    
+                    <!-- <p class="mb-0">
+                        <span class="badge bg-white bg-opacity-10 me-1">2.97%</span>
+                        <span class="text-nowrap">Since last month</span>
+                    </p> -->
                 </div>
             </div>
-        </div>  --}}
-        <!-- end col-->
+        </div> <!-- end col-->
 
-        <div class="col-xxl-3 col-sm-6">
+        {{-- <div class="col-xxl-3 col-sm-6">
             <div class="card widget-flat text-bg-danger">
                 <div class="card-body">
                     <h4 class="my-3">Not Matching</h4>
@@ -1046,28 +1061,38 @@
                     <h6 class="text-uppercase mt-0" title="Customers">Ebay3: <span id="ebay3notmatching"></span></h6>
                 </div>
             </div>
-        </div> <!-- end col-->
+        </div> --}}
+         <!-- end col-->
 
-        <div class="col-xxl-3 col-sm-6">
+         
+        <div class="col-xxl-3 col-sm-6 d-none">
             <div class="card widget-flat text-bg-success">
                 <div class="card-body">
                     <h4 class="my-3">Listed</h4>
-                    <h6 class="text-uppercase mt-0" title="Customers">Shopify: <span id="shopifylisted"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Amazon: <span id="amazonlisted"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Walmart: <span id="walmartlisted"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Reverb: <span id="reverblisted"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Shein: <span id="sheinlisted"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Doba: <span id="dobalisted"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Temu: <span id="temulisted"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Macy: <span id="macylisted"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Ebay1: <span id="ebay1listed"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Ebay2: <span id="ebay2listed"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Ebay3: <span id="ebay3listed"></span></h6>
+                    <div class="row">
+    <div class="col">
+        <h5 class="text-uppercase mt-0" title="Customers">Shopify: <span id="shopifylisted"></span></h5>
+                    <h5 class="text-uppercase mt-0" title="Customers">Amazon: <span id="amazonlisted"></span></h5>
+                    <h5 class="text-uppercase mt-0" title="Customers">Walmart: <span id="walmartlisted"></span></h5>
+                    <h5 class="text-uppercase mt-0" title="Customers">Reverb: <span id="reverblisted"></span></h5>
+                    <h5 class="text-uppercase mt-0" title="Customers">Shein: <span id="sheinlisted"></span></h5>
+                    <h5 class="text-uppercase mt-0" title="Customers">Doba: <span id="dobalisted"></span></h5>
+    </div>
+    <div class="col">
+                    <h5 class="text-uppercase mt-0" title="Customers">Temu: <span id="temulisted"></span></h5>
+                    <h5 class="text-uppercase mt-0" title="Customers">Macy: <span id="macylisted"></span></h5>
+                    <h5 class="text-uppercase mt-0" title="Customers">Ebay1: <span id="ebay1listed"></span></h5>
+                    <h5 class="text-uppercase mt-0" title="Customers">Ebay2: <span id="ebay2listed"></span></h5>
+                    <h5 class="text-uppercase mt-0" title="Customers">Ebay3: <span id="ebay3listed"></span></h5>
+    </div>
+</div>
+                    
+                    
                 </div>
             </div>
         </div> <!-- end col-->
 
-        <div class="col-xxl-3 col-sm-6">
+        {{-- <div class="col-xxl-3 col-sm-6">
             <div class="card widget-flat text-bg-success">
                 <div class="card-body">
                     <h4 class="my-3">Matching</h4>
@@ -1084,13 +1109,14 @@
                     <h6 class="text-uppercase mt-0" title="Customers">Ebay3: <span id="ebay3matching"></span></h6>
                 </div>
             </div>
-        </div> <!-- end col-->
+        </div> --}}
+         <!-- end col-->
     </div>
     <div class="row">
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
-                    <h4 class="header-title">View Stock Mapping</h4>
+                    <h4 class="header-title">View Missing Listing</h4>
 
                    
                    
@@ -1120,6 +1146,19 @@
                         <div class="form-inline">
                             <button id="updatenotrequired" class="btn btn-primary btn-sm">Update Not Required</button>
                             <button id="reFetchliveData" class="btn btn-primary btn-sm">Refech Live Data</button>
+                            
+                            {{-- <button id="reFetchliveData1" data-source="shopify" class="btn btn-primary btn-sm reFetchliveData">Refech Live Shopify Data</button>
+                            <button id="reFetchliveData2" data-source="amazon" class="btn btn-primary btn-sm reFetchliveData">Refech Live Amazon Data</button>
+                            <button id="reFetchliveData3" data-source="walmart" class="btn btn-primary btn-sm reFetchliveData">Refech Live Walmart Data</button>
+                            <button id="reFetchliveData4" data-source="reverb" class="btn btn-primary btn-sm reFetchliveData">Refech Live Reverb Data</button>
+                            <button id="reFetchliveData5" data-source="shein" class="btn btn-primary btn-sm reFetchliveData">Refech Live Shein Data</button>
+                            <button id="reFetchliveData6" data-source="doba" class="btn btn-primary btn-sm reFetchliveData">Refech Live Doba Data</button>
+                            <button id="reFetchliveData7" data-source="temu" class="btn btn-primary btn-sm reFetchliveData">Refech Live Temu Data</button>
+                            <button id="reFetchliveData8" data-source="macy" class="btn btn-primary btn-sm reFetchliveData">Refech Live Macy Data</button>
+                            <button id="reFetchliveData9" data-source="ebay1" class="btn btn-primary btn-sm reFetchliveData">Refech Live Ebay1 Data</button>
+                            <button id="reFetchliveData10" data-source="ebay2" class="btn btn-primary btn-sm reFetchliveData">Refech Live Ebay2 Data</button>
+                            <button id="reFetchliveData11" data-source="ebay3" class="btn btn-primary btn-sm reFetchliveData">Refech Live Ebay3 Data</button> --}}
+
                         </div>
                     </div>
                     <div class="row">
@@ -1151,86 +1190,97 @@
                                         </div>
                                     </th> --}}
 
-                                     <th data-field="INV_shopify" style="vertical-align: middle; white-space: nowrap;">
-                                        <div class="d-flex flex-column align-items-center sortable">
+                                     <th style="vertical-align: middle; white-space: nowrap;">
+                                        <div data-field="INV_shopify" class="d-flex flex-column align-items-center sortable">
                                             <div class="d-flex align-items-left">
-                                                 Shopfiy <span class="sort-arrow">↓</span>
+                                                 Shopify <span class="sort-arrow">↓</span>
                                             </div>
-                                            
+                                                <a href="{{ route('listing.shopifyb2c') }}" target="_blank"><span class="text-danger text-center mx-auto d-block" id="hShopifynl"></span></a>
                                             </div>
                                         </div>
                                     </th>
 
                                   
                                   
-                                     <th data-field="INV_amazon" style="vertical-align: middle; white-space: nowrap;">
-                                        <div class="d-flex flex-column align-items-center">
+                                     <th style="vertical-align: middle; white-space: nowrap;">
+                                        <div data-field="INV_amazon" class="d-flex flex-column align-items-center">
                                             <div class="d-flex align-items-center">
                                                 Amazon <span class="sort-arrow">↓</span>
-                                            </div>                                            
+                                            </div>                                           
+                                            <a href="{{ route('listing.amazon') }}" target="_blank"><span class="text-danger text-center mx-auto d-block" id="hAmazonnl"></span></a>
                                         </div>
+
                                     </th>
-                                     <th data-field="INV_wallmart" style="vertical-align: middle; white-space: nowrap;">
-                                        <div class="d-flex flex-column align-items-center">
+                                     <th style="vertical-align: middle; white-space: nowrap;">
+                                        <div data-field="INV_wallmart" class="d-flex flex-column align-items-center">
                                             <div class="d-flex align-items-center">
                                                 Walmart <span class="sort-arrow">↓</span>
-                                            </div>                                            
+                                            </div>
+                                            <a href="{{ route('listing.walmart') }}" target="_blank"><span class="text-danger text-center mx-auto d-block" id="hWalmartnl"></span></a>
                                         </div>
                                     </th>
-                                     <th data-field="INV_reverb" style="vertical-align: middle; white-space: nowrap;">
-                                        <div class="d-flex flex-column align-items-center">
+                                     <th style="vertical-align: middle; white-space: nowrap;">                                        
+                                        <div data-field="INV_reverb" class="d-flex flex-column align-items-center">
                                             <div class="d-flex align-items-center">
                                                 Reverb <span class="sort-arrow">↓</span>
                                             </div>                                            
                                         </div>
+                                        <a href="{{ route('listing.reverb') }}" target="_blank"><span class="text-danger text-center mx-auto d-block" id="hReverbnl"></span></a>
                                     </th>
-                                    <th data-field="INV_shein" style="vertical-align: middle; white-space: nowrap;">
-                                        <div class="d-flex flex-column align-items-center">
+                                    <th style="vertical-align: middle; white-space: nowrap;">
+                                        <div data-field="INV_shein" class="d-flex flex-column align-items-center">
                                             <div class="d-flex align-items-center">
                                                 Shein <span class="sort-arrow">↓</span>
                                             </div>                                            
+                                            <a href="{{ route('listing.shein') }}" target="_blank"><span class="text-danger text-center mx-auto d-block" id="hSheinnl"></span></a>
                                         </div>
                                     </th>
-                                    <th data-field="INV_doba" style="vertical-align: middle; white-space: nowrap;">
-                                        <div class="d-flex flex-column align-items-center">
+                                    <th style="vertical-align: middle; white-space: nowrap;">
+                                        <div data-field="INV_doba" class="d-flex flex-column align-items-center">
                                             <div class="d-flex align-items-center">
                                                 Doba <span class="sort-arrow">↓</span>
                                             </div>                                            
+                                            <a href="{{ route('listing.doba') }}" target="_blank"><span class="text-danger text-center mx-auto d-block" id="hDobanl"></span></a>
                                         </div>
                                     </th>
-                                    <th data-field="INV_temu" style="vertical-align: middle; white-space: nowrap;">
-                                        <div class="d-flex flex-column align-items-center">
+                                    <th style="vertical-align: middle; white-space: nowrap;">
+                                        <div data-field="INV_temu" class="d-flex flex-column align-items-center">
                                             <div class="d-flex align-items-center">
                                                 Temu <span class="sort-arrow">↓</span>
                                             </div>                                            
+                                            <a href="{{ route('listing.temu') }}" target="_blank"><span class="text-danger text-center mx-auto d-block" id="hTemunl"></span></a>
                                         </div>
                                     </th>
-                                    <th data-field="INV_macy" style="vertical-align: middle; white-space: nowrap;">
-                                        <div class="d-flex flex-column align-items-center">
+                                    <th style="vertical-align: middle; white-space: nowrap;">
+                                        <div data-field="INV_macy" class="d-flex flex-column align-items-center">
                                             <div class="d-flex align-items-center">
                                                 Macy <span class="sort-arrow">↓</span>
                                             </div>                                            
+                                            <a href="{{ route('listing.macys') }}" target="_blank"><span class="text-danger text-center mx-auto d-block" id="hMacynl"></span></a>
                                         </div>
                                     </th>
-                                    <th data-field="INV_ebay1" style="vertical-align: middle; white-space: nowrap;">
-                                        <div class="d-flex flex-column align-items-center">
+                                    <th style="vertical-align: middle; white-space: nowrap;">
+                                        <div data-field="INV_ebay1" class="d-flex flex-column align-items-center">
                                             <div class="d-flex align-items-center">
                                                 Ebay1 <span class="sort-arrow">↓</span>
                                             </div>                                            
+                                            <a href="{{ route('listing.ebay') }}" target="_blank"><span class="text-danger text-center mx-auto d-block" id="hEbay1nl"></span></a>
                                         </div>
                                     </th>
-                                    <th data-field="INV_ebay2" style="vertical-align: middle; white-space: nowrap;">
-                                        <div class="d-flex flex-column align-items-center">
+                                    <th style="vertical-align: middle; white-space: nowrap;">
+                                        <div data-field="INV_ebay2" class="d-flex flex-column align-items-center">
                                             <div class="d-flex align-items-center">
                                                 Ebay2 <span class="sort-arrow">↓</span>
                                             </div>                                            
+                                            <a href="{{ route('listing.ebayTwo') }}" target="_blank"><span class="text-danger text-center mx-auto d-block" id="hEbay2nl"></span></a>
                                         </div>
                                     </th>
-                                    <th data-field="INV_ebay3" style="vertical-align: middle; white-space: nowrap;">
-                                        <div class="d-flex flex-column align-items-center">
+                                    <th style="vertical-align: middle; white-space: nowrap;">
+                                        <div data-field="INV_ebay3" class="d-flex flex-column align-items-center">
                                             <div class="d-flex align-items-center">
                                                 Ebay3 <span class="sort-arrow">↓</span>
                                             </div>                                            
+                                            <a href="{{ route('listing.ebayThree') }}" target="_blank"><span class="text-danger text-center mx-auto d-block" id="hEbay3nl"></span></a>
                                         </div>
                                     </th>
                                 </tr>
@@ -1244,78 +1294,111 @@
                                                     <option value="all">All</option>
                                                     <option value="listed">Listed</option>
                                                     <option value="notlisted">Not Listed</option>                                  
+                                                    <option value="nrl">NRL</option>
                                                 </select>
-                                            </div> </th>
+                                            </div> 
+                                        <span class="text-danger text-center mx-auto d-block" id="filter-shopify-count"></span>
+                                        </th>
                                     <th><div class="d-flex align-items-center">
                                                 <select id="filter-amazon" class="form-control form-control-sm">
                                                     <option value="all">All</option>
                                                     <option value="listed">Listed</option>
                                                     <option value="notlisted">Not Listed</option>
+                                                    <option value="nrl">NRL</option>
                                                 </select>
-                                            </div></th>
+                                            </div>
+                                        <span class="text-danger text-center mx-auto d-block" id="filter-amazon-count"></span>
+                                        </th>
                                             <th><div class="d-flex align-items-center">
                                                 <select id="filter-walmart" class="form-control form-control-sm">
                                                     <option value="all">All</option>
                                                     <option value="listed">Listed</option>
                                                     <option value="notlisted">Not Listed</option>
-                                                </select>
-                                            </div></th>
+                                                    <option value="nrl">NRL</option>
+                                                </select>                                                                                                
+                                            </div>
+                                            <span class="text-danger text-center mx-auto d-block" id="filter-walmart-count"></span>
+                                        </th>
                                               <th><div class="d-flex align-items-center">
                                                 <select id="filter-reverb" class="form-control form-control-sm">
                                                     <option value="all">All</option>
                                                     <option value="listed">Listed</option>
                                                     <option value="notlisted">Not Listed</option>
+                                                    <option value="nrl">NRL</option>
                                                 </select>
-                                            </div></th>
+                                            </div>
+                                            <span class="text-danger text-center mx-auto d-block" id="filter-reverb-count"></span>
+                                        </th>
                                              <th><div class="d-flex align-items-center">
                                                 <select id="filter-shein" class="form-control form-control-sm">
                                                     <option value="all">All</option>
                                                     <option value="listed">Listed</option>
                                                     <option value="notlisted">Not Listed</option>
+                                                    <option value="nrl">NRL</option>
                                                 </select>
-                                            </div></th>
+                                            </div>
+                                        <span class="text-danger text-center mx-auto d-block" id="filter-shein-count"></span>
+                                        </th>
                                             <th><div class="d-flex align-items-center">
                                                 <select id="filter-doba" class="form-control form-control-sm">
                                                     <option value="all">All</option>
                                                     <option value="listed">Listed</option>
                                                     <option value="notlisted">Not Listed</option>
+                                                    <option value="nrl">NRL</option>
                                                 </select>
-                                            </div></th>
+                                            </div>
+                                        <span class="text-danger text-center mx-auto d-block" id="filter-doba-count"></span>
+                                        </th>
                                             <th><div class="d-flex align-items-center">
                                                 <select id="filter-temu" class="form-control form-control-sm">
                                                     <option value="all">All</option>
                                                     <option value="listed">Listed</option>
                                                     <option value="notlisted">Not Listed</option>
+                                                    <option value="nrl">NRL</option>
                                                 </select>
-                                            </div></th>
+                                            </div>
+                                        <span class="text-danger text-center mx-auto d-block" id="filter-temu-count"></span>
+                                        </th>
                                               <th><div class="d-flex align-items-center">
                                                 <select id="filter-macy" class="form-control form-control-sm">
                                                     <option value="all">All</option>
                                                     <option value="listed">Listed</option>
                                                     <option value="notlisted">Not Listed</option>
+                                                    <option value="nrl">NRL</option>
                                                 </select>
-                                            </div></th>
+                                            </div>
+                                            <span class="text-danger text-center mx-auto d-block" id="filter-macy-count"></span>
+                                        </th>
                                              <th><div class="d-flex align-items-center">
                                                 <select id="filter-ebay1" class="form-control form-control-sm">
                                                     <option value="all">All</option>
                                                     <option value="listed">Listed</option>
                                                     <option value="notlisted">Not Listed</option>
+                                                    <option value="nrl">NRL</option>
                                                 </select>
-                                            </div></th>
+                                            </div>
+                                            <span class="text-danger text-center mx-auto d-block" id="filter-ebay1-count"></span>
+                                        </th>
                                             <th><div class="d-flex align-items-center">
                                                 <select id="filter-ebay2" class="form-control form-control-sm">
                                                     <option value="all">All</option>
                                                     <option value="listed">Listed</option>
                                                     <option value="notlisted">Not Listed</option>
+                                                    <option value="nrl">NRL</option>
                                                 </select>
-                                            </div></th>
+                                            </div>
+                                            <span class="text-danger text-center mx-auto d-block" id="filter-ebay2-count"></span>
+                                        </th>
                                             <th><div class="d-flex align-items-center">
                                                 <select id="filter-ebay3" class="form-control form-control-sm">
                                                     <option value="all">All</option>
                                                     <option value="listed">Listed</option>
                                                     <option value="notlisted">Not Listed</option>
+                                                    <option value="nrl">NRL</option>
                                                 </select>
-                                            </div></th>
+                                            </div>
+                                        <span class="text-danger text-center mx-auto d-block" id="filter-ebay3-count"></span>
+                                        </th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -1363,12 +1446,12 @@
       <!-- stock Modal -->
     <div class="modal fade modal-draggable" id="stockModal" tabindex="-1" aria-labelledby="stockModalLabel"
         aria-hidden="true">
-        <div class="modal-dialog modal-xl">
+        <div class="modal-dialog modal-md">
             <div class="modal-content">
                 <div class="modal-header bg-gradient">
                     <h5 class="modal-title d-flex align-items-center text-dark">
                         <i class="bi bi-bar-chart-line-fill me-2"></i>
-                        Stock Mapping Analysis for SKU:<span id="stockSkuLabel" class="badge  text-danger m-0 animate__animated animate__fadeIn fw-bold fs-3"></span>                        
+                        Missing Listing Analysis for SKU:<span id="stockSkuLabel" class="badge  text-danger m-0 animate__animated animate__fadeIn fw-bold fs-3"></span>                        
                     </h5>
                     <div class="modal-actions">                    
                         <button type="button" class="btn-close" data-bs-dismiss="modal"
@@ -1378,14 +1461,7 @@
                 <div class="modal-body p-0">
                     <div class="row g-0">
                         <div class="col-12">  
-                            <div class="row">
-                                <div class="col">
-                                    <div id="stockContent" class="p-3" style="color: #000000; width:100%; max-height: 70vh; overflow-y: auto;"></div>                            
-                                </div>
-                                <div class="col">
-                                    <div id="stockContent1" class="p-3" style="color: #000000; width:100%; max-height: 70vh; overflow-y: auto;"></div>                            
-                                </div>
-                            </div>                                                     
+                            <div id="stockContent" class="p-3" style="color: #000000; width:100%; max-height: 70vh; overflow-y: auto;"></div>                                                        
                         </div>
                     </div>
                 </div>
@@ -1415,7 +1491,8 @@
     document.body.style.zoom = "80%";
 
     $(document).ready(function () {
-        initTable();
+    
+        initTable(1000);
 
         function initTable() {
             loadData().then(() => {
@@ -1432,7 +1509,7 @@
         function loadData() {
             showLoader();
             return $.ajax({
-                url: '/stock/mapping/inventory/data',
+                url: '/stock/missing/listing/data',
                 type: 'GET',
                 dataType: 'json'
             }).then(response => {
@@ -1440,30 +1517,100 @@
                     ? response.data
                     : Object.values(response.data || {});
                 
-                datainfo=response.datainfo;                
-                $('#shopifynotlisted').text(datainfo.shopify.notlisted);
-                $('#amazonnotlisted').text(datainfo.amazon.notlisted);
-                $('#walmartnotlisted').text(datainfo.walmart.notlisted);
-                $('#reverbnotlisted').text(datainfo.reverb.notlisted);
-                $('#sheinnotlisted').text(datainfo.shein.notlisted);
-                $('#dobanotlisted').text(datainfo.doba.notlisted);
-                $('#temunotlisted').text(datainfo.temu.notlisted);
-                $('#macynotlisted').text(datainfo.macy.notlisted);
-                $('#ebay1notlisted').text(datainfo.ebay1.notlisted);
-                $('#ebay2notlisted').text(datainfo.ebay2.notlisted);
-                $('#ebay3notlisted').text(datainfo.ebay3.notlisted);
+                datainfo=response.datainfo;                        
+                $('#totalNotListed').text(datainfo.shopify.notlisted+datainfo.amazon.notlisted+datainfo.walmart.notlisted+datainfo.reverb.notlisted+datainfo.shein.notlisted+datainfo.doba.notlisted+datainfo.temu.notlisted+datainfo.macy.notlisted+datainfo.ebay1.notlisted+datainfo.ebay2.notlisted+datainfo.ebay3.notlisted);
 
-                $('#shopifynotmatching').text(datainfo.shopify.mismatching);
-                $('#amazonnotmatching').text(datainfo.amazon.mismatching);
-                $('#walmartnotmatching').text(datainfo.walmart.mismatching);
-                $('#reverbnotmatching').text(datainfo.reverb.mismatching);
-                $('#sheinnotmatching').text(datainfo.shein.mismatching);
-                $('#dobanotmatching').text(datainfo.doba.mismatching);
-                $('#temunotmatching').text(datainfo.temu.mismatching);
-                $('#macynotmatching').text(datainfo.macy.mismatching);
-                $('#ebay1notmatching').text(datainfo.ebay1.mismatching);
-                $('#ebay2notmatching').text(datainfo.ebay2.mismatching);
-                $('#ebay3notmatching').text(datainfo.ebay3.mismatching);
+                $('#shopifynotlisted').text(datainfo.shopify.notlisted);
+                if(datainfo.shopify.notlisted==0){
+                    $('#hShopifynl').text(`(${datainfo.shopify.notlisted})`).removeClass('text-danger').css('color', 'green');
+                }else{
+                    $('#hShopifynl').text(`(${datainfo.shopify.notlisted})`);
+                }
+                
+                
+                $('#amazonnotlisted').text(datainfo.amazon.notlisted);
+                if(datainfo.amazon.notlisted==0){
+                    $('#hAmazonnl').text(`(${datainfo.amazon.notlisted})`).removeClass('text-danger').css('color', 'green');
+                }else{
+                    $('#hAmazonnl').text(`(${datainfo.amazon.notlisted})`);
+                }
+
+                $('#walmartnotlisted').text(datainfo.walmart.notlisted);
+                if(datainfo.walmart.notlisted==0){
+                    $('#hWalmartnl').text(`(${datainfo.walmart.notlisted})`).removeClass('text-danger').css('color', 'green');
+                }else{
+                    $('#hWalmartnl').text(`(${datainfo.walmart.notlisted})`);
+                }
+
+                $('#reverbnotlisted').text(datainfo.reverb.notlisted);
+                if(datainfo.reverb.notlisted==0){
+                    $('#hReverbnl').text(`(${datainfo.reverb.notlisted})`).removeClass('text-danger').css('color', 'green');
+                }else{
+                    $('#hReverbnl').text(`(${datainfo.reverb.notlisted})`);
+                }
+
+                $('#sheinnotlisted').text(datainfo.shein.notlisted);
+                if(datainfo.shein.notlisted==0){
+                    $('#hSheinnl').text(`(${datainfo.shein.notlisted})`).removeClass('text-danger').css('color', 'green');
+                }else{
+                    $('#hSheinnl').text(`(${datainfo.shein.notlisted})`);
+                }
+
+                $('#dobanotlisted').text(datainfo.doba.notlisted);
+                if(datainfo.doba.notlisted==0){
+                    $('#hDobanl').text(`(${datainfo.doba.notlisted})`).removeClass('text-danger').css('color', 'green');
+                }else{
+                    $('#hDobanl').text(`(${datainfo.doba.notlisted})`);
+                }
+
+                $('#temunotlisted').text(datainfo.temu.notlisted);
+                if(datainfo.temu.notlisted==0){
+                    $('#hTemunl').text(`(${datainfo.temu.notlisted})`).removeClass('text-danger').css('color', 'green');
+                }else{
+                    $('#hTemunl').text(`(${datainfo.temu.notlisted})`);
+                }
+
+                $('#macynotlisted').text(datainfo.macy.notlisted);
+                if(datainfo.macy.notlisted==0){
+                    $('#hMacynl').text(`(${datainfo.macy.notlisted})`).removeClass('text-danger').css('color', 'green');
+                }else{
+                    $('#hMacynl').text(`(${datainfo.macy.notlisted})`);
+                }
+
+                $('#ebay1notlisted').text(datainfo.ebay1.notlisted);
+                if(datainfo.ebay1.notlisted==0){
+                    $('#hEbay1nl').text(`(${datainfo.ebay1.notlisted})`).removeClass('text-danger').css('color', 'green');
+                }else{
+                    $('#hEbay1nl').text(`(${datainfo.ebay1.notlisted})`);
+                }
+
+
+                $('#ebay2notlisted').text(datainfo.ebay2.notlisted);
+                if(datainfo.ebay2.notlisted==0){
+                    $('#hEbay2nl').text(`(${datainfo.ebay2.notlisted})`).removeClass('text-danger').css('color', 'green');
+                }else{
+                    $('#hEbay2nl').text(`(${datainfo.ebay2.notlisted})`);
+                }
+
+                $('#ebay3notlisted').text(datainfo.ebay3.notlisted);
+                if(datainfo.ebay3.notlisted==0){
+                    $('#hEbay3nl').text(`(${datainfo.ebay3.notlisted})`).removeClass('text-danger').css('color', 'green');
+                }else{
+                    $('#hEbay3nl').text(`(${datainfo.ebay3.notlisted})`);
+                }
+
+
+                // $('#shopifynotmatching').text(datainfo.shopify.mismatching);
+                // $('#amazonnotmatching').text(datainfo.amazon.mismatching);
+                // $('#walmartnotmatching').text(datainfo.walmart.mismatching);
+                // $('#reverbnotmatching').text(datainfo.reverb.mismatching);
+                // $('#sheinnotmatching').text(datainfo.shein.mismatching);
+                // $('#dobanotmatching').text(datainfo.doba.mismatching);
+                // $('#temunotmatching').text(datainfo.temu.mismatching);
+                // $('#macynotmatching').text(datainfo.macy.mismatching);
+                // $('#ebay1notmatching').text(datainfo.ebay1.mismatching);
+                // $('#ebay2notmatching').text(datainfo.ebay2.mismatching);
+                // $('#ebay3notmatching').text(datainfo.ebay3.mismatching);
 
                 $('#shopifylisted').text(datainfo.shopify.listed);
                 $('#amazonlisted').text(datainfo.amazon.listed);
@@ -1477,17 +1624,17 @@
                 $('#ebay2listed').text(datainfo.ebay2.listed);
                 $('#ebay3listed').text(datainfo.ebay3.listed);
 
-                $('#shopifymatching').text(datainfo.shopify.matching);
-                $('#amazonmatching').text(datainfo.amazon.matching);
-                $('#walmartmatching').text(datainfo.walmart.matching);
-                $('#reverbmatching').text(datainfo.reverb.matching);
-                $('#sheinmatching').text(datainfo.shein.matching);
-                $('#dobamatching').text(datainfo.doba.matching);
-                $('#temumatching').text(datainfo.temu.matching);
-                $('#macymatching').text(datainfo.macy.matching);
-                $('#ebay1matching').text(datainfo.ebay1.matching);
-                $('#ebay2matching').text(datainfo.ebay2.matching);
-                $('#ebay3matching').text(datainfo.ebay3.matching);
+                // $('#shopifymatching').text(datainfo.shopify.matching);
+                // $('#amazonmatching').text(datainfo.amazon.matching);
+                // $('#walmartmatching').text(datainfo.walmart.matching);
+                // $('#reverbmatching').text(datainfo.reverb.matching);
+                // $('#sheinmatching').text(datainfo.shein.matching);
+                // $('#dobamatching').text(datainfo.doba.matching);
+                // $('#temumatching').text(datainfo.temu.matching);
+                // $('#macymatching').text(datainfo.macy.matching);
+                // $('#ebay1matching').text(datainfo.ebay1.matching);
+                // $('#ebay2matching').text(datainfo.ebay2.matching);
+                // $('#ebay3matching').text(datainfo.ebay3.matching);
 
                 tableData = sheetData.map((item, index) => {
                     const sku = (item.sku || '').toUpperCase().trim();
@@ -1535,36 +1682,67 @@
                        is_notlisted_shopify: (() => {
                             return INV_shopify=='Not Listed'?'notlisted':'listed';
                         })(),
+                        is_nrl_shopify: INV_shopify === 'NRL' ? 'nrl' : '',
+
+                        
                         is_notlisted_amazon: (() => {
                             return INV_amazon=='Not Listed'?'notlisted':'listed';
                         })(),
+                        is_nrl_amazon: INV_amazon === 'NRL' ? 'nrl' : '',
+
                         is_notlisted_walmart: (() => {
                             return INV_walmart=='Not Listed'?'notlisted':'listed';
                         })(),
+                        is_nrl_walmart: (() => {
+                            return INV_walmart=='NRL'?'nrl':'';
+                        })(),
+
                         is_notlisted_reverb: (() => {
                             return INV_reverb=='Not Listed'?'notlisted':'listed';
                         })(),
+                        is_nrl_reverb: INV_reverb === 'NRL' ? 'nrl' : '',
+
+
                         is_notlisted_shein: (() => {
                             return INV_shein=='Not Listed'?'notlisted':'listed';
                         })(),
+                        is_nrl_shein: INV_shein === 'NRL' ? 'nrl' : '',
+
                         is_notlisted_doba: (() => {
                             return INV_doba=='Not Listed'?'notlisted':'listed';
                         })(),
+                        is_nrl_doba: INV_doba === 'NRL' ? 'nrl' : '',
+
+
                         is_notlisted_temu: (() => {
                             return INV_temu=='Not Listed'?'notlisted':'listed';
                         })(),
+                        is_nrl_temu: INV_temu === 'NRL' ? 'nrl' : '',
+
+
                         is_notlisted_macy: (() => {
                             return INV_macy=='Not Listed'?'notlisted':'listed';
                         })(),
+                        is_nrl_macy: INV_macy === 'NRL' ? 'nrl' : '',
+
+
                         is_notlisted_ebay1: (() => {
                             return INV_ebay1=='Not Listed'?'notlisted':'listed';
                         })(),
+                        is_nrl_ebay1: INV_ebay1 === 'NRL' ? 'nrl' : '',
+
+
                         is_notlisted_ebay2: (() => {
                             return INV_ebay2=='Not Listed'?'notlisted':'listed';
                         })(),
+                        is_nrl_ebay2: INV_ebay2 === 'NRL' ? 'nrl' : '',
+
+
                         is_notlisted_ebay3: (() => {
                             return INV_ebay3=='Not Listed'?'notlisted':'listed';
                         })(),
+                        is_nrl_ebay3: INV_ebay3 === 'NRL' ? 'nrl' : '',
+
 
                                                 matching: (() => {
                             return INV_shopify == INV_amazon ? 'matching' : 'notmatching';
@@ -1651,6 +1829,7 @@
 `;
                 $tableBody.append(row);
             });
+            
         }
 
         
@@ -1696,7 +1875,7 @@
 
         function initSorting() {
             const $table = $('#inventory-table');
-            $table.find('th[data-field]').addClass('sortable').off('click').on('click', function (e) {
+            $table.find('th div[data-field]').addClass('sortable').off('click').on('click', function (e) {
                 if (isResizing) return e.stopPropagation();
                 if ($(e.target).is('input, .resize-handle')) return;
 
@@ -1904,20 +2083,41 @@ function applyRowTypeFilter(filterType) {
 // }
 
 function applyRowTypeFilterA(platform, filterType) {
-    const key = `is_notlisted_${platform}`;
-    filteredData = [...tableData];
+    let key = '';
+    let filteredData = [...tableData];
+    let countFiltered = 0;
 
-    if (filterType === 'listed' || filterType === 'notlisted') {
+    // Set the correct key based on filterType
+    if (filterType === 'nrl') {
+        key = `is_nrl_${platform}`;
+    } else if (filterType === 'listed' || filterType === 'notlisted') {
+        key = `is_notlisted_${platform}`;
+    }
+
+    // Apply filtering
+    if (filterType === 'listed' || filterType === 'notlisted' || filterType === 'nrl') {
         filteredData = filteredData.filter(item => item[key] === filterType);
+        countFiltered = filteredData.length;
+    }
+
+    // Update count display
+    const $countEl = $(`#filter-${platform}-count`);
+    if (filterType === 'all') {
+        $countEl.hide().text('');
+    } else {
+        $countEl.show().text(countFiltered);
     }
 
     currentPage = 1;
+    console.log(filteredData);    
+
     renderTable(filteredData);
     calculateTotals();
 }
 
+
 // Generic event binding for all filters
-['shopify', 'walmart', 'amazon','reverb','shein','doba'].forEach(platform => {
+['shopify', 'walmart', 'amazon','reverb','shein','doba','temu','macy','ebay1','ebay2','ebay3'].forEach(platform => {
     $(`#filter-${platform}`).on('change', function(e) {
         e.preventDefault();
         const filterType = $(this).val();
@@ -1974,7 +2174,7 @@ function moveImagePreview(e) {
         $('#stockSkuLabel').text("("+sku+")");
     // Render modal content
   $('#stockContent').html(buildStockTable(item));
-  $('#stockContent1').html(buildStockTable1(item));
+//   $('#stockContent1').html(buildStockTable1(item));
 
 
     const modalEl = document.getElementById('stockModal');
@@ -2075,7 +2275,7 @@ function buildStockTable(data, showShopify = false) {
                 <img src="https://inventory.5coremanagement.com/uploads/${channel.img}" alt="${channel.name}" class="channel-logo mb-1" style="width:50px; height:50px; object-fit:contain;">
                 <p class="d-inline-block">${channel.name}</p>
             </td>
-            <td style="${isMismatch ? 'color:red;' : ''}">${value}</td>
+            <td style="${isMismatch ? 'color:red;' : ''}">${value=='Not Listed'?'N/L':''}</td>
         </tr>`;
     });
 
@@ -2178,13 +2378,12 @@ $(document).on('click', '#reFetchliveData', function (e) {
     showLoader();
     e.preventDefault();
      $.ajax({
-        url: '/stock/missing/inventory/refetch_live_data',
-        type: 'GET',
+        url: '/stock/mapping/inventory/refetch_live_data',
+        type: 'GET',        
         headers: {
             "Content-Type": "application/json",
             "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content') // safer than blade token in JS
-        },
-        
+        },        
     })
     .then(response => {
         console.log("Refetch successful:", response);
@@ -2197,7 +2396,40 @@ $(document).on('click', '#reFetchliveData', function (e) {
 
 });
 
+$(document).on('click', '.reFetchliveData', function (e) {
+    e.preventDefault();
+    showLoader();
 
+    const source = $(this).attr('data-source');
+    const csrfToken = $('meta[name="csrf-token"]').attr('content');
+    $.ajax({
+        url: '/stock/missing/inventory/refetch_live_data_u',
+        type: 'POST',        
+         data: {
+                source: source,
+                _token: $('meta[name="csrf-token"]').attr('content')
+            },
+        // contentType: 'application/json', // ensures server interprets JSON
+        headers: {
+            'X-CSRF-TOKEN': csrfToken
+        }
+    })
+    .done(response => {
+        console.log('✅ Refetch successful:', response);
+        location.reload(); // reload page on success
+    })
+    .fail((jqXHR, textStatus, errorThrown) => {
+        console.error(`❌ Refetch failed: ${textStatus}`, errorThrown);
+        hideLoader(); // hide loader on failure
+    });
+});
+
+
+
+    $(document).on('click', '#NotListed', function (e) {
+        e.preventDefault();
+        $('#showNotListed').toggle();
+    });
 
     });
 </script>
