@@ -1089,6 +1089,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::controller(ArrivedContainerController::class)->group(function () {
         Route::get('/arrived/container', 'index')->name('arrived.container');
         Route::post('/arrived/container/push', 'pushArrivedContainer');
+        Route::get('/arrived/container/summary', 'containerSummary')->name('container.summary');
     });
 
 
@@ -2007,6 +2008,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     });
 
     Route::post('/channel-promotion/store', [ChannelPromotionMasterController::class, 'storeOrUpdatePromotion']);
+
 
 
 

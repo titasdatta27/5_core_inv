@@ -49,65 +49,61 @@
                                                 </div>
                                             @endif
 
-                                            <!--<div class="mb-3">-->
-                                            <!--    <label for="fullname" class="form-label">Full Name</label>-->
-                                            <!--    <input class="form-control" type="text" id="fullname" name="name"-->
-                                            <!--        placeholder="Enter your name" required value="{{ old('name') }}">-->
-                                            <!--    @error('name')-->
-                                            <!--        <span class="text-danger">{{ $message }}</span>-->
-                                            <!--    @enderror-->
-                                            <!--</div>-->
+                                <div class="mb-3">
+                                                <label for="fullname" class="form-label">Full Name</label>
+                                                <input class="form-control" type="text" id="fullname" name="name"
+                                                    placeholder="Enter your name" required value="{{ old('name') }}">
+                                                @error('name')
+                                                    <span class="text-danger">{{ $message }}</span>
+                                                @enderror
+                                            </div>
 
-                                            <!--<div class="mb-3">-->
-                                            <!--    <label for="emailaddress" class="form-label">Email address</label>-->
-                                            <!--    <input class="form-control" type="email" id="emailaddress"-->
-                                            <!--        name="email" required placeholder="Enter your email"-->
-                                            <!--        value="{{ old('email') }}">-->
-                                            <!--    @error('email')-->
-                                            <!--        <span class="text-danger">{{ $message }}</span>-->
-                                            <!--    @enderror-->
-                                            <!--</div>-->
+                                            <div class="mb-3">
+                                                <label for="emailaddress" class="form-label">Email address</label>
+                                                <input class="form-control" type="email" id="emailaddress"
+                                                    name="email" required placeholder="Enter your email"
+                                                    value="{{ old('email') }}">
+                                                @error('email')
+                                                    <span class="text-danger">{{ $message }}</span>
+                                                @enderror
+                                            </div>
 
-                                            <!--<div class="mb-3">-->
-                                            <!--    <label for="password" class="form-label">Password</label>-->
-                                            <!--    <div class="input-group">-->
-                                            <!--        <input class="form-control" type="password" required id="password"-->
-                                            <!--            name="password" placeholder="Enter your password">-->
-                                            <!--        <button class="btn btn-outline-secondary" type="button"-->
-                                            <!--            id="togglePassword">-->
-                                            <!--            <i class="ri-eye-fill"></i>-->
-                                            <!--        </button>-->
-                                            <!--    </div>-->
-                                            <!--    @error('password')-->
-                                            <!--        <span class="text-danger">{{ $message }}</span>-->
-                                            <!--    @enderror-->
-                                            <!--</div>-->
+                                            <div class="mb-3">
+                                                <label for="password" class="form-label">Password</label>
+                                                <div class="input-group">
+                                                    <input class="form-control" type="password" required id="password"
+                                                        name="password" placeholder="Enter your password">
+                                                    <button class="btn btn-outline-secondary" type="button"
+                                                        id="togglePassword">
+                                                        <i class="ri-eye-fill"></i>
+                                                    </button>
+                                                </div>
+                                                @error('password')
+                                                    <span class="text-danger">{{ $message }}</span>
+                                                @enderror
+                                            </div>
 
-                                            <!--<div class="mb-3">-->
-                                            <!--    <label for="password_confirmation" class="form-label">Confirm-->
-                                            <!--        Password</label>-->
-                                            <!--    <input class="form-control" type="password" required-->
-                                            <!--        id="password_confirmation" name="password_confirmation"-->
-                                            <!--        placeholder="Confirm your password">-->
-                                            <!--</div>-->
-
-                                            <!--<div class="mb-3">-->
-                                            <!--    <div class="form-check">-->
-                                            <!--        <input type="checkbox" class="form-check-input" id="checkbox-signup"-->
-                                            <!--            name="terms" required>-->
-                                            <!--        <label class="form-check-label" for="checkbox-signup">I accept <a-->
-                                            <!--                href="#" class="text-muted">Terms and-->
-                                            <!--                Conditions</a></label>-->
-                                            <!--    </div>-->
-                                            <!--    @error('terms')-->
-                                            <!--        <span class="text-danger">{{ $message }}</span>-->
-                                            <!--    @enderror-->
-                                            <!--</div>-->
-
-                                            <!--<div class="mb-0 d-grid text-center">-->
-                                            <!--    <button class="btn btn-primary fw-semibold" type="submit">Sign-->
-                                            <!--        Up</button>-->
-                                            <!--</div>-->
+                                            <div class="mb-3">
+                                                <label for="password_confirmation" class="form-label">Confirm
+                                                    Password</label>
+                                                <input class="form-control" type="password" required
+                                                    id="password_confirmation" name="password_confirmation"
+                                                    placeholder="Confirm your password">
+                                            </div>--                                         <div class="mb-3">
+                                                <div class="form-check">
+                                                    <input type="checkbox" class="form-check-input" id="checkbox-signup"
+                                                        name="terms" required>
+                                                    <label class="form-check-label" for="checkbox-signup">I accept <a
+                                                            href="#" class="text-muted">Terms and
+                                                            Conditions</a></label>
+                                                </div>
+                                                @error('terms')
+                                                    <span class="text-danger">{{ $message }}</span>
+                                                @enderror
+                                            </div>                                         <div class="mb-0 d-grid text-center">
+                                                <button class="btn btn-primary fw-semibold" type="submit">Sign
+                                                    Up</button>
+                                            </div>
                                         </form>
                                         <!-- end form-->
                                     </div>
