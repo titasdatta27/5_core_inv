@@ -497,6 +497,7 @@ class DobaApiService
     }
 
 
+   
     public function getinventory(){
         $allStock=[];
         Log::info("Fetching Doba Metrics...");

@@ -1,6 +1,6 @@
 <!-- ========== Left Sidebar Start ========== -->
 <div class="leftside-menu">
-
+ 
     <!-- Brand Logo Light -->
     <a href="{{ route('any', 'index') }}" class="logo logo-light">
         <span class="logo">
@@ -11,6 +11,11 @@
         <!--    <img src="/images/HR5LOGO.png" alt="small logo">-->
         <!--</span>-->
     </a>
+
+     <div class="side-nav-title m-2">
+                <input type="text" placeholder="Search Menu" class="form-control form-control-sm" id="searchMenuItem"/>
+  </div>
+
 
     <!-- Brand Logo Dark -->
     <a href="{{ route('any', 'index') }}" class="logo logo-dark">
@@ -27,6 +32,8 @@
         <!--- Sidemenu -->
         <ul class="side-nav">
 
+
+          
             <li class="side-nav-title">Main</li>
 
 
@@ -1144,6 +1151,13 @@
 
             {{-- Inventory Management --}}
               <li class="side-nav-item">
+                <a href="{{ route('view.missing.listing') }}" class="side-nav-link">
+                    <i class="ri-dashboard-3-line"></i>
+                    <span> Missing Listing </span>
+                </a>
+            </li>
+
+            <li class="side-nav-item">
                 <a href="{{ route('view.stock.mapping') }}" class="side-nav-link">
                     <i class="ri-dashboard-3-line"></i>
                     <span> Stock Mapping </span>
