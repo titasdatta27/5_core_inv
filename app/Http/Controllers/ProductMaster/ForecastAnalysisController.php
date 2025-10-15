@@ -158,9 +158,15 @@ class ForecastAnalysisController extends Controller
                 // Calculate MSL
                 $msl = $item->{'Total month'} > 0 ? ($item->{'Total'} / $item->{'Total month'}) * 4 : 0;
                 
+                // Use effective MSL (manual s-msl if available, otherwise calculated msl)
+                $effectiveMsl = (isset($item->{'s-msl'}) && $item->{'s-msl'} > 0) ? $item->{'s-msl'} : $msl;
+                
                 // Calculate MSL_C (MSL * LP)
                 $lp = is_numeric($item->{'LP'}) ? (float)$item->{'LP'} : 0;
-                $item->{'MSL_C'} = round($msl * $lp, 2);
+                $item->{'MSL_C'} = round($msl * $lp/4);
+                
+                // Calculate MSL SP (shopify price * effective MSL / 4)
+                $item->{'MSL_SP'} = floor($shopifyb2c_price * $effectiveMsl / 4);
             }
 
             $processedData[] = $item;
@@ -531,10 +537,10 @@ class ForecastAnalysisController extends Controller
                     // Calculate MSL_C (MSL * LP)
                     $lp = is_numeric($item->{'LP'}) ? (float)$item->{'LP'} : 0;
                     $item->{'MSL_C'} = (int)round($msl * $lp);
-
+                    
+                    // Calculate MSL SP (shopify price * MSL / 4)
+                    $item->{'MSL_SP'} = floor($shopifyb2c_price * $msl / 4);
                 }
-
-                $skuStage = '';
                 $skuKey = strtoupper(trim($prodData->sku));
 
                 if ($toOrderMap->has($skuKey)) {
