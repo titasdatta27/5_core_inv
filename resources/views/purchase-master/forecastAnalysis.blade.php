@@ -136,23 +136,19 @@
                             </button>
 
                             <button id="restock_needed" class="btn btn-sm btn-warning fw-semibold text-dark">
-                                Restock Needed: <span id="total_restock" class="fw-semibold text-dark">0</span>
+                                Restock Needed: <span id = "total_restock" class="fw-semibold text-dark">0</span>
                             </button>
 
                             <button id="total_msl_c" class="btn btn-sm btn-success fw-semibold text-dark">
-                                Total MSL_Value: $<span id="total_msl_c_value" class="fw-semibold text-dark">0.00</span>
-                            </button>
-
-                            <button id="total_msl_sp" class="btn btn-sm btn-primary fw-semibold text-dark">
-                                Total MSL_SP: $<span id="total_msl_sp_value" class="fw-semibold text-dark">0</span>
+                                 MSL_C: $<span id="total_msl_c_value" class="fw-semibold text-dark">0.00</span>
                             </button>
 
                             <button id="total_inv_value" class="btn btn-sm btn-info fw-semibold text-dark">
-                                Total INV Value: $<span id="total_inv_value_display" class="fw-semibold text-dark">0</span>
+                                 INV Value: $<span id="total_inv_value_display" class="fw-semibold text-dark">0</span>
                             </button>
 
                             <button id="total_lp_value" class="btn btn-sm btn-warning fw-semibold text-dark">
-                                Total LP Value: $<span id="total_lp_value_display" class="fw-semibold text-dark">0</span>
+                                 LP Value: $<span id="total_lp_value_display" class="fw-semibold text-dark">0</span>
                             </button>
                         </div>
                     </div>
@@ -395,26 +391,6 @@
                     }
                 },
                 {
-                    title: "Shopify Price",
-                    field: "shopifyb2c_price",
-                    accessor: row => row["shopifyb2c_price"],
-                    formatter: function(cell) {
-                        const value = cell.getValue() || 0;
-                        const roundedValue = (value);
-                        return `<span style="display:block; text-align:center; font-weight:bold;">$${roundedValue.toLocaleString()}</span>`;
-                    }
-                },
-                {
-                    title: "LP",
-                    field: "LP",
-                    accessor: row => row["LP"],
-                    formatter: function(cell) {
-                        const value = cell.getValue() || 0;
-                        const roundedValue = parseFloat(value).toFixed(2);
-                        return `<span style="display:block; text-align:center;">${roundedValue}</span>`;
-                    }
-                },
-                {
                     title: "INV Value",
                     field: "inv_value",
                     accessor: row => row["inv_value"],
@@ -504,19 +480,6 @@
                         const value = cell.getValue() || 0;
                         const wholeNumber = Math.round(parseFloat(value));
                         return `<div style="text-align:center; font-weight:bold;">${wholeNumber}</div>`;
-                    },
-                    sum: function(cells) {
-                        return cells.reduce((acc, cell) => acc + (cell.getValue() || 0), 0);
-                    }
-                },
-                {
-                    title: "MSL SP",
-                    field: "MSL_SP",
-                    accessor: row => row["MSL_SP"],
-                    formatter: function(cell) {
-                        const value = cell.getValue() || 0;
-                        const roundedValue = Math.floor(parseFloat(value));
-                        return `<div style="text-align:center; font-weight:bold;">$${roundedValue.toLocaleString()}</div>`;
                     },
                     sum: function(cells) {
                         return cells.reduce((acc, cell) => acc + (cell.getValue() || 0), 0);
@@ -743,19 +706,6 @@
                     totalLpValueElement.textContent = roundedTotal.toLocaleString('en-US');
                 }
 
-                // Calculate and update total MSL_SP
-                const totalMslSp = response.data.reduce((sum, item) => {
-                    if (!item.is_parent) {
-                        return sum + (parseFloat(item.MSL_SP) || 0);
-                    }
-                    return sum;
-                }, 0);
-                const totalMslSpElement = document.getElementById('total_msl_sp_value');
-                if (totalMslSpElement) {
-                    const roundedTotal = Math.floor(totalMslSp);
-                    totalMslSpElement.textContent = roundedTotal.toLocaleString('en-US');
-                }
-
                 const groupedMSL = {};
                 const groupedS_MSL = {};
 
@@ -786,11 +736,10 @@
 
                     const isParent = item.is_parent === true || item.is_parent === "true" || sku.toUpperCase().includes("PARENT");
 
-                    // Calculate MSL_C (effective MSL * LP / 4)
+                    // Calculate MSL_C (MSL * LP)
                     const lp = parseFloat(item["LP"]) || 0;
-                    const effectiveMsl = parseFloat(item["s-msl"]) || msl;
-                    const msl_c = Math.round(effectiveMsl * lp / 4 * 100) / 100; // Round to 2 decimal places
-                    
+                    const msl_c = Math.round(msl * lp * 100) / 100; // Round to 2 decimal places
+
                     const processedItem = {
                         ...item,
                         sl_no: index + 1,
@@ -951,21 +900,8 @@
                 r.nr !== 'NR'
             ).length;
 
-            document.getElementById('yellow-count-box').textContent = `Appr Pending: ${yellowCount}`;
+            document.getElementById('yellow-count-box').textContent = `Approval Pending: ${yellowCount}`;
             document.getElementById('toggle-nr-rows').textContent = hideNRYes ? "Show NR" : "Hide NR";
-
-            // Update total MSL_C for visible rows
-            const totalMslCVisible = visibleRows.reduce((sum, item) => {
-                if (!item.is_parent) {
-                    return sum + (parseFloat(item.MSL_C) || 0);
-                }
-                return sum;
-            }, 0);
-            const totalMslCElement = document.getElementById('total_msl_c_value');
-            if (totalMslCElement) {
-                const wholeNumber = Math.round(parseFloat(totalMslCVisible));
-                totalMslCElement.textContent = wholeNumber.toLocaleString('en-US');
-            }
         }
 
         function updateParentTotalsBasedOnVisibleRows() {
@@ -1074,9 +1010,7 @@
                 SH: row['SH'],
                 CP: row['CP'],
                 LP: row['LP'],
-                "Shopify Price": row['shopifyb2c_price'],
                 "MSL_C": row['MSL_C'],
-                "MSL_SP": row['MSL_SP'],
                 Freight: row['Freight'],
                 "GW (KG)": row['GW (KG)'],
                 "GW (LB)": row['GW (LB)'],
