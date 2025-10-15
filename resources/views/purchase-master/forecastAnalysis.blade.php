@@ -138,6 +138,10 @@
                             <button id="restock_needed" class="btn btn-sm btn-warning fw-semibold text-white">
                                 Restock Needed: <span id = "total_restock" class="fw-semibold text-white">0</span>
                             </button>
+
+                            <button id="total_msl_c" class="btn btn-sm btn-success fw-semibold text-white">
+                                Total MSL_C: $<span id="total_msl_c_value" class="fw-semibold text-white">0.00</span>
+                            </button>
                         </div>
                     </div>
 
@@ -441,6 +445,19 @@
                     }
                 },
                 {
+                    title: "MSL_VL",
+                    field: "MSL_C",
+                    accessor: row => row["MSL_C"],
+                    formatter: function(cell) {
+                        const value = cell.getValue() || 0;
+                        const wholeNumber = Math.round(parseFloat(value));
+                        return `<div style="text-align:center; font-weight:bold;">${wholeNumber}</div>`;
+                    },
+                    sum: function(cells) {
+                        return cells.reduce((acc, cell) => acc + (cell.getValue() || 0), 0);
+                    }
+                },
+                {
                     title: "S-MSL",
                     field: "s_msl",
                     headerSort: false,
@@ -628,6 +645,13 @@
             ajaxResponse: function(url, params, response) {
                 groupedSkuData = {}; // clear previous
 
+                // Update total MSL_C from server response
+                const totalMslCElement = document.getElementById('total_msl_c_value');
+                if (totalMslCElement && response.total_msl_c !== undefined) {
+                    const wholeNumber = Math.round(parseFloat(response.total_msl_c));
+                    totalMslCElement.textContent = wholeNumber.toLocaleString('en-US');
+                }
+
                 const groupedMSL = {};
                 const groupedS_MSL = {};
 
@@ -658,11 +682,16 @@
 
                     const isParent = item.is_parent === true || item.is_parent === "true" || sku.toUpperCase().includes("PARENT");
 
+                    // Calculate MSL_C (MSL * LP)
+                    const lp = parseFloat(item["LP"]) || 0;
+                    const msl_c = Math.round(msl * lp * 100) / 100; // Round to 2 decimal places
+
                     const processedItem = {
                         ...item,
                         sl_no: index + 1,
                         pft_percent: item['pft%'] ?? null,
                         msl: Math.round(msl),
+                        MSL_C: msl_c,
                         to_order: toOrder,
                         parentKey: parentKey,
                         s_msl: s_msl_val,
@@ -927,6 +956,7 @@
                 SH: row['SH'],
                 CP: row['CP'],
                 LP: row['LP'],
+                "MSL_C": row['MSL_C'],
                 Freight: row['Freight'],
                 "GW (KG)": row['GW (KG)'],
                 "GW (LB)": row['GW (LB)'],
