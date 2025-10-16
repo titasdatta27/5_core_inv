@@ -94,12 +94,12 @@ class Ebay3ApiService
         
             ProductStockMapping::updateOrCreate(
                 ['sku' => $sku],
-                ['inventory_ebay1'=>$quantity,]
+                ['inventory_ebay3'=>$quantity,]
             );
         }
         return $listingData;
         
-         \Log::info('Total Temu inventory items collected: ' . count($listingData));
+         \Log::info('Total Ebay3 inventory items collected: ' . count($listingData));
         $itemIdToSku = [];       
     }
 

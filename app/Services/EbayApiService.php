@@ -244,11 +244,13 @@ class EbayApiService
     public function getRateLimitForAPI(String $name, String $context)
     {
         $bearerToken = $this->generateEbayToken();
-
-        $response = Http::withHeaders([
+        $request= Http::withHeaders([
             'Authorization' => "Bearer {$bearerToken}"
-        ])
-            ->get('https://api.ebay.com/developer/analytics/v1_beta/rate_limit', [
+        ]);
+        
+        if (env('FILESYSTEM_DRIVER') === 'local') {$request = $request->withoutVerifying();}
+
+        $response=$request->get('https://api.ebay.com/developer/analytics/v1_beta/rate_limit', [
                 'api_name' => $name,
                 'api_context' => $context,
             ]);
@@ -256,6 +258,7 @@ class EbayApiService
         return $response->json();
     }
     public function getEbayInventory(){
+
         $token = $this->generateEbayToken();
          if (!$token) {
             Log::error('Failed to generate token.');
@@ -263,7 +266,7 @@ class EbayApiService
         }
         $listingData = $this->fetchAndParseReport('LMS_ACTIVE_INVENTORY_REPORT', null, $token);
         
-        Log::info('Total Temu inventory items collected: ' . count($listingData));
+        Log::info('Total Ebay1 inventory items collected: ' . count($listingData));
         foreach ($listingData as $sku => $data) {
         $sku = $data['sku'] ?? null;
         $quantity = $data['quantity'];
