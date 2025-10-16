@@ -1340,182 +1340,290 @@ const table = new Tabulator("#forecast-table", {
             return element;
         }
     },
-    {
-        title: "AVG PFT%<br><span id='avgPftHeader' style='font-size:12px; color:#fff; '></span>",
-        field: "avgPftPercent",
-        hozAlign: "right",
-        headerSort: true,
-        sortable: true,
-        sorterParams: { alignEmptyValues: "bottom" },
-        formatter: function(cell) {
-            const data = cell.getRow().getData();
-            const LP = parseFloat(data.LP) || 0;
-            const SHIP = parseFloat(data.SHIP) || 0;
-            const ovl30 = parseFloat(data.shopifyb2c_l30) || 0;
-            const temuship = parseFloat(data.temu_ship) || 0;
-            const avgPrice = parseFloat(data.formattedAvgPrice) || 0;
+   
+                {
+                     title: "AVG PFT%<br><span id='avgPftHeader' style='font-size:12px; color:#fff; '></span>",
+                    field: "avgPftPercent",
+                    hozAlign: "right",
+                    headerSort: true,
+                    sortable: true,
+                    sorterParams: {
+                        alignEmptyValues: "bottom"
+                    },
+                    sorter: function(a, b) {
+                        let rowA = this.getRow(a);
+                        let rowB = this.getRow(b);
+                        return calculateAvgProfit(rowA.getData()) - calculateAvgProfit(rowB.getData());
+                    },
+                    headerSort: true,
+                    sorter: function(a, b) {
+                        const valA = a || 0;
+                        const valB = b || 0;
+                        return valA - valB;
+                    },
+                    formatter: function(cell) {
+                        const data = cell.getRow().getData();
 
-            const amzPrice = parseFloat(data.amz_price) || 0;
-            const ebayPrice = parseFloat(data.ebay_price) || 0;
-            const shopifyPrice = parseFloat(data.shopifyb2c_price) || 0;
-            const macyPrice = parseFloat(data.macy_price) || 0;
-            const reverbPrice = parseFloat(data.reverb_price) || 0;
-            const dobaPrice = parseFloat(data.doba_price) || 0;
-            const temuPrice = parseFloat(data.temu_price) || 0;
-            const ebay3Price = parseFloat(data.ebay3_price) || 0;
-            const ebay2Price = parseFloat(data.ebay2_price) || 0;
-            const walmartPrice = parseFloat(data.walmart_price) || 0;
-            const sheinPrice = parseFloat(data.shein_price) || 0;
-            const bestbuyPrice = parseFloat(data.bestbuy_price) || 0;
-            const tiendamiaPrice = parseFloat(data.tiendamia_price) || 0;
-            const tiktokPrice = parseFloat(data.tiktok_price) || 0;
-            const aliexpressPrice = parseFloat(data.aliexpress_price) || 0;
+                        // Calculate profits per site using L30
+                        const LP = parseFloat(data.LP) || 0;
+                        const SHIP = parseFloat(data.SHIP) || 0;
+                        const ovl30 = parseFloat(data.shopifyb2c_l30) || 0;
+                        const temuship = parseFloat(data.temu_ship) || 0;
+                        const avgPrice = parseFloat(data.formattedAvgPrice) || 0;
 
-            const amzL30 = parseFloat(data.amz_l30) || 0;
-            const ebayL30 = parseFloat(data.ebay_l30) || 0;
-            const shopifyL30 = parseFloat(data.shopifyb2c_l30_data) || 0;
-            const macyL30 = parseFloat(data.macy_l30) || 0;
-            const reverbL30 = parseFloat(data.reverb_l30) || 0;
-            const dobaL30 = parseFloat(data.doba_l30) || 0;
-            const temuL30 = parseFloat(data.temu_l30) || 0;
-            const ebay3L30 = parseFloat(data.ebay3_l30) || 0;
-            const ebay2L30 = parseFloat(data.ebay2_l30) || 0;
-            const walmartL30 = parseFloat(data.walmart_l30) || 0;
-            const sheinL30 = parseFloat(data.shein_l30) || 0;
-            const bestbuyL30 = parseFloat(data.bestbuy_l30) || 0;
-            const tiendamiaL30 = parseFloat(data.tiendamia_l30) || 0;
-            const tiktokL30 = parseFloat(data.tiktok_l30) || 0;
-            const aliexpressL30 = parseFloat(data.aliexpress_l30) || 0;
+                        // Get price and L30 values for each marketplace
+                        const amzPrice = parseFloat(data.amz_price) || 0;
+                        const ebayPrice = parseFloat(data.ebay_price) || 0;
+                        const shopifyPrice = parseFloat(data.shopifyb2c_price) || 0;
+                        const macyPrice = parseFloat(data.macy_price) || 0;
+                        const reverbPrice = parseFloat(data.reverb_price) || 0;
+                        const dobaPrice = parseFloat(data.doba_price) || 0;
+                        const temuPrice = parseFloat(data.temu_price) || 0;
+                        const ebay3Price = parseFloat(data.ebay3_price) || 0;
+                        const ebay2Price = parseFloat(data.ebay2_price) || 0;
+                        const walmartPrice = parseFloat(data.walmart_price) || 0;
+                        const sheinPrice = parseFloat(data.shein_price) || 0;
+                        const bestbuyPrice = parseFloat(data.bestbuy_price) || 0;
+                        const tiendamiaPrice = parseFloat(data.tiendamia_price) || 0;
+                        const tiktokPrice = parseFloat(data.tiktok_price) || 0;
+                        const aliexpressPrice = parseFloat(data.aliexpress_price) || 0;
 
-            const amzProfit = ((amzPrice * 0.70) - LP - SHIP);
-            const ebayProfit = ((ebayPrice * 0.72) - LP - SHIP);
-            const shopifyProfit = ((shopifyPrice * 0.75) - LP - SHIP);
-            const macyProfit = ((macyPrice * 0.76) - LP - SHIP);
-            const reverbProfit = ((reverbPrice * 0.84) - LP - SHIP);
-            const dobaProfit = ((dobaPrice * 0.95) - LP - SHIP);
-            const temuProfit = ((temuPrice * 0.87) - LP - temuship);
-            const ebay3Profit = ((ebay3Price * 0.71) - LP - SHIP);
-            const ebay2Profit = ((ebay2Price * 0.80) - LP - SHIP);
-            const walmartProfit = ((walmartPrice * 0.80) - LP - SHIP);
-            const sheinProfit = ((sheinPrice * 0.89) - LP - SHIP);
-            const bestbuyProfit = ((bestbuyPrice * 0.80) - LP - SHIP);
-            const tiendamiaProfit = ((tiendamiaPrice * 0.83) - LP - SHIP);
-            const tiktokProfit = ((tiktokPrice * 0.64) - LP - SHIP);
-            const aliexpressProfit = ((aliexpressPrice * 0.89) - LP - SHIP);
+                        const amzL30 = parseFloat(data.amz_l30) || 0;
+                        const ebayL30 = parseFloat(data.ebay_l30) || 0;
+                        const shopifyL30 = parseFloat(data.shopifyb2c_l30_data) || 0;
+                        const macyL30 = parseFloat(data.macy_l30) || 0;
+                        const reverbL30 = parseFloat(data.reverb_l30) || 0;
+                        const dobaL30 = parseFloat(data.doba_l30) || 0;
+                        const temuL30 = parseFloat(data.temu_l30) || 0;
+                        const ebay3L30 = parseFloat(data.ebay3_l30) || 0;
+                        const ebay2L30 = parseFloat(data.ebay2_l30) || 0;
+                        const walmartL30 = parseFloat(data.walmart_l30) || 0;
+                        const sheinL30 = parseFloat(data.shein_l30) || 0;
+                        const bestbuyL30 = parseFloat(data.bestbuy_l30) || 0;
+                        const tiendamiaL30 = parseFloat(data.tiendamia_l30) || 0;
+                        const tiktokL30 = parseFloat(data.tiktok_l30) || 0;
+                        const aliexpressL30 = parseFloat(data.aliexpress_l30) || 0;
 
-            const totalProfit = amzProfit * amzL30 + ebayProfit * ebayL30 + shopifyProfit * shopifyL30 + macyProfit * macyL30 +
-                reverbProfit * reverbL30 + dobaProfit * dobaL30 + temuProfit * temuL30 +
-                ebay3Profit * ebay3L30 + ebay2Profit * ebay2L30 + walmartProfit * walmartL30 +
-                sheinProfit * sheinL30 + bestbuyProfit * bestbuyL30 + tiendamiaProfit * tiendamiaL30 +
-                tiktokProfit * tiktokL30 + aliexpressProfit * aliexpressL30;
+                        // Calculate profit for each marketplace
+                        const amzProfit = ((amzPrice * 0.70) - LP - SHIP)  ;
+                        const ebayProfit = ((ebayPrice * 0.72) - LP - SHIP) ;
+                        const shopifyProfit = ((shopifyPrice * 0.75) - LP - SHIP) ;
+                        const macyProfit = ((macyPrice * 0.76) - LP - SHIP) ;
+                        const reverbProfit = ((reverbPrice * 0.84) - LP - SHIP) ;
+                        const dobaProfit = ((dobaPrice * 0.95) - LP - SHIP) ;
+                        const temuProfit = ((temuPrice * 0.87) - LP - temuship) ;
+                        const ebay3Profit = ((ebay3Price * 0.71) - LP - SHIP);
+                        const ebay2Profit = ((ebay2Price * 0.80) - LP - SHIP) ;
+                        const walmartProfit = ((walmartPrice * 0.80) - LP - SHIP) ;
+                        const sheinProfit = ((sheinPrice * 0.89) - LP - SHIP) ;
+                        const bestbuyProfit = ((bestbuyPrice * 0.80) - LP - SHIP) ;
+                        const tiendamiaProfit = ((tiendamiaPrice * 0.83) - LP - SHIP) ;
+                        const tiktokProfit = ((tiktokPrice * 0.64) - LP - SHIP) ;
+                        const aliexpressProfit = ((aliexpressPrice * 0.89) - LP - SHIP) ;
 
-            const totalRevenue =
-                (amzPrice * amzL30) + (ebayPrice * ebayL30) + (shopifyPrice * shopifyL30) + (macyPrice * macyL30) +
-                (reverbPrice * reverbL30) + (dobaPrice * dobaL30) + (temuPrice * temuL30) +
-                (ebay3Price * ebay3L30) + (ebay2Price * ebay2L30) + (walmartPrice * walmartL30) +
-                (sheinPrice * sheinL30) + (bestbuyPrice * bestbuyL30) + (tiendamiaPrice * tiendamiaL30) +
-                (tiktokPrice * tiktokL30) + (aliexpressPrice * aliexpressL30);
+ 
 
-            let avgPftPercent = totalRevenue > 0 ? (totalProfit / totalRevenue) * 100 : 0;
-            if (!isFinite(avgPftPercent) || isNaN(avgPftPercent)) avgPftPercent = 0;
-            avgPftPercent = Math.round(avgPftPercent);
+                        // Calculate total profit
+                        const totalProfit = amzProfit * amzL30 + ebayProfit * ebayL30 + shopifyProfit * shopifyL30 + macyProfit * macyL30 +
+                            reverbProfit * reverbL30 + dobaProfit * dobaL30 + temuProfit * temuL30 +
+                            ebay3Profit * ebay3L30 + ebay2Profit * ebay2L30 + walmartProfit * walmartL30 +
+                            sheinProfit * sheinL30 + bestbuyProfit * bestbuyL30 + tiendamiaProfit * tiendamiaL30 +
+                            tiktokProfit * tiktokL30 + aliexpressProfit * aliexpressL30;
 
-            let bgColor, textColor;
-            if (avgPftPercent < 11) {
-                textColor = '#ff0000';
-            } else if (avgPftPercent >= 10 && avgPftPercent < 15) {
-                bgColor = 'yellow';
-                textColor = '#000000';
-            } else if (avgPftPercent >= 15 && avgPftPercent < 20) {
-                textColor = '#0d6efd';
-            } else if (avgPftPercent >= 21 && avgPftPercent < 50) {
-                textColor = '#198754';
-            } else {
-                textColor = '#800080';
-            }
+                        // Calculate total revenue
+                        const totalRevenue =
+                            (amzPrice * amzL30) +
+                            (ebayPrice * ebayL30) +
+                            (shopifyPrice * shopifyL30) +
+                            (macyPrice * macyL30) +
+                            (reverbPrice * reverbL30) +
+                            (dobaPrice * dobaL30) +
+                            (temuPrice * temuL30) +
+                            (ebay3Price * ebay3L30) +
+                            (ebay2Price * ebay2L30) +
+                            (walmartPrice * walmartL30) +
+                            (sheinPrice * sheinL30) +
+                            (bestbuyPrice * bestbuyL30) +
+                            (tiendamiaPrice * tiendamiaL30) +
+                            (tiktokPrice * tiktokL30) +
+                            (aliexpressPrice * aliexpressL30);
 
-            const element = document.createElement('div');
-            element.textContent = avgPftPercent + '%';
-            element.style.backgroundColor = bgColor;
-            element.style.color = textColor;
-            element.style.padding = '4px 8px';
-            element.style.borderRadius = '4px';
-            element.style.fontWeight = '600';
-            element.style.textAlign = 'center';
+                        // Calculate average profit percentage and round to nearest integer
+                        let avgPftPercent = totalRevenue > 0 ? (totalProfit / totalRevenue) * 100 : 0;
 
-            data.avgPftPercent = avgPftPercent;
-            data.TotalAvgpft = Math.round((avgPrice * ovl30 ) * avgPftPercent / 100);
-            data.TotalAvgSales = Math.round(avgPrice * ovl30);
-            data.TotalAvgpftForTop = Math.round((data.TotalAvgpft / data.TotalAvgSales) * 100);
-            data.totalCogs = Math.round(LP * ovl30);
-            data.TotalAvgRoiPer = Math.round((data.TotalAvgpft / data.totalCogs) * 100);
+                        if (!isFinite(avgPftPercent) || isNaN(avgPftPercent)) {
+                            avgPftPercent = 0;
+                        }
 
-            return element;
-        }
-    },
-    {
-        title: "AVG ROI%<br><span id='avgRoiHeader' style='font-size:12px; color:#fff; '></span>",
-        field: "avgRoi",
-        hozAlign: "right",
-        headerSort: true,
-        sorter: function(a, b) {
-            const valA = parseFloat(a) || 0;
-            const valB = parseFloat(b) || 0;
-            return valA - valB;
-        },
-        formatter: function(cell) {
-            const data = cell.getRow().getData();
-            const LP = parseFloat(data.LP) || 0;
-            if (LP === 0) return "N/A";
+                        avgPftPercent = Math.round(avgPftPercent);
 
-            const amzL30 = parseFloat(data.amz_l30) || 0;
-            const ebayL30 = parseFloat(data.ebay_l30) || 0;
-            const shopifyL30 = parseFloat(data.shopifyb2c_l30) || 0;
-            const macyL30 = parseFloat(data.macy_l30) || 0;
-            const reverbL30 = parseFloat(data.reverb_l30) || 0;
-            const dobaL30 = parseFloat(data.doba_l30) || 0;
-            const temuL30 = parseFloat(data.temu_l30) || 0;
-            const ebay3L30 = parseFloat(data.ebay3_l30) || 0;
-            const ebay2L30 = parseFloat(data.ebay2_l30) || 0;
-            const walmartL30 = parseFloat(data.walmart_l30) || 0;
-            const sheinL30 = parseFloat(data.shein_l30) || 0;
-            const bestbuyL30 = parseFloat(data.bestbuy_l30) || 0;
-            const tiendamiaL30 = parseFloat(data.tiendamia_l30) || 0;
-            const tiktokL30 = parseFloat(data.tiktok_l30) || 0;
-            const aliexpressL30 = parseFloat(data.aliexpress_l30) || 0;
 
-            const totalL30 = amzL30 + ebayL30 + shopifyL30 + macyL30 + reverbL30 + dobaL30 + temuL30 + ebay3L30 + ebay2L30 + walmartL30 + sheinL30 + bestbuyL30 + tiendamiaL30 + tiktokL30 + aliexpressL30;
+                        // Profit top caculation start 
 
-            const roi = totalL30 > 0 ? (data.TotalAvgpft / totalL30) / LP * 100 : 0;
+                        // Style based on profit percentage
+                        let bgColor, textColor;
+                        if (avgPftPercent < 11) {
+                          
+                            textColor = '#ff0000';
+                        } else if (avgPftPercent >= 10 && avgPftPercent < 15) {
+                            bgColor = 'yellow'; // orange
+                            textColor = '#000000';
+                        } else if (avgPftPercent >= 15 && avgPftPercent < 20) {
+                           
+                            textColor = '#0d6efd';
+                        } else if (avgPftPercent >= 21 && avgPftPercent < 50) {
+                            textColor = '#198754';
+                        }
+                        else{
+                            textColor = '#800080'; // purple
+                        }
 
-            let bgColor, textColor;
-            if (roi < 11) {
-                textColor = '#ff0000';
-            } else if (roi >= 10 && roi < 15) {
-                bgColor = 'yellow';
-                textColor = '#000000';
-            } else if (roi >= 15 && roi < 20) {
-                textColor = '#0d6efd';
-            } else if (roi >= 21 && roi < 50) {
-                textColor = '#198754';
-            } else {
-                textColor = '#800080';
-            }
+                        const element = document.createElement('div');
+                        element.textContent = avgPftPercent + '%';
+                        element.style.backgroundColor = bgColor;
+                        element.style.color = textColor;
+                        element.style.padding = '4px 8px';
+                        element.style.borderRadius = '4px';
+                        element.style.fontWeight = '600';
+                        element.style.textAlign = 'center';
 
-            const element = document.createElement('div');
-            element.textContent = Math.round(roi) + '%';
-            element.style.backgroundColor = bgColor;
-            element.style.color = textColor;
-            element.style.padding = '4px 8px';
-            element.style.borderRadius = '4px';
-            element.style.fontWeight = '600';
-            element.style.textAlign = 'center';
+                        data.avgPftPercent = avgPftPercent;
 
-            data.avgRoi = Math.round(roi);
-            return element;
-        },
-        visible: true
-    },
+                        // console
+
+
+
+                        
+                        // Top Calculation
+      
+                        TotalAvgpft= (avgPrice * ovl30 ) * avgPftPercent / 100;
+                        TotalAvgSales = avgPrice * ovl30;
+
+
+                        TotalAvgpftForTop = (TotalAvgpft / TotalAvgSales) * 100;
+                        totalCogs = LP * ovl30;
+                        TotalAvgRoiPer = (TotalAvgpft / totalCogs) * 100;
+
+                        console.log("TotalAvgpft",TotalAvgpft);
+
+                        data.TotalAvgpft = Math.round(TotalAvgpft);
+                        data.TotalAvgSales = Math.round(TotalAvgSales);
+                        data.TotalAvgpftForTop = Math.round(TotalAvgpftForTop) ;
+                        data.totalCogs = Math.round(totalCogs);
+                        data.TotalAvgRoiPer = Math.round(TotalAvgRoiPer);
+                        console.log("TotalAvgpftForTop",TotalAvgpftForTop);  
+
+
+                       console.log("TotalAvgSales",TotalAvgSales);
+                       console.log("TotalAvgpftForTop",TotalAvgpftForTop);
+                       console.log("totalCogs",totalCogs);
+                       console.log("TotalAvgRoiPer",TotalAvgRoiPer);
+                         
+                       
+                        return element;
+                    }
+                },
+
+                {
+                        title: "AVG ROI%<br><span id='avgRoiHeader' style='font-size:12px; color:#fff; '></span>",
+                        field: "avgRoi",
+                        hozAlign: "right",
+                        headerSort: true,
+                        sorter: function(a, b) {
+                            const valA = parseFloat(a) || 0;
+                            const valB = parseFloat(b) || 0;
+                            return valA - valB;
+                        },
+                        formatter: function(cell) {
+                            const data = cell.getRow().getData();
+                            const LP = parseFloat(data.LP) || 0;
+                            const ovl30 = parseFloat(data.shopifyb2c_l30) || 0;
+                            const temuship = parseFloat(data.temu_ship) || 0;
+                            const avgPrice = parseFloat(data.formattedAvgPrice) || 0;
+                             const SHIP = parseFloat(data.SHIP) || 0;
+                            
+                            if (LP === 0) return "N/A";
+
+                            // Parse all L30 values
+                            const amzL30     = parseFloat(data.amz_l30) || 0;
+                            const ebayL30    = parseFloat(data.ebay_l30) || 0;
+                            const shopifyL30 = parseFloat(data.shopifyb2c_l30) || 0;
+                            const macyL30    = parseFloat(data.macy_l30) || 0;
+                            const reverbL30  = parseFloat(data.reverb_l30) || 0;
+                            const dobaL30    = parseFloat(data.doba_l30) || 0;
+                            const temuL30    = parseFloat(data.temu_l30) || 0;
+                            const ebay3L30   = parseFloat(data.ebay3_l30) || 0;
+                            const ebay2L30   = parseFloat(data.ebay2_l30) || 0;
+                            const walmartL30 = parseFloat(data.walmart_l30) || 0;
+                            const sheinL30   = parseFloat(data.shein_l30) || 0;
+                            const bestbuyL30  = parseFloat(data.bestbuy_l30) || 0;
+                            const tiendamiaL30 = parseFloat(data.tiendamia_l30) || 0;
+                            const tiktokL30   = parseFloat(data.tiktok_l30) || 0;
+                            const aliexpressL30 = parseFloat(data.aliexpress_l30) || 0; 
+
+                            // Total L30 across marketplaces
+                            const totalL30 = amzL30 + ebayL30 + shopifyL30 + macyL30 + reverbL30 + dobaL30 + temuL30  + ebay3L30 + ebay2L30 + walmartL30 + sheinL30 + bestbuyL30 + tiendamiaL30 + tiktokL30 + aliexpressL30;
+
+                            // Profit calculations (use parsed *_L30 variables)
+                            const amzProfit     = data.amz_price        ? ((parseFloat(data.amz_price) * 0.70) - LP - SHIP) * amzL30 : 0;
+                            const ebayProfit    = data.ebay_price       ? ((parseFloat(data.ebay_price) * 0.72) - LP - SHIP) * ebayL30 : 0;
+                            const shopifyProfit = data.shopifyb2c_price ? ((parseFloat(data.shopifyb2c_price) * 0.75) - LP - SHIP) * shopifyL30 : 0;
+                            const macyProfit    = data.macy_price       ? ((parseFloat(data.macy_price) * 0.76) - LP - SHIP) * macyL30 : 0;
+                            const reverbProfit  = data.reverb_price     ? ((parseFloat(data.reverb_price) * 0.84) - LP - SHIP) * reverbL30 : 0;
+                            const dobaProfit    = data.doba_price       ? ((parseFloat(data.doba_price) * 0.95) - LP - SHIP) * dobaL30 : 0;
+                            const temuProfit    = data.temu_price       ? ((parseFloat(data.temu_price) * 0.87) - LP - temuship) * temuL30 : 0;
+                            const ebay3Profit   = data.ebay3_price      ? ((parseFloat(data.ebay3_price) * 0.71) - LP - SHIP) * ebay3L30 : 0;
+                            const ebay2Profit   = data.ebay2_price      ? ((parseFloat(data.ebay2_price) * 0.80) - LP - SHIP) * ebay2L30 : 0;
+                            const walmartProfit = data.walmart_price    ? ((parseFloat(data.walmart_price) * 0.80) - LP - SHIP) * walmartL30 : 0;
+                            const sheinProfit   = data.shein_price      ? ((parseFloat(data.shein_price) * 0.89) - LP - SHIP) * sheinL30 : 0;
+                            const bestbuyProfit  = data.bestbuy_price    ? ((parseFloat(data.bestbuy_price) * 0.80) - LP - SHIP) * bestbuyL30 : 0;
+                            const tiendamiaProfit = data.tiendamia_price ? ((parseFloat(data.tiendamia_price) * 0.83) - LP - SHIP) * tiendamiaL30 : 0;
+                            const tiktokProfit    = data.tiktok_price    ? ((parseFloat(data.tiktok_price) * 0.64) - LP - SHIP) * tiktokL30 : 0;
+                            const aliexpressProfit = data.aliexpress_price ? ((parseFloat(data.aliexpress_price) * 0.89) - LP - SHIP) * aliexpressL30 : 0;
+                            // Total profit
+                            const totalProfit = amzProfit + ebayProfit + shopifyProfit + macyProfit +
+                                                reverbProfit + dobaProfit + temuProfit  +
+                                                ebay3Profit + ebay2Profit + walmartProfit + sheinProfit + bestbuyProfit + tiendamiaProfit + tiktokProfit + aliexpressProfit;
+
+
+                            
+
+                            // ROI calculation
+                            const roi = totalL30 > 0 ? (totalProfit / totalL30) / LP * 100 : 0;
+
+                            data.TotalAvgRoiPer = Math.round(TotalAvgRoiPer);
+                            // Style based on ROI percentage
+                            let bgColor, textColor;
+                            if (roi < 11) {
+                                textColor = '#ff0000'; // red
+                            } else if (roi >= 10 && roi < 15) {
+                                bgColor = 'yellow';
+                                textColor = '#000000'; // black
+                            } else if (roi >= 15 && roi < 20) {
+                                textColor = '#0d6efd'; // blue
+                            } else if (roi >= 21 && roi < 50) {
+                                textColor = '#198754'; // green
+                            } else {
+                                textColor = '#800080'; // purple
+                            }
+
+                            // Build cell element
+                            const element = document.createElement('div');
+                            element.textContent = Math.round(roi) + '%';
+                            element.style.backgroundColor = bgColor;
+                            element.style.color = textColor;
+                            element.style.padding = '4px 8px';
+                            element.style.borderRadius = '4px';
+                            element.style.fontWeight = '600';
+                            element.style.textAlign = 'center';
+
+                            // Store for sorting
+                            data.avgRoi = Math.round(roi);
+                            return element;
+                        },
+                        visible: true
+                    }
+                    ,
     {
         title: "Avg CVR",
         field: "avgCvr",
