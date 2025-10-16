@@ -578,6 +578,12 @@
                     let field = e.target.getAttribute("data-field");
                     let value = e.target.value;
 
+                    // Set background color if NRA
+                    if(field === "NRA" && value === "NRA") {
+                        e.target.style.backgroundColor = "#dc3545";
+                        e.target.style.color = "#fff";
+                    }
+
                     fetch('/update-amazon-nr-nrl-fba', {
                         method: 'POST',
                         headers: {
