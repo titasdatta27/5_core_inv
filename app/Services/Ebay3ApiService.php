@@ -98,6 +98,8 @@ class Ebay3ApiService
             );
         }
         return $listingData;
+        
+         \Log::info('Total Temu inventory items collected: ' . count($listingData));
         $itemIdToSku = [];       
     }
 

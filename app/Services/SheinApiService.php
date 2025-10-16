@@ -63,14 +63,15 @@ class SheinApiService
                 "updateTimeEnd"   => "",
                 "updateTimeStart" => "",
             ];
-
-            $response = Http::withoutVerifying()->withHeaders([
+            $request= Http::withoutVerifying()->withHeaders([
                 "Language"       => "en-us",
                 "x-lt-openKeyId" => env('SHEIN_OPEN_KEY_ID'),
                 "x-lt-timestamp" => $timestamp,
                 "x-lt-signature" => $signature,
                 "Content-Type"   => "application/json",
-            ])->post($url, $payload);
+            ]);
+            if (env('FILESYSTEM_DRIVER') === 'local') {$request = $request->withoutVerifying();}
+            $response =$request->post($url, $payload);
 
             if (!$response->successful()) {
                 throw new \Exception("Shein API Error: " . $response->body());
@@ -79,7 +80,6 @@ class SheinApiService
             $data = $response->json();
             $products = $data["info"]["data"] ?? [];
             // dd($products);
-
             // If no products returned → stop looping
             if (empty($products)) {
                 break;

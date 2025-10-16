@@ -696,57 +696,35 @@
 
             function combinedFilter(data) {
 
-                let searchVal = $("#global-search").val()?.toLowerCase() || "";
-                if (searchVal && !(data.sku?.toLowerCase().includes(searchVal))) {
+                let searchVal = ($("#global-search").val() || "").toLowerCase();
+                if (searchVal && !(data.campaignName || "").toLowerCase().includes(searchVal)) {
                     return false;
                 }
 
+                // ⚙️ Status filter
                 let statusVal = $("#status-filter").val();
                 if (statusVal && data.campaignStatus !== statusVal) {
                     return false;
                 }
 
+                // 📦 INV filter
                 let invFilterVal = $("#inv-filter").val();
-                if (invFilterVal === "ALL") {
-                    if (parseFloat(data.INV) === 0) return false;
-                } else if (invFilterVal === "INV_0") {
-                    if (parseFloat(data.INV) !== 0) return false;
-                } else if (invFilterVal === "OTHERS") {
-                    if (parseFloat(data.INV) === 0) return false;
-                }
+                let inv = parseFloat(data.INV) || 0;
+                if (!invFilterVal && inv === 0) return false;
+                if (invFilterVal === "INV_0" && inv !== 0) return false;
+                if (invFilterVal === "OTHERS" && inv === 0) return false;
 
+                // 🟩 NRL filter
                 let nrlFilterVal = $("#nrl-filter").val();
-                if (nrlFilterVal) {
-                    let rowSelect = document.querySelector(
-                        `select[data-sku="${data.sku}"][data-field="NRL"]`
-                    );
-                    let rowVal = rowSelect ? rowSelect.value : "";
-                    if (!rowVal) rowVal = data.NRL || "";
+                if (nrlFilterVal && (data.NRL || "") !== nrlFilterVal) return false;
 
-                    if (rowVal !== nrlFilterVal) return false;
-                }
-
+                // 🟧 NR filter
                 let nraFilterVal = $("#nra-filter").val();
-                if (nraFilterVal) {
-                    let rowSelect = document.querySelector(
-                        `select[data-sku="${data.sku}"][data-field="NR"]`
-                    );
-                    let rowVal = rowSelect ? rowSelect.value : "";
-                    if (!rowVal) rowVal = data.NR || "";
+                if (nraFilterVal && (data.NR || "") !== nraFilterVal) return false;
 
-                    if (rowVal !== nraFilterVal) return false;
-                }
-
+                // 🟦 FBA filter
                 let fbaFilterVal = $("#fba-filter").val();
-                if (fbaFilterVal) {
-                    let rowSelect = document.querySelector(
-                        `select[data-sku="${data.sku}"][data-field="FBA"]`
-                    );
-                    let rowVal = rowSelect ? rowSelect.value : "";
-                    if (!rowVal) rowVal = data.FBA || "";
-
-                    if (rowVal !== fbaFilterVal) return false;
-                }
+                if (fbaFilterVal && (data.FBA || "") !== fbaFilterVal) return false;
 
                 return true;
             }
