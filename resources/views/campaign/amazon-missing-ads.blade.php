@@ -618,6 +618,17 @@
                     if (invFilterVal === "INV_0" && inv !== 0) return false;
                     if (invFilterVal === "OTHERS" && inv === 0) return false;
 
+                    // 🔹 NRA Filter
+                    let nraFilterVal = $("#nra-filter").val();
+                    let nra = (data.NRA || "").trim();
+                    if (nraFilterVal) {
+                        if (nraFilterVal === "ALL") {
+                            
+                        } else if (nra !== nraFilterVal) {
+                            return false;
+                        }
+                    }
+                    
                     // 🔹 Missing Ads Filter
                     let missingVal = $("#missingAds-filter").val();
                     let kw = data.kw_campaign_name || "";
@@ -656,19 +667,26 @@
                     visibleData.forEach(row => {
                         let kw = row.kw_campaign_name || "";
                         let pt = row.pt_campaign_name || "";
+                        let nra = (row.NRA || "").trim();
 
                         // Existing counts
-                        if (kw && pt) bothRunning++;
-                        else if (kw && !pt) ptMissing++;
-                        else if (!kw && pt) kwMissing++;
-                        else bothMissing++;
+                        if(nra !== "NRA") {
+                            if (kw && pt) bothRunning++;
+                            else if (kw && !pt) ptMissing++;
+                            else if (!kw && pt) kwMissing++;
+                            else bothMissing++;
+                        }
 
                         // New running counts
-                        if (kw) kwRunning++;
-                        if (pt) ptRunning++;
+                        if(nra !== "NRA") {
+                            if (kw) kwRunning++;
+                            if (pt) ptRunning++;
+                        }
 
                         // Total Missing Ads Count
-                        totalMissingAds = `( ${ptMissing + kwMissing + (bothMissing)} ) `;
+                        if(nra !== "NRA") {
+                            totalMissingAds = `( ${ptMissing + kwMissing + (bothMissing)} ) `;
+                        }
 
                         // Total NRA Count
                         if(row.NRA && row.NRA.trim() === "NRA"){
@@ -700,7 +718,7 @@
 
                 // ✅ Events
                 $("#global-search").on("keyup", reapplyFiltersAndUpdate);
-                $("#status-filter, #inv-filter, #missingAds-filter").on("change", reapplyFiltersAndUpdate);
+                $("#status-filter, #inv-filter, #nra-filter, #missingAds-filter").on("change", reapplyFiltersAndUpdate);
 
                 table.on("dataFiltered", updateCampaignStats);
                 table.on("pageLoaded", updateCampaignStats);
