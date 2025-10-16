@@ -1041,17 +1041,18 @@
 
 
         //global variables for play btn
+        let currentInvFilter = null;
+        let currentCvrFilter = null;
+        let currentViewFilter = null;
+        let currentDilFilter = null;
+        let currentMarginFilter = null;
+
         function renderGroup(parentKey) {
         if (!groupedSkuData[parentKey]) return;
 
             // Update current filter
         currentParentFilter = parentKey;
         setCombinedFilters();
-
-            // Apply Tabulator filter for the selected group
-        table.setFilter(function(data) {
-            return data.Parent === parentKey;
-        });
         }
 
         // Filter by Inventory radio buttons
@@ -1061,11 +1062,14 @@
                 let value = this.value;
 
                 if (value === "all") {
-                    table.clearFilter();
+                    currentInvFilter = null;
+                    setCombinedFilters();
                 } else if (value === "zero") {
-                    table.setFilter("inv", "=", 0);
+                    currentInvFilter = "zero";
+                    setCombinedFilters();
                 } else if (value === "other") {
-                    table.setFilter("inv", ">", 0);
+                    currentInvFilter = "other";
+                    setCombinedFilters();
                 }
             });
         });
@@ -1078,19 +1082,18 @@
             input.addEventListener("change", function() {
                 let value = this.value;
 
-                if (value === "clear") {
-                    table.clearFilter("avgCvr");
-                } else if (value === "all") {
-                    table.clearFilter("avgCvr");
+                if (value === "clear" || value === "all") {
+                    currentCvrFilter = null;
+                    setCombinedFilters();
                 } else if (value === "high") {
-                    table.setFilter("avgCvr", ">", 5);
+                    currentCvrFilter = "high";
+                    setCombinedFilters();
                 } else if (value === "medium") {
-                    table.setFilter(function(data) {
-                        const cvr = parseFloat(data.avgCvr) || 0;
-                        return cvr >= 3 && cvr <= 5;
-                    });
+                    currentCvrFilter = "medium";
+                    setCombinedFilters();
                 } else if (value === "low") {
-                    table.setFilter("avgCvr", "<", 3);
+                    currentCvrFilter = "low";
+                    setCombinedFilters();
                 }
             });
         });
@@ -1101,17 +1104,14 @@
                 let value = this.value;
 
                 if (value === "parent") {
-                    table.setFilter(function(data) {
-                        const sku = (data.SKU || "").toUpperCase();
-                        return sku.includes("PARENT");
-                    });
+                    currentViewFilter = "parent";
+                    setCombinedFilters();
                 } else if (value === "sku") {
-                    table.setFilter(function(data) {
-                        const sku = (data.SKU || "").toUpperCase();
-                        return !sku.includes("PARENT");
-                    });
+                    currentViewFilter = "sku";
+                    setCombinedFilters();
                 } else if (value === "both") {
-                    table.clearFilter();
+                    currentViewFilter = null;
+                    setCombinedFilters();
                 }
             });
         });
@@ -1121,29 +1121,39 @@
             input.addEventListener("change", function() {
                 let value = this.value;
 
-                if (value === "clear") {
-                    table.clearFilter("Dil%");
-                } else if (value === "all") {
-                    table.clearFilter("Dil%");
+                if (value === "clear" || value === "all") {
+                    currentDilFilter = null;
+                    setCombinedFilters();
                 } else if (value === "verylow") {
-                    table.setFilter("Dil%", "<=", 10);
+                    currentDilFilter = "verylow";
+                    setCombinedFilters();
                 } else if (value === "low") {
-                    table.setFilter(function(data) {
-                        const dil = parseFloat(data["Dil%"]) || 0;
-                        return dil >= 11 && dil <= 15;
-                    });
+                    currentDilFilter = "low";
+                    setCombinedFilters();
                 } else if (value === "medium") {
-                    table.setFilter(function(data) {
-                        const dil = parseFloat(data["Dil%"]) || 0;
-                        return dil >= 16 && dil <= 20;
-                    });
+                    currentDilFilter = "medium";
+                    setCombinedFilters();
                 } else if (value === "high") {
-                    table.setFilter(function(data) {
-                        const dil = parseFloat(data["Dil%"]) || 0;
-                        return dil >= 21 && dil <= 40;
-                    });
+                    currentDilFilter = "high";
+                    setCombinedFilters();
                 } else if (value === "veryhigh") {
-                    table.setFilter("Dil%", ">", 40);
+                    currentDilFilter = "veryhigh";
+                    setCombinedFilters();
+                }
+            });
+        });
+
+        // Filter by Margin radio buttons
+        document.querySelectorAll("input[name='marginFilter']").forEach(input => {
+            input.addEventListener("change", function() {
+                let value = this.value;
+
+                if (value === "clear") {
+                    currentMarginFilter = null;
+                    setCombinedFilters();
+                } else if (value === "high") {
+                    currentMarginFilter = "high";
+                    setCombinedFilters();
                 }
             });
         });
@@ -2115,8 +2125,37 @@
         let currentParentFilter = null;
 
         function setCombinedFilters() {
-            table.setFilter(function(row) {
-                return true; // Show all rows by default
+            table.setFilter(function(data) {
+                // Parent filter
+                if (currentParentFilter && data.Parent !== currentParentFilter) return false;
+
+                // Inv filter
+                if (currentInvFilter === "zero" && data.inv != 0) return false;
+                if (currentInvFilter === "other" && data.inv == 0) return false;
+
+                // CVR filter
+                const cvr = parseFloat(data.avgCvr) || 0;
+                if (currentCvrFilter === "high" && !(cvr > 5)) return false;
+                if (currentCvrFilter === "medium" && !(cvr >= 3 && cvr <= 5)) return false;
+                if (currentCvrFilter === "low" && !(cvr < 3)) return false;
+
+                // View filter
+                if (currentViewFilter === "parent" && !data.is_parent) return false;
+                if (currentViewFilter === "sku" && data.is_parent) return false;
+
+                // Dil filter
+                const dil = parseFloat(data["Dil%"]) || 0;
+                if (currentDilFilter === "verylow" && !(dil <= 10)) return false;
+                if (currentDilFilter === "low" && !(dil >= 11 && dil <= 15)) return false;
+                if (currentDilFilter === "medium" && !(dil >= 16 && dil <= 20)) return false;
+                if (currentDilFilter === "high" && !(dil >= 21 && dil <= 40)) return false;
+                if (currentDilFilter === "veryhigh" && !(dil > 40)) return false;
+
+                // Margin filter
+                const margin = parseFloat(data.avgPftPercent) || 0;
+                if (currentMarginFilter === "high" && !(margin > 20)) return false;
+
+                return true;
             });
         }
 
@@ -2365,6 +2404,7 @@
                                 : r.prefix === 'temu' ? (data.temu_views ?? "-")
                                 : r.prefix === 'tiktok' ? (data.tiktok_views ?? "-")
                                 : r.prefix === 'aliexpress' ? (data.aliexpress_views ?? "-")
+                                : r.prefix === 'walmart' ? (data.walmart_views ?? "-")
                                 : "-" }
                         </div>
                     </td>
@@ -2391,6 +2431,9 @@
                                 else if (r.prefix === 'aliexpress' && cvr) {
                                     return `<span style="color: ${cvr.color}">${Math.round(cvr.value)}%</span>`;
                                 }
+                                else if (r.prefix === 'walmart' && cvr) {
+                                    return `<span style="color: ${cvr.color}">${Math.round(cvr.value)}%</span>`;
+                                }
 
                                 return "N/A";
                             })()} 
@@ -2408,7 +2451,8 @@
                             r.prefix === 'bestbuy' ? Math.round(data.bestbuy_req_view) ?? "-" :
                             r.prefix === 'tiendamia' ? Math.round(data.tiendamia_req_view) ?? "-" :
                             r.prefix === 'tiktok' ? Math.round(data.tiktok_req_view) ?? "-" :
-                            r.prefix === 'aliexpress' ? Math.round(data.aliexpress_req_view) ?? "-" : "-"}
+                            r.prefix === 'aliexpress' ? Math.round(data.aliexpress_req_view) ?? "-" :
+                            r.prefix === 'walmart' ? Math.round(data.walmart_req_view) ?? "-" : "-"}
                         </div>
                     </td>
 
@@ -2860,9 +2904,6 @@
 
                 currentParentFilter = parentKey;
                 setCombinedFilters();
-
-                // Filter table by Parent
-                table.setFilter("Parent", "=", parentKey);
                 console.log("Showing group:", parentKey);
             }
 
