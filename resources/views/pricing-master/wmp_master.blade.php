@@ -2136,7 +2136,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 { label: "eBay2", prefix: "ebay2", logo: "{{ asset('uploads/2.png') }}" },
                 { label: "eBay3", prefix: "ebay3", logo: "{{ asset('uploads/3.png') }}" },
                 { label: "Shopify B2C", prefix: "shopifyb2c", logo: "{{ asset('uploads/shopify.png') }}" },
-                { label: "Shein", prefix: "shein", logo: "{{ asset('uploads/Shein.jpg') }}" }
+                { label: "Shein", prefix: "shein", logo: "{{ asset('uploads/Shein.jpg') }}" },
+                { label: "Bestbuy", prefix: "bestbuy", logo: "{{ asset('uploads/bestbuy.jpeg') }}" },
+                { label: "Tiendamia", prefix: "tiendamia", logo: "{{ asset('uploads/ten.jpg') }}" },
+                { label: "TikTok", prefix: "tiktok", logo: "{{ asset('uploads/tiktok.png') }}" },
+                { label: "AliExpress", prefix: "aliexpress", logo: "{{ asset('uploads/aliexpress.png') }}" }
             ];
 
 
@@ -2151,8 +2155,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 <thead class="table-light position-sticky" style="top: 0; z-index: 1000;">
                 <tr>
                     <th data-sort="string">Channel <i class="bi bi-arrow-down-up"></i></th>
+                    <th data-sort="number">L60 <i class="bi bi-arrow-down-up"></i></th>
                     <th data-sort="number" class="default-sort">L30 <i class="bi bi-arrow-down"></i></th>
-                    <th data-sort="number" class="default-sort">L60 <i class="bi bi-arrow-down"></i></th>
                     <th data-sort="number">PRC <i class="bi bi-arrow-down-up"></i></th>
                     <th data-sort="number">PFT % <i class="bi bi-arrow-down-up"></i></th>
                     <th data-sort="number">ROI % <i class="bi bi-arrow-down-up"></i></th>
@@ -2173,7 +2177,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 const price = data[`${r.prefix}_price`];
                 const l30 = r.prefix === 'shopifyb2c' ? data['shopify_l30'] : data[`${r.prefix}_l30`];
                 const l60 = data[`${r.prefix}_l60`];
-                console.log(r.prefix, l30, l60);
                 const pft = data[`${r.prefix}_pft`];
                 const roi = data[`${r.prefix}_roi`];
                 const cvr = data[`${r.prefix}_cvr`];
@@ -2185,6 +2188,8 @@ document.addEventListener('DOMContentLoaded', function() {
                const getColor = (value) => {
                     // Convert to number and handle percentage values
                     const val = typeof value === 'string' ? parseFloat(value.replace('%', '')) : Number(value);
+                    console.log('Color value:', value, 'Parsed:', val); // Debug log
+                    
                     // Make sure value is a finite number
                     if (!isFinite(val) || isNaN(val)) return '#000000'; // default black
                     
@@ -2253,6 +2258,20 @@ document.addEventListener('DOMContentLoaded', function() {
                                  ` : r.prefix === 'shein' ? `
                                     ${data.shein_seller_link ? `<div><strong>SL:</strong> <a href="${data.shein_seller_link}" target="_blank" class="text-info">Seller Link</a></div>` : ''}
                                     ${data.shein_buyer_link ? `<div><strong>BL:</strong> <a href="${data.shein_buyer_link}" target="_blank" class="text-success">Buyer Link</a></div>` : ''}
+                                ` : r.prefix === 'bestbuy' ? `
+                                    ${data.bestbuy_seller_link ? `<div><strong>SL:</strong> <a href="${data.bestbuy_seller_link}" target="_blank" class="text-info">Seller Link</a></div>` : ''}
+                                    ${data.bestbuy_buyer_link ? `<div><strong>BL:</strong> <a href="${data.bestbuy_buyer_link}" target="_blank" class="text-success">Buyer Link</a></div>` : ''}
+                                ` : r.prefix === 'tiendamia' ? `
+                                    ${data.tiendamia_seller_link ? `<div><strong>SL:</strong> <a href="${data.tiendamia_seller_link}" target="_blank" class="text-info">Seller Link</a></div>` : ''}
+                                    ${data.tiendamia_buyer_link ? `<div><strong>BL:</strong> <a href="${data.tiendamia_buyer_link}" target="_blank" class="text-success">Buyer Link</a></div>` : ''}
+                                ` : ''}
+                                ${r.prefix === 'tiktok' ? `
+                                    ${data.tiktok_seller_link ? `<div><strong>SL:</strong> <a href="${data.tiktok_seller_link}" target="_blank" class="text-info">Seller Link</a></div>` : ''}
+                                    ${data.tiktok_buyer_link ? `<div><strong>BL:</strong> <a href="${data.tiktok_buyer_link}" target="_blank" class="text-success">Buyer Link</a></div>` : ''}
+                                ` : ''}
+                                 ${r.prefix === 'aliexpress' ? `
+                                    ${data.aliexpress_seller_link ? `<div><strong>SL:</strong> <a href="${data.aliexpress_seller_link}" target="_blank" class="text-info">Seller Link</a></div>` : ''}
+                                    ${data.aliexpress_buyer_link ? `<div><strong>BL:</strong> <a href="${data.aliexpress_buyer_link}" target="_blank" class="text-success">Buyer Link</a></div>` : ''}
                                 ` : ''}
 
                             </div>
@@ -2261,16 +2280,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                     </td>
 
-
+                    <td>
+                        <div class="value-indicator">
+                            ${l60 ?? "-"}
+                        </div>
+                    </td>
                     <td>
                         <div class="value-indicator">
                             ${l30 ?? "-"}
-                        </div>
-                    </td>
-
-                      <td>
-                        <div class="value-indicator">
-                            ${l60 ?? "-"}
                         </div>
                     </td>
                 
@@ -2298,6 +2315,10 @@ document.addEventListener('DOMContentLoaded', function() {
                                 : r.prefix === 'ebay2' ? (data.ebay2_views ?? "-") 
                                 : r.prefix === 'ebay3' ? (data.ebay3_views ?? "-") 
                                 : r.prefix === 'shein' ? (data.views_clicks ?? "-")
+                                : r.prefix === 'reverb' ? (data.reverb_views ?? "-")
+                                : r.prefix === 'temu' ? (data.temu_views ?? "-")
+                                : r.prefix === 'tiktok' ? (data.tiktok_views ?? "-")
+                                : r.prefix === 'aliexpress' ? (data.aliexpress_views ?? "-")
                                 : "-" }
                         </div>
                     </td>
@@ -2313,28 +2334,45 @@ document.addEventListener('DOMContentLoaded', function() {
                                 }
                                 else if (r.prefix === 'shein' && cvr) {
                                     return `<span style="color: ${cvr.color}">${Math.round(cvr.value)}%</span>`;
+                                } else if (r.prefix === 'reverb' && cvr) {
+                                    return `<span style="color: ${cvr.color}">${Math.round(cvr.value)}%</span>`;
+                                } else if (r.prefix === 'temu' && cvr) {
+                                    return `<span style="color: ${cvr.color}">${Math.round(cvr.value)}%</span>`;
+                                }
+                                else if (r.prefix === 'tiktok' && cvr) {
+                                    return `<span style="color: ${cvr.color}">${Math.round(cvr.value)}%</span>`;
+                                }
+                                else if (r.prefix === 'aliexpress' && cvr) {
+                                    return `<span style="color: ${cvr.color}">${Math.round(cvr.value)}%</span>`;
                                 }
 
                                 return "N/A";
                             })()} 
                         </div>
                     </td>
-                     <td>
+                      <td>
                         <div class="value-indicator">
                         ${r.prefix === 'amz' ? Math.round(data.amz_req_view) ?? "-" : 
                             r.prefix === 'ebay' ? Math.round(data.ebay_req_view) ?? "-" :
                             r.prefix === 'ebay2' ? Math.round(data.ebay2_req_view) ?? "-" :
                             r.prefix === 'ebay3' ? Math.round(data.ebay3_req_view) ?? "-" :
-                            r.prefix === 'shein' ? Math.round(data.shein_req_view) ?? "-" : "-"}
+                            r.prefix === 'shein' ? Math.round(data.shein_req_view) ?? "-" : 
+                            r.prefix === 'reverb' ? Math.round(data.reverb_req_view) ?? "-" :
+                            r.prefix === 'temu' ? Math.round(data.temu_req_view) ?? "-" :
+                            r.prefix === 'bestbuy' ? Math.round(data.bestbuy_req_view) ?? "-" :
+                            r.prefix === 'tiendamia' ? Math.round(data.tiendamia_req_view) ?? "-" :
+                            r.prefix === 'tiktok' ? Math.round(data.tiktok_req_view) ?? "-" :
+                            r.prefix === 'aliexpress' ? Math.round(data.aliexpress_req_view) ?? "-" : "-"}
                         </div>
                     </td>
-
 
                     <td>
                         <div class="value-indicator">
                             ${r.prefix === 'amz' ? fmtMoney(data.price_lmpa) 
                                 : r.prefix === 'ebay' ? fmtMoney(data.ebay_price_lmpa) 
                                 : r.prefix === 'shein' ? fmtMoney(data.lmp) 
+                                : r.prefix === 'tiktok' ? fmtMoney(data.tiktok_price_lmpa) 
+                                : r.prefix === 'aliexpress' ? fmtMoney(data.aliexpress_price_lmpa) 
                                 : '-'}
                         </div>
                     </td>
@@ -2358,10 +2396,14 @@ document.addEventListener('DOMContentLoaded', function() {
                                 : r.prefix === 'reverb' ? (data.reverb_sprice || '')
                                 : r.prefix === 'walmart' ? (data.walmart_sprice || '')
                                 : r.prefix === 'shein' ? (data.shein_sprice || '')
+                                : r.prefix === 'bestbuy' ? (data.bestbuy_sprice || '')
+                                : r.prefix === 'tiendamia' ? (data.tiendamia_sprice || '')
+                                : r.prefix === 'tiktok' ? (data.tiktok_sprice || '')
+                                : r.prefix === 'aliexpress' ? (data.aliexpress_sprice || '')
                             
                                 : ''
                             }"
-                            style="width: 85px;" 
+                            style="width: 65px;" 
                             step="any"
                             data-sku="${data.SKU}" 
                             data-lp="${data.LP}" 
@@ -2408,6 +2450,17 @@ document.addEventListener('DOMContentLoaded', function() {
                             }
                             else if (r.prefix === 'shein' && data.shein_spft) {
                                 value = Math.round(data.shein_spft);
+                            }
+                            else if (r.prefix === 'bestbuy' && data.bestbuy_spft) {
+                                value = Math.round(data.bestbuy_spft);
+                            }
+                            else if (r.prefix === 'tiendamia' && data.tiendamia_spft) {
+                                value = Math.round(data.tiendamia_spft);
+                            } else if (r.prefix === 'tiktok' && data.tiktok_spft) {
+                                value = Math.round(data.tiktok_spft);
+                            }
+                            else if (r.prefix === 'aliexpress' && data.aliexpress_spft) {
+                                value = Math.round(data.aliexpress_spft);
                             }
 
                             if (value !== undefined) {
@@ -2457,7 +2510,17 @@ document.addEventListener('DOMContentLoaded', function() {
                                 value = Math.round(data.walmart_sroi);
                             } else if (r.prefix === 'shein' && data.shein_sroi) {
                                 value = Math.round(data.shein_sroi);
+                            } else if (r.prefix === 'bestbuy' && data.bestbuy_sroi) {
+                                value = Math.round(data.bestbuy_sroi);
+                            } else if (r.prefix === 'tiendamia' && data.tiendamia_sroi) {
+                                value = Math.round(data.tiendamia_sroi);
+                            } else if (r.prefix === 'tiktok' && data.tiktok_sroi) {
+                                value = Math.round(data.tiktok_sroi);
+                            } else if (r.prefix === 'aliexpress' && data.aliexpress_sroi) {
+                                value = Math.round(data.aliexpress_sroi);
                             }
+
+
 
                             if (value !== undefined) {
                                 if (value < 11) {
