@@ -195,7 +195,7 @@
                                             <select id="status-filter" 
                                                     class="form-select" 
                                                     style="width: 130px; height: 38px;">
-                                                <option value="">Status</option>
+                                                <option value="">select status</option>
                                                 <option value="ENABLED">Enabled</option>
                                                 <option value="PAUSED">Paused</option>
                                                 <option value="ARCHIVED">Archived</option>
@@ -204,7 +204,7 @@
                                             <select id="inv-filter" 
                                                     class="form-select" 
                                                     style="width: 130px; height: 38px;">
-                                                <option value="">INV</option>
+                                                <option value="">select inv</option>
                                                 <option value="ALL">All</option>
                                                 <option value="INV_0">0 INV</option>
                                                 <option value="OTHERS">Others</option>
@@ -213,7 +213,7 @@
                                             <select id="nra-filter" 
                                                     class="form-select" 
                                                     style="width: 130px; height: 38px;">
-                                                <option value="">NRA</option>
+                                                <option value="">select NRA</option>
                                                 <option value="ALL">All</option>
                                                 <option value="RA">RA</option>
                                                 <option value="NRA">NRA</option>
@@ -223,11 +223,11 @@
                                             <select id="missingAds-filter" 
                                                     class="form-select" 
                                                     style="width: 150px; height: 38px;">
-                                                <option value="">Missing Ads</option>
+                                                <option value="">select missing</option>
                                                 <option value="Both Running">Both Running</option>
                                                 <option value="KW Missing">KW Missing</option>
                                                 <option value="PT Missing">PT Missing</option>
-                                                <option value="Both Missing">Both Missing</option>
+                                                <option value="Both Missing">Missing</option>
                                             </select>
 
                                             <button id="all-missing-btn" class="btn btn-primary text-black fw-bold" 
@@ -634,6 +634,10 @@
 
                 // ✅ Combined Filter Function
                 function combinedFilter(data) {
+                    const sku = data.sku || '';
+                    const isParent = sku.toUpperCase().includes("PARENT");
+                    if (isParent) return false; // Exclude parent rows
+
                     // 🔹 Global Search
                     let searchVal = ($("#global-search").val() || "").toLowerCase().trim();
                     if (searchVal) {
