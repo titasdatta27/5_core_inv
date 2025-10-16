@@ -57,6 +57,7 @@ class ForecastAnalysisController extends Controller
 
         $shopifyData = ShopifySku::all()->keyBy(fn($item) => $normalizeSku($item->sku));
 
+
         $supplierRows = Supplier::where('type', 'Supplier')->get();
         $supplierMapByParent = [];
         foreach ($supplierRows as $row) {
@@ -133,8 +134,10 @@ class ForecastAnalysisController extends Controller
                 $item->date_apprvl = $forecast->date_apprvl ?? '';
             }
 
+            $readyToShipQty = 0;
             if($readyToShipMap->has($sheetSku)){
-                $item->readyToShipQty = $readyToShipMap->get($sheetSku)->qty ?? 0;
+                $readyToShipQty = $readyToShipMap->get($sheetSku)->qty ?? 0;
+                $item->readyToShipQty = $readyToShipQty;
             }
 
             if ($movementMap->has($sheetSku)) {
@@ -168,10 +171,16 @@ class ForecastAnalysisController extends Controller
                 // Calculate MSL SP (shopify price * effective MSL / 4)
                 $item->{'MSL_SP'} = floor($shopifyb2c_price * $effectiveMsl / 4);
 
-                    if($item->INV == 0){
-                        $item->{'restock_msl'} = round($shopifyb2c_price * $msl);
-                    }
-                
+                $cp = (float)($item->{'CP'} ?? 0);
+                $orderQty = (float)($item->order_given ?? 0);
+                $readyToShipQty = (float)($item->readyToShipQty ?? 0);
+                $transit = (float)($item->transit ?? 0);
+
+                $item->MIP_Value = round($cp * $orderQty, 2);
+                $item->R2S_Value = round($cp * $readyToShipQty, 2);
+                $item->Transit_Value = round($cp * $transit, 2);
+
+
                 
             }
 

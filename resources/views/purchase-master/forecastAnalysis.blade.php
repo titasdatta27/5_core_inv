@@ -46,6 +46,10 @@
         'sub_title' => 'Forecast Analysis',
     ])
 
+    <div class="alert alert-warning mb-3">
+        <strong>Items with 0 Inventory:</strong> <span id="zero_inv_count" class="fw-bold">0</span>
+    </div>
+
     <div class="row">
         <div class="col-12">
             <div class="card shadow-sm">
@@ -135,6 +139,10 @@
                                 Show Transit
                             </button>
 
+                            <button id="show-zero-inv" class="btn btn-sm btn-danger">
+                                Show 0 INV
+                            </button>
+
                             <button id="restock_needed" class="btn btn-sm btn-warning fw-semibold text-dark">
                                 Restock Needed: <span id = "total_restock" class="fw-semibold text-dark">0</span>
                             </button>
@@ -172,9 +180,18 @@
                                  Restock MSL LP: $<span id="total_restock_msl_lp_value" class="fw-semibold text-dark">0</span>
                             </button>
 
-                            {{-- <button id="total_restock_msl_lp" class="btn btn-sm btn-warning fw-semibold text-dark">
-                                 Restock MSL LP: $<span id="restock_msl" class="fw-semibold text-dark">0</span>
-                            </button> --}}
+                           
+                            <button id="total_mip_value" class="btn btn-sm btn-success fw-semibold text-dark">
+                                 MIP Value: $<span id="total_mip_value_display" class="fw-semibold text-dark">0</span>
+                            </button>
+
+                            <button id="total_r2s_value" class="btn btn-sm btn-info fw-semibold text-dark">
+                                 R2S Value: $<span id="total_r2s_value_display" class="fw-semibold text-dark">0</span>
+                            </button>
+
+                            <button id="total_transit_value" class="btn btn-sm btn-secondary fw-semibold text-dark">
+                                 Transit Value: $<span id="total_transit_value_display" class="fw-semibold text-dark">0</span>
+                            </button>
                         </div>
                     </div>
 
@@ -446,6 +463,15 @@
                     }
                 },
                 {
+                    title: "CP",
+                    field: "CP",
+                    accessor: row => row["CP"],
+                    formatter: function(cell) {
+                        const value = cell.getValue() || 0;
+                        return `<span style="display:block; text-align:center; font-weight:bold;">$${value.toLocaleString()}</span>`;
+                    }
+                },
+                {
                     title: "OV L30",
                     field: "L30",
                     accessor: row => row["L30"],
@@ -628,6 +654,41 @@
                         </div>`;
                     }
                 },
+
+                {
+                    title: "MIP Value",
+                    field: "MIP_Value",
+                    accessor: row => row["MIP_Value"] ?? null,
+                    sorter: "number",
+                    headerSort: true,
+                    formatter: function(cell) {
+                        const value = cell.getValue() || 0;
+                        return `<span style="display:block; text-align:center; font-weight:bold;">$${value.toLocaleString()}</span>`;
+                    }
+                },
+
+                {
+                    title: "R2S Value",
+                    field: "R2S_Value",
+                    accessor: row => row["R2S_Value"] ?? null,
+                    sorter: "number",
+                    headerSort: true,
+                    formatter: function(cell) {
+                        const value = cell.getValue() || 0;
+                        return `<span style="display:block; text-align:center; font-weight:bold;">$${value.toLocaleString()}</span>`;
+                    }
+                },
+                {
+                    title: "Transit Value",
+                    field: "Transit_Value",
+                    accessor: row => row["Transit_Value"] ?? null,
+                    sorter: "number",
+                    headerSort: true,
+                    formatter: function(cell) {
+                        const value = cell.getValue() || 0;
+                        return `<span style="display:block; text-align:center; font-weight:bold;">$${value.toLocaleString()}</span>`;
+                    }
+                },
                 {
                     title: "2 ORDER",
                     field: "to_order",
@@ -764,6 +825,45 @@
                     totalLpValueElement.textContent = roundedTotal.toLocaleString('en-US');
                 }
 
+                // Calculate and update total MIP Value
+                const totalMipValue = response.data.reduce((sum, item) => {
+                    if (!item.is_parent) {
+                        return sum + (parseFloat(item.MIP_Value) || 0);
+                    }
+                    return sum;
+                }, 0);
+                const totalMipValueElement = document.getElementById('total_mip_value_display');
+                if (totalMipValueElement) {
+                    const roundedTotal = Math.round(totalMipValue);
+                    totalMipValueElement.textContent = roundedTotal.toLocaleString('en-US');
+                }
+
+                // Calculate and update total R2S Value
+                const totalR2sValue = response.data.reduce((sum, item) => {
+                    if (!item.is_parent) {
+                        return sum + (parseFloat(item.R2S_Value) || 0);
+                    }
+                    return sum;
+                }, 0);
+                const totalR2sValueElement = document.getElementById('total_r2s_value_display');
+                if (totalR2sValueElement) {
+                    const roundedTotal = Math.round(totalR2sValue);
+                    totalR2sValueElement.textContent = roundedTotal.toLocaleString('en-US');
+                }
+
+                // Calculate and update total Transit Value
+                const totalTransitValue = response.data.reduce((sum, item) => {
+                    if (!item.is_parent) {
+                        return sum + (parseFloat(item.Transit_Value) || 0);
+                    }
+                    return sum;
+                }, 0);
+                const totalTransitValueElement = document.getElementById('total_transit_value_display');
+                if (totalTransitValueElement) {
+                    const roundedTotal = Math.round(totalTransitValue);
+                    totalTransitValueElement.textContent = roundedTotal.toLocaleString('en-US');
+                }
+
                 // Calculate and update total Restock MSL
                 const totalRestockMsl = response.data.reduce((sum, item) => {
                     if (!item.is_parent && (parseFloat(item.INV) || 0) === 0) {
@@ -892,6 +992,7 @@
         let hideNRYes = true;
         let currentRowTypeFilter = 'all';
         let currentRestockFilter = false;
+        let currentZeroInvFilter = false;
 
         function setCombinedFilters() {
             const allData = table.getData();
@@ -905,6 +1006,7 @@
                 return !item.is_parent && inv === 0;
             }).length;
             document.getElementById('total_restock').textContent = restockCount;
+            document.getElementById('zero_inv_count').textContent = restockCount;
 
             // Group all children by parent
             allData.forEach(item => {
@@ -1094,6 +1196,40 @@
                 if (totalRestockMslLpElement) {
                     const wholeNumber = Math.round(totalRestockMslLp);
                     totalRestockMslLpElement.textContent = wholeNumber.toLocaleString('en-US');
+                }
+
+                // Calculate total MIP_Value, R2S_Value, Transit_Value for visible rows
+                let totalMipValue = 0;
+                let totalR2sValue = 0;
+                let totalTransitValue = 0;
+                visibleRows.forEach(row => {
+                    const data = row.getData();
+                    if (!data.is_parent) {
+                        totalMipValue += parseFloat(data.MIP_Value) || 0;
+                        totalR2sValue += parseFloat(data.R2S_Value) || 0;
+                        totalTransitValue += parseFloat(data.Transit_Value) || 0;
+                    }
+                });
+
+                // Update total MIP_Value display
+                const totalMipValueElement = document.getElementById('total_mip_value_display');
+                if (totalMipValueElement) {
+                    const wholeNumber = Math.round(totalMipValue);
+                    totalMipValueElement.textContent = wholeNumber.toLocaleString('en-US');
+                }
+
+                // Update total R2S_Value display
+                const totalR2sValueElement = document.getElementById('total_r2s_value_display');
+                if (totalR2sValueElement) {
+                    const wholeNumber = Math.round(totalR2sValue);
+                    totalR2sValueElement.textContent = wholeNumber.toLocaleString('en-US');
+                }
+
+                // Update total Transit_Value display
+                const totalTransitValueElement = document.getElementById('total_transit_value_display');
+                if (totalTransitValueElement) {
+                    const wholeNumber = Math.round(totalTransitValue);
+                    totalTransitValueElement.textContent = wholeNumber.toLocaleString('en-US');
                 }
             }, 50);
 
