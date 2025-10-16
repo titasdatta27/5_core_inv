@@ -167,6 +167,11 @@ class ForecastAnalysisController extends Controller
                 
                 // Calculate MSL SP (shopify price * effective MSL / 4)
                 $item->{'MSL_SP'} = floor($shopifyb2c_price * $effectiveMsl / 4);
+
+                    if($item->INV == 0){
+                        $item->{'restock_msl'} = round($shopifyb2c_price * $msl);
+                    }
+                
                 
             }
 
