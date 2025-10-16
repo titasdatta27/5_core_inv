@@ -304,8 +304,8 @@ class PricingMasterViewsController extends Controller
         $tiendamiaDataView = TiendamiaDataView::whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
         $aliexpressDataView = AliexpressDataView::whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
         $aliexpressLookup = AliExpressSheetData::whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
-
         $walmartProductSheetLookup = DB::table('walmart_product_sheet')->whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
+        $dobaProductSheetLookup = DB::table('doba_sheet_data')->whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
 
         // Fetch LMPA and LMP data
         $lmpaLookup = collect();
@@ -383,6 +383,7 @@ class PricingMasterViewsController extends Controller
             $aliexpress = $aliexpressLookup[$sku] ?? null;
 
             $walmartSheet = $walmartProductSheetLookup[$sku] ?? null;
+            $dobaSheet = $dobaProductSheetLookup[$sku] ?? null;
 
             // Get Shopify data for L30 and INV
             $shopifyItem = $shopifyData[trim(strtoupper($sku))] ?? null;
@@ -399,7 +400,8 @@ class PricingMasterViewsController extends Controller
                 ($reverb ? ($reverb->views ?? 0) : 0) +
                 ($temuMetric ? ($temuMetric->product_clicks_l30 ?? 0) : 0) +
                 ($tiktok ? ($tiktok->views ?? 0) : 0) +
-                ($walmartSheet ? ($walmartSheet->views ?? 0) : 0);
+                ($walmartSheet ? ($walmartSheet->views ?? 0) : 0) +
+                ($dobaSheet ? ($dobaSheet->views ?? 0) : 0);
 
             // Calculate total L30 and L60 counts
             $total_l30_count = ($tiktok ? ($tiktok->shopify_tiktokl30 ?? 0) : 0) +
@@ -442,7 +444,8 @@ class PricingMasterViewsController extends Controller
                 ['data' => $walmart,    'l30' => 'l30',                    'views' => 'views'],
                 ['data' => $tiktok,     'l30' => 'shopify_tiktokl30',                    'views' => 'views'],
                 ['data' => $shein,      'l30' => 'shopify_sheinl30',       'views' => 'views_clicks'],
-                ['data' => $walmartSheet, 'l30' => 'l30', 'views' => 'views'],
+                ['data' => $walmart, 'l30' => 'l30', 'views' => $walmartSheet ? 'views' : null],
+                ['data' => $doba, 'l30' => 'l30', 'views' => $dobaSheet ? 'views' : null],
             ];
 
             $l30_sum = 0;        // Sum of L30 for channels where L30 > 0 and views > 0
@@ -499,7 +502,8 @@ class PricingMasterViewsController extends Controller
                 (($temuMetric && ($temuMetric->{'quantity_purchased_l30'} ?? 0) > 0 && ($temuMetric->{'product_clicks_l30'} ?? 0) > 0) ? ($temuMetric->{'product_clicks_l30'} ?? 0) : 0) +
                 (($tiktok && ($tiktok->shopify_tiktokl30 ?? 0) > 0 && ($tiktok->views ?? 0) > 0) ? ($tiktok->views ?? 0) : 0) +
                 (($shein && ($shein->shopify_sheinl30 ?? 0) > 0 && ($shein->views_clicks ?? 0) > 0) ? ($shein->views_clicks ?? 0) : 0)+
-                (($walmartSheet && ($walmartSheet->l30 ?? 0) > 0 && ($walmartSheet->views ?? 0) > 0) ? ($walmartSheet->views ?? 0) : 0);
+                (($walmartSheet && ($walmart->l30 ?? 0) > 0 && ($walmartSheet->views ?? 0) > 0) ? ($walmartSheet->views ?? 0) : 0)+
+                (($dobaSheet && ($doba->l30 ?? 0) > 0 && ($dobaSheet->views ?? 0) > 0) ? ($dobaSheet->views ?? 0) : 0);
 
             $avgCvr = $views_sum > 0
                 ? number_format(($l30_sum / $views_sum) * 100, 1) . ' %'
@@ -564,6 +568,7 @@ class PricingMasterViewsController extends Controller
                 'doba_price' => $doba ? ($doba->doba_price ?? 0) : 0,
                 'doba_l30' => $doba ? ($doba->l30 ?? 0) : 0,
                 'doba_l60' => $doba ? ($doba->l60 ?? 0) : 0,
+                'doba_views' => $dobaSheet ? ($dobaSheet->views ?? 0) : 0,
                 'doba_pft' => $doba && ($doba->doba_price ?? 0) > 0 ? (($doba->doba_price * 0.95 - $lp - $ship) / $doba->doba_price) : 0,
                 'doba_roi' => $doba && $lp > 0 && ($doba->doba_price ?? 0) > 0 ? (($doba->doba_price * 0.95 - $lp - $ship) / $lp) : 0,
                 'doba_buyer_link' => isset($dobaListingData[$sku]) ? ($dobaListingData[$sku]->value['buyer_link'] ?? null) : null,
@@ -697,7 +702,8 @@ class PricingMasterViewsController extends Controller
                     ($shein && $shein->views_clicks && $shein->shopify_sheinl30 ? ($inv * 20) : 0) +
                     ($reverb && $reverb->views && $reverb->r_l30 ? ($inv * 20) : 0) +
                     ($temuMetric && ($temuMetric->product_clicks_l30 ?? 0) && ($temuMetric->quantity_purchased_l30 ?? 0) ? ($inv * 20) : 0) +
-                    ($walmartSheet && ($walmartSheet->l30 ?? 0) > 0 && ($walmartSheet->views ?? 0) > 0 ? ($walmartSheet->views ?? 0) : 0)
+                    ($walmartSheet && ($walmart->l30 ?? 0) > 0 && ($walmartSheet->views ?? 0) > 0 ? ($walmartSheet->views ?? 0) : 0) +
+                    ($dobaSheet && ($doba->l30 ?? 0) > 0 && ($dobaSheet->views ?? 0) > 0 ? ($dobaSheet->views ?? 0) : 0)
                 ),
                 // DataView values
                 'amz_sprice' => isset($amazonDataView[$sku]) ? (is_array($amazonDataView[$sku]->value) ? ($amazonDataView[$sku]->value['SPRICE'] ?? null) : (json_decode($amazonDataView[$sku]->value, true)['SPRICE'] ?? null)) : null,

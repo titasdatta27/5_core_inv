@@ -140,28 +140,28 @@
                             </button>
 
                             <button id="total_msl_c" class="btn btn-sm btn-success fw-semibold text-dark">
-                                Total MSL_C: $<span id="total_msl_c_value" class="fw-semibold text-dark">0.00</span>
+                                 MSL_LP: $<span id="total_msl_c_value" class="fw-semibold text-dark">0.00</span>
                             </button>
 
                             <button id="total_msl_sp" class="btn btn-sm btn-primary fw-semibold text-dark">
-                                Total MSL_SP: $<span id="total_msl_sp_value" class="fw-semibold text-dark">0</span>
+                                 MSL_SP: $<span id="total_msl_sp_value" class="fw-semibold text-dark">0</span>
                             </button>
 
 
                             <button id="total_inv_value" class="btn btn-sm btn-info fw-semibold text-dark">
-                                Total INV Value: $<span id="total_inv_value_display" class="fw-semibold text-dark">0</span>
+                                 INV Value: $<span id="total_inv_value_display" class="fw-semibold text-dark">0</span>
                             </button>
 
                             <button id="total_lp_value" class="btn btn-sm btn-warning fw-semibold text-dark">
-                                Total LP Value: $<span id="total_lp_value_display" class="fw-semibold text-dark">0</span>
+                                 LP Value: $<span id="total_lp_value_display" class="fw-semibold text-dark">0</span>
                             </button>
 
                             <button id="total_restock_msl" class="btn btn-sm btn-dark fw-semibold text-white">
-                                Total Restock MSL: $<span id="total_restock_msl_value" class="fw-semibold text-white">0.00</span>
+                                 Restock MSL: $<span id="total_restock_msl_value" class="fw-semibold text-white">0.00</span>
                             </button>
 
                             <button id="total_minimal_msl" class="btn btn-sm btn-secondary fw-semibold text-white">
-                                Minimal MSL: $<span id="total_minimal_msl_value" class="fw-semibold text-white">0</span>
+                                Missing Sales: $<span id="total_minimal_msl_value" class="fw-semibold text-white">0</span>
                             </button>
 
                             <button id="sum_restock_shopify_price" class="btn btn-sm btn-info fw-semibold text-dark">
@@ -169,8 +169,12 @@
                             </button>
 
                             <button id="total_restock_msl_lp" class="btn btn-sm btn-warning fw-semibold text-dark">
-                                Total Restock MSL LP: $<span id="total_restock_msl_lp_value" class="fw-semibold text-dark">0</span>
+                                 Restock MSL LP: $<span id="total_restock_msl_lp_value" class="fw-semibold text-dark">0</span>
                             </button>
+
+                            {{-- <button id="total_restock_msl_lp" class="btn btn-sm btn-warning fw-semibold text-dark">
+                                 Restock MSL LP: $<span id="restock_msl" class="fw-semibold text-dark">0</span>
+                            </button> --}}
                         </div>
                     </div>
 
@@ -779,7 +783,7 @@
                 const restockCount = restockItems.length;
                 const totalShopifyPrice = restockItems.reduce((sum, item) => sum + (parseFloat(item.shopifyb2c_price) || 0), 0);
                 const averageShopifyPrice = restockCount > 0 ? totalShopifyPrice / restockCount : 0;
-                const totalMinimalMsl = restockCount * (averageShopifyPrice / 4);
+                const totalMinimalMsl = restockItems.reduce((sum, item) => sum + (parseFloat(item.MSL_SP) || 0), 0);
                 const totalMinimalMslElement = document.getElementById('total_minimal_msl_value');
                 if (totalMinimalMslElement) {
                     const wholeNumber = Math.round(totalMinimalMsl);
@@ -1052,7 +1056,10 @@
                     return sum + (parseFloat(data.shopifyb2c_price) || 0);
                 }, 0);
                 const visibleAverageShopifyPrice = visibleRestockCount > 0 ? visibleTotalShopifyPrice / visibleRestockCount : 0;
-                const totalMinimalMsl = visibleRestockCount * (visibleAverageShopifyPrice / 4);
+                const totalMinimalMsl = visibleRestockItems.reduce((sum, row) => {
+                    const data = row.getData();
+                    return sum + (parseFloat(data.MSL_SP) || 0);
+                }, 0);
 
                 // Update total Minimal MSL display
                 const totalMinimalMslElement = document.getElementById('total_minimal_msl_value');

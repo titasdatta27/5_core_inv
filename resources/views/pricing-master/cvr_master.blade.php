@@ -2502,6 +2502,7 @@
                                 : r.prefix === 'tiktok' ? (data.tiktok_views ?? "-")
                                 : r.prefix === 'aliexpress' ? (data.aliexpress_views ?? "-")
                                 : r.prefix === 'walmart' ? (data.walmart_views ?? "-")
+                                : r.prefix === 'doba' ? (data.doba_views ?? "-")
                                 : "-" }
                         </div>
                     </td>
@@ -2531,6 +2532,9 @@
                                 else if (r.prefix === 'walmart' && cvr) {
                                     return `<span style="color: ${cvr.color}">${Math.round(cvr.value)}%</span>`;
                                 }
+                                else if (r.prefix === 'doba' && cvr) {
+                                    return `<span style="color: ${cvr.color}">${Math.round(cvr.value)}%</span>`;
+                                }
 
                                 return "N/A";
                             })()} 
@@ -2549,7 +2553,8 @@
                             r.prefix === 'tiendamia' ? Math.round(data.tiendamia_req_view) ?? "-" :
                             r.prefix === 'tiktok' ? Math.round(data.tiktok_req_view) ?? "-" :
                             r.prefix === 'aliexpress' ? Math.round(data.aliexpress_req_view) ?? "-" :
-                            r.prefix === 'walmart' ? Math.round(data.walmart_req_view) ?? "-" : "-"}
+                            r.prefix === 'walmart' ? Math.round(data.walmart_req_view) ?? "-" :
+                            r.prefix === 'doba' ? Math.round(data.doba_req_view) ?? "-" : "-"}
                         </div>
                     </td>
 
