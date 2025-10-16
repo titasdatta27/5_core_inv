@@ -16,6 +16,7 @@ class AliExpressSheetData extends Model
         'price',
         'aliexpress_l30',
         'aliexpress_l60',
+        'views',
         'created_at',
         'updated_at'
     ];

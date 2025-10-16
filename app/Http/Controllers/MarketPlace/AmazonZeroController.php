@@ -552,14 +552,16 @@ class AmazonZeroController extends Controller
                 $status = json_decode($status, true);
             }
 
-            $listed = $status['listed'] ?? (floatval($inv) > 0 ? 'Pending' : 'Listed');
+            // $listed = $status['listed'] ?? (floatval($inv) > 0 ? 'Pending' : 'Listed');
+            $listed = $status['listed'] ?? null;
 
             // --- Amazon Live Status ---
             $dataView = $amazonDataViews[$sku]->value ?? null;
             if (is_string($dataView)) {
                 $dataView = json_decode($dataView, true);
             }
-            $live = ($dataView['Live'] ?? false) === true ? 'Live' : null;
+            // $live = ($dataView['Live'] ?? false) === true ? 'Live' : null;
+            $live = (!empty($dataView['Live']) && $dataView['Live'] === true) ? 'Live' : null;
 
             // --- Listed count ---
             if ($listed === 'Listed') {
@@ -579,11 +581,11 @@ class AmazonZeroController extends Controller
             $views = null;
 
             if ($metricRecord) {
-                // ✅ Direct field (if column exists)
+                // Direct field (if column exists)
                 if (!empty($metricRecord->sessions_l30)) {
                     $views = $metricRecord->sessions_l30;
                 }
-                // ✅ Or inside JSON column `value`
+                // Or inside JSON column `value`
                 elseif (!empty($metricRecord->value)) {
                     $metricData = json_decode($metricRecord->value, true);
                     $views = $metricData['sessions_l30'] ?? null;
@@ -595,80 +597,13 @@ class AmazonZeroController extends Controller
             }
         }
 
-        $livePending = $listedCount - $zeroInvOfListed - $liveCount;
-        // dd($livePending,$zeroViewCount);
+        $livePending = $listedCount - $liveCount;
 
         return [
             'live_pending' => $livePending,
             'zero_view' => $zeroViewCount,
         ];
     }
-
-
-
-    // public function getLivePendingAndZeroViewCounts()
-    // {
-    //     $productMasters = ProductMaster::whereNull('deleted_at')->get();
-    //     $skus = $productMasters->pluck('sku')->unique()->toArray();
-
-    //     $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy('sku');
-    //     $amazonDataViews = AmazonListingStatus::whereIn('sku', $skus)->get()->keyBy('sku');
-    //     $amazonDatasheets = AmazonDatasheet::whereIn('sku', $skus)->get()->keyBy('sku');
-
-    //     $listedCount = 0;
-    //     $zeroInvOfListed = 0;
-    //     $liveCount = 0;
-    //     $zeroViewCount = 0;
-    //     $zeroViewNRCount = 0;
-
-    //     foreach ($productMasters as $item) {
-    //         $sku = trim($item->sku);
-    //         $inv = $shopifyData[$sku]->inv ?? 0;
-    //         $isParent = stripos($sku, 'PARENT') !== false;
-    //         if ($isParent) continue;
-
-    //         $status = $amazonDataViews[$sku]->value ?? null;
-    //         if (is_string($status)) {
-    //             $status = json_decode($status, true);
-    //         }
-    //         $nr = $status['NR'] ?? (floatval($inv) > 0 ? 'REQ' : 'NR');
-    //         $listed = $status['listed'] ?? (floatval($inv) > 0 ? 'Pending' : 'Listed');
-    //         $live = $status['live'] ?? null;
-
-    //         // Listed count (for live pending)
-    //         if ($listed === 'Listed') {
-    //             $listedCount++;
-    //             if (floatval($inv) <= 0) {
-    //                 $zeroInvOfListed++;
-    //             }
-    //         }
-
-    //         // Live count
-    //         if ($live === 'Live') {
-    //             $liveCount++;
-    //         }
-
-    //         // Zero view: INV > 0, Sess30 == 0
-    //         $sess30 = $amazonDatasheets[$sku]->sessions_l30 ?? null;
-    //         if (floatval($inv) > 0 && $sess30 !== null && intval($sess30) === 0) {
-    //             $zeroViewCount++;
-    //             if ($nr === 'NR') {
-    //                 $zeroViewNRCount++;
-    //             }
-    //         }
-    //     }
-
-    //     // dd($listedCount, $zeroInvOfListed, $liveCount);
-    //     // live pending = listed - 0-inv of listed - live
-    //     $livePending = $listedCount - $zeroInvOfListed - $liveCount;
-    //     $zeroViewFinal = $zeroViewCount - $zeroViewNRCount;
-    //     dd($livePending,$zeroViewFinal);
-
-    //     return [
-    //         'live_pending' => $livePending,
-    //         'zero_view' => $zeroViewFinal,
-    //     ];
-    // }
 
 
 
