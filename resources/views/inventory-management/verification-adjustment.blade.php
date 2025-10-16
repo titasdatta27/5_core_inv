@@ -4037,13 +4037,17 @@
             // Initialize search functionality
             function initSearch() {
                 $('#search-input').on('keyup', function() {
-                    const searchTerm = $(this).val().toLowerCase();
+                    // const searchTerm = $(this).val().toLowerCase();
+                    const rawSearch = $(this).val();
+                    const searchTerm = rawSearch.replace(/\s+/g, '').toLowerCase();
 
                     if (searchTerm) {
                         filteredData = tableData.filter(item => {
                             return Object.values(item).some(val => {
                                 if (typeof val === 'boolean' || val === null) return false;
-                                return val.toString().toLowerCase().includes(searchTerm);
+                                // return val.toString().toLowerCase().includes(searchTerm);
+                                const normalizedVal = val.toString().replace(/\s+/g, '').toLowerCase();
+                                return normalizedVal.includes(searchTerm);
                             });
                         });
                     } else {
@@ -4357,12 +4361,23 @@
                     // Get unique values for the field
                     const uniqueValues = [...new Set(tableData.map(item => String(item[field] || '')))];
 
+                    const normalizedSearch = searchTerm.replace(/\s+/g, '').toLowerCase();
+
                     // Filter based on search term if provided
-                    const filteredValues = searchTerm.length >= minSearchLength ?
-                        uniqueValues.filter(value =>
-                            value.toLowerCase().includes(searchTerm.toLowerCase())
-                        ) :
-                        uniqueValues;
+                    // const filteredValues = searchTerm.length >= minSearchLength ?
+                    //     uniqueValues.filter(value =>
+                    //         // value.toLowerCase().includes(searchTerm.toLowerCase())
+                    //         const normalizedValue = value.replace(/\s+/g, '').toLowerCase();
+                    //         return normalizedValue.includes(normalizedSearch);
+                    //     ) :
+                    //     uniqueValues;
+                    const filteredValues =
+                        searchTerm.length >= minSearchLength
+                            ? uniqueValues.filter(value => {
+                                const normalizedValue = value.replace(/\s+/g, '').toLowerCase();
+                                return normalizedValue.includes(normalizedSearch);
+                            })
+                            : uniqueValues;
 
                     if (filteredValues.length) {
                         filteredValues.sort().forEach(value => {
@@ -4384,9 +4399,16 @@
                     if (value === '') {
                         filteredData = [...tableData];
                     } else {
-                        filteredData = tableData.filter(item =>
-                            String(item[column] || '').toLowerCase() === value.toLowerCase()
-                        );
+                        const normalizedValue = value.replace(/\s+/g, '').toLowerCase();
+                        filteredData = tableData.filter(item => {
+                            const itemValue = String(item[column] || '').replace(/\s+/g, '').toLowerCase();
+                            return itemValue.includes(normalizedValue);
+                        });
+                        // filteredData = tableData.filter(item =>
+                        // const itemValue = String(item[column] || '').replace(/\s+/g, '').toLowerCase();
+                        // return itemValue.includes(normalizedValue);
+                        //     // String(item[column] || '').toLowerCase() === value.toLowerCase()
+                        // );
                     }
 
                     currentPage = 1;
