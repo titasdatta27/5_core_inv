@@ -1999,6 +1999,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
         Route::get('/google/shopping/under/utilize', 'googleUnderUtilizeView')->name('google.shopping.under.utilize');
         Route::get('/google/shopping/running', 'googleShoppingAdsRunning')->name('google.shopping.running');
         Route::get('/google/shopping/data', 'getGoogleShoppingAdsData');
+        Route::get('/google-search/shopping/data', 'getGoogleSearchShoppingAdsData');
     });
 
     Route::controller(FbaDataController::class)->group(function () {
