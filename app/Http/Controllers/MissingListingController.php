@@ -85,7 +85,12 @@ class MissingListingController extends Controller
     // if ($latestRecord && $latestRecord->updated_at > now()->subDay()) {
    if ($latestRecord) {
     // Return cached data from DB
-    $data = ProductStockMapping::all()->keyBy('sku');
+    // $data = ProductStockMapping::all()->keyBy('sku')->unique()->groupby('sku');
+    $data = ProductStockMapping::all()
+    ->groupBy('sku')
+    ->map(function ($items) {
+        return $items->first(); // or customize how you want to handle duplicates
+    });
 
 $skusforNR = array_values(array_filter(array_map(function ($item) {
     return $item['sku'] ?? null;
@@ -162,7 +167,7 @@ protected function fetchFreshData(){
     $delete=ProductStockMapping::truncate();
     $shopifyInventoryData = (new ShopifyApiService())->getinventory();        
     $parentskuList=$this->filterParentSKU($shopifyInventoryData);
-    // $amazonInventoryData = (new AmazonSpApiService())->getinventory();
+    $amazonInventoryData = (new AmazonSpApiService())->getinventory();
     $walmartInventory=(new WalmartApiService())->getinventory();
     $reverbInventory=(new ReverbApiService())->getInventory();
     $sheinInventory = (new SheinApiService())->listAllProducts();

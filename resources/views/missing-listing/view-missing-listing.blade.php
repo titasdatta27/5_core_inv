@@ -1823,8 +1823,11 @@
                 const checked=item.notrequired==1?'checked':'';
                 const image= item.image?`<img src="${item.image}" width="40" height="40" class="product-thumb" style="cursor: pointer;visibility: visible !important;">`:"";
                 const parent=item.parent && item.parent !== null ? item.parent : '-';                
+                if(item.SKU!=''){
+                    
+                }
                     const row = `
-    <tr>
+    <tr ${item.SKU.toLowerCase().includes("parent")?'style="display:none"':''}>
         <td><input type="checkbox" class="checkboxnotrequired" value="${item.SKU}___${item.sku_dbid}" ${checked}/></td>
         <td>${image}</td>
         <td>${parent}</td>

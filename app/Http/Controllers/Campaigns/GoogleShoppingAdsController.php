@@ -7,6 +7,7 @@ use App\Models\ProductMaster;
 use App\Models\ShopifySku;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class GoogleShoppingAdsController extends Controller
 {
@@ -56,6 +57,7 @@ class GoogleShoppingAdsController extends Controller
                 'metrics_clicks',
                 'metrics_impressions'
             )
+            ->whereIn('range_type', ['L1', 'L7', 'L30']) // Only get ranges we need
             ->get();
 
         $ranges = ['L1', 'L7', 'L30'];
@@ -70,11 +72,15 @@ class GoogleShoppingAdsController extends Controller
 
             $matchedCampaign = $googleCampaigns->first(function ($c) use ($sku) {
                 $campaign = strtoupper(trim($c->campaign_name));
+                $skuTrimmed = strtoupper(trim($sku));
+                
+                $contains = strpos($campaign, $skuTrimmed) !== false;
+                
                 $parts = array_map('trim', explode(',', $campaign));
-                return in_array($sku, $parts);
+                $exactMatch = in_array($skuTrimmed, $parts);
+                
+                return ($contains || $exactMatch) && $c->campaign_status === 'ENABLED';
             });
-
-            if (!$matchedCampaign) continue;
 
             $row = [];
             $row['parent'] = $parent;
@@ -90,8 +96,14 @@ class GoogleShoppingAdsController extends Controller
             foreach ($ranges as $range) {
                 $campaignRange = $googleCampaigns->first(function ($c) use ($sku, $range) {
                     $campaign = strtoupper(trim($c->campaign_name));
+                    $skuTrimmed = strtoupper(trim($sku));
+                    
+                    $contains = strpos($campaign, $skuTrimmed) !== false;
+                    
                     $parts = array_map('trim', explode(',', $campaign));
-                    return in_array($sku, $parts) && $c->range_type === $range;
+                    $exactMatch = in_array($skuTrimmed, $parts);
+                    
+                    return ($contains || $exactMatch) && $c->range_type === $range && $c->campaign_status === 'ENABLED';
                 });
 
 
@@ -104,8 +116,11 @@ class GoogleShoppingAdsController extends Controller
                 $row["cpc_$range"] = $row["clicks_$range"] ? $row["spend_$range"] / $row["clicks_$range"] : 0;
             }
 
+            Log::info('Row Data:', ['budget' => $row['campaignBudgetAmount'], 'spend' => $row['spend_L30'], 'clicks' => $row['clicks_L30'], 'cpc' => $row['cpc_L30'], 'impressions' => $row['impressions_L30'], 'campaign' => $row['campaignName']]);
 
-            $result[] = (object) $row;
+            if($row['campaignName'] != '') {
+                $result[] = (object) $row;
+            }
 
         }
         

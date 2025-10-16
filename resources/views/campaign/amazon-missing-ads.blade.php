@@ -227,7 +227,7 @@
                                                 <option value="Both Running">Both Running</option>
                                                 <option value="KW Missing">KW Missing</option>
                                                 <option value="PT Missing">PT Missing</option>
-                                                <option value="Both Missing">Missing</option>
+                                                <option value="Both Missing">KW & PT Missing</option>
                                             </select>
 
                                             <button id="all-missing-btn" class="btn btn-primary text-black fw-bold" 
@@ -241,10 +241,17 @@
                                     <!-- Right side - Stats Boxes -->
                                     <div class="d-flex flex-wrap gap-3">
                                         <div class="stats-box">
-                                            <div class="stats-label">Total SKUs</div>
+                                            <div class="stats-label">Total SKU</div>
                                             <div id="total-campaigns" class="stats-value primary">0</div>
                                         </div>
-                                        
+                                        <div class="stats-box">
+                                            <div class="stats-label">Total RA</div>
+                                            <div id="total-ra" class="stats-value success">0</div>
+                                        </div>
+                                        <div class="stats-box">
+                                            <div class="stats-label">Total NRA</div>
+                                            <div id="total-nra" class="stats-value danger">0</div>
+                                        </div>
                                         <div class="stats-box">
                                             <div class="stats-label">Kw Missing <br/> PT Missing</div>
                                             <div id="both-missing" class="stats-value danger">0</div>
@@ -270,10 +277,6 @@
                                         <div class="stats-box">
                                             <div class="stats-label">Both Ads Running</div>
                                             <div id="both-running" class="stats-value success">0</div>
-                                        </div>
-                                        <div class="stats-box">
-                                            <div class="stats-label">Total NRA</div>
-                                            <div id="total-nra" class="stats-value danger">0</div>
                                         </div>
                                     </div>
                                 </div>
@@ -710,6 +713,7 @@
                     let ptRunning = 0;
                     let totalMissingAds = 0;
                     let totalNRA = 0;
+                    let totalRA = 0;
 
                     visibleData.forEach(row => {
                         let kw = row.kw_campaign_name || "";
@@ -739,6 +743,11 @@
                         if(row.NRA && row.NRA.trim() === "NRA"){
                             totalNRA++;
                         }
+
+                        // Total RA Count
+                        if(!row.NRA || row.NRA.trim() !== "NRA"){
+                            totalRA++;
+                        }
                     });
 
                     // Update HTML
@@ -754,6 +763,7 @@
                     $("#pt-running").text(ptRunning);
 
                     $("#total-nra").text(totalNRA);
+                    $("#total-ra").text(totalRA);
 
                     // Update All Missing Button Text
                     $("#all-missing-btn").on("click", function() {
@@ -765,11 +775,14 @@
                         
                         // Custom filter to show only rows with missing ads
                         table.setFilter(function(data) {
+                            const sku = data.sku || '';
+                            const isParent = sku.toUpperCase().includes("PARENT");
+                            
                             let kw = data.kw_campaign_name || "";
                             let pt = data.pt_campaign_name || "";
                             let nra = (data.NRA || "").trim();
                             
-                            return nra !== "NRA" && (!kw || !pt);
+                            return !isParent && nra !== "NRA" && (!kw || !pt);
                         });
                         
                         // Update stats

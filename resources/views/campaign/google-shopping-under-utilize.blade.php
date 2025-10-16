@@ -323,6 +323,10 @@
                         field: "campaignName"
                     },
                     {
+                        title: "STATUS",
+                        field: "status"
+                    },
+                    {
                         title: "BGT",
                         field: "campaignBudgetAmount",
                         hozAlign: "right",
