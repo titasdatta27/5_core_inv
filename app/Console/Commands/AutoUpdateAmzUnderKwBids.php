@@ -56,6 +56,8 @@ class AutoUpdateAmzUnderKwBids extends Command
 
         $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy('sku');
 
+        $nrValues = AmazonDataView::whereIn('sku', $skus)->pluck('value', 'sku');
+
         $amazonSpCampaignReportsL7 = AmazonSpCampaignReport::where('ad_type', 'SPONSORED_PRODUCTS')
             ->where('report_date_range', 'L7')
             ->where(function ($q) use ($skus) {
@@ -106,6 +108,17 @@ class AutoUpdateAmzUnderKwBids extends Command
             $row['l1_spend'] = $matchedCampaignL1->spend ?? 0;
             $row['l1_cpc'] = $matchedCampaignL1->costPerClick ?? 0;
 
+            $row['NRA'] = '';
+            if (isset($nrValues[$pm->sku])) {
+                $raw = $nrValues[$pm->sku];
+                if (!is_array($raw)) {
+                    $raw = json_decode($raw, true);
+                }
+                if (is_array($raw)) {
+                    $row['NRA'] = $raw['NRA'] ?? null;
+                }
+            }
+
             $l1_cpc = floatval($row['l1_cpc']);
             $l7_cpc = floatval($row['l7_cpc']);
             if ($l1_cpc > $l7_cpc) {
@@ -116,12 +129,10 @@ class AutoUpdateAmzUnderKwBids extends Command
 
             $budget = floatval($row['campaignBudgetAmount']);
             $l7_spend = floatval($row['l7_spend']);
-            $l1_spend = floatval($row['l1_spend']);
 
             $ub7 = $budget > 0 ? ($l7_spend / ($budget * 7)) * 100 : 0;
-            // $ub1 = $budget > 0 ? ($l1_spend / $budget) * 100 : 0;
 
-            if ($row['INV'] > 0 && $ub7 < 70) {
+            if ($row['INV'] > 0 && $row['NRA'] !== 'NRA' && $ub7 < 70) {
                 $result[] = (object) $row;
             }
         }
