@@ -176,9 +176,9 @@
                                 Sum Restock Shopify Price: $<span id="sum_restock_shopify_price_value" class="fw-semibold text-dark">0</span>
                             </button>
 
-                            <button id="total_restock_msl_lp" class="btn btn-sm btn-warning fw-semibold text-dark">
+                            {{-- <button id="total_restock_msl_lp" class="btn btn-sm btn-warning fw-semibold text-dark">
                                  Restock MSL LP: $<span id="total_restock_msl_lp_value" class="fw-semibold text-dark">0</span>
-                            </button>
+                            </button> --}}
 
                             <button id="total_mip_value" class="btn btn-sm btn-success fw-semibold text-dark">
                                  MIP Value: $<span id="total_mip_value_display" class="fw-semibold text-dark">0</span>
