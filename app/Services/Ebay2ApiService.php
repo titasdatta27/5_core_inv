@@ -95,7 +95,7 @@ class Ebay2ApiService
         
             ProductStockMapping::updateOrCreate(
                 ['sku' => $sku],
-                ['inventory_ebay1'=>$quantity,]
+                ['inventory_ebay2'=>$quantity,]
             );
         }
         return $listingData;
