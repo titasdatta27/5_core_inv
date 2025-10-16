@@ -605,6 +605,10 @@
                         e.target.style.backgroundColor = "#dc3545";
                         e.target.style.color = "#fff";
                     }
+                    else if(field === "NRA" && value === "RA") {
+                        e.target.style.backgroundColor = "#28a745";
+                        e.target.style.color = "#000";
+                    }
 
                     fetch('/update-amazon-nr-nrl-fba', {
                         method: 'POST',
@@ -620,7 +624,7 @@
                     })
                     .then(res => res.json())
                     .then(data => {
-                        console.log(data);
+                        table.replaceData();
                     })
                     .catch(err => console.error(err));
                 }
