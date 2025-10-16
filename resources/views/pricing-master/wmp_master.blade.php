@@ -2124,377 +2124,335 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Marketplace table generator
-        function buildOVL30Table(data) {
-          const rows = [
-                { label: "Amazon", prefix: "amz", logo: "{{ asset('uploads/amazon.png') }}" },
-                { label: "eBay", prefix: "ebay", logo:  "{{ asset('uploads/1.png') }}" },
-                { label: "Doba", prefix: "doba", logo: "{{ asset('uploads/doba.png') }}" },
-                { label: "Macy", prefix: "macy", logo: "{{ asset('uploads/macy.png') }}" },
-                { label: "Reverb", prefix: "reverb", logo: "{{ asset('uploads/reverb.png') }}" },
-                { label: "Temu", prefix: "temu", logo: "{{ asset('uploads/temu.jpeg') }}" },
-                { label: "Walmart", prefix: "walmart", logo: "{{ asset('uploads/walmart.png') }}" },
-                { label: "eBay2", prefix: "ebay2", logo: "{{ asset('uploads/2.png') }}" },
-                { label: "eBay3", prefix: "ebay3", logo: "{{ asset('uploads/3.png') }}" },
-                { label: "Shopify B2C", prefix: "shopifyb2c", logo: "{{ asset('uploads/shopify.png') }}" },
-                { label: "Shein", prefix: "shein", logo: "{{ asset('uploads/Shein.jpg') }}" }
-            ];
+      function buildOVL30Table(data) {
+    const rows = [
+        { label: "Amazon", prefix: "amz", logo: "{{ asset('uploads/amazon.png') }}" },
+        { label: "eBay", prefix: "ebay", logo: "{{ asset('uploads/1.png') }}" },
+        { label: "Doba", prefix: "doba", logo: "{{ asset('uploads/doba.png') }}" },
+        { label: "Macy", prefix: "macy", logo: "{{ asset('uploads/macy.png') }}" },
+        { label: "Reverb", prefix: "reverb", logo: "{{ asset('uploads/reverb.png') }}" },
+        { label: "Temu", prefix: "temu", logo: "{{ asset('uploads/temu.jpeg') }}" },
+        { label: "Walmart", prefix: "walmart", logo: "{{ asset('uploads/walmart.png') }}" },
+        { label: "eBay2", prefix: "ebay2", logo: "{{ asset('uploads/2.png') }}" },
+        { label: "eBay3", prefix: "ebay3", logo: "{{ asset('uploads/3.png') }}" },
+        { label: "Shopify B2C", prefix: "shopifyb2c", logo: "{{ asset('uploads/shopify.png') }}" },
+        { label: "Shein", prefix: "shein", logo: "{{ asset('uploads/Shein.jpg') }}" },
+        { label: "Bestbuy", prefix: "bestbuy", logo: "{{ asset('uploads/bestbuy.jpeg') }}" },
+        { label: "Tiendamia", prefix: "tiendamia", logo: "{{ asset('uploads/ten.jpg') }}" },
+        { label: "TikTok", prefix: "tiktok", logo: "{{ asset('uploads/tiktok.png') }}" },
+        { label: "AliExpress", prefix: "aliexpress", logo: "{{ asset('uploads/aliexpress.png') }}" }
+    ];
 
+    let html = `
+    <div class="table-responsive">
+    <div class="mb-2 text-muted small">
+        <i class="bi bi-info-circle"></i> Default sorting: L30 (Highest to Lowest)
+    </div>
+    <div class="table-responsive" style="max-height: 600px; overflow-y: auto; position: relative;">
+    <table class="table table-sm table-bordered align-middle sortable-table">
+        <thead class="table-light position-sticky" style="top: 0; z-index: 1000;">
+        <tr>
+            <th data-sort="string">Channel <i class="bi bi-arrow-down-up"></i></th>
+            <th data-sort="number">L60 <i class="bi bi-arrow-down-up"></i></th>
+            <th data-sort="number" class="default-sort">L30 <i class="bi bi-arrow-down"></i></th>
+            <th data-sort="number">PRC <i class="bi bi-arrow-down-up"></i></th>
+            <th data-sort="number">PFT % <i class="bi bi-arrow-down-up"></i></th>
+            <th data-sort="number">ROI % <i class="bi bi-arrow-down-up"></i></th>
+            <th data-sort="number">Views L30 <i class="bi bi-arrow-down-up"></i></th>
+            <th data-sort="number">CVR <i class="bi bi-arrow-down-up"></i></th>
+            <th data-sort="number">Req Views <i class="bi bi-arrow-down-up"></i></th>
+            <th data-sort="number">LMP <i class="bi bi-arrow-down-up"></i></th>
+            <th>S Price</th>
+            <th data-sort="number">S PFT<i class="bi bi-arrow-down-up"></i></th>
+            <th data-sort="number">S ROI<i class="bi bi-arrow-down-up"></i></th>
+        </tr>
+        </thead>
+        <tbody>
+    `;
 
+    rows.forEach(r => {
+        const price = data[`${r.prefix}_price`];
+        const l30 = r.prefix === 'shopifyb2c' ? data['shopify_l30'] : data[`${r.prefix}_l30`];
+        const l60 = data[`${r.prefix}_l60`];
+        const pft = data[`${r.prefix}_pft`];
+        const roi = data[`${r.prefix}_roi`];
+        const cvr = data[`${r.prefix}_cvr`];
+        const reqCvr = data[`${r.prefix}_req_view`];
 
-            let html = `
-            <div class="table-responsive">
-            <div class="mb-2 text-muted small">
-                <i class="bi bi-info-circle"></i> Default sorting: L30 (Highest to Lowest)
-            </div>
-            <div class="table-responsive" style="max-height: 600px; overflow-y: auto; position: relative;">
-            <table class="table table-sm table-bordered align-middle sortable-table">
-                <thead class="table-light position-sticky" style="top: 0; z-index: 1000;">
-                <tr>
-                    <th data-sort="string">Channel <i class="bi bi-arrow-down-up"></i></th>
-                    <th data-sort="number" class="default-sort">L30 <i class="bi bi-arrow-down"></i></th>
-                    <th data-sort="number" class="default-sort">L60 <i class="bi bi-arrow-down"></i></th>
-                    <th data-sort="number">PRC <i class="bi bi-arrow-down-up"></i></th>
-                    <th data-sort="number">PFT % <i class="bi bi-arrow-down-up"></i></th>
-                    <th data-sort="number">ROI % <i class="bi bi-arrow-down-up"></i></th>
-                    <th data-sort="number">Views L30 <i class="bi bi-arrow-down-up"></i></th>
-                    <th data-sort="number">CVR <i class="bi bi-arrow-down-up"></i></th>
-                    <th data-sort="number">Req Views <i class="bi bi-arrow-down-up"></i></th>
-                    <th data-sort="number">LMP <i class="bi bi-arrow-down-up"></i></th>
-                    <th>S Price</th>
-                    <th data-sort="number">S PFT<i class="bi bi-arrow-down-up"></i></th>
-                    <th data-sort="number">S ROI<i class="bi bi-arrow-down-up"></i></th>
-                </tr>
-                </thead>
-                <tbody>
-            `;
+        const hasAny = price != null || l30 != null || l60 != null || pft != null || roi != null;
+        if (!hasAny) return;
+
+        const getColor = (value) => {
+            const val = typeof value === 'string' ? parseFloat(value.replace('%', '')) : Number(value);
             
+            if (!isFinite(val) || isNaN(val)) return '#000000';
+            
+            if (val >= 0 && val <= 10) return '#ff0000';
+            if (val > 10 && val <= 14) return '#fd7e14';
+            if (val > 14 && val <= 19) return '#0d6efd';
+            if (val > 19 && val <= 40) return '#198754';
+            if (val > 40) return '#800080';
+            
+            return '#000000';
+        };
 
-            rows.forEach(r => {
-                const price = data[`${r.prefix}_price`];
-                const l30 = r.prefix === 'shopifyb2c' ? data['shopify_l30'] : data[`${r.prefix}_l30`];
-                const l60 = data[`${r.prefix}_l60`];
-                console.log(r.prefix, l30, l60);
-                const pft = data[`${r.prefix}_pft`];
-                const roi = data[`${r.prefix}_roi`];
-                const cvr = data[`${r.prefix}_cvr`];
-                const reqCvr = data[`${r.prefix}_req_view`];
+        const pftClass = pft > 20 ? 'positive' : pft < 10 ? 'negative' : 'neutral';
+        const roiClass = roi > 30 ? 'positive' : roi < 15 ? 'negative' : 'neutral';
 
-                const hasAny = price != null || l30 != null || l60 != null || pft != null || roi != null;
-                if (!hasAny) return;
+        // Fixed views data mapping for all channels
+        const getViewsData = () => {
+            switch(r.prefix) {
+                case 'amz':
+                    return data.sessions_l30 ?? "-";
+                case 'ebay':
+                    return data.ebay_views ?? "-";
+                case 'ebay2':
+                    return data.ebay2_views ?? "-";
+                case 'ebay3':
+                    return data.ebay3_views ?? "-";
+                case 'shein':
+                    return data.views_clicks ?? "-";
+                case 'reverb':
+                    return data.reverb_views ?? "-";
+                case 'temu':
+                    return data.temu_views ?? "-";
+                case 'tiktok':
+                    return data.tiktok_views ?? "-";
+                case 'aliexpress':
+                    return data.aliexpress_views ?? "-";
+                case 'walmart':
+                    return data.walmart_views ?? "-";
+                case 'macy':
+                    return data.macy_views ?? "-";
+                case 'doba':
+                    return data.doba_views ?? "-";
+                case 'bestbuy':
+                    return data.bestbuy_views ?? "-";
+                case 'tiendamia':
+                    return data.tiendamia_views ?? "-";
+                case 'shopifyb2c':
+                    return data.shopifyb2c_views ?? "-";
+                default:
+                    return "-";
+            }
+        };
 
-               const getColor = (value) => {
-                    // Convert to number and handle percentage values
-                    const val = typeof value === 'string' ? parseFloat(value.replace('%', '')) : Number(value);
-                    // Make sure value is a finite number
-                    if (!isFinite(val) || isNaN(val)) return '#000000'; // default black
+        // Fixed CVR data mapping
+        const getCVRData = () => {
+            if (cvr && cvr.value !== undefined) {
+                return `<span style="color: ${cvr.color}">${Math.round(cvr.value)}%</span>`;
+            }
+            return "N/A";
+        };
+
+        // Fixed Required Views mapping
+        const getReqViews = () => {
+            const reqView = data[`${r.prefix}_req_view`];
+            return reqView ? Math.round(reqView) : "-";
+        };
+
+        // Fixed LMP data mapping
+        const getLMPData = () => {
+            switch(r.prefix) {
+                case 'amz':
+                    return fmtMoney(data.price_lmpa);
+                case 'ebay':
+                    return fmtMoney(data.ebay_price_lmpa);
+                case 'shein':
+                    return fmtMoney(data.lmp);
+                case 'tiktok':
+                    return fmtMoney(data.tiktok_price_lmpa);
+                case 'aliexpress':
+                    return fmtMoney(data.aliexpress_price_lmpa);
+                case 'walmart':
+                    return fmtMoney(data.walmart_price_lmpa);
+                case 'macy':
+                    return fmtMoney(data.macy_price_lmpa);
+                case 'reverb':
+                    return fmtMoney(data.reverb_price_lmpa);
+                case 'temu':
+                    return fmtMoney(data.temu_price_lmpa);
+                case 'bestbuy':
+                    return fmtMoney(data.bestbuy_price_lmpa);
+                case 'tiendamia':
+                    return fmtMoney(data.tiendamia_price_lmpa);
+                case 'shopifyb2c':
+                    return fmtMoney(data.shopifyb2c_price_lmpa);
+                default:
+                    return '-';
+            }
+        };
+
+        // Fixed S Price value
+        const getSPriceValue = () => {
+            return data[`${r.prefix}_sprice`] || '';
+        };
+
+        // Fixed SPFT data
+        const getSPFTData = () => {
+            const spft = data[`${r.prefix}_spft`];
+            if (spft !== undefined && spft !== null) {
+                const value = Math.round(spft);
+                let textColor, bgColor;
+                
+                if (value < 11) {
+                    textColor = '#ff0000';
+                } else if (value >= 10 && value < 15) {
+                    bgColor = 'yellow';
+                    textColor = '#000000';
+                } else if (value >= 15 && value < 20) {
+                    textColor = '#0d6efd';
+                } else if (value >= 21 && value < 50) {
+                    textColor = '#198754';
+                } else {
+                    textColor = '#800080';
+                }
+                
+                return `<span style="color: ${textColor}; ${bgColor ? `background-color: ${bgColor};` : ''}">${value}%</span>`;
+            }
+            return '-';
+        };
+
+        // Fixed SROI data
+        const getSROIData = () => {
+            const sroi = data[`${r.prefix}_sroi`];
+            if (sroi !== undefined && sroi !== null) {
+                const value = Math.round(sroi);
+                let textColor, bgColor;
+                
+                if (value < 11) {
+                    textColor = '#ff0000';
+                } else if (value >= 10 && value < 15) {
+                    bgColor = 'yellow';
+                    textColor = '#000000';
+                } else if (value >= 15 && value < 20) {
+                    textColor = '#0d6efd';
+                } else if (value >= 21 && value < 50) {
+                    textColor = '#198754';
+                } else {
+                    textColor = '#800080';
+                }
+                
+                return `<span style="color: ${textColor}; ${bgColor ? `background-color: ${bgColor};` : ''}">${value}%</span>`;
+            }
+            return '-';
+        };
+
+        html += `
+        <tr>
+            <td>
+            <div class="d-flex flex-column align-items-center text-center">
+                <div class="position-relative">
+                    <img src="${r.logo}" alt="${r.label}" 
+                        class="channel-logo mb-1" 
+                        style="width:30px; height:30px; object-fit:contain; cursor: pointer;"
+                        onmouseenter="showTooltip(this)"
+                        onmouseleave="hideTooltip(this)">
                     
-                    // Handle percentage ranges
-                    if (val >= 0 && val <= 10) return '#ff0000';        // red
-                    if (val > 10 && val <= 14) return '#fd7e14';       // orange
-                    if (val > 14 && val <= 19) return '#0d6efd';       // blue
-                    if (val > 19 && val <= 40) return '#198754';       // green
-                    if (val > 40) return '#800080';                    // purple
-                    
-                    return '#000000';                                  // default black
-                };
-
-                const pftClass = pft > 20 ? 'positive' : pft < 10 ? 'negative' : 'neutral';
-                const roiClass = roi > 30 ? 'positive' : roi < 15 ? 'negative' : 'neutral';
-                
-
-                html += `
-                 <tr>
-                    <td>
-                    <div class="d-flex flex-column align-items-center text-center">
-                        <div class="position-relative">
-                            <img src="${r.logo}" alt="${r.label}" 
-                                class="channel-logo mb-1" 
-                                style="width:30px; height:30px; object-fit:contain; cursor: pointer;"
-                                onmouseenter="showTooltip(this)"
-                                onmouseleave="hideTooltip(this)">
-                            
-                            <!-- Tooltip for links -->
-                            <div class="position-absolute bg-dark text-white p-2 rounded shadow-sm link-tooltip" 
-                                style="bottom: 0px; left: 70px; 
-                                       opacity: 0; visibility: hidden; transition: all 0.3s; 
-                                       white-space: nowrap; z-index: 1000; font-size: 11px;"
-                                onmouseenter="showTooltip(this.previousElementSibling)"
-                                onmouseleave="hideTooltip(this.previousElementSibling)">
-                                ${r.prefix === 'amz' ? `
-                                    ${data.amz_seller_link ? `<div><strong>SL:</strong> <a href="${data.amz_seller_link}" target="_blank" class="text-info">Seller Link</a></div>` : ''}
-                                    ${data.amz_buyer_link ? `<div><strong>BL:</strong> <a href="${data.amz_buyer_link}" target="_blank" class="text-success">Buyer Link</a></div>` : ''}
-                                ` : r.prefix === 'ebay' ? `
-                                    ${data.ebay_seller_link ? `<div><strong>SL:</strong> <a href="${data.ebay_seller_link}" target="_blank" class="text-info">Seller Link</a></div>` : ''}
-                                    ${data.ebay_buyer_link ? `<div><strong>BL:</strong> <a href="${data.ebay_buyer_link}" target="_blank" class="text-success">Buyer Link</a></div>` : ''}
-                                ` : r.prefix === 'ebay2' ? `
-                                    ${data.ebay2_seller_link ? `<div><strong>SL:</strong> <a href="${data.ebay2_seller_link}" target="_blank" class="text-info">Seller Link</a></div>` : ''}
-                                    ${data.ebay2_buyer_link ? `<div><strong>BL:</strong> <a href="${data.ebay2_buyer_link}" target="_blank" class="text-success">Buyer Link</a></div>` : ''}
-                                ` : r.prefix === 'ebay3' ? `
-                                    ${data.ebay3_seller_link ? `<div><strong>SL:</strong> <a href="${data.ebay3_seller_link}" target="_blank" class="text-info">Seller Link</a></div>` : ''}
-                                    ${data.ebay3_buyer_link ? `<div><strong>BL:</strong> <a href="${data.ebay3_buyer_link}" target="_blank" class="text-success">Buyer Link</a></div>` : ''}
-                                ` : r.prefix === 'macy' ? `
-                                    ${data.macy_seller_link ? `<div><strong>SL:</strong> <a href="${data.macy_seller_link}" target="_blank" class="text-info">Seller Link</a></div>` : ''}
-                                    ${data.macy_buyer_link ? `<div><strong>BL:</strong> <a href="${data.macy_buyer_link}" target="_blank" class="text-success">Buyer Link</a></div>` : ''}
-                                ` : r.prefix === 'reverb' ? `
-                                    ${data.reverb_seller_link ? `<div><strong>SL:</strong> <a href="${data.reverb_seller_link}" target="_blank" class="text-info">Seller Link</a></div>` : ''}
-                                    ${data.reverb_buyer_link ? `<div><strong>BL:</strong> <a href="${data.reverb_buyer_link}" target="_blank" class="text-success">Buyer Link</a></div>` : ''}
-                                ` : r.prefix === 'walmart' ? `
-                                    ${data.walmart_seller_link ? `<div><strong>SL:</strong> <a href="${data.walmart_seller_link}" target="_blank" class="text-info">Seller Link</a></div>` : ''}
-                                    ${data.walmart_buyer_link ? `<div><strong>BL:</strong> <a href="${data.walmart_buyer_link}" target="_blank" class="text-success">Buyer Link</a></div>` : ''}
-                                ` : r.prefix === 'doba' ? `
-                                    ${data.doba_seller_link ? `<div><strong>SL:</strong> <a href="${data.doba_seller_link}" target="_blank" class="text-info">Seller Link</a></div>` : ''}
-                                    ${data.doba_buyer_link ? `<div><strong>BL:</strong> <a href="${data.doba_buyer_link}" target="_blank" class="text-success">Buyer Link</a></div>` : ''}
-                                ` : r.prefix === 'temu' ? `
-                                    ${data.temu_seller_link ? `<div><strong>SL:</strong> <a href="${data.temu_seller_link}" target="_blank" class="text-info">Seller Link</a></div>` : ''}
-                                    ${data.temu_buyer_link ? `<div><strong>BL:</strong> <a href="${data.temu_buyer_link}" target="_blank" class="text-success">Buyer Link</a></div>` : ''}
-                                ` : r.prefix === 'shopifyb2c' ? `
-                                    ${data.shopifyb2c_seller_link ? `<div><strong>SL:</strong> <a href="${data.shopifyb2c_seller_link}" target="_blank" class="text-info">Seller Link</a></div>` : ''}
-                                    ${data.shopifyb2c_buyer_link ? `<div><strong>BL:</strong> <a href="${data.shopifyb2c_buyer_link}" target="_blank" class="text-success">Buyer Link</a></div>` : ''}
-                                 ` : r.prefix === 'shein' ? `
-                                    ${data.shein_seller_link ? `<div><strong>SL:</strong> <a href="${data.shein_seller_link}" target="_blank" class="text-info">Seller Link</a></div>` : ''}
-                                    ${data.shein_buyer_link ? `<div><strong>BL:</strong> <a href="${data.shein_buyer_link}" target="_blank" class="text-success">Buyer Link</a></div>` : ''}
-                                ` : ''}
-
-                            </div>
-                        </div>
-                        <span class="small fw-bold">${r.label}</span>
+                    <!-- Tooltip for links -->
+                    <div class="position-absolute bg-dark text-white p-2 rounded shadow-sm link-tooltip" 
+                        style="bottom: 0px; left: 70px; 
+                               opacity: 0; visibility: hidden; transition: all 0.3s; 
+                               white-space: nowrap; z-index: 1000; font-size: 11px;"
+                        onmouseenter="showTooltip(this.previousElementSibling)"
+                        onmouseleave="hideTooltip(this.previousElementSibling)">
+                        ${data[`${r.prefix}_seller_link`] ? `<div><strong>SL:</strong> <a href="${data[`${r.prefix}_seller_link`]}" target="_blank" class="text-info">Seller Link</a></div>` : ''}
+                        ${data[`${r.prefix}_buyer_link`] ? `<div><strong>BL:</strong> <a href="${data[`${r.prefix}_buyer_link`]}" target="_blank" class="text-success">Buyer Link</a></div>` : ''}
                     </div>
-                    </td>
+                </div>
+                <span class="small fw-bold">${r.label}</span>
+            </div>
+            </td>
 
+            <td>
+                <div class="value-indicator">
+                    ${l60 ?? "-"}
+                </div>
+            </td>
+            <td>
+                <div class="value-indicator">
+                    ${l30 ?? "-"}
+                </div>
+            </td>
+        
+            <td>
+                <div class="value-indicator">
+                    ${fmtMoney(price)}
+                </div>
+            </td>
+            <td>
+                <div class="value-indicator ${pftClass}" style="color: ${getColor(pft * 100)};">
+                    ${fmtPct(pft)}
+                </div>
+            </td>
+            <td>
+                <div class="value-indicator ${roiClass}" style="color: ${getColor(roi * 100)};">
+                    ${fmtPct(roi)}
+                </div>
+            </td>
+        
+            <td>
+                <div class="value-indicator">
+                    ${getViewsData()}
+                </div>
+            </td>
+            <td>
+                <div class="value-indicator">
+                    ${getCVRData()}
+                </div>
+            </td>
+            <td>
+                <div class="value-indicator">
+                    ${getReqViews()}
+                </div>
+            </td>
 
-                    <td>
-                        <div class="value-indicator">
-                            ${l30 ?? "-"}
-                        </div>
-                    </td>
+            <td>
+                <div class="value-indicator">
+                    ${getLMPData()}
+                </div>
+            </td>
 
-                      <td>
-                        <div class="value-indicator">
-                            ${l60 ?? "-"}
-                        </div>
-                    </td>
-                
-                    <td>
-                        <div class="value-indicator">
-                            ${fmtMoney(price)}
-                        </div>
-                    </td>
-                    <td>
-                        <div class="value-indicator ${pftClass}" style="color: ${getColor(pft * 100)};">
-                            ${fmtPct(pft)}
-                        </div>
-                    </td>
-                    <td>
-                        <div class="value-indicator ${roiClass}" style="color: ${getColor(roi * 100)};">
-                            ${fmtPct(roi)}
-                        </div>
-                    </td>
-                
-                
-                    <td>
-                        <div class="value-indicator">
-                            ${r.prefix === 'amz' ? (data.sessions_l30 ?? "-") 
-                                : r.prefix === 'ebay' ? (data.ebay_views ?? "-") 
-                                : r.prefix === 'ebay2' ? (data.ebay2_views ?? "-") 
-                                : r.prefix === 'ebay3' ? (data.ebay3_views ?? "-") 
-                                : r.prefix === 'shein' ? (data.views_clicks ?? "-")
-                                : "-" }
-                        </div>
-                    </td>
-                    <td>
-                        <div class="value-indicator">
-                            ${(() => {
-                                if (r.prefix === 'amz' && cvr) {
-                                    return `<span style="color: ${cvr.color}">${Math.round(cvr.value)}%</span>`;
-                                } else if (r.prefix === 'ebay' && cvr) {
-                                    return `<span style="color: ${cvr.color}">${Math.round(cvr.value)}%</span>`;
-                                } else if (r.prefix === 'ebay3' && cvr) {
-                                    return `<span style="color: ${cvr.color}">${Math.round(cvr.value)}%</span>`;
-                                }
-                                else if (r.prefix === 'shein' && cvr) {
-                                    return `<span style="color: ${cvr.color}">${Math.round(cvr.value)}%</span>`;
-                                }
+            <td>
+                <div class="d-flex align-items-center gap-2">
+                    <input type="text" 
+                        class="form-control form-control-sm s-price" 
+                        value="${getSPriceValue()}"
+                        style="width: 65px;" 
+                        step="any"
+                        data-sku="${data.SKU}" 
+                        data-lp="${data.LP}" 
+                        data-ship="${r.prefix === 'temu' ? (data.temu_ship || '') : (data.SHIP || '')}"
+                        data-type="${r.prefix}">
 
-                                return "N/A";
-                            })()} 
-                        </div>
-                    </td>
-                     <td>
-                        <div class="value-indicator">
-                        ${r.prefix === 'amz' ? Math.round(data.amz_req_view) ?? "-" : 
-                            r.prefix === 'ebay' ? Math.round(data.ebay_req_view) ?? "-" :
-                            r.prefix === 'ebay2' ? Math.round(data.ebay2_req_view) ?? "-" :
-                            r.prefix === 'ebay3' ? Math.round(data.ebay3_req_view) ?? "-" :
-                            r.prefix === 'shein' ? Math.round(data.shein_req_view) ?? "-" : "-"}
-                        </div>
-                    </td>
+                    <button class="btn btn-success btn-sm d-flex align-items-center pushPriceBtn" 
+                        type="button"
+                        data-sku="${data.SKU}" 
+                        data-type="${r.prefix}">
+                        <i class="bi bi-cloud-arrow-up"></i>
+                    </button>
+                </div>
+            </td>
 
+            <td class="spft-field">
+                ${getSPFTData()}
+            </td>
 
-                    <td>
-                        <div class="value-indicator">
-                            ${r.prefix === 'amz' ? fmtMoney(data.price_lmpa) 
-                                : r.prefix === 'ebay' ? fmtMoney(data.ebay_price_lmpa) 
-                                : r.prefix === 'shein' ? fmtMoney(data.lmp) 
-                                : '-'}
-                        </div>
-                    </td>
+            <td class="sroi-field">
+                ${getSROIData()}
+            </td>
+        </tr>
+        `;
+    });
 
-
-                
-
-              <td>
-                    <div class="d-flex align-items-center gap-2">
-                        <input type="text" 
-                            class="form-control form-control-sm s-price" 
-                            value="${
-                                r.prefix === 'amz' ? (data.amz_sprice || '') 
-                                : r.prefix === 'ebay' ? (data.ebay_sprice || '') 
-                                : r.prefix === 'shopifyb2c' ? (data.shopifyb2c_sprice || '') 
-                                : r.prefix === 'ebay2' ? (data.ebay2_sprice || '') 
-                                : r.prefix === 'ebay3' ? (data.ebay3_sprice || '')
-                                : r.prefix === 'doba' ? (data.doba_sprice || '')
-                                : r.prefix === 'temu' ? (data.temu_sprice || '')
-                                : r.prefix === 'macy' ? (data.macy_sprice || '')
-                                : r.prefix === 'reverb' ? (data.reverb_sprice || '')
-                                : r.prefix === 'walmart' ? (data.walmart_sprice || '')
-                                : r.prefix === 'shein' ? (data.shein_sprice || '')
-                            
-                                : ''
-                            }"
-                            style="width: 85px;" 
-                            step="any"
-                            data-sku="${data.SKU}" 
-                            data-lp="${data.LP}" 
-                            data-ship="${
-                                r.prefix === 'temu' ? (data.temu_ship || '') : (data.SHIP || '')
-                            }"
-                            data-type="${r.prefix}">
-
-                        <!-- Push to Marketplace -->
-                        <button class="btn btn-success btn-sm d-flex align-items-center pushPriceBtn" 
-                            type="button"
-                            data-sku="${data.SKU}" 
-                            data-type="${r.prefix}">
-                            <i class="bi bi-cloud-arrow-up"></i>
-                        </button>
-                    </div>
-                </td>
-
-
-                    <td class="spft-field">
-                        ${(() => {
-                            let value, textColor, bgColor;
-                            
-                            if (r.prefix === 'amz' && data.amz_spft) {
-                                value = Math.round(data.amz_spfst);
-                            } else if (r.prefix === 'ebay' && data.ebay_spft) {
-                                value = Math.round(data.ebay_spft);
-                            } else if (r.prefix === 'shopifyb2c' && data.shopifyb2c_spft) {
-                                value = Math.round(data.shopifyb2c_spft);
-                            } else if (r.prefix === 'ebay2' && data.ebay2_spft) {
-                                value = Math.round(data.ebay2_spft);
-                            } else if (r.prefix === 'ebay3' && data.ebay3_spft) {
-                                value = Math.round(data.ebay3_spft);
-                            } else if (r.prefix === 'doba' && data.doba_spft) {
-                                value = Math.round(data.doba_spft);
-                            } else if (r.prefix === 'temu' && data.temu_spft) {
-                                value = Math.round(data.temu_spft);
-                            } else if (r.prefix === 'macy' && data.macy_spft) {
-                                value = Math.round(data.macy_spft);
-                            } else if (r.prefix === 'reverb' && data.reverb_spft) {
-                                value = Math.round(data.reverb_spft);
-                            } else if (r.prefix === 'walmart' && data.walmart_spft) {
-                                value = Math.round(data.walmart_spft);
-                            }
-                            else if (r.prefix === 'shein' && data.shein_spft) {
-                                value = Math.round(data.shein_spft);
-                            }
-
-                            if (value !== undefined) {
-                                if (value < 11) {
-                                    textColor = '#ff0000';
-                                } else if (value >= 10 && value < 15) {
-                                    bgColor = 'yellow';
-                                    textColor = '#000000';
-                                } else if (value >= 15 && value < 20) {
-                                    textColor = '#0d6efd';
-                                } else if (value >= 21 && value < 50) {
-                                    textColor = '#198754';
-                                } else {
-                                    textColor = '#800080';
-                                }
-                                
-                                return `<span style="color: ${textColor}; ${bgColor ? `background-color: ${bgColor};` : ''}">${value}%</span>`;
-                            }
-                            
-                            return '-';
-                        })()}
-                    </td>
-
-                    <td class="sroi-field">
-                        ${(() => {
-                            let value, textColor, bgColor;
-                            
-                            if (r.prefix === 'amz' && data.amz_sroi) {
-                                value = Math.round(data.amz_sroi);
-                            } else if (r.prefix === 'ebay' && data.ebay_sroi) {
-                                value = Math.round(data.ebay_sroi);
-                            } else if (r.prefix === 'shopifyb2c' && data.shopifyb2c_sroi) {
-                                value = Math.round(data.shopifyb2c_sroi);
-                            } else if (r.prefix === 'ebay2' && data.ebay2_sroi) {
-                                value = Math.round(data.ebay2_sroi);
-                            } else if (r.prefix === 'ebay3' && data.ebay3_sroi) {
-                                value = Math.round(data.ebay3_sroi);
-                            }else if (r.prefix === 'doba' && data.doba_sroi) {
-                                value = Math.round(data.doba_sroi);
-                            } else if (r.prefix === 'temu' && data.temu_sroi) {
-                                value = Math.round(data.temu_sroi);
-                            } else if (r.prefix === 'macy' && data.macy_sroi) {
-                                value = Math.round(data.macy_sroi);
-                            } else if (r.prefix === 'reverb' && data.reverb_sroi) {
-                                value = Math.round(data.reverb_sroi);
-                            } else if (r.prefix === 'walmart' && data.walmart_sroi) {
-                                value = Math.round(data.walmart_sroi);
-                            } else if (r.prefix === 'shein' && data.shein_sroi) {
-                                value = Math.round(data.shein_sroi);
-                            }
-
-                            if (value !== undefined) {
-                                if (value < 11) {
-                                    textColor = '#ff0000';
-                                } else if (value >= 10 && value < 15) {
-                                    bgColor = 'yellow';
-                                    textColor = '#000000';
-                                } else if (value >= 15 && value < 20) {
-                                    textColor = '#0d6efd';
-                                } else if (value >= 21 && value < 50) {
-                                    textColor = '#198754';
-                                } else {
-                                    textColor = '#800080';
-                                }
-                                
-                                return `<span style="color: ${textColor}; ${bgColor ? `background-color: ${bgColor};` : ''}">${value}%</span>`;
-                            }
-                            
-                            return '-';
-                        })()}
-                    </td>
-                   
-
-                </tr>
-                `;
-            });
-
-            html += "</tbody></table></div>";
-          
-
-            return html;
-        }
+    html += "</tbody></table></div>";
+    return html;
+}
 
         // Modal open function
         function showOVL30Modal(row) {
             const data = row.getData();
-            
+
             // Initialize top push button
             const topPushPrice = document.getElementById('topPushPrice');
             const topPushBtn = document.getElementById('topPushBtn');

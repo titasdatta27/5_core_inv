@@ -377,10 +377,6 @@ class AmzUnderUtilizedBgtController extends Controller
                 return $campaignName === $cleanSku;
             });
 
-            if (!$matchedCampaignL7 && !$matchedCampaignL1) {
-                continue;
-            }
-
             $row = [];
             $row['parent'] = $parent;
             $row['sku']    = $pm->sku;
@@ -438,7 +434,9 @@ class AmzUnderUtilizedBgtController extends Controller
                 }
             }
 
-            $result[] = (object) $row;
+            if($row['NRA'] !== 'NRA' && $row['campaignName'] !== ''){
+                $result[] = (object) $row;
+            }
         }
 
         return response()->json([
@@ -528,10 +526,6 @@ class AmzUnderUtilizedBgtController extends Controller
                 );
             });
 
-            if (!$matchedCampaignL7 && !$matchedCampaignL1) {
-                continue;
-            }
-
             $row = [];
             $row['parent'] = $parent;
             $row['sku']    = $pm->sku;
@@ -582,7 +576,9 @@ class AmzUnderUtilizedBgtController extends Controller
                 }
             }
 
-            $result[] = (object) $row;
+            if($row['NRA'] !== 'NRA' && $row['campaignName'] !== ''){
+                $result[] = (object) $row;
+            }
         }
 
         $uniqueResult = collect($result)->unique('sku')->values()->all();

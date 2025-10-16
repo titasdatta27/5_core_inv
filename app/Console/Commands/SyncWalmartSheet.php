@@ -5,8 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Http\Controllers\ApiController;
 use App\Models\WalmartProductSheet;
-
-
+use Illuminate\View\ViewServiceProvider;
 
 class SyncWalmartSheet extends Command
 {
@@ -46,6 +45,7 @@ class SyncWalmartSheet extends Command
                     'l30'       => $this->toIntOrNull($row->{'WL30'} ?? null),
                     'dil'       => $this->toDecimalOrNull($row->{'Dil%'} ?? null),
                     'buy_link'  => trim($row->{'Buyer Link'} ?? ''),
+                    'views'       => $this->toIntOrNull($row->{'Views'} ?? null),
                 ]
             );
         }

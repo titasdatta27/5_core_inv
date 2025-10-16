@@ -101,10 +101,9 @@ class AmazonMissingAdsController extends Controller
                     $row['TPFT'] = $raw['TPFT'] ?? null;
                 }
             }
-
-            if($row['INV'] > 0 && $row['NRA'] != 'NRA'){
-                $result[] = (object) $row;
-            }
+            
+            $result[] = (object) $row;
+            
         }
 
         return response()->json([
