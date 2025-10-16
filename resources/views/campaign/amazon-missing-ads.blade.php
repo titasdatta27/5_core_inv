@@ -180,38 +180,62 @@
                             <div class="col-12">
                                 <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center">
                                     <!-- Left side controls -->
-                                    <div class="d-flex gap-2">
-                                        <input type="text" id="global-search" class="form-control form-select-lg border-1 border-secondary" placeholder="Search campaign...">
+                                    <div class="d-flex gap-3 flex-wrap">
+                                        <!-- Search input -->
+                                        <div class="flex-grow-1" style="min-width: 200px; max-width: 300px;">
+                                            <input type="text" 
+                                                   id="global-search" 
+                                                   class="form-control" 
+                                                   placeholder="Search campaign..."
+                                                   style="height: 38px;">
+                                        </div>
 
-                                        <select id="status-filter" class="form-select form-select-lg" style="width: 140px;">
-                                            <option value="">All Status</option>
-                                            <option value="ENABLED">Enabled</option>
-                                            <option value="PAUSED">Paused</option>
-                                            <option value="ARCHIVED">Archived</option>
-                                        </select>
+                                        <!-- Filter dropdowns -->
+                                        <div class="d-flex gap-2 flex-wrap">
+                                            <select id="status-filter" 
+                                                    class="form-select" 
+                                                    style="width: 130px; height: 38px;">
+                                                <option value="">Status</option>
+                                                <option value="ENABLED">Enabled</option>
+                                                <option value="PAUSED">Paused</option>
+                                                <option value="ARCHIVED">Archived</option>
+                                            </select>
 
-                                        <select id="inv-filter" class="form-select form-select-lg" style="width: 200px;">
-                                            <option value="">Select INV</option>
-                                            <option value="ALL">ALL</option>
-                                            <option value="INV_0">0 INV</option>
-                                            <option value="OTHERS">OTHERS</option>
-                                        </select>
+                                            <select id="inv-filter" 
+                                                    class="form-select" 
+                                                    style="width: 130px; height: 38px;">
+                                                <option value="">INV</option>
+                                                <option value="ALL">All</option>
+                                                <option value="INV_0">0 INV</option>
+                                                <option value="OTHERS">Others</option>
+                                            </select>
 
-                                        <select id="nra-filter" class="form-select form-select-lg" style="width: 200px;">
-                                            <option value="">Select NRA</option>
-                                            <option value="ALL">ALL</option>
-                                            <option value="RA">RA</option>
-                                            <option value="NRA">NRA</option>
-                                            <option value="LATER">LATER</option>
-                                        </select>
+                                            <select id="nra-filter" 
+                                                    class="form-select" 
+                                                    style="width: 130px; height: 38px;">
+                                                <option value="">NRA</option>
+                                                <option value="ALL">All</option>
+                                                <option value="RA">RA</option>
+                                                <option value="NRA">NRA</option>
+                                                <option value="LATER">Later</option>
+                                            </select>
 
-                                        <select id="missingAds-filter" class="form-select form-select-lg" style="width: 180px;">
-                                            <option value="">Select Missing Ads</option>
-                                            <option value="Both Running">Both Running</option>
-                                            <option value="KW Missing">KW Missing</option>
-                                            <option value="PT Missing">PT Missing</option>
-                                            <option value="Both Missing">Both Missing</option>
-                                        </select>
+                                            <select id="missingAds-filter" 
+                                                    class="form-select" 
+                                                    style="width: 150px; height: 38px;">
+                                                <option value="">Missing Ads</option>
+                                                <option value="Both Running">Both Running</option>
+                                                <option value="KW Missing">KW Missing</option>
+                                                <option value="PT Missing">PT Missing</option>
+                                                <option value="Both Missing">Both Missing</option>
+                                            </select>
+
+                                            <button id="all-missing-btn" class="btn btn-primary text-black fw-bold" 
+                                                    style="height: 38px;">
+                                                <i class="fas fa-exclamation-triangle me-1"></i>
+                                                All Missing
+                                            </button>
+                                        </div>
                                     </div>
 
                                     <!-- Right side - Stats Boxes -->
@@ -409,13 +433,11 @@
                         formatter: function(cell) {
                             const row = cell.getRow();
                             const sku = row.getData().sku;
-                            const value = cell.getValue()?.trim();
+                            const value = cell.getValue()?.trim() || 'RA'; // Default to RA if no value
 
-                            let bgColor = "";
+                            let bgColor = "background-color:#28a745;color:#000;"; // Default green for RA
                             if (value === "NRA") {
                                 bgColor = "background-color:#dc3545;color:#fff;"; // red
-                            } else if (value === "RA") {
-                                bgColor = "background-color:#28a745;color:#fff;"; // green
                             } else if (value === "LATER") {
                                 bgColor = "background-color:#ffc107;color:#000;"; // yellow
                             }
@@ -528,7 +550,7 @@
                                 } else {
                                     if(nra !== 'NRA'){
                                         return `
-                                            <span style="color: red;">Both Missing</span>
+                                            <span style="color: red;">KW Missing </br> PT Missing</span>
                                             <i class="fa fa-info-circle text-primary toggle-missingAds-btn" 
                                                 style="cursor:pointer; margin-left:8px;">
                                             </i>
@@ -638,7 +660,9 @@
                     let nra = (data.NRA || "").trim();
                     if (nraFilterVal) {
                         if (nraFilterVal === "ALL") {
-                            
+                            // Show all records
+                        } else if (nraFilterVal === "RA") {
+                            if (nra === "NRA") return false;
                         } else if (nra !== nraFilterVal) {
                             return false;
                         }
@@ -722,6 +746,29 @@
                     $("#pt-running").text(ptRunning);
 
                     $("#total-nra").text(totalNRA);
+
+                    // Update All Missing Button Text
+                    $("#all-missing-btn").on("click", function() {
+                        // Clear all filters first
+                        $("#global-search").val("");
+                        $("#status-filter").val("");
+                        $("#inv-filter").val("");
+                        $("#nra-filter").val("RA");
+                        
+                        // Custom filter to show only rows with missing ads
+                        table.setFilter(function(data) {
+                            let kw = data.kw_campaign_name || "";
+                            let pt = data.pt_campaign_name || "";
+                            let nra = (data.NRA || "").trim();
+                            
+                            return nra !== "NRA" && (!kw || !pt);
+                        });
+                        
+                        // Update stats
+                        updateCampaignStats();
+                    });
+
+                    $(document)
                 }
 
 
