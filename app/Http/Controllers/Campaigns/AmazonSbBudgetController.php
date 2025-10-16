@@ -566,7 +566,9 @@ class AmazonSbBudgetController extends Controller
                 }
             }
             
-            $result[] = (object) $row;
+            if($row['NRA'] !== 'NRA' ){
+                $result[] = (object) $row;
+            }
         }
 
         $uniqueResult = collect($result)->unique('sku')->values()->all();

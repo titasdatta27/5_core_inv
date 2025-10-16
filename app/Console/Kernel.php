@@ -23,6 +23,7 @@ class Kernel extends ConsoleKernel
         \App\Console\Commands\AutoUpdateAmazonHlBids::class,
         \App\Console\Commands\AutoUpdateAmzUnderKwBids::class,
         \App\Console\Commands\AutoUpdateAmzUnderPtBids::class,
+        \App\Console\Commands\AutoUpdateAmzUnderHlBids::class,
         \App\Console\Commands\AutoUpdateAmazonBgtKw::class,
         \App\Console\Commands\AutoUpdateAmazonBgtPt::class,
         \App\Console\Commands\AutoUpdateAmazonBgtHl::class,
@@ -132,7 +133,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('app:ebay2-campaign-reports')
             ->dailyAt('01:15')
             ->timezone('America/Los_Angeles');
-        // Amazon over utilized bids update commands
+        // Amazon over and under utilized bids update commands
         $schedule->command('amazon:auto-update-over-kw-bids')
             ->dailyAt('12:00')
             ->timezone('Asia/Kolkata');
@@ -140,6 +141,15 @@ class Kernel extends ConsoleKernel
             ->dailyAt('12:00')
             ->timezone('Asia/Kolkata'); 
         $schedule->command('amazon:auto-update-over-hl-bids')
+            ->dailyAt('12:00')
+            ->timezone('Asia/Kolkata');
+        $schedule->command('amazon:auto-update-under-kw-bids')
+            ->dailyAt('12:00')
+            ->timezone('Asia/Kolkata');
+        $schedule->command('amazon:auto-update-under-pt-bids')
+            ->dailyAt('12:00')
+            ->timezone('Asia/Kolkata'); 
+        $schedule->command('amazon:auto-update-under-hl-bids')
             ->dailyAt('12:00')
             ->timezone('Asia/Kolkata');
         // amazon acos bgt update commands

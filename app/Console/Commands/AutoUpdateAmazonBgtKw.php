@@ -75,7 +75,9 @@ class AutoUpdateAmazonBgtKw extends Command
             $shopify = $shopifyData[$pm->sku] ?? null;
 
             $matchedCampaignL30 = $amazonSpCampaignReportsL30->first(function ($item) use ($sku) {
-                return strcasecmp(trim($item->campaignName), $sku) === 0;
+                $campaignName = strtoupper(trim(rtrim($item->campaignName, '.')));
+                $cleanSku = strtoupper(trim(rtrim($sku, '.')));
+                return $campaignName === $cleanSku;
             });
 
             if (!$matchedCampaignL30) {
