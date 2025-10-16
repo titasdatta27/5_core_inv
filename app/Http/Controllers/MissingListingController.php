@@ -216,7 +216,7 @@ protected function fetchFreshDataU($type = null)
             'progress' => $progress
         ];
     } else {
-        ini_set('max_execution_time', 300);
+        ini_set('max_execution_time', 1800);
 
         if (!array_key_exists($type, $sources)) {
             return ['status' => false, 'msg' => "Invalid type: $type"];
