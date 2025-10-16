@@ -56,7 +56,6 @@ class AmazonSpApiService
             'client_id' => env('SPAPI_CLIENT_ID'),
             'client_secret' => env('SPAPI_CLIENT_SECRET'),
         ]);
-        dd($res);
         return $res['access_token'] ?? null;
     }
 
@@ -145,7 +144,7 @@ class AmazonSpApiService
         
         if (env('FILESYSTEM_DRIVER') === 'local') {$accessToken = $this->getAccessTokenV1();}
         else{$accessToken = $this->getAccessToken();}
-        dd($accessToken);
+        
         Log::info('Access Token: ', [$accessToken]);
 
         $marketplaceId = env('SPAPI_MARKETPLACE_ID');

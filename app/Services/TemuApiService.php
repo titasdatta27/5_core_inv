@@ -94,7 +94,7 @@ class TemuApiService
 
         $items = $data['result']['goodsList'] ?? [];
         if (empty($items)) break;
-
+        // dd($items);
         foreach ($items as $item) {
             $skuId = $item['outGoodsSn'] ?? null;
             $qty = $item['quantity'] ?? 0;
@@ -109,6 +109,9 @@ class TemuApiService
 
         $pageNumber++;
     } while (true);
+
+
+Log::info('Total Temu inventory items collected: ' . count($allitems));
 
     foreach ($allitems as $sku => $data) {
       $sku = $data['sku'] ?? null;
