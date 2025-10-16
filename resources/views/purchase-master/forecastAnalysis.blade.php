@@ -140,24 +140,24 @@
                             </button>
 
                             <button id="total_msl_c" class="btn btn-sm btn-success fw-semibold text-dark">
-                                Total MSL_C: $<span id="total_msl_c_value" class="fw-semibold text-dark">0.00</span>
+                                 MSL_LP: $<span id="total_msl_c_value" class="fw-semibold text-dark">0.00</span>
                             </button>
 
                             <button id="total_msl_sp" class="btn btn-sm btn-primary fw-semibold text-dark">
-                                Total MSL_SP: $<span id="total_msl_sp_value" class="fw-semibold text-dark">0</span>
+                                 MSL_SP: $<span id="total_msl_sp_value" class="fw-semibold text-dark">0</span>
                             </button>
 
 
                             <button id="total_inv_value" class="btn btn-sm btn-info fw-semibold text-dark">
-                                Total INV Value: $<span id="total_inv_value_display" class="fw-semibold text-dark">0</span>
+                                 INV Value: $<span id="total_inv_value_display" class="fw-semibold text-dark">0</span>
                             </button>
 
                             <button id="total_lp_value" class="btn btn-sm btn-warning fw-semibold text-dark">
-                                Total LP Value: $<span id="total_lp_value_display" class="fw-semibold text-dark">0</span>
+                                 LP Value: $<span id="total_lp_value_display" class="fw-semibold text-dark">0</span>
                             </button>
 
                             <button id="total_restock_msl" class="btn btn-sm btn-dark fw-semibold text-white">
-                                Total Restock MSL: $<span id="total_restock_msl_value" class="fw-semibold text-white">0.00</span>
+                                 Restock MSL: $<span id="total_restock_msl_value" class="fw-semibold text-white">0.00</span>
                             </button>
 
                             <button id="total_minimal_msl" class="btn btn-sm btn-secondary fw-semibold text-white">
@@ -169,7 +169,7 @@
                             </button>
 
                             <button id="total_restock_msl_lp" class="btn btn-sm btn-warning fw-semibold text-dark">
-                                Total Restock MSL LP: $<span id="total_restock_msl_lp_value" class="fw-semibold text-dark">0</span>
+                                 Restock MSL LP: $<span id="total_restock_msl_lp_value" class="fw-semibold text-dark">0</span>
                             </button>
                         </div>
                     </div>
