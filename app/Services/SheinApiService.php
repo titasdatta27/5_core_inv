@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Log;
 use SimpleXMLElement;
 use ZipArchive;
 use Illuminate\Support\Str;
-
+use App\Models\ProductStockMapping;
 class SheinApiService
 {
 
@@ -95,7 +95,19 @@ class SheinApiService
 $spuNames = array_filter($spuNames); // remove nulls if any
 
     $result=$this->getStock($spuNames);
+    
+    foreach($result as $item){
+         $sku = $item['sku'];
+        $quantity = $item['quantity'];
+
+         if (!$sku) {Log::warning('Missing SKU in Shein inventory data', $item);continue;}
+         ProductStockMapping::updateOrCreate(
+            ['sku' => $sku],
+            ['inventory_shein' => $quantity]
+        );
+    }
     // dd($result);
+    Log::info('Total Shein inventory items collected: ' . count($result));
     return $result;
         // return $spuNames;
     }

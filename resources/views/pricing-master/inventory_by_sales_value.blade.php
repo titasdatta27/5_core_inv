@@ -1185,7 +1185,7 @@ const table = new Tabulator("#forecast-table", {
             }
         },
         {
-            title: "COGS<br><span id='cogsHeader' style='font-size:12px; color:#000; background:#fff; padding:1px 4px; border-radius:3px;'></span>",
+            title: "LP VALUE<br><span id='cogsHeader' style='font-size:12px; color:#000; background:#fff; padding:1px 4px; border-radius:3px;'></span>",
             field: "COGS",
             hozAlign: "center",
             headerSort: true,

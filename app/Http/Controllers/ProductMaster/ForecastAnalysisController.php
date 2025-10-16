@@ -102,6 +102,15 @@ class ForecastAnalysisController extends Controller
 
             $item->INV = $shopify->inv ?? 0;
             $item->L30 = $shopify->quantity ?? 0;
+            
+            // Calculate shopifyb2c_price and inv_value
+            $shopifyb2c_price = $shopify->price ?? 0;
+            $item->shopifyb2c_price = $shopifyb2c_price;
+            $item->inv_value = $item->INV * $shopifyb2c_price;
+            
+            // Calculate lp_value (LP * INV)
+            $lp = is_numeric($item->{'LP'}) ? (float)$item->{'LP'} : 0;
+            $item->lp_value = $lp * $item->INV;
 
             if (!empty($item->Parent) && $jungleScoutData->has($item->Parent)) {
                 $item->scout_data = json_decode(json_encode($jungleScoutData[$item->Parent]), true);
@@ -149,9 +158,16 @@ class ForecastAnalysisController extends Controller
                 // Calculate MSL
                 $msl = $item->{'Total month'} > 0 ? ($item->{'Total'} / $item->{'Total month'}) * 4 : 0;
                 
-                // Calculate MSL_C (MSL * LP)
+                // Use effective MSL (manual s-msl if available, otherwise calculated msl)
+                $effectiveMsl = (isset($item->{'s-msl'}) && $item->{'s-msl'} > 0) ? $item->{'s-msl'} : $msl;
+                
+                // Calculate MSL_C (MSL * LP / 4)
                 $lp = is_numeric($item->{'LP'}) ? (float)$item->{'LP'} : 0;
-                $item->{'MSL_C'} = round($msl * $lp, 2);
+                $item->{'MSL_C'} = round($msl * $lp / 4, 2);
+                
+                // Calculate MSL SP (shopify price * effective MSL / 4)
+                $item->{'MSL_SP'} = floor($shopifyb2c_price * $effectiveMsl / 4);
+                
             }
 
             $processedData[] = $item;
@@ -459,6 +475,15 @@ class ForecastAnalysisController extends Controller
 
                 $item->INV = $shopify->inv ?? 0;
                 $item->L30 = $shopify->quantity ?? 0;
+                
+                // Calculate shopifyb2c_price and inv_value
+                $shopifyb2c_price = $shopify->price ?? 0;
+                $item->shopifyb2c_price = $shopifyb2c_price;
+                $item->inv_value = $item->INV * $shopifyb2c_price;
+                
+                // Calculate lp_value (LP * INV)
+                $lp = is_numeric($item->{'LP'}) ? (float)$item->{'LP'} : 0;
+                $item->lp_value = $lp * $item->INV;
 
                 // JungleScout
                 // if(!empty($item->Parent) && $jungleScoutData->has($item->Parent)){
@@ -513,10 +538,10 @@ class ForecastAnalysisController extends Controller
                     // Calculate MSL_C (MSL * LP)
                     $lp = is_numeric($item->{'LP'}) ? (float)$item->{'LP'} : 0;
                     $item->{'MSL_C'} = (int)round($msl * $lp);
-
+                    
+                    // Calculate MSL SP (shopify price * MSL / 4)
+                    $item->{'MSL_SP'} = floor($shopifyb2c_price * $msl / 4);
                 }
-
-                $skuStage = '';
                 $skuKey = strtoupper(trim($prodData->sku));
 
                 if ($toOrderMap->has($skuKey)) {
