@@ -528,7 +528,7 @@
                                 } else {
                                     if(nra !== 'NRA'){
                                         return `
-                                            <span style="color: red;">Missing</span>
+                                            <span style="color: red;">Both Missing</span>
                                             <i class="fa fa-info-circle text-primary toggle-missingAds-btn" 
                                                 style="cursor:pointer; margin-left:8px;">
                                             </i>
@@ -541,6 +541,15 @@
                                             </i>
                                         `;
                                     }
+                                }
+                            }else{
+                                if(nra === 'NRA'){
+                                    return `
+                                        <span style="color: red;">NRA</span>
+                                        <i class="fa fa-info-circle text-primary toggle-missingAds-btn" 
+                                            style="cursor:pointer; margin-left:8px;">
+                                        </i>
+                                    `;
                                 }
                             }
                             
