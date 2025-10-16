@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\ProductMaster;
 use App\Models\ShopifySku;
 use App\Models\Business5CoreDataView;
+use App\Models\Business5CoreListingStatus;
+use App\Models\BusinessFiveCoreSheetdata;
 use Illuminate\Http\Request;
 
 class Business5CoreZeroController extends Controller
@@ -104,5 +106,94 @@ class Business5CoreZeroController extends Controller
             'status' => 200,
             'message' => 'Reason and actions updated successfully.'
         ]);
+    }
+
+
+    public function getLivePendingAndZeroViewCounts()
+    {
+        $productMasters = ProductMaster::whereNull('deleted_at')->get();
+
+        // Normalize SKUs (avoid case/space mismatch)
+        $skus = $productMasters->pluck('sku')->map(fn($s) => strtoupper(trim($s)))->unique()->toArray();
+
+        $shopifyData = ShopifySku::whereIn('sku', $skus)->get()
+            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
+
+        $business5coreListingStatus = Business5CoreListingStatus::whereIn('sku', $skus)->get()
+            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
+
+        $business5coreDataViews = Business5CoreDataView::whereIn('sku', $skus)->get()
+            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
+
+        $business5coreMetrics = BusinessFiveCoreSheetdata::whereIn('sku', $skus)->get()
+            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
+
+        $listedCount = 0;
+        $zeroInvOfListed = 0;
+        $liveCount = 0;
+        $zeroViewCount = 0;
+
+        foreach ($productMasters as $item) {
+            $sku = strtoupper(trim($item->sku));
+            $inv = $shopifyData[$sku]->inv ?? 0;
+
+            // Skip parent SKUs
+            if (stripos($sku, 'PARENT') !== false) continue;
+
+            // --- Amazon Listing Status ---
+            $status = $business5coreListingStatus[$sku]->value ?? null;
+            if (is_string($status)) {
+                $status = json_decode($status, true);
+            }
+
+            // $listed = $status['listed'] ?? (floatval($inv) > 0 ? 'Pending' : 'Listed');
+            $listed = $status['listed'] ?? null;
+
+            // --- Amazon Live Status ---
+            $dataView = $business5coreDataViews[$sku]->value ?? null;
+            if (is_string($dataView)) {
+                $dataView = json_decode($dataView, true);
+            }
+            // $live = ($dataView['Live'] ?? false) === true ? 'Live' : null;
+            $live = (!empty($dataView['Live']) && $dataView['Live'] === true) ? 'Live' : null;
+
+
+            // --- Listed count ---
+            if ($listed === 'Listed') {
+                $listedCount++;
+            }
+
+            // --- Live count ---
+            if ($live === 'Live') {
+                $liveCount++;
+            }
+
+            // --- Views / Zero-View logic ---
+            $metricRecord = $business5coreMetrics[$sku] ?? null;
+            $views = null;
+
+            if ($metricRecord) {
+                // Direct field (if column exists)
+                if (!empty($metricRecord->views)) {
+                    $views = $metricRecord->views;
+                }
+                // Or inside JSON column `value`
+                elseif (!empty($metricRecord->value)) {
+                    $metricData = json_decode($metricRecord->value, true);
+                    $views = $metricData['views'] ?? null;
+                }
+            }
+
+            if ($inv > 0 && $views !== null && intval($views) === 0) {
+                $zeroViewCount++;
+            }
+        }
+
+        $livePending = $listedCount - $liveCount;
+
+        return [
+            'live_pending' => $livePending,
+            'zero_view' => $zeroViewCount,
+        ];
     }
 }
