@@ -1054,95 +1054,91 @@
         currentParentFilter = parentKey;
         setCombinedFilters();
         }
-// Filter by Inventory radio buttons
 
-// Filter by Inventory radio buttons
-
-document.querySelectorAll("input[name='invFilter']").forEach(input => {
-    input.addEventListener("change", function() {
-        let value = this.value;
+        // Filter by Inventory radio buttons
+        
+        document.querySelectorAll("input[name='invFilter']").forEach(input => {
+            input.addEventListener("change", function() {
+                let value = this.value;
 
                 if (value === "all") {
-                    table.clearFilter();
+                    currentInvFilter = null;
+                    setCombinedFilters();
                 } else if (value === "zero") {
-                    table.setFilter("inv", "=", 0);
+                    currentInvFilter = "zero";
+                    setCombinedFilters();
                 } else if (value === "other") {
-                    table.setFilter("inv", ">", 0);
+                    currentInvFilter = "other";
+                    setCombinedFilters();
                 }
             });
         });
 
-// Filter by CVR radio buttons
-document.querySelectorAll("input[name='cvrFilter']").forEach(input => {
-    input.addEventListener("change", function() {
-        let value = this.value;
 
-                if (value === "clear") {
-                    table.clearFilter("avgCvr");
-                } else if (value === "all") {
-                    table.clearFilter("avgCvr");
+
+
+        // Filter by CVR radio buttons for cvr 
+        document.querySelectorAll("input[name='cvrFilter']").forEach(input => {
+            input.addEventListener("change", function() {
+                let value = this.value;
+
+                if (value === "clear" || value === "all") {
+                    currentCvrFilter = null;
+                    setCombinedFilters();
                 } else if (value === "high") {
-                    table.setFilter("avgCvr", ">", 5);
+                    currentCvrFilter = "high";
+                    setCombinedFilters();
                 } else if (value === "medium") {
-                    table.setFilter(function(data) {
-                        const cvr = parseFloat(data.avgCvr) || 0;
-                        return cvr >= 3 && cvr <= 5;
-                    });
+                    currentCvrFilter = "medium";
+                    setCombinedFilters();
                 } else if (value === "low") {
-                    table.setFilter("avgCvr", "<", 3);
+                    currentCvrFilter = "low";
+                    setCombinedFilters();
                 }
             });
         });
 
-// Filter by View radio buttons
-document.querySelectorAll("input[name='viewFilter']").forEach(input => {
-    input.addEventListener("change", function() {
-        let value = this.value;
+        // Filter by View radio buttons for sku parent and both 
+        document.querySelectorAll("input[name='viewFilter']").forEach(input => {
+            input.addEventListener("change", function() {
+                let value = this.value;
 
                 if (value === "parent") {
-                    table.setFilter(function(data) {
-                        const sku = (data.SKU || "").toUpperCase();
-                        return sku.includes("PARENT");
-                    });
+                    currentViewFilter = "parent";
+                    setCombinedFilters();
                 } else if (value === "sku") {
-                    table.setFilter(function(data) {
-                        const sku = (data.SKU || "").toUpperCase();
-                        return !sku.includes("PARENT");
-                    });
+                    currentViewFilter = "sku";
+                    setCombinedFilters();
                 } else if (value === "both") {
-                    table.clearFilter();
+                    currentViewFilter = null;
+                    setCombinedFilters();
                 }
             });
         });
 
-// Filter by Dilution radio buttons
-document.querySelectorAll("input[name='dilFilter']").forEach(input => {
-    input.addEventListener("change", function() {
-        let value = this.value;
+        // Filter by Dilution radio buttons for dil
+        document.querySelectorAll("input[name='dilFilter']").forEach(input => {
+            input.addEventListener("change", function() {
+                let value = this.value;
 
-                if (value === "clear") {
-                    table.clearFilter("Dil%");
-                } else if (value === "all") {
-                    table.clearFilter("Dil%");
+                if (value === "clear" || value === "all") {
+                    currentDilFilter = null;
+                    setCombinedFilters();
                 } else if (value === "verylow") {
-                    table.setFilter("Dil%", "<=", 10);
+                    currentDilFilter = "verylow";
+                    setCombinedFilters();
                 } else if (value === "low") {
-                    table.setFilter(function(data) {
-                        const dil = parseFloat(data["Dil%"]) || 0;
-                        return dil >= 11 && dil <= 15;
-                    });
+                    currentDilFilter = "low";
+                    setCombinedFilters();
                 } else if (value === "medium") {
-                    table.setFilter(function(data) {
-                        const dil = parseFloat(data["Dil%"]) || 0;
-                        return dil >= 16 && dil <= 20;
-                    });
+                    currentDilFilter = "medium";
+                    setCombinedFilters();
                 } else if (value === "high") {
-                    table.setFilter(function(data) {
-                        const dil = parseFloat(data["Dil%"]) || 0;
-                        return dil >= 21 && dil <= 40;
-                    });
+                    currentDilFilter = "high";
+                    setCombinedFilters();
                 } else if (value === "veryhigh") {
-                    table.setFilter("Dil%", ">", 40);
+                    currentDilFilter = "veryhigh";
+                    setCombinedFilters();
                 }
             });
         });
@@ -1151,196 +1147,294 @@ document.querySelectorAll("input[name='dilFilter']").forEach(input => {
 
 
 
-const table = new Tabulator("#forecast-table", {
-    ajaxURL: "/pricing-master-data-views",
-    fixedHeader: true,
-    width: "100%",
-    height: "700px",
-    pagination: true, 
-    paginationSize: 50,
-    
-    rowFormatter: function(row) {
-        const data = row.getData();
-        const sku = data["SKU"] || '';
+       const table = new Tabulator("#forecast-table", {
+            ajaxURL: "/pricing-master-data-views",
+            fixedHeader: true,
+         
+            width: "100%",
+            height: "700px",
+          
+            pagination: true, 
+            paginationSize: 50,
+        
+             rowFormatter: function(row) {
+                const data = row.getData();
+                const sku = data["SKU"] || '';
 
-        if (sku.toUpperCase().includes("PARENT")) {
-            row.getElement().classList.add("parent-row");
-        }
-    },
-    
-    columns: [{
-        title: "Image",
-        field: "shopifyb2c_image",
-        formatter: function(cell) {
-            const value = cell.getValue();
-            if (!value) return "";
-            return `<img src="${value}" width="40" height="40" class="product-thumb" onmouseover="showImagePreview(this)" onmouseout="hideImagePreview()" style="cursor: pointer">`;
-        },
-        headerSort: false,
-        width: 70,
-        hozAlign: "center"
-    },
-    {
-        title: "Parent",
-        field: "Parent",
-        headerFilter: "input",
-        headerFilterPlaceholder: "Search Parent...",
-        cssClass: "text-muted",
-        tooltip: true,
-        frozen: true
-    },
-    {
-        title: "SKU",
-        field: "SKU",
-        headerFilter: "input",
-        headerFilterPlaceholder: "Search SKU...",
-        cssClass: "font-weight-bold",
-        tooltip: true,
-        frozen: true,
-        formatter: function(cell) {
-            let value = cell.getValue();
-            return `
-                <span class="sku-text">${value}</span>
-                <i class="bi bi-clipboard ms-2 copy-icon" 
-                style="cursor:pointer;color:#007bff;" 
-                title="Copy SKU"></i>
-                <span class="copied-msg" style="display:none;color:green;font-size:12px;margin-left:5px;">Copied!</span>
-            `;
-        },
-        cellClick: function(e, cell) {
-            if (e.target.classList.contains("copy-icon")) {
-                let sku = cell.getValue();
-                navigator.clipboard.writeText(sku).then(() => {
-                    let copiedMsg = cell.getElement().querySelector(".copied-msg");
-                    copiedMsg.style.display = "inline";
-                    setTimeout(() => {
-                        copiedMsg.style.display = "none";
-                    }, 500);
-                }).catch(err => {
-                    console.error("Failed to copy: ", err);
-                });
-            } else {
-                showPriceComparisonModal(cell.getRow());
-            }
-        },
-    },
-    {
-        title: "INV",
-        field: "INV",
-        hozAlign: "right",
-        formatter: function(cell) {
-            const value = cell.getValue();
-            return `<strong>${Math.round(value)}</strong>`;
-        }
-    },
-    {
-        title: "OVL30",
-        field: "ovl30",
-        hozAlign: "center",
-        headerSort: false,
-        formatter: function(cell) {
-            const data = cell.getRow().getData();
-            const l30 = data.shopifyb2c_l30 || 0;
-            return `<button class="btn btn-outline-primary rounded-pill px-3 text-primary" style="cursor:default !important; background-color: #fff !important">
-                <i class="bi bi-eye me-1"></i>${l30}
-            </button>`;
-        },
-        cellClick: function(e, cell) {
-            showOVL30Modal(cell.getRow());
-        }
-    },
-    {
-        title: "DIL%",
-        field: "Dil%",
-        hozAlign: "right",
-        formatter: function (cell) {
-            const data = cell.getRow().getData();
-            const value = cell.getValue() || 0;
-            const element = document.createElement("div");
-            const rounded = Math.round(value);
-            element.textContent = rounded + "%";
-            
-            if (rounded >= 0 && rounded <= 10) {
-                element.style.color = "red";
-            } else if (rounded >= 11 && rounded <= 15) {
-                element.style.backgroundColor = "yellow";
-                element.style.color = "black";
-                element.style.padding = "2px 4px";
-                element.style.borderRadius = "4px";
-            } else if (rounded >= 16 && rounded <= 20) {
-                element.style.color = "blue";
-            } else if (rounded >= 21 && rounded <= 40) {
-                element.style.color = "green";
-            } else if (rounded >= 41) {
-                element.style.color = "purple";
-            }
-            data.dilPercentage = rounded;
-            return element;
-        },
-    },
-    {
-        title: "AVG PRC",
-        field: "avgPrice",
-        hozAlign: "center",
-        bold: true,
-        formatter: function(cell) {
-            const data = cell.getRow().getData();
-            const calculateAvgPrice = () => {
-                const marketplaces = [
-                    { price: data.amz_price, l30: data.amz_l30 },
-                    { price: data.ebay_price, l30: data.ebay_l30 },
-                    { price: data.macy_price, l30: data.macy_l30 },
-                    { price: data.reverb_price, l30: data.reverb_l30 },
-                    { price: data.doba_price, l30: data.doba_l30 },
-                    { price: data.temu_price, l30: data.temu_l30 },
-                    { price: data.ebay3_price, l30: data.ebay3_l30 },
-                    { price: data.ebay2_price, l30: data.ebay2_l30 },
-                    { price: data.walmart_price, l30: data.walmart_l30 },
-                    { price: data.shopify_price, l30: data.shopify_l30 },
-                    { price: data.shein_price, l30: data.shein_l30 },
-                    { price: data.bestbuy_price, l30: data.bestbuy_l30 },
-                    { price: data.tiendamia_price, l30: data.tiendamia_l30 },
-                    { price: data.tiktok_price, l30: data.tiktok_l30 },
-                    { price: data.aliexpress_price, l30: data.aliexpress_l30 }
-                ];
-                let totalWeightedPrice = 0;
-                let totalL30 = 0;
-                marketplaces.forEach(mp => {
-                    const price = parseFloat(mp.price) || 0;
-                    const l30 = parseFloat(mp.l30) || 0;
-                    totalWeightedPrice += (price * l30);
-                    totalL30 += l30;
-                });
-                return totalL30 > 0 ? (totalWeightedPrice / totalL30).toFixed(2) : '---';
-            };
-            const avgPrice = calculateAvgPrice();
-            const avgPriceValue = parseFloat(avgPrice);
-            let textColor;
-            if (!isNaN(avgPriceValue)) {
-                if (avgPriceValue < 10) {
-                    textColor = '#dc3545';
-                } else if (avgPriceValue >= 10 && avgPriceValue < 15) {
-                    textColor = '#fd7e14';
-                } else if (avgPriceValue >= 15 && avgPriceValue < 20) {
-                    textColor = '#0d6efd';
-                } else if (avgPriceValue >= 20) {
-                    textColor = '#198754';
+                if (sku.toUpperCase().includes("PARENT")) {
+                    row.getElement().classList.add("parent-row");
                 }
-            } else {
-                textColor = '#6c757d';
-            }
-            const element = document.createElement('div');
-            element.innerHTML = avgPrice === '---' ? avgPrice : `$${avgPrice}`;
-            element.style.color = textColor;
-            element.style.fontWeight = '700';
-            element.style.padding = '4px 8px';
-            element.style.borderRadius = '4px';
-            element.style.textAlign = 'center';
-            data.formattedAvgPrice = avgPrice;
-            return element;
-        }
-    },
-   
+            },
+            columns: [{
+                    title: "Image",
+                    field: "shopifyb2c_image",
+                    formatter: function(cell) {
+                        const value = cell.getValue();
+                        if (!value) return "";
+                        return `<img src="${value}" width="40" height="40" class="product-thumb" onmouseover="showImagePreview(this)" onmouseout="hideImagePreview()" style="cursor: pointer">`;
+                    },
+                    headerSort: false,
+                    width: 70,
+                    hozAlign: "center"
+                },
+               
+                {
+                    title: "Parent",
+                    field: "Parent",
+                    headerFilter: "input",
+                    headerFilterPlaceholder: "Search Parent...",
+                    cssClass: "text-muted",
+                    tooltip: true,
+                    frozen: true
+                },
+                {
+                    title: "SKU",
+                    field: "SKU",
+                    headerFilter: "input",
+                    headerFilterPlaceholder: "Search SKU...",
+                    cssClass: "font-weight-bold",
+                    tooltip: true,
+                    frozen: true,
+                    formatter: function(cell) {
+                        let value = cell.getValue();
+                        return `
+                            <span class="sku-text">${value}</span>
+                            <i class="bi bi-clipboard ms-2 copy-icon" 
+                            style="cursor:pointer;color:#007bff;" 
+                            title="Copy SKU"></i>
+                            <span class="copied-msg" style="display:none;color:green;font-size:12px;margin-left:5px;">Copied!</span>
+                        `;
+                    },
+                    cellClick: function(e, cell) {
+                        if (e.target.classList.contains("copy-icon")) {
+                            let sku = cell.getValue();
+
+                            // copy to clipboard
+                            navigator.clipboard.writeText(sku).then(() => {
+                                let copiedMsg = cell.getElement().querySelector(".copied-msg");
+                                copiedMsg.style.display = "inline";
+
+                                setTimeout(() => {
+                                    copiedMsg.style.display = "none";
+                                }, 500);
+                            }).catch(err => {
+                                console.error("Failed to copy: ", err);
+                            });
+                        } else {
+                            showPriceComparisonModal(cell.getRow());
+                        }
+                    },
+                },
+                {
+                    title: "INV",
+                    field: "INV",
+                    hozAlign: "right",
+                    formatter: function(cell) {
+                        const value = cell.getValue();
+                        return `<strong>${Math.round(value)}</strong>`;
+                    }
+                    
+                },
+
+
+               {
+                    title: "OVL30",
+                    field: "ovl30",
+                    hozAlign: "center",
+                    headerSort: false,
+                    formatter: function(cell) {
+                        const data = cell.getRow().getData();
+                        const l30 = data.shopifyb2c_l30 || 0;
+
+                        // Determine button color based on L30 value
+
+                        return `<button class="btn btn-outline-primary  rounded-pill px-3 text-primary" style="cursor:default !important; background-color: #fff !important">
+                            <i class="bi bi-eye me-1"></i>${l30}
+                        </button>`;
+                    },
+                    cellClick: function(e, cell) {
+                        showOVL30Modal(cell.getRow());
+                    }
+                },
+             
+
+
+                    {
+                        title: "DIL%",
+                        field: "Dil%",
+                        hozAlign: "right",
+                        formatter: function (cell) {
+                            const data = cell.getRow().getData();
+                            const value = cell.getValue() || 0;
+                            const element = document.createElement("div");
+                        
+                            const rounded = Math.round(value);
+                            element.textContent = rounded + "%";
+                            if (rounded >= 0 && rounded <= 10) {
+                                element.style.color = "red"; // red text
+                            } else if (rounded >= 11 && rounded <= 15) {
+                                element.style.backgroundColor = "yellow"; // yellow background
+                                element.style.color = "black";
+                                element.style.padding = "2px 4px";
+                                element.style.borderRadius = "4px";
+                            } else if (rounded >= 16 && rounded <= 20) {
+                                element.style.color = "blue"; // blue text
+                            } else if (rounded >= 21 && rounded <= 40) {
+                                element.style.color = "green"; // green text
+                            } else if (rounded >= 41) {
+                                element.style.color = "purple"; // purple text (41 and above)
+                            }
+
+                            data.dilPercentage = rounded;
+                           
+                            return element;
+                        },
+                    }
+
+                 ,
+                  {
+                    title: "AVG PRC",
+                    field: "avgPrice",
+                    hozAlign: "center",
+                    bold: true,
+                    formatter: function(cell) {
+                        const data = cell.getRow().getData();
+
+                        // Calculate weighted average price
+                        const calculateAvgPrice = () => {
+                            const marketplaces = [{
+                                    price: data.amz_price,
+                                    l30: data.amz_l30
+                                },
+                                {
+                                    price: data.ebay_price,
+                                    l30: data.ebay_l30
+                                },
+                                {
+                                    price: data.macy_price,
+                                    l30: data.macy_l30
+                                },
+                                {
+                                    price: data.reverb_price,
+                                    l30: data.reverb_l30
+                                },
+                                {
+                                    price: data.doba_price,
+                                    l30: data.doba_l30
+                                },
+                                {
+                                    price: data.temu_price,
+                                    l30: data.temu_l30
+                                },
+                               
+                                {
+                                    price: data.ebay3_price,
+                                    l30: data.ebay3_l30
+                                },
+                                {
+                                    price: data.ebay2_price,
+                                    l30: data.ebay2_l30
+                                },
+                                {
+                                    price: data.walmart_price,
+                                    l30: data.walmart_l30
+                                },
+                                {
+                                    price: data.shopify_price,
+                                    l30: data.shopify_l30
+                                },
+                                {
+                                    price: data.shein_price,
+                                    l30: data.shein_l30
+                                },
+                                {
+                                    price: data.bestbuy_price,
+                                    l30: data.bestbuy_l30
+                                },
+                                {
+                                    price: data.tiendamia_price,
+                                    l30: data.tiendamia_l30
+                                },
+                                {
+                                    price: data.tiktok_price,
+                                    l30: data.tiktok_l30
+                                },
+                                {
+                                    price: data.aliexpress_price,
+                                    l30: data.aliexpress_l30
+                                }
+
+                            ];
+
+                            let totalWeightedPrice = 0;
+                            let totalL30 = 0;
+
+                            marketplaces.forEach(mp => {
+                                const price = parseFloat(mp.price) || 0;
+                                const l30 = parseFloat(mp.l30) || 0;
+                                totalWeightedPrice += (price * l30);
+                                totalL30 += l30;
+                            });
+
+                            return totalL30 > 0 ? (totalWeightedPrice / totalL30).toFixed(2) : '---';
+                        };
+
+                        const avgPrice = calculateAvgPrice();
+                        const avgPriceValue = parseFloat(avgPrice);
+
+                        // Determine colors based on value
+                        let textColor, bgColor;
+                        if (!isNaN(avgPriceValue)) {
+                            if (avgPriceValue < 10) {
+                                textColor = '#dc3545'; // red
+                               
+                            } else if (avgPriceValue >= 10 && avgPriceValue < 15) {
+                                textColor = '#fd7e14'; // orange
+                             
+                            } else if (avgPriceValue >= 15 && avgPriceValue < 20) {
+                                textColor = '#0d6efd'; // blue
+                              
+                            } else if (avgPriceValue >= 20) {
+                                textColor = '#198754'; // green
+                               
+                            }
+                        } else {
+                            textColor = '#6c757d'; // gray
+                           
+                        }
+
+                        const element = document.createElement('div');
+                        element.innerHTML = avgPrice === '---' ? avgPrice : `$${avgPrice}`;
+                        element.style.color = textColor;
+                        element.style.fontWeight = '700'; // Bolder text
+                        element.style.backgroundColor = bgColor;
+                        element.style.padding = '4px 8px';
+                        element.style.borderRadius = '4px';
+                        element.style.textAlign = 'center';
+
+                        data.formattedAvgPrice = avgPrice;
+                        return element;
+                    }
+                },
+
+                
+
+                /* === OVL30 button (VISIBLE) === */
+               
+                /* === MARKETPLACE COLUMNS (HIDDEN, but kept for modal data) === */
+
+
+                    // Total avg pft= (avg price * ovl30 ) * avg pft on top add sum of all columns 
+                    // avg sales = price * Ovl30 same as above
+                    // avgpft top = (total avg pft /avg sales) * 100
+
+                    // Avg cogs = Lp * Ov l30 on back sum on top
+
+                    // Avg Roi % = avg sales / Avg COGS * 100
+
+               
+               
+
                 {
                      title: "AVG PFT%<br><span id='avgPftHeader' style='font-size:12px; color:#fff; '></span>",
                     field: "avgPftPercent",
@@ -1624,158 +1718,195 @@ const table = new Tabulator("#forecast-table", {
                         visible: true
                     }
                     ,
-    {
-        title: "Avg CVR",
-        field: "avgCvr",
-        hozAlign: "center",
-        headerSort: true,
-        sorter: function(a, b) {
-            const valA = parseFloat(a) || 0;
-            const valB = parseFloat(b) || 0;
-            return valA - valB;
-        },
-        formatter: function(cell) {
-            let value = cell.getValue() || 0;
-            if (typeof value === "string" && value.includes("%")) {
-                value = value.replace("%", "");
-            }
-            value = parseFloat(value);
-            if (isNaN(value)) value = 0;
-            const element = document.createElement("span");
-            element.textContent = value.toFixed(1) + "%";
-            if (value >= 0 && value <= 3) {
-                element.style.color = "red";
-            } else if (value > 3 && value <= 6) {
-                element.style.backgroundColor = "yellow";
-                element.style.color = "black";
-                element.style.padding = "2px 4px";
-                element.style.borderRadius = "4px";
-            } else if (value > 6 && value <= 9) {
-                element.style.color = "blue";
-            } else if (value > 9 && value <= 13) {
-                element.style.color = "green";
-            } else if (value > 13) {
-                element.style.color = "purple";
-            }
-            return element;
-        }
-    },
-    {
-        title: "Total Views",
-        field: "total_views",
-        hozAlign: "center",
-        headerSort: false,
-        formatter: function(cell) {
-            const value = cell.getValue() || 0;
-            return `<span class="text-danger">${Math.round(value)} </span>`;
-        }
-    },
-    {
-        title: "Total Req Views",
-        field: "total_req_view",
-        hozAlign: "center",
-        headerSort: false,
-        formatter: function(cell) {
-            const value = cell.getValue() || 0;
-            return `<span class="text-dark">${Math.round(value)} </span>`;
-        }
-    },
-    {
-        title: "Total L30 Count",
-        field: "total_l30_count",
-        hozAlign: "center",
-        headerSort: false,
-        formatter: function(cell) {
-            const value = cell.getValue() || 0;
-            return `<span class="text-success">${value} </span>`;
-        }
-    },
-    {
-        title: "Total L60 Count",
-        field: "total_l60_count",
-        hozAlign: "center",
-        headerSort: false,
-        formatter: function(cell) {
-            const value = cell.getValue() || 0;
-            return `<span class="text-success">${value} </span>`;
-        }
-    },
-    {
-        title: "MSRP",
-        field: "MSRP",
-        hozAlign: "right",
-        formatter: "money",
-        formatterParams: { precision: 2 }
-    },
-    {
-        title: "MAP",
-        field: "MAP",
-        hozAlign: "right",
-        formatter: "money",
-        formatterParams: { precision: 2 }
-    },
-    {
-        title: "LP",
-        field: "LP",
-        hozAlign: "right",
-        formatter: "money",
-        formatterParams: { precision: 2 }
-    },
-    {
-        title: "SHIP",
-        field: "SHIP",
-        hozAlign: "right",
-        formatter: "money",
-        formatterParams: { precision: 2 }
-    },
-    {
-        title: "Remark",
-        field: "remark",
-        hozAlign: "center",
-        headerSort: false,
-        width: 80,
-        formatter: function(cell) {
-            const data = cell.getRow().getData();
-            const sku = data.SKU;
-            const remark = cell.getValue() || '';
-            if (data.is_parent) return '';
-            const buttonColor = remark ? 'btn-warning' : 'btn-outline-secondary';
-            return `<button class="btn ${buttonColor} btn-sm" onclick="openRemarkModal('${sku}', '${remark}')" title="${remark ? 'Edit remark' : 'Add remark'}"><i class="fas fa-edit"></i></button>`;
-        }
-    }
-    ],
-    ajaxResponse: function(url, params, response) {
-        groupedSkuData = {};
 
-        // Add calculated fields + mark parent rows
-        response.data = response.data.map((item, index) => {
-            const sku = item.SKU || "";
-            const isParent = item.is_parent || sku.toUpperCase().includes("PARENT");
-            return {
-                ...item,
-                calculatedRoi: calculateROI(item),
-                calculatedProfit: calculateAvgProfit(item),
-                sl_no: index + 1,
-                is_parent: isParent ? 1 : 0,
-                isParent: isParent,
-                raw_data: item || {}
-            };
-        });
+            {
+                title: "Avg CVR",
+                field: "avgCvr",
+                hozAlign: "center",
+              
+                formatterParams: {
+                    decimal: 2,
+                
+            
+                },
+                formatter: function(cell) {
+                    let value = cell.getValue() || 0;
+                    // Remove % if present and parse as float
+                    if (typeof value === "string" && value.includes("%")) {
+                        value = value.replace("%", "");
+                    }
+                    value = parseFloat(value);
+                    if (isNaN(value)) value = 0;
+                    const element = document.createElement("span");
+                    // Show value with 2 decimals
+                    element.textContent = value.toFixed(1) + "%";
+                    if (value >= 0 && value <= 3) {
+                        element.style.color = "red"; // red text
+                    } else if (value > 3 && value <= 6) {
+                        element.style.backgroundColor = "yellow"; // yellow background
+                        element.style.color = "black";
+                        element.style.padding = "2px 4px";
+                        element.style.borderRadius = "4px";
+                    } else if (value > 6 && value <= 9) {
+                        element.style.color = "blue"; // blue text
+                    } else if (value > 9 && value <= 13) {
+                        element.style.color = "green"; // green text
+                    } else if (value > 41) {
+                        element.style.color = "purple"; // purple text (41 and above)
+                    }
+                    return element;
+                }
+            },
+            
 
-        // Group by Parent
-        let grouped = {};
-        response.data.forEach(item => {
-            const parentKey = item.Parent || "";
-            if (!grouped[parentKey]) grouped[parentKey] = [];
-            grouped[parentKey].push(item);
+        {
+                    title: "Total Views",
+                    field: "total_views",
+                    hozAlign: "center",
+                    headerSort: false,
+                    formatter: function(cell) {
+                        const value = cell.getValue() || 0;
+                        return `<span class="text-danger">${Math.round(value)} </span>`;
+                    }
+                    
+                },
 
-            if (!groupedSkuData[parentKey]) {
-                groupedSkuData[parentKey] = [];
-            }
-            groupedSkuData[parentKey].push(item);
-        });
+                 {
+                    title: "Total Req Views",
+                    field: "total_req_view",
+                    hozAlign: "center",
+                    headerSort: false,
+                    formatter: function(cell) {
+                        const value = cell.getValue() || 0;
+                        return `<span class="text-dark">${Math.round(value)} </span>`;
+                    }
+                    
+                },
 
-        // Aggregate for parent rows
+                
+
+                {
+                    title: "Total L30 Count",
+                    field: "total_l30_count",
+                    hozAlign: "center",
+                    headerSort: false,
+                    formatter: function(cell) {
+                        const value = cell.getValue() || 0;
+                        return `<span class="text-success">${value} </span>`;
+                    }
+                },
+
+                {
+                    title: "Total L60 Count",
+                    field: "total_l60_count",
+                    hozAlign: "center",
+                    headerSort: false,
+                    formatter: function(cell) {
+                        const value = cell.getValue() || 0;
+                        return `<span class="text-success">${value} </span>`;
+                    }
+                },
+
+             
+
+               
+
+                 {
+                    title: "MSRP",
+                    field: "MSRP",
+                    hozAlign: "right",
+                    formatter: "money",
+                    formatterParams: {
+                        precision: 2
+                    }
+                },
+
+                  {
+                    title: "MAP",
+                    field: "MAP",
+                    hozAlign: "right",
+                    formatter: "money",
+                    formatterParams: {
+                        precision: 2
+                    }
+                },
+
+                {
+                    title: "LP",
+                    field: "LP",
+                    hozAlign: "right",
+                    formatter: "money",
+                    formatterParams: {
+                        precision: 2
+                    }
+                },
+                {
+                    title: "SHIP",
+                    field: "SHIP",
+                    hozAlign: "right",
+                    formatter: "money",
+                    formatterParams: {
+                        precision: 2
+                    }
+                },
+                {
+                    title: "Remark",
+                    field: "remark",
+                    hozAlign: "center",
+                    headerSort: false,
+                    width: 80,
+                    formatter: function(cell) {
+                        const data = cell.getRow().getData();
+                        const sku = data.SKU;
+                        const remark = cell.getValue() || '';
+                        
+                        // Only show for non-parent rows
+                        if (data.is_parent) {
+                            return '';
+                        }
+                        
+                        const buttonColor = remark ? 'btn-warning' : 'btn-outline-secondary';
+                        return `<button class="btn ${buttonColor} btn-sm" onclick="openRemarkModal('${sku}', '${remark}')" title="${remark ? 'Edit remark' : 'Add remark'}"><i class="fas fa-edit"></i></button>`;
+                    }
+                },
+             
+            ],
+                ajaxResponse: function(url, params, response) {
+                    groupedSkuData = {}; // clear previous
+
+                    // Add calculated fields + mark parent rows
+                    response.data = response.data.map((item, index) => {
+                        const sku = item.SKU || "";
+                        const isParent = item.is_parent || sku.toUpperCase().includes("PARENT");
+
+                        return {
+                            ...item,
+                            calculatedRoi: calculateROI(item),
+                            calculatedProfit: calculateAvgProfit(item),
+                            sl_no: index + 1,
+                            is_parent: isParent ? 1 : 0,
+                             isParent: isParent,
+                            isParent: isParent,
+                            raw_data: item || {}
+                        };
+                    });
+
+                    // Group by Parent
+                    let grouped = {};
+                    response.data.forEach(item => {
+                        const parentKey = item.Parent || "";
+                        if (!grouped[parentKey]) grouped[parentKey] = [];
+                        grouped[parentKey].push(item);
+
+                        // Group for play button use
+                        if (!groupedSkuData[parentKey]) {
+                            groupedSkuData[parentKey] = [];
+                        }
+                        groupedSkuData[parentKey].push(item);
+                    });
+
+
+                         // Aggregate for parent rows
         Object.keys(grouped).forEach(parentKey => {
             const rows = grouped[parentKey];
             const children = rows.filter(item => !item.is_parent);
@@ -1783,26 +1914,31 @@ const table = new Tabulator("#forecast-table", {
 
             if (!parent || children.length === 0) return;
 
+            // Additive fields to sum
             const additiveFields = ['INV', 'total_views', 'total_req_view', 'inv_value', 'COGS'];
             additiveFields.forEach(field => {
                 parent[field] = children.reduce((sum, c) => sum + (parseFloat(c[field]) || 0), 0).toFixed(2);
             });
 
+            // Rate fields to average
             const rateFields = ['Dil%', 'avgCvr', 'MSRP', 'MAP', 'LP', 'SHIP', 'temu_ship', 'avgPftPercent'];
             rateFields.forEach(field => {
                 const values = children.map(c => parseFloat(c[field]) || 0);
-                const valid = values.filter(v => !isNaN(v) && v !== 0);
+                const valid = values.filter(v => !isNaN(v) && v !== 0); // Exclude 0 to avoid skew
                 parent[field] = valid.length > 0 ? (valid.reduce((sum, v) => sum + v, 0) / valid.length).toFixed(2) :
                     (values.length > 0 ? (values.reduce((sum, v) => sum + v, 0) / values.length).toFixed(2) : 0);
             });
 
-            const mps = ['amz', 'ebay', 'macy', 'reverb', 'doba', 'temu', 'ebay3', 'ebay2', 'walmart', 'shein', 'shopifyb2c', 'aliexpress', 'tiktok', 'bestbuy', 'tiendamia'];
+            // Marketplaces for l30 sum and price weighted average
+            const mps = ['amz', 'ebay', 'macy', 'reverb', 'doba', 'temu', 'ebay3', 'ebay2', 'walmart', 'shein', 'shopifyb2c', 'aliexpress', 'tiktok', 'bestbuy' ,'tiendamia'];
             mps.forEach(mp => {
                 const l30Field = (mp === 'shopifyb2c' ? 'shopifyb2c_l30' : `${mp}_l30`);
                 const priceField = (mp === 'shopifyb2c' ? 'shopifyb2c_price' : `${mp}_price`);
 
+                // Sum l30
                 parent[l30Field] = children.reduce((sum, c) => sum + (parseFloat(c[l30Field]) || 0), 0);
 
+                // Weighted average price by l30
                 let totalWeighted = 0;
                 let totalWeight = 0;
                 children.forEach(c => {
@@ -1816,13 +1952,16 @@ const table = new Tabulator("#forecast-table", {
                     (children.reduce((sum, c) => sum + (parseFloat(c[priceField]) || 0), 0) / children.length).toFixed(2);
             });
 
+            // Recalculate inv_value for parent
             const inv = parseFloat(parent.INV) || 0;
             const shopifyPrice = parseFloat(parent.shopifyb2c_price) || 0;
             parent.inv_value = (inv * shopifyPrice).toFixed(2);
 
+            // Recalculate COGS for parent
             const lp = parseFloat(parent.LP) || 0;
             parent.COGS = (lp * inv).toFixed(2);
 
+            // Recalculate avgPftPercent for parent
             const marketplaces = [
                 { price: parent.amz_price, l30: parent.amz_l30, factor: 0.70 },
                 { price: parent.ebay_price, l30: parent.ebay_l30, factor: 0.72 },
@@ -1836,9 +1975,11 @@ const table = new Tabulator("#forecast-table", {
                 { price: parent.walmart_price, l30: parent.walmart_l30, factor: 0.80 },
                 { price: parent.shein_price, l30: parent.shein_l30, factor: 0.89 },
                 { price: parent.aliexpress_price, l30: parent.aliexpress_l30, factor: 0.89 },
-                { price: parent.tiktok_price, l30: parent.tiktok_l30, factor: 0.64 },
-                { price: parent.bestbuy_price, l30: parent.bestbuy_l30, factor: 0.80 },
-                { price: parent.tiendamia_price, l30: parent.tiendamia_l30, factor: 0.83 }
+                { price: parent.tiktok_price, l30: parent.tiktok_price, factor: 0.64 },
+                { price: parent.bestbuy_price, l30: parent.bestbuy_price, factor: 0.80 },
+                { price: parent.tiendamia_price, l30: parent.tiendamia_price, factor: 0.83 },
+                { price: parent.aliexpress_price, l30: parent.aliexpress_price, factor: 0.89 }
+
             ];
 
             let totalProfit = 0;
@@ -1854,46 +1995,41 @@ const table = new Tabulator("#forecast-table", {
 
             parent.avgPftPercent = totalRevenue > 0 ? ((totalProfit / totalRevenue) * 100).toFixed(2) : 0;
 
+            // Set image from first child if missing
             if (!parent.shopifyb2c_image && children[0]) {
                 parent.shopifyb2c_image = children[0].shopifyb2c_image;
             }
 
+            // Set ovl30 if needed
             parent.ovl30 = parent.shopifyb2c_l30;
         });
 
-        // Sort inside each group: child rows first, parent bottom
-        let finalData = [];
-        Object.values(grouped).forEach(rows => {
-            rows.sort((a, b) => {
-                if (a.is_parent !== b.is_parent) {
-                    return a.is_parent - b.is_parent;
-                }
-                return (a.SKU || "").localeCompare(b.SKU || "");
-            });
-            finalData = finalData.concat(rows);
+
+                    // Sort inside each group: child rows first, parent bottom
+                    let finalData = [];
+                    Object.values(grouped).forEach(rows => {
+                        rows.sort((a, b) => {
+                            if (a.is_parent !== b.is_parent) {
+                                return a.is_parent - b.is_parent; // parent last
+                            }
+                            return (a.SKU || "").localeCompare(b.SKU || "");
+                        });
+                        finalData = finalData.concat(rows);
+                    });
+
+                    setTimeout(() => {
+                        setCombinedFilters();
+                    }, 0);
+
+                    console.log("Processed Response:", finalData);
+                    return finalData;
+                },
+
         });
 
-        // Filter out rows with INV = 0 (remove all zero inventory rows, but keep calculated parents)
-        finalData = finalData.filter(item => {
-            const inv = parseFloat(item.INV) || 0;
-            return inv > 0;
-        });
 
-        // Sort by CVR from lowest to highest
-        finalData.sort((a, b) => {
-            const cvrA = parseFloat(a.avgCvr) || 0;
-            const cvrB = parseFloat(b.avgCvr) || 0;
-            return cvrA - cvrB;
-        });
 
-        setTimeout(() => {
-            setCombinedFilters();
-        }, 0);
 
-        console.log("Processed Response:", finalData);
-        return finalData;
-    }
-});
         // On Top Start 
     //   On to Percentaeg color
         table.on("dataProcessed", function(){
@@ -1999,10 +2135,6 @@ const table = new Tabulator("#forecast-table", {
                 if (currentDilFilter === "medium" && !(dil >= 16 && dil <= 20)) return false;
                 if (currentDilFilter === "high" && !(dil >= 21 && dil <= 40)) return false;
                 if (currentDilFilter === "veryhigh" && !(dil > 40)) return false;
-
-                // Margin filter
-                const margin = parseFloat(data.avgPftPercent) || 0;
-                if (currentMarginFilter === "high" && !(margin > 20)) return false;
 
                 return true;
             });
@@ -2253,7 +2385,6 @@ const table = new Tabulator("#forecast-table", {
                                 : r.prefix === 'temu' ? (data.temu_views ?? "-")
                                 : r.prefix === 'tiktok' ? (data.tiktok_views ?? "-")
                                 : r.prefix === 'aliexpress' ? (data.aliexpress_views ?? "-")
-                                : r.prefix === 'walmart' ? (data.walmart_views ?? "-")
                                 : "-" }
                         </div>
                     </td>
@@ -2280,9 +2411,6 @@ const table = new Tabulator("#forecast-table", {
                                 else if (r.prefix === 'aliexpress' && cvr) {
                                     return `<span style="color: ${cvr.color}">${Math.round(cvr.value)}%</span>`;
                                 }
-                                else if (r.prefix === 'walmart' && cvr) {
-                                    return `<span style="color: ${cvr.color}">${Math.round(cvr.value)}%</span>`;
-                                }
 
                                 return "N/A";
                             })()} 
@@ -2300,8 +2428,7 @@ const table = new Tabulator("#forecast-table", {
                             r.prefix === 'bestbuy' ? Math.round(data.bestbuy_req_view) ?? "-" :
                             r.prefix === 'tiendamia' ? Math.round(data.tiendamia_req_view) ?? "-" :
                             r.prefix === 'tiktok' ? Math.round(data.tiktok_req_view) ?? "-" :
-                            r.prefix === 'aliexpress' ? Math.round(data.aliexpress_req_view) ?? "-" :
-                            r.prefix === 'walmart' ? Math.round(data.walmart_req_view) ?? "-" : "-"}
+                            r.prefix === 'aliexpress' ? Math.round(data.aliexpress_req_view) ?? "-" : "-"}
                         </div>
                     </td>
 
@@ -2753,6 +2880,9 @@ const table = new Tabulator("#forecast-table", {
 
                 currentParentFilter = parentKey;
                 setCombinedFilters();
+
+                // Filter table by Parent
+                table.setFilter("Parent", "=", parentKey);
                 console.log("Showing group:", parentKey);
             }
 
