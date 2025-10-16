@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-use App\Http\Controllers\ShopifyApiInventoryController;
+// use App\Http\Controllers\ShopifyApiInventoryController;
 use App\Models\ShopifySku;
 use App\Models\Inventory;
 use App\Models\ShopifyInventory;
@@ -37,8 +37,10 @@ use App\Models\EbayThreeListingStatus;
 
 use App\Services\ShopifyApiService;
 use App\Services\AmazonSpApiService;
-use App\Services\EbayApiService;
 use App\Services\WalmartApiService;
+use App\Services\EbayApiService;
+use App\Services\Ebay2ApiService;
+use App\Services\Ebay3ApiService;
 use App\Services\ReverbApiService;
 use App\Services\TemuApiService;
 use App\Services\SheinApiService;
