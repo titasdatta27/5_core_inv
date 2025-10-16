@@ -2501,6 +2501,7 @@
                                 : r.prefix === 'temu' ? (data.temu_views ?? "-")
                                 : r.prefix === 'tiktok' ? (data.tiktok_views ?? "-")
                                 : r.prefix === 'aliexpress' ? (data.aliexpress_views ?? "-")
+                                : r.prefix === 'walmart' ? (data.walmart_views ?? "-")
                                 : "-" }
                         </div>
                     </td>
@@ -2527,6 +2528,9 @@
                                 else if (r.prefix === 'aliexpress' && cvr) {
                                     return `<span style="color: ${cvr.color}">${Math.round(cvr.value)}%</span>`;
                                 }
+                                else if (r.prefix === 'walmart' && cvr) {
+                                    return `<span style="color: ${cvr.color}">${Math.round(cvr.value)}%</span>`;
+                                }
 
                                 return "N/A";
                             })()} 
@@ -2544,7 +2548,8 @@
                             r.prefix === 'bestbuy' ? Math.round(data.bestbuy_req_view) ?? "-" :
                             r.prefix === 'tiendamia' ? Math.round(data.tiendamia_req_view) ?? "-" :
                             r.prefix === 'tiktok' ? Math.round(data.tiktok_req_view) ?? "-" :
-                            r.prefix === 'aliexpress' ? Math.round(data.aliexpress_req_view) ?? "-" : "-"}
+                            r.prefix === 'aliexpress' ? Math.round(data.aliexpress_req_view) ?? "-" :
+                            r.prefix === 'walmart' ? Math.round(data.walmart_req_view) ?? "-" : "-"}
                         </div>
                     </td>
 
