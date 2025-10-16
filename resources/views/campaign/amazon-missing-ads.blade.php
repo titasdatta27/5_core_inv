@@ -197,6 +197,14 @@
                                             <option value="OTHERS">OTHERS</option>
                                         </select>
 
+                                        <select id="nra-filter" class="form-select form-select-lg" style="width: 200px;">
+                                            <option value="">Select NRA</option>
+                                            <option value="ALL">ALL</option>
+                                            <option value="RA">RA</option>
+                                            <option value="NRA">NRA</option>
+                                            <option value="LATER">LATER</option>
+                                        </select>
+
                                         <select id="missingAds-filter" class="form-select form-select-lg" style="width: 180px;">
                                             <option value="">Select Missing Ads</option>
                                             <option value="Both Running">Both Running</option>
@@ -238,6 +246,10 @@
                                         <div class="stats-box">
                                             <div class="stats-label">Both Ads Running</div>
                                             <div id="both-running" class="stats-value success">0</div>
+                                        </div>
+                                        <div class="stats-box">
+                                            <div class="stats-label">Total NRA</div>
+                                            <div id="total-nra" class="stats-value danger">0</div>
                                         </div>
                                     </div>
                                 </div>
@@ -460,38 +472,75 @@
                             var row = cell.getRow().getData();
                             var kwCampaign = row.kw_campaign_name || '';
                             var ptCampaign = row.pt_campaign_name || '';
+                            var nra = row.NRA || '';
                             var sku = row.sku || '';
                             const isParent = sku.toUpperCase().includes("PARENT");
 
                             if(!isParent){
                                 if(kwCampaign && ptCampaign){
-                                    return `
-                                        <span style="color: green;">Both Running</span>
-                                        <i class="fa fa-info-circle text-primary toggle-missingAds-btn" 
-                                            style="cursor:pointer; margin-left:8px;">
-                                        </i>
-                                    `;
+                                    if(nra !== 'NRA'){
+                                        return `
+                                            <span style="color: green;">Both Running</span>
+                                            <i class="fa fa-info-circle text-primary toggle-missingAds-btn" 
+                                                style="cursor:pointer; margin-left:8px;">
+                                            </i>
+                                        `;
+                                    }else{
+                                        return `
+                                            <span style="color: red;">NRA</span>
+                                            <i class="fa fa-info-circle text-primary toggle-missingAds-btn" 
+                                                style="cursor:pointer; margin-left:8px;">
+                                            </i>
+                                        `;
+                                    }
                                 } else if(kwCampaign){
-                                    return `
-                                        <span style="color: red;">PT Missing</span>
-                                        <i class="fa fa-info-circle text-primary toggle-missingAds-btn" 
-                                            style="cursor:pointer; margin-left:8px;">
-                                        </i>
-                                    `;
+                                    if(nra !== 'NRA'){
+                                        return `
+                                            <span style="color: red;">PT Missing</span>
+                                            <i class="fa fa-info-circle text-primary toggle-missingAds-btn" 
+                                                style="cursor:pointer; margin-left:8px;">
+                                            </i>
+                                        `;
+                                    }else{
+                                        return `
+                                            <span style="color: red;">NRA</span>
+                                            <i class="fa fa-info-circle text-primary toggle-missingAds-btn" 
+                                                style="cursor:pointer; margin-left:8px;">
+                                            </i>
+                                        `;
+                                    }
                                 } else if(ptCampaign){
-                                    return `
-                                        <span style="color: red;">KW Missing</span>
-                                        <i class="fa fa-info-circle text-primary toggle-missingAds-btn" 
-                                            style="cursor:pointer; margin-left:8px;">
-                                        </i>
-                                    `;
+                                    if(nra !== 'NRA'){
+                                        return `
+                                            <span style="color: red;">KW Missing</span>
+                                            <i class="fa fa-info-circle text-primary toggle-missingAds-btn" 
+                                                style="cursor:pointer; margin-left:8px;">
+                                            </i>
+                                        `;
+                                    }else{
+                                        return `
+                                            <span style="color: red;">NRA</span>
+                                            <i class="fa fa-info-circle text-primary toggle-missingAds-btn" 
+                                                style="cursor:pointer; margin-left:8px;">
+                                            </i>
+                                        `;
+                                    }
                                 } else {
-                                    return `
-                                        <span style="color: red;">Kw Missing <br/> PT Missing</span>
-                                        <i class="fa fa-info-circle text-primary toggle-missingAds-btn" 
-                                            style="cursor:pointer; margin-left:8px;">
-                                        </i>
-                                    `;
+                                    if(nra !== 'NRA'){
+                                        return `
+                                            <span style="color: red;">Missing</span>
+                                            <i class="fa fa-info-circle text-primary toggle-missingAds-btn" 
+                                                style="cursor:pointer; margin-left:8px;">
+                                            </i>
+                                        `;
+                                    }else{
+                                        return `
+                                            <span style="color: red;">NRA</span>
+                                            <i class="fa fa-info-circle text-primary toggle-missingAds-btn" 
+                                                style="cursor:pointer; margin-left:8px;">
+                                            </i>
+                                        `;
+                                    }
                                 }
                             }
                             
@@ -513,6 +562,32 @@
                 }
             });
 
+
+            document.addEventListener("change", function(e){
+                if(e.target.classList.contains("editable-select")){
+                    let sku   = e.target.getAttribute("data-sku");
+                    let field = e.target.getAttribute("data-field");
+                    let value = e.target.value;
+
+                    fetch('/update-amazon-nr-nrl-fba', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({
+                            sku: sku,
+                            field: field,
+                            value: value
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        console.log(data);
+                    })
+                    .catch(err => console.error(err));
+                }
+            });
 
             table.on("tableBuilt", function () {
 
@@ -576,6 +651,7 @@
                     let kwRunning = 0;
                     let ptRunning = 0;
                     let totalMissingAds = 0;
+                    let totalNRA = 0;
 
                     visibleData.forEach(row => {
                         let kw = row.kw_campaign_name || "";
@@ -594,6 +670,10 @@
                         // Total Missing Ads Count
                         totalMissingAds = `( ${ptMissing + kwMissing + (bothMissing)} ) `;
 
+                        // Total NRA Count
+                        if(row.NRA && row.NRA.trim() === "NRA"){
+                            totalNRA++;
+                        }
                     });
 
                     // Update HTML
@@ -607,6 +687,8 @@
                     // New stats
                     $("#kw-running").text(kwRunning);
                     $("#pt-running").text(ptRunning);
+
+                    $("#total-nra").text(totalNRA);
                 }
 
 
