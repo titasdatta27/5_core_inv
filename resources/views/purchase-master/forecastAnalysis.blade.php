@@ -135,12 +135,41 @@
                                 Show Transit
                             </button>
 
-                            <button id="restock_needed" class="btn btn-sm btn-warning fw-semibold text-white">
-                                Restock Needed: <span id = "total_restock" class="fw-semibold text-white">0</span>
+                            <button id="restock_needed" class="btn btn-sm btn-warning fw-semibold text-dark">
+                                Restock Needed: <span id = "total_restock" class="fw-semibold text-dark">0</span>
                             </button>
 
-                            <button id="total_msl_c" class="btn btn-sm btn-success fw-semibold text-white">
-                                Total MSL_C: $<span id="total_msl_c_value" class="fw-semibold text-white">0.00</span>
+                            <button id="total_msl_c" class="btn btn-sm btn-success fw-semibold text-dark">
+                                Total MSL_C: $<span id="total_msl_c_value" class="fw-semibold text-dark">0.00</span>
+                            </button>
+
+                            <button id="total_msl_sp" class="btn btn-sm btn-primary fw-semibold text-dark">
+                                Total MSL_SP: $<span id="total_msl_sp_value" class="fw-semibold text-dark">0</span>
+                            </button>
+
+
+                            <button id="total_inv_value" class="btn btn-sm btn-info fw-semibold text-dark">
+                                Total INV Value: $<span id="total_inv_value_display" class="fw-semibold text-dark">0</span>
+                            </button>
+
+                            <button id="total_lp_value" class="btn btn-sm btn-warning fw-semibold text-dark">
+                                Total LP Value: $<span id="total_lp_value_display" class="fw-semibold text-dark">0</span>
+                            </button>
+
+                            <button id="total_restock_msl" class="btn btn-sm btn-dark fw-semibold text-white">
+                                Total Restock MSL: $<span id="total_restock_msl_value" class="fw-semibold text-white">0.00</span>
+                            </button>
+
+                            <button id="total_minimal_msl" class="btn btn-sm btn-secondary fw-semibold text-white">
+                                Minimal MSL: $<span id="total_minimal_msl_value" class="fw-semibold text-white">0</span>
+                            </button>
+
+                            <button id="sum_restock_shopify_price" class="btn btn-sm btn-info fw-semibold text-dark">
+                                Sum Restock Shopify Price: $<span id="sum_restock_shopify_price_value" class="fw-semibold text-dark">0</span>
+                            </button>
+
+                            <button id="total_restock_msl_lp" class="btn btn-sm btn-warning fw-semibold text-dark">
+                                Total Restock MSL LP: $<span id="total_restock_msl_lp_value" class="fw-semibold text-dark">0</span>
                             </button>
                         </div>
                     </div>
@@ -383,6 +412,36 @@
                     }
                 },
                 {
+                    title: "Shopify Price",
+                    field: "shopifyb2c_price",
+                    accessor: row => row["shopifyb2c_price"],
+                    formatter: function(cell) {
+                        const value = cell.getValue() || 0;
+                        const roundedValue = (value);
+                        return `<span style="display:block; text-align:center; font-weight:bold;">$${roundedValue.toLocaleString()}</span>`;
+                    }
+                },
+                {
+                    title: "INV Value",
+                    field: "inv_value",
+                    accessor: row => row["inv_value"],
+                    formatter: function(cell) {
+                        const value = cell.getValue() || 0;
+                        const roundedValue = Math.round(parseFloat(value));
+                        return `<span style="display:block; text-align:center; font-weight:bold;">$${roundedValue.toLocaleString()}</span>`;
+                    }
+                },
+                {
+                    title: "LP Value",
+                    field: "lp_value",
+                    accessor: row => row["lp_value"],
+                    formatter: function(cell) {
+                        const value = cell.getValue() || 0;
+                        const roundedValue = Math.round(parseFloat(value));
+                        return `<span style="display:block; text-align:center; font-weight:bold;">$${roundedValue.toLocaleString()}</span>`;
+                    }
+                },
+                {
                     title: "OV L30",
                     field: "L30",
                     accessor: row => row["L30"],
@@ -458,26 +517,49 @@
                     }
                 },
                 {
-                    title: "S-MSL",
-                    field: "s_msl",
-                    headerSort: false,
+                    title: "MSL SP",
+                    field: "MSL_SP",
+                    accessor: row => row["MSL_SP"],
                     formatter: function(cell) {
-                        const value = cell.getValue();
-                        const rowData = cell.getRow().getData();
-
-                        const sku = rowData.SKU ?? '';
-                        const parent = rowData.Parent ?? '';
-
-                        return `<div 
-                        class="editable-qty" 
-                        contenteditable="true" 
-                        data-field="S-MSL"
-                        data-original="${value ?? ''}" 
-                        data-sku='${sku}' 
-                        data-parent='${parent}' 
-                        style="outline:none; min-width:50px; text-align:center;">
-                        ${value ?? ''}
-                    </div>`;
+                        const value = cell.getValue() || 0;
+                        const roundedValue = Math.floor(parseFloat(value));
+                        return `<div style="text-align:center; font-weight:bold;">$${roundedValue.toLocaleString()}</div>`;
+                    }
+                },
+                {
+                    title: "MSL",
+                    field: "msl",
+                    formatter: function(cell) {
+                        const value = cell.getValue() || 0;
+                        return `
+                        <div style="text-align:center; font-weight:bold;">
+                            ${value}
+                            <button class="btn btn-sm btn-link text-info open-month-modal" style="padding: 0 4px;" title="View Monthly">
+                                <i class="bi bi-calendar3"></i>
+                            </button>
+                        </div>
+                    `;
+                    },
+                    cellClick: function(e, cell) {
+                        if (e.target.closest(".open-month-modal")) {
+                            const row = cell.getRow().getData();
+                            const sku = row["SKU"] || '';
+                            const monthData = {
+                                "JAN": row["jan"],
+                                "FEB": row["feb"],
+                                "MAR": row["Mar"],
+                                "APR": row["Apr"],
+                                "MAY": row["May"],
+                                "JUN": row["Jun"],
+                                "JUL": row["Jul"],
+                                "AUG": row["Aug"],
+                                "SEP": row["Sep"],
+                                "OCT": row["Oct"],
+                                "NOV": row["Nov"],
+                                "DEC": row["Dec"]
+                            };
+                            openMonthModal(monthData, sku);
+                        }
                     }
                 },
                 {
@@ -652,6 +734,76 @@
                     totalMslCElement.textContent = wholeNumber.toLocaleString('en-US');
                 }
 
+                // Calculate and update total INV Value
+                const totalInvValue = response.data.reduce((sum, item) => {
+                    if (!item.is_parent) {
+                        return sum + (parseFloat(item.inv_value) || 0);
+                    }
+                    return sum;
+                }, 0);
+                const totalInvValueElement = document.getElementById('total_inv_value_display');
+                if (totalInvValueElement) {
+                    const roundedTotal = Math.round(totalInvValue);
+                    totalInvValueElement.textContent = roundedTotal.toLocaleString('en-US');
+                }
+
+                // Calculate and update total LP Value
+                const totalLpValue = response.data.reduce((sum, item) => {
+                    if (!item.is_parent) {
+                        return sum + (parseFloat(item.lp_value) || 0);
+                    }
+                    return sum;
+                }, 0);
+                const totalLpValueElement = document.getElementById('total_lp_value_display');
+                if (totalLpValueElement) {
+                    const roundedTotal = Math.round(totalLpValue);
+                    totalLpValueElement.textContent = roundedTotal.toLocaleString('en-US');
+                }
+
+                // Calculate and update total Restock MSL
+                const totalRestockMsl = response.data.reduce((sum, item) => {
+                    if (!item.is_parent && (parseFloat(item.INV) || 0) === 0) {
+                        const lp = parseFloat(item.LP) || 0;
+                        return sum + (lp / 4);
+                    }
+                    return sum;
+                }, 0);
+                const totalRestockMslElement = document.getElementById('total_restock_msl_value');
+                if (totalRestockMslElement) {
+                    const wholeNumber = Math.round(totalRestockMsl);
+                    totalRestockMslElement.textContent = wholeNumber.toLocaleString('en-US');
+                }
+
+                // Calculate restock count and average shopify price for restock SKUs
+                const restockItems = response.data.filter(item => !item.is_parent && (parseFloat(item.INV) || 0) === 0);
+                const restockCount = restockItems.length;
+                const totalShopifyPrice = restockItems.reduce((sum, item) => sum + (parseFloat(item.shopifyb2c_price) || 0), 0);
+                const averageShopifyPrice = restockCount > 0 ? totalShopifyPrice / restockCount : 0;
+                const totalMinimalMsl = restockCount * (averageShopifyPrice / 4);
+                const totalMinimalMslElement = document.getElementById('total_minimal_msl_value');
+                if (totalMinimalMslElement) {
+                    const wholeNumber = Math.round(totalMinimalMsl);
+                    totalMinimalMslElement.textContent = wholeNumber.toLocaleString('en-US');
+                }
+
+                // Calculate sum of restock shopify prices
+                const sumRestockShopifyPrice = restockItems.reduce((sum, item) => sum + (parseFloat(item.shopifyb2c_price) || 0), 0);
+                const sumRestockShopifyPriceElement = document.getElementById('sum_restock_shopify_price_value');
+                if (sumRestockShopifyPriceElement) {
+                    const wholeNumber = Math.round(sumRestockShopifyPrice);
+                    sumRestockShopifyPriceElement.textContent = wholeNumber.toLocaleString('en-US');
+                }
+
+                // Calculate total restock MSL LP
+                const totalLp = restockItems.reduce((sum, item) => sum + (parseFloat(item.LP) || 0), 0);
+                const averageLp = restockCount > 0 ? totalLp / restockCount : 0;
+                const totalRestockMslLp = restockCount * (averageLp / 4);
+                const totalRestockMslLpElement = document.getElementById('total_restock_msl_lp_value');
+                if (totalRestockMslLpElement) {
+                    const wholeNumber = Math.round(totalRestockMslLp);
+                    totalRestockMslLpElement.textContent = wholeNumber.toLocaleString('en-US');
+                }
+
                 const groupedMSL = {};
                 const groupedS_MSL = {};
 
@@ -682,9 +834,13 @@
 
                     const isParent = item.is_parent === true || item.is_parent === "true" || sku.toUpperCase().includes("PARENT");
 
-                    // Calculate MSL_C (MSL * LP)
+                    // Calculate MSL_C (MSL * LP / 4)
                     const lp = parseFloat(item["LP"]) || 0;
-                    const msl_c = Math.round(msl * lp * 100) / 100; // Round to 2 decimal places
+                    const msl_c = Math.round((msl * lp / 4) * 100) / 100; // Round to 2 decimal places
+                    
+                    // Calculate MSL SP (shopify price * MSL / 4)
+                    const shopifyPrice = parseFloat(item["shopifyb2c_price"]) || 0;
+                    const msl_sp = Math.round(shopifyPrice * msl / 4);
 
                     const processedItem = {
                         ...item,
@@ -692,6 +848,7 @@
                         pft_percent: item['pft%'] ?? null,
                         msl: Math.round(msl),
                         MSL_C: msl_c,
+                        MSL_SP: msl_sp,
                         to_order: toOrder,
                         parentKey: parentKey,
                         s_msl: s_msl_val,
@@ -837,7 +994,101 @@
             });
 
             // update visible count
-            setTimeout(() => updateParentTotalsBasedOnVisibleRows(), 50);
+            setTimeout(() => {
+                updateParentTotalsBasedOnVisibleRows();
+                
+                // Calculate total MSL_C and MSL_SP for visible rows
+                const visibleRows = table.getRows(true);
+                let totalMslC = 0;
+                let totalMslSp = 0;
+                
+                visibleRows.forEach(row => {
+                    const data = row.getData();
+                    if (!data.is_parent) {
+                        totalMslC += parseFloat(data.MSL_C) || 0;
+                        totalMslSp += parseFloat(data.MSL_SP) || 0;
+                    }
+                });
+                
+                // Update total MSL_C display
+                const totalMslCElement = document.getElementById('total_msl_c_value');
+                if (totalMslCElement) {
+                    const wholeNumber = Math.round(totalMslC);
+                    totalMslCElement.textContent = wholeNumber.toLocaleString('en-US');
+                }
+                
+                // Update total MSL_SP display
+                const totalMslSpElement = document.getElementById('total_msl_sp_value');
+                if (totalMslSpElement) {
+                    const wholeNumber = Math.round(totalMslSp);
+                    totalMslSpElement.textContent = wholeNumber.toLocaleString('en-US');
+                }
+
+                // Calculate total Restock MSL for visible rows
+                let totalRestockMsl = 0;
+                visibleRows.forEach(row => {
+                    const data = row.getData();
+                    if (!data.is_parent && (parseFloat(data.INV) || 0) === 0) {
+                        const lp = parseFloat(data.LP) || 0;
+                        totalRestockMsl += (lp / 4);
+                    }
+                });
+
+                // Update total Restock MSL display
+                const totalRestockMslElement = document.getElementById('total_restock_msl_value');
+                if (totalRestockMslElement) {
+                    const wholeNumber = Math.round(totalRestockMsl);
+                    totalRestockMslElement.textContent = wholeNumber.toLocaleString('en-US');
+                }
+
+                // Calculate total Minimal MSL for visible rows
+                const visibleRestockItems = visibleRows.filter(row => {
+                    const data = row.getData();
+                    return !data.is_parent && (parseFloat(data.INV) || 0) === 0;
+                });
+                const visibleRestockCount = visibleRestockItems.length;
+                const visibleTotalShopifyPrice = visibleRestockItems.reduce((sum, row) => {
+                    const data = row.getData();
+                    return sum + (parseFloat(data.shopifyb2c_price) || 0);
+                }, 0);
+                const visibleAverageShopifyPrice = visibleRestockCount > 0 ? visibleTotalShopifyPrice / visibleRestockCount : 0;
+                const totalMinimalMsl = visibleRestockCount * (visibleAverageShopifyPrice / 4);
+
+                // Update total Minimal MSL display
+                const totalMinimalMslElement = document.getElementById('total_minimal_msl_value');
+                if (totalMinimalMslElement) {
+                    const wholeNumber = Math.round(totalMinimalMsl);
+                    totalMinimalMslElement.textContent = wholeNumber.toLocaleString('en-US');
+                }
+
+                // Calculate sum restock shopify price for visible rows
+                const visibleSumRestockShopifyPrice = visibleRestockItems.reduce((sum, row) => {
+                    const data = row.getData();
+                    return sum + (parseFloat(data.shopifyb2c_price) || 0);
+                }, 0);
+
+                // Update sum restock shopify price display
+                const sumRestockShopifyPriceElement = document.getElementById('sum_restock_shopify_price_value');
+                if (sumRestockShopifyPriceElement) {
+                    const wholeNumber = Math.round(visibleSumRestockShopifyPrice);
+                    sumRestockShopifyPriceElement.textContent = wholeNumber.toLocaleString('en-US');
+                }
+
+                // Calculate total restock MSL LP for visible rows
+                const visibleTotalLp = visibleRestockItems.reduce((sum, row) => {
+                    const data = row.getData();
+                    return sum + (parseFloat(data.LP) || 0);
+                }, 0);
+                const visibleAverageLp = visibleRestockCount > 0 ? visibleTotalLp / visibleRestockCount : 0;
+                const totalRestockMslLp = visibleRestockCount * (visibleAverageLp / 4);
+
+                // Update total restock MSL LP display
+                const totalRestockMslLpElement = document.getElementById('total_restock_msl_lp_value');
+                if (totalRestockMslLpElement) {
+                    const wholeNumber = Math.round(totalRestockMslLp);
+                    totalRestockMslLpElement.textContent = wholeNumber.toLocaleString('en-US');
+                }
+            }, 50);
 
             const visibleRows = table.getRows(true).map(r => r.getData());
             const yellowCount = visibleRows.filter(r =>
@@ -956,7 +1207,9 @@
                 SH: row['SH'],
                 CP: row['CP'],
                 LP: row['LP'],
+                "Shopify Price": row['shopifyb2c_price'],
                 "MSL_C": row['MSL_C'],
+                "MSL_SP": row['MSL_SP'],
                 Freight: row['Freight'],
                 "GW (KG)": row['GW (KG)'],
                 "GW (LB)": row['GW (LB)'],

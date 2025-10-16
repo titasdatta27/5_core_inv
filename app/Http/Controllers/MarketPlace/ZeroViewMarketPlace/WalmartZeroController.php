@@ -7,6 +7,8 @@ use App\Models\ProductMaster;
 use App\Models\ShopifySku;
 use App\Models\WalmartDataView;
 use App\Models\WalmartListingStatus;
+use App\Models\WalmartProductSheet;
+use App\Models\ZendropDataView;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -157,6 +159,11 @@ class WalmartZeroController extends Controller
             ->get()
             ->keyBy('sku');
 
+        $walmartSheetViews = WalmartProductSheet::select('sku', 'views')
+            ->whereIn('sku', $skus)
+            ->get()
+            ->keyBy('sku');
+
 
         $listedCount = 0;
         $zeroInvOfListed = 0;
@@ -190,7 +197,7 @@ class WalmartZeroController extends Controller
             }
 
             // Zero view: INV > 0, views == 0 (from ebay_metric table), not parent SKU (NR ignored)
-            $views = $ebayMetrics[$sku]->views ?? null;
+            $views = $walmartSheetViews[$sku]->views ?? null;
             // if (floatval($inv) > 0 && $views !== null && intval($views) === 0) {
             //     $zeroViewCount++;
             // }

@@ -11,6 +11,8 @@ class InventoryWarehouse extends Model
 
     protected $table = 'inventory_warehouse';
 
+    protected $guarded = [];
+
      protected $fillable = [
         'tab_name',
         'supplier_name',
@@ -32,10 +34,13 @@ class InventoryWarehouse extends Model
         'photos',
         'specification',
         'supplier_names',
+        'pushed',
+
     ];
 
     protected $casts = [
         'supplier_names' => 'array',
+        'pushed' => 'boolean',
     ];
 
 }

@@ -1145,7 +1145,30 @@
                         </div>
                         <div class="form-inline">
                             <button id="updatenotrequired" class="btn btn-primary btn-sm">Update Not Required</button>
-                            <button id="reFetchliveData" class="btn btn-primary btn-sm">Refech Live Data</button>
+                            <button id="reFetchliveData" class="btn btn-primary btn-sm">Refech ALL Live Data</button>
+
+                            <div class="row">
+                                <div class="col">
+                                    <select id="refetchFilter" class="form-select-sm border border-primary" style="width: 150px;">
+                                        <option>🔁 Fetch For</option>
+                                        <option value="sku">🔹 SKU (Child)</option>
+                                        <option value="shopify">🔸Shopify</option>
+                                        <option value="amazon">🔹Amazon</option>
+                                        <option value="walmart">🔸Walmart</option>
+                                        <option value="reverb">🔹Reverb</option>
+                                        <option value="shein">🔸Shein</option>
+                                        <option value="doba">🔹Doba</option>
+                                        <option value="temu">🔸Temu</option>
+                                        <option value="macy">🔹Macy</option>
+                                        <option value="ebay1">🔸Ebay1</option>
+                                        <option value="ebay2">🔹Ebay2</option>
+                                        <option value="ebay3">🔸Ebay3</option>
+                                    </select>
+                                </div>
+                                <div class="col">
+                                    <button id="reFetchliveDataFor" class="btn btn-primary btn-sm">Refetch For</button>
+                                </div>
+                            </div>
                             
                             {{-- <button id="reFetchliveData1" data-source="shopify" class="btn btn-primary btn-sm reFetchliveData">Refech Live Shopify Data</button>
                             <button id="reFetchliveData2" data-source="amazon" class="btn btn-primary btn-sm reFetchliveData">Refech Live Amazon Data</button>
@@ -2396,6 +2419,35 @@ $(document).on('click', '#reFetchliveData', function (e) {
 
 });
 
+
+$(document).on('click', '#reFetchliveDataFor', function (e) {
+    e.preventDefault();
+    showLoader();
+
+    const source = $("#refetchFilter").val();
+    const csrfToken = $('meta[name="csrf-token"]').attr('content');
+    $.ajax({
+        url: '/stock/missing/inventory/refetch_live_data_u',
+        type: 'POST',        
+         data: {
+                source: source,
+                _token: $('meta[name="csrf-token"]').attr('content')
+            },
+        // contentType: 'application/json', // ensures server interprets JSON
+        headers: {
+            'X-CSRF-TOKEN': csrfToken
+        }
+    })
+    .done(response => {
+        console.log('✅ Refetch successful:', response);
+        location.reload(); // reload page on success
+    })
+    .fail((jqXHR, textStatus, errorThrown) => {
+        console.error(`❌ Refetch failed: ${textStatus}`, errorThrown);
+        hideLoader(); // hide loader on failure
+    });
+});
+
 $(document).on('click', '.reFetchliveData', function (e) {
     e.preventDefault();
     showLoader();
@@ -2423,6 +2475,8 @@ $(document).on('click', '.reFetchliveData', function (e) {
         hideLoader(); // hide loader on failure
     });
 });
+
+
 
 
 

@@ -40,7 +40,7 @@ class MacysApiService
                 return;
             }
             $json = $response->json();
-            dd($json['data'][0]);
+            // dd($json['data'][0]);
             // dd($json['data'][0]);
             $products = $json['data'] ?? [];
             $pageToken = $json['next_page_token'] ?? null;

@@ -211,9 +211,30 @@ class AdsMasterController extends Controller
             })
             ->get();
 
-        // Calculate total ad metrics
+        // Calculate total ad metrics for each campaign type
         $totalSpendL30 = 0;
         $totalClicksL30 = 0;
+        $totalImpressionsL30 = 0;
+        $totalSoldL30 = 0;
+
+        // Campaign type specific totals
+        $kwSpendL30 = 0;
+        $kwClicksL30 = 0;
+        $kwImpressionsL30 = 0;
+        $kwSoldL30 = 0;
+        $kwSalesL30 = 0;
+
+        $ptSpendL30 = 0;
+        $ptClicksL30 = 0;
+        $ptImpressionsL30 = 0;
+        $ptSoldL30 = 0;
+        $ptSalesL30 = 0;
+
+        $hlSpendL30 = 0;
+        $hlClicksL30 = 0;
+        $hlImpressionsL30 = 0;
+        $hlSoldL30 = 0;
+        $hlSalesL30 = 0;
 
         foreach ($productMasters as $pm) {
             $sku = strtoupper($pm->sku);
@@ -239,6 +260,27 @@ class AdsMasterController extends Controller
                     && strtoupper($item->campaignStatus) === 'ENABLED';
             });
 
+            // KW Campaign metrics
+            $kwSpendL30 += $matchedCampaignKwL30->spend ?? 0;
+            $kwClicksL30 += $matchedCampaignKwL30->clicks ?? 0;
+            $kwImpressionsL30 += $matchedCampaignKwL30->impressions ?? 0;
+            $kwSoldL30 += $matchedCampaignKwL30->unitsSoldClicks30d ?? 0;
+            $kwSalesL30 += $matchedCampaignKwL30->sales30d ?? 0;
+
+            // PT Campaign metrics
+            $ptSpendL30 += $matchedCampaignPtL30->spend ?? 0;
+            $ptClicksL30 += $matchedCampaignPtL30->clicks ?? 0;
+            $ptImpressionsL30 += $matchedCampaignPtL30->impressions ?? 0;
+            $ptSoldL30 += $matchedCampaignPtL30->unitsSoldClicks30d ?? 0;
+            $ptSalesL30 += $matchedCampaignPtL30->sales30d ?? 0;
+
+            // HL Campaign metrics
+            $hlSpendL30 += $matchedCampaignHlL30->cost ?? 0;
+            $hlClicksL30 += $matchedCampaignHlL30->clicks ?? 0;
+            $hlImpressionsL30 += $matchedCampaignHlL30->impressions ?? 0;
+            $hlSoldL30 += $matchedCampaignHlL30->unitsSold ?? 0;
+            $hlSalesL30 += $matchedCampaignHlL30->sales ?? 0;
+
             // Add to totals
             $totalSpendL30 += ($matchedCampaignKwL30->spend ?? 0) +
                 ($matchedCampaignPtL30->spend ?? 0) +
@@ -247,6 +289,14 @@ class AdsMasterController extends Controller
             $totalClicksL30 += ($matchedCampaignKwL30->clicks ?? 0) +
                 ($matchedCampaignPtL30->clicks ?? 0) +
                 ($matchedCampaignHlL30->clicks ?? 0);
+
+            $totalImpressionsL30 += ($matchedCampaignKwL30->impressions ?? 0) +
+                ($matchedCampaignPtL30->impressions ?? 0) +
+                ($matchedCampaignHlL30->impressions ?? 0);
+
+            $totalSoldL30 += ($matchedCampaignKwL30->unitsSoldClicks30d ?? 0) +
+                ($matchedCampaignPtL30->unitsSoldClicks30d ?? 0) +
+                ($matchedCampaignHlL30->unitsSold ?? 0);
         }
 
         // Get Amazon marketing percentage
@@ -263,6 +313,12 @@ class AdsMasterController extends Controller
         // Calculate ROI
         $gRoi = $totalSpendL30 > 0 ? ($totalProfit / $totalSpendL30) * 100 : 0;
         $gRoiL60 = $totalSpendL30 > 0 ? ($totalProfitL60 / $totalSpendL30) * 100 : 0;
+
+        // Calculate ACOS for each campaign type
+        $kwAcos = $kwSalesL30 > 0 ? ($kwSpendL30 / $kwSalesL30) * 100 : 0;
+        $ptAcos = $ptSalesL30 > 0 ? ($ptSpendL30 / $ptSalesL30) * 100 : 0;
+        $hlAcos = $hlSalesL30 > 0 ? ($hlSpendL30 / $hlSalesL30) * 100 : 0;
+        $totalAcos = $l30SalesAmount > 0 ? ($totalSpendL30 / $l30SalesAmount) * 100 : 0;
 
         // Channel data
         $channelData = ChannelMaster::where('channel', 'Amazon')->first();
@@ -288,15 +344,43 @@ class AdsMasterController extends Controller
             'channel_percentage' => $channelData->channel_percentage ?? '',
             'Update'     => $channelData->update ?? 0,
             'Account health' => null,
-            // Ad metrics that match your screenshot
-            'SPEND_L30'  => round($totalSpendL30, 2),  // This is "Spent"
-            'CLICKS_L30' => $totalClicksL30,           // This is "Clicks"
-            // Add other ad metrics if available
-            'Ad Sales'   => intval($l30SalesAmount),   // Sales from ads
-            'Ad Sold'    => $l30Sales,                 // Units sold from ads
-            'ACOS'       => $totalSpendL30 > 0 ? round(($totalSpendL30 / $l30SalesAmount) * 100, 2) . '%' : '0%',
-            'Tacos'      => 'N/A', // Add if you have this data
-            'Pft'        => round($totalProfit, 2),    // Profit
+
+            // Total Ad metrics
+            'SPEND_L30'  => round($totalSpendL30, 2),
+            'CLICKS_L30' => $totalClicksL30,
+            'IMPRESSIONS_L30' => $totalImpressionsL30,
+            'SOLD_L30'   => $totalSoldL30,
+
+            // KW Campaign metrics
+            'KW_SPEND_L30' => round($kwSpendL30, 2),
+            'KW_CLICKS_L30' => $kwClicksL30,
+            'KW_IMPRESSIONS_L30' => $kwImpressionsL30,
+            'KW_SOLD_L30' => $kwSoldL30,
+            'KW_SALES_L30' => round($kwSalesL30, 2),
+            'KW_ACOS' => round($kwAcos, 2) . '%',
+
+            // PT Campaign metrics
+            'PT_SPEND_L30' => round($ptSpendL30, 2),
+            'PT_CLICKS_L30' => $ptClicksL30,
+            'PT_IMPRESSIONS_L30' => $ptImpressionsL30,
+            'PT_SOLD_L30' => $ptSoldL30,
+            'PT_SALES_L30' => round($ptSalesL30, 2),
+            'PT_ACOS' => round($ptAcos, 2) . '%',
+
+            // HL Campaign metrics
+            'HL_SPEND_L30' => round($hlSpendL30, 2),
+            'HL_CLICKS_L30' => $hlClicksL30,
+            'HL_IMPRESSIONS_L30' => $hlImpressionsL30,
+            'HL_SOLD_L30' => $hlSoldL30,
+            'HL_SALES_L30' => round($hlSalesL30, 2),
+            'HL_ACOS' => round($hlAcos, 2) . '%',
+
+            // Combined metrics
+            'Ad Sales'   => intval($l30SalesAmount),
+            'Ad Sold'    => $l30Sales,
+            'ACOS'       => round($totalAcos, 2) . '%',
+            'Tacos'      => 'N/A',
+            'Pft'        => round($totalProfit, 2),
         ];
 
         return response()->json([

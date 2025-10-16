@@ -122,7 +122,9 @@ class WalmartApiService
         return $response->json();
     }
 
- public function getinventory(): array
+
+
+    public function getinventory(): array
 {
     $accessToken = $this->getAccessToken();
     if (!$accessToken) {
@@ -131,13 +133,13 @@ class WalmartApiService
 
     $endpoint = $this->baseUrl . '/v3/inventories';
     $limit = 50;
-    $cursor = null;
+    $cursor = '';
     $collected = [];
 
     do {
         $query = ['limit' => $limit];
         if ($cursor) {
-            $query['nextCursor'] = $cursor;
+           $query['nextCursor'] = urlencode($cursor);
         }
 
         $headers = [
@@ -148,11 +150,10 @@ class WalmartApiService
         ];
 
         $request = Http::withHeaders($headers);
-        if (env('FILESYSTEM_DRIVER') === 'local') {
-            $request = $request->withoutVerifying();
-        }
+        if (env('FILESYSTEM_DRIVER') === 'local') {$request = $request->withoutVerifying();}
 
-        $response = $request->get($endpoint, $query);
+        // $response = $request->get($endpoint, $query);
+        $response = $request->get($endpoint,['limit' => 50,'nextCursor' => $cursor]);
 
         if ($response->failed()) {
             Log::error('Walmart inventory fetch failed', [
@@ -163,39 +164,35 @@ class WalmartApiService
         }
 
         $json = $response->json();
-        $items = $json['elements'] ?? [];
-        $collected = array_merge($collected, $items);
-        $cursor = $json['meta']['nextCursor'] ?? null;
-
+        $items = $json['elements']['inventories'] ?? [];
+        // $collected = array_merge($collected, $items); // ✅ Correctly flatten the array
+        foreach ($items as $item) { $collected[] = $item; }
+        $cursor = $json['meta']['nextCursor']??'';
     } while ($cursor);
 
-    // Process the collected inventory data
-    $collected=$collected['inventories'];
-    // dd($collected);
+    // ✅ Now process after full collection
     foreach ($collected as $item) {
         $sku = $item['sku'] ?? null;
         $quantity = 0;
-        
-        // Extract quantity from the first node's available to sell amount
+
         if (isset($item['nodes'][0]['availToSellQty']['amount'])) {
             $quantity = (int) $item['nodes'][0]['availToSellQty']['amount'];
         } elseif (isset($item['nodes'][0]['inputQty']['amount'])) {
-            // Fallback to inputQty if availToSellQty is not available
             $quantity = (int) $item['nodes'][0]['inputQty']['amount'];
         }
-         if (!$sku) {
-                Log::warning('Missing SKU in parsed Amazon data', $item);
-                continue;
-            }
-        // Only process if we have a valid SKU
-        if ($sku !== null) {
-            ProductStockMapping::updateOrCreate(
-                ['sku' => $sku],
-                ['inventory_walmart' => $quantity]
-            );
+
+        if (!$sku) {
+            Log::warning('Missing SKU in Walmart inventory data', $item);
+            continue;
         }
+
+        ProductStockMapping::updateOrCreate(
+            ['sku' => $sku],
+            ['inventory_walmart' => $quantity]
+        );
     }
 
+    Log::info('Total Walmart inventory items collected: ' . count($collected));
     return $collected;
 }
 
