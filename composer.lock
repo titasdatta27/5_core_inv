@@ -10147,7 +10147,7 @@
             "authors": [
                 {
                     "name": "Arne Blankerts",
-                    "email": "arne@blankerts.de",
+                    "email": "arne@blankerts.de", 
                     "role": "Developer"
                 }
             ],

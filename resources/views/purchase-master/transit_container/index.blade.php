@@ -368,6 +368,25 @@ Object.entries(groupedData).forEach(([tabName, data], index) => {
         rowHeight: 55,
         index: "id",
         selectable: true,
+        rowFormatter: function(row) {
+            const rowData = row.getData();
+
+            // Ensure tab_name and SKU are normalized
+            const tabName = (rowData.tab_name || '').trim().toUpperCase();
+            const sku = (rowData.our_sku || '').trim().toUpperCase();
+
+            // The pushed flag should already be set in your controller for this exact combination
+            if (rowData.pushed == 1) {
+                const cell = row.getCell("our_sku");
+                if (cell) {
+                    const el = cell.getElement();
+                    el.style.boxShadow = "0 0 10px 2px #4CAF50"; // green shadow
+                    el.style.borderRadius = "6px";
+                    el.style.padding = "3px";
+                }
+            }
+        },
+
         columns: [{
                 formatter: "rowSelection",
                 titleFormatter: "rowSelection",
@@ -805,62 +824,159 @@ Object.entries(groupedData).forEach(([tabName, data], index) => {
 });
 
 //push container to inventory warehouse 
-document.getElementById("push-inventory-btn").addEventListener("click", function () {
-    // Find the active tab index
+// document.getElementById("push-inventory-btn").addEventListener("click", function () {
+//     // Find the active tab index
+//     const activeTab = document.querySelector(".nav-link.active");
+//     if (!activeTab) {
+//         alert("No container tab selected.");
+//         return;
+//     }
+
+//     const tabId = activeTab.getAttribute("data-bs-target"); // e.g. #tab-0
+//     const index = tabId.replace("#tab-", ""); // get the index
+//     const table = window.tabTables[index];
+
+//     if (!table) {
+//         alert("No data found for this container.");
+//         return;
+//     }
+
+//       // Get only selected rows
+//     const selectedRows = table.getSelectedData();
+
+//     if (selectedRows.length === 0) {
+//         alert("Please select at least one SKU to push.");
+//         return;
+//     }
+
+
+//     // Get data from the active container tab
+//     // const containerData = table.getData();
+
+//     // if (containerData.length === 0) {
+//     //     alert("This container has no data to push.");
+//     //     return;
+//     // }
+
+//     // Confirm before pushing
+//     if (!confirm("Are you sure you want to push this container’s inventory?")) {
+//         return;
+//     }
+
+//     // Send data to backend
+//     fetch("/inventory-warehouse/push", {
+//         method: "POST",
+//         headers: {
+//             "Content-Type": "application/json",
+//             "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+//         },
+//         body: JSON.stringify({
+//             tab_name: activeTab.textContent.trim(),
+//             data: selectedRows
+//         })
+//     })
+//     .then(res => res.json())
+//     .then(response => {
+//         if (response.success) {
+//             alert("Inventory pushed successfully!");
+//              // Mark pushed rows as green and unselectable
+//             table.getSelectedRows().forEach(row => {
+//                 row.getElement().style.backgroundColor = "#d4edda"; // green
+//                 row.deselect();
+//                 row.update({ pushed: 1 });
+//                 // disable checkbox
+//                 const checkboxCell = row.getCells()[0].getElement();
+//                 const checkbox = checkboxCell.querySelector('input[type="checkbox"]');
+//                 if (checkbox) checkbox.disabled = true;
+//             });
+//             window.location.href = "/inventory-warehouse";
+//         } else {
+//             alert(response.message || "Push failed!");
+//         }
+//     })
+//     .catch(err => {
+//         console.error("Push error:", err);
+//         alert("Something went wrong while pushing inventory.");
+//     });
+// });
+
+document.getElementById("push-inventory-btn").addEventListener("click", async function () {
     const activeTab = document.querySelector(".nav-link.active");
-    if (!activeTab) {
-        alert("No container tab selected.");
-        return;
-    }
+    if (!activeTab) return alert("No container tab selected.");
 
-    const tabId = activeTab.getAttribute("data-bs-target"); // e.g. #tab-0
-    const index = tabId.replace("#tab-", ""); // get the index
+    const tabId = activeTab.getAttribute("data-bs-target"); 
+    const index = tabId.replace("#tab-", "");
     const table = window.tabTables[index];
+    if (!table) return alert("No data found for this container.");
 
-    if (!table) {
-        alert("No data found for this container.");
-        return;
-    }
+    const selectedRows = table.getSelectedData();
+    if (selectedRows.length === 0) return alert("Please select at least one SKU to push.");
 
-    // Get data from the active container tab
-    const containerData = table.getData();
+    if (!confirm(`Are you sure you want to push ${selectedRows.length} selected SKU(s)?`)) return;
 
-    if (containerData.length === 0) {
-        alert("This container has no data to push.");
-        return;
-    }
+    const tabName = activeTab.textContent.trim();
 
-    // Confirm before pushing
-    if (!confirm("Are you sure you want to push this container’s inventory?")) {
-        return;
-    }
+    // Normalize SKUs before sending
+    const rowsToSend = selectedRows.map(r => ({
+        ...r,
+        our_sku: r.our_sku.trim().toUpperCase()
+    }));
 
-    // Send data to backend
     fetch("/inventory-warehouse/push", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
             "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
         },
-        body: JSON.stringify({
-            tab_name: activeTab.textContent.trim(),
-            data: containerData
-        })
+        body: JSON.stringify({ tab_name: tabName, data: rowsToSend })
     })
     .then(res => res.json())
     .then(response => {
-        if (response.success) {
-            alert("Inventory pushed successfully!");
-            window.location.href = "/inventory-warehouse";
-        } else {
-            alert(response.message || "Push failed!");
+        if (!response.success) return alert(response.message || "Push failed!");
+
+        const pushedSkus = [];
+        const skippedSkus = response.skipped || [];
+        const notFoundSkus = response.not_found || [];
+
+        selectedRows.forEach(row => {
+            const tableRow = table.getRow(row.id);
+            if (!tableRow) return;
+
+            if (skippedSkus.includes(row.our_sku)) {
+                tableRow.getElement().style.backgroundColor = "#f8d7da"; // red
+            } else if (notFoundSkus.includes(row.our_sku)) {
+                tableRow.getElement().style.backgroundColor = "#fff3cd"; // yellow for not found
+            } else {
+                tableRow.getElement().style.backgroundColor = "#d4edda"; // green
+                tableRow.deselect();
+                tableRow.update({ pushed: 1 });
+                pushedSkus.push(row.our_sku);
+            }
+        });
+
+        // Alert skipped SKUs
+        if (skippedSkus.length > 0) {
+            alert("These SKUs were already pushed and skipped:\n" + skippedSkus.join(", "));
         }
+
+        // Alert not found SKUs
+        if (notFoundSkus.length > 0) {
+            alert("These SKUs were not found in Shopify:\n" + notFoundSkus.join(", "));
+        }
+
+        // Redirect with pushed SKUs info
+        const query = pushedSkus.length > 0 ? `?pushed=${encodeURIComponent(pushedSkus.join(","))}` : "";
+        window.location.href = "/inventory-warehouse" + query;
     })
     .catch(err => {
         console.error("Push error:", err);
         alert("Something went wrong while pushing inventory.");
     });
 });
+
+
+
+
 
 //push arrived container to inventory warehouse 
 document.getElementById("push-arrived-container-btn").addEventListener("click", function () {

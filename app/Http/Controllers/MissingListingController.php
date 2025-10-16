@@ -177,9 +177,9 @@ protected function fetchFreshData(){
 
 protected function fetchFreshDataU($type = null)
 {
+    ini_set('max_execution_time', 1800);
     $progress = [];
-
-    // Define all sources including Shopify
+      // Define all sources including Shopify
     $sources = [
         'shopify' => fn() => (new ShopifyApiService())->getinventory(),
         'amazon'  => fn() => (new AmazonSpApiService())->getinventory(),
@@ -216,7 +216,7 @@ protected function fetchFreshDataU($type = null)
             'progress' => $progress
         ];
     } else {
-        ini_set('max_execution_time', 300);
+        ini_set('max_execution_time', 2800);
 
         if (!array_key_exists($type, $sources)) {
             return ['status' => false, 'msg' => "Invalid type: $type"];

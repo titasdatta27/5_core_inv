@@ -262,6 +262,8 @@ class EbayApiService
             return;
         }
         $listingData = $this->fetchAndParseReport('LMS_ACTIVE_INVENTORY_REPORT', null, $token);
+        
+        Log::info('Total Temu inventory items collected: ' . count($listingData));
         foreach ($listingData as $sku => $data) {
         $sku = $data['sku'] ?? null;
         $quantity = $data['quantity'];
