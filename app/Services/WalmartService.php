@@ -84,4 +84,117 @@ class WalmartService
         return $response->json();
     }
 
+
+    public function getAccessTokenV1(): ?string
+{
+    $clientId     = env('WALMART_CLIENT_ID');
+    $clientSecret = env('WALMART_CLIENT_SECRET');
+
+    if (!$clientId || !$clientSecret) {
+        Log::error('Walmart credentials missing.');
+        return null;
+    }
+
+    $authorization = base64_encode("{$clientId}:{$clientSecret}");
+
+    $response = Http::withoutVerifying()->asForm()->withHeaders([
+        'Authorization'         => "Basic {$authorization}",
+        'WM_QOS.CORRELATION_ID' => "123",
+        'WM_SVC.NAME'           => 'Walmart Marketplace',
+        'Accept'                => 'application/json',
+        'Content-Type'          => 'application/x-www-form-urlencoded',
+    ])->post('https://marketplace.walmartapis.com/v3/token', [
+        'grant_type' => 'client_credentials',
+    ]);
+
+    if ($response->successful()) {
+        return $response->json()['access_token'] ?? null;
+    }
+
+    Log::error('Failed to fetch Walmart access token', [
+        'status' => $response->status(),
+        'body' => $response->json(),
+    ]);
+
+    return null;
+}
+
+
+public function getinventory(): array
+{
+    $accessToken = $this->getAccessToken();
+    if (!$accessToken) {
+        throw new \Exception('Failed to retrieve Walmart access token.');
+    }
+
+    $endpoint = $this->baseUrl . '/v3/inventories';
+    $limit = 50;
+    $cursor = null;
+    $collected = [];
+
+    do {
+        $query = ['limit' => $limit];
+        if ($cursor) {
+            $query['nextCursor'] = $cursor;
+        }
+
+        $headers = [
+            'WM_SEC.ACCESS_TOKEN'   => $accessToken,
+            'WM_QOS.CORRELATION_ID' => (string) Str::uuid(),
+            'WM_SVC.NAME'           => 'Walmart Marketplace',
+            'Accept'                => 'application/json',
+        ];
+
+        $request = Http::withHeaders($headers);
+        if (env('FILESYSTEM_DRIVER') === 'local') {
+            $request = $request->withoutVerifying();
+        }
+
+        $response = $request->get($endpoint, $query);
+
+        if ($response->failed()) {
+            Log::error('Walmart inventory fetch failed', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+            throw new \Exception('Failed to fetch Walmart inventory');
+        }
+
+        $json = $response->json();
+        $items = $json['elements'] ?? [];
+        $collected = array_merge($collected, $items);
+        $cursor = $json['meta']['nextCursor'] ?? null;
+
+    } while ($cursor);
+
+    // Process the collected inventory data
+    $collected=$collected['inventories'];
+    // dd($collected);
+    foreach ($collected as $item) {
+        $sku = $item['sku'] ?? null;
+        $quantity = 0;
+        
+        // Extract quantity from the first node's available to sell amount
+        if (isset($item['nodes'][0]['availToSellQty']['amount'])) {
+            $quantity = (int) $item['nodes'][0]['availToSellQty']['amount'];
+        } elseif (isset($item['nodes'][0]['inputQty']['amount'])) {
+            // Fallback to inputQty if availToSellQty is not available
+            $quantity = (int) $item['nodes'][0]['inputQty']['amount'];
+        }
+         if (!$sku) {
+                Log::warning('Missing SKU in parsed Amazon data', $item);
+                continue;
+            }
+        // Only process if we have a valid SKU
+        if ($sku !== null) {
+            ProductStockMapping::updateOrCreate(
+                ['sku' => $sku],
+                ['inventory_walmart' => $quantity]
+            );
+        }
+    }
+
+    return $collected;
+}
+
 }

@@ -97,8 +97,6 @@ class EbayCampaignReports extends Command
                 $campaignStatus = $campaignData['status'];
                 $campaignBudget = $campaignData['daily_budget'];
 
-                Log::info("Processing campaign ID: {$item['campaign_id']} with name: " . ($campaignName ?? 'N/A') . " and daily budget: " . ($campaignBudget ?? 'N/A') . " and status: " . ($campaignStatus ?? 'N/A'));
-
                 if (!$campaignName) {
                     Log::warning("Missing campaignName for ID: {$item['campaign_id']}");
                 }
@@ -167,7 +165,7 @@ class EbayCampaignReports extends Command
 
             foreach($items as $item){
                 if (!$item || empty($item['listing_id'])) continue;
-            
+                
                 EbayGeneralReport::updateOrCreate(
                     ['listing_id' => $item['listing_id'], 'report_range' => $rangeKey],
                     [

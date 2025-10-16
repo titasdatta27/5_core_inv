@@ -551,7 +551,7 @@ class AmazonACOSController extends Controller
                 }
             }
 
-            if ($row['NRA'] !== 'NRA') {
+            if ($row['NRA'] !== 'NRA' && $row['campaignName'] !== '') {
                 $result[] = (object) $row;
             }
 
@@ -668,7 +668,7 @@ class AmazonACOSController extends Controller
                 }
             }
 
-            if ($row['NRA'] !== 'NRA') {
+            if ($row['NRA'] !== 'NRA' && $row['campaignName'] !== '') {
                 $result[] = (object) $row;
             }
         }
@@ -766,7 +766,7 @@ class AmazonACOSController extends Controller
                 }
             }
 
-            if ($row['NRA'] !== 'NRA') {
+            if ($row['NRA'] !== 'NRA' && $row['campaignName'] !== '') {
                 $result[] = (object) $row;
             }
         }

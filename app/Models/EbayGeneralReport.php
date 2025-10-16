@@ -27,9 +27,10 @@ class EbayGeneralReport extends Model
     protected $casts = [
         'impressions' => 'integer',
         'clicks' => 'integer',
-        'ad_fees' => 'float',
+        // Remove float cast for ad_fees and sale_amount since they contain 'USD ' prefix
+        // 'ad_fees' => 'float',
         'sales' => 'integer',
-        'sale_amount' => 'float',
+        // 'sale_amount' => 'float',
         'ctr' => 'float',
         'avg_cost_per_sale' => 'float',
     ];
