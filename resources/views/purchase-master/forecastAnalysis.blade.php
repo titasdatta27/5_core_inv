@@ -475,6 +475,15 @@
                     }
                 },
                 {
+                    title: "LP",
+                    field: "LP",
+                    accessor: row => row["LP"],
+                    formatter: function(cell) {
+                        const value = cell.getValue() || 0;
+                        return `<span style="display:block; text-align:center; font-weight:bold;">$${value.toLocaleString()}</span>`;
+                    }
+                },
+                {
                     title: "OV L30",
                     field: "L30",
                     accessor: row => row["L30"],
@@ -534,6 +543,29 @@
                             };
                             openMonthModal(monthData, sku);
                         }
+                    }
+                },
+                  {
+                    title: "S-MSL",
+                    field: "s_msl",
+                    headerSort: false,
+                    formatter: function(cell) {
+                        const value = cell.getValue();
+                        const rowData = cell.getRow().getData();
+
+                        const sku = rowData.SKU ?? '';
+                        const parent = rowData.Parent ?? '';
+
+                        return `<div 
+                        class="editable-qty" 
+                        contenteditable="true" 
+                        data-field="S-MSL"
+                        data-original="${value ?? ''}" 
+                        data-sku='${sku}' 
+                        data-parent='${parent}' 
+                        style="outline:none; min-width:50px; text-align:center;">
+                        ${value ?? ''}
+                    </div>`;
                     }
                 },
                 {

@@ -186,8 +186,8 @@ class ForecastAnalysisController extends Controller
                 $transit = (float)($item->transit ?? 0);
 
                 $item->MIP_Value = round($cp * $orderQty, 2);
-                $item->R2S_Value = round($cp * $readyToShipQty, 2);
-                $item->Transit_Value = round($cp * $transit, 2);
+                $item->R2S_Value = round($lp * $readyToShipQty, 2);
+                $item->Transit_Value = round($lp * $transit, 2);
 
 
                 
