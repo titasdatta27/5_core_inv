@@ -93,15 +93,17 @@ class ArrivedContainerController extends Controller
         foreach ($rows as $row) {
             ArrivedContainer::updateOrCreate(
                 [
-                    'our_sku' => $row['our_sku'],
-                    'tab_name' => $row['tab_name'] ?? $tabName,
+                    'transit_container_id' => $row['id'],
+                    'tab_name'          => $row['tab_name'] ?? $tabName,
                 ],
                 [
-                    'supplier_name'     => $row['supplier_name'] ?? null,
-                    'company_name'      => $row['company_name'] ?? null,
-                    'parent'            => $row['parent'] ?? null,
-                    'no_of_units'       => !empty($row['no_of_units']) ? (int) $row['no_of_units'] : null,
-                    'total_ctn'         => !empty($row['total_ctn']) ? (int) $row['total_ctn'] : null,
+                    'tab_name'          => $row['tab_name'] ?? null,
+                    'our_sku'          => $row['our_sku'] ?? null,
+                    'supplier_name'    => $row['supplier_name'] ?? null,
+                    'company_name'     => $row['company_name'] ?? null,
+                    'parent'           => $row['parent'] ?? null,
+                    'no_of_units'      => !empty($row['no_of_units']) ? (int) $row['no_of_units'] : null,
+                    'total_ctn'       => !empty($row['total_ctn']) ? (int) $row['total_ctn'] : null,
                     'rate'              => !empty($row['rate']) ? (float) $row['rate'] : null,
                     'unit'              => $row['unit'] ?? null,
                     'changes'           => $row['changes'] ?? null,

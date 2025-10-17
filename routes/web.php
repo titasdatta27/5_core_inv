@@ -1025,7 +1025,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     //To Order Analysis routes
     Route::controller(ToOrderAnalysisController::class)->group(function () {
         Route::get('/test', 'test')->name('test');
-        Route::get('/to-order-analysis', 'index')->name('to.order.analysis');
+        Route::get('/to-order-analysis', 'toOrderAnalysisNew')->name('to.order.analysis');
         Route::get('/to-order-analysis-new', 'toOrderAnalysisNew')->name('to.order.analysis.new');
         Route::get('/to-order-analysis/data', 'getToOrderAnalysis')->name('to.order.analysis.data');
         Route::post('/update-link', 'updateLink')->name('update.rfq.link');

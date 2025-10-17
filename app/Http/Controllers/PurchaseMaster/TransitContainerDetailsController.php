@@ -53,13 +53,6 @@ class TransitContainerDetailsController extends Controller
             return [$normSku => $value];
         })->toArray();
 
-        // $pushedMap = InventoryWarehouse::select('our_sku', 'pushed')
-        //     ->get()
-        //     ->mapWithKeys(function ($item) {
-        //         $normSku = strtoupper(trim(preg_replace('/\s+/', ' ', $item->sku)));
-        //         return [$normSku => (int) $item->pushed];
-        // })->toArray();
-
         $pushedMap = InventoryWarehouse::select('tab_name', 'our_sku', 'pushed', 'created_at')
             ->whereNotNull('our_sku')
             ->whereNotNull('tab_name')
