@@ -14,7 +14,10 @@ class ReadyToShip extends Model
     protected $fillable = [
         'parent',
         'sku',
+        'qty',
+        'rate',
         'supplier',
+        'rec_qty',
         'cbm',
         'area',
         'shipd_cbm_in_cont',

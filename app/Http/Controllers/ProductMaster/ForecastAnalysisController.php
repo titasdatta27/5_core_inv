@@ -72,6 +72,7 @@ class ForecastAnalysisController extends Controller
         $forecastMap = DB::table('forecast_analysis')->get()->keyBy(fn($item) => $normalizeSku($item->sku));
         $movementMap = DB::table('movement_analysis')->get()->keyBy(fn($item) => $normalizeSku($item->sku));
         $readyToShipMap = DB::table('ready_to_ship')->get()->keyBy(fn($item) => $normalizeSku($item->sku));
+        $mfrg = DB::table('mfrg_progress')->get()->keyBy(fn($item) => $normalizeSku($item->sku));
 
         $processedData = [];
 
@@ -121,7 +122,6 @@ class ForecastAnalysisController extends Controller
                 $forecast = $forecastMap->get($sheetSku);
                 $item->{'s-msl'} = $forecast->s_msl ?? 0;
                 $item->{'Approved QTY'} = $forecast->approved_qty ?? 0;
-                $item->order_given = $forecast->order_given ?? 0;
                 $item->transit = $forecast->transit ?? '';
                 $item->nr = $forecast->nr ?? '';
                 $item->req = $forecast->req ?? '';
@@ -138,6 +138,15 @@ class ForecastAnalysisController extends Controller
             if($readyToShipMap->has($sheetSku)){
                 $readyToShipQty = $readyToShipMap->get($sheetSku)->qty ?? 0;
                 $item->readyToShipQty = $readyToShipQty;
+            }
+
+            $order_given = 0;
+            if($mfrg->has($sheetSku)){
+                $order_given = $mfrg->get($sheetSku)->qty ?? 0;
+                $isReadyToShip = $mfrg->get($sheetSku)->ready_to_ship ?? 'No';
+                if($isReadyToShip === 'No' || $isReadyToShip === ''){
+                    $item->order_given = $order_given;
+                }
             }
 
             if ($movementMap->has($sheetSku)) {
@@ -177,8 +186,8 @@ class ForecastAnalysisController extends Controller
                 $transit = (float)($item->transit ?? 0);
 
                 $item->MIP_Value = round($cp * $orderQty, 2);
-                $item->R2S_Value = round($cp * $readyToShipQty, 2);
-                $item->Transit_Value = round($cp * $transit, 2);
+                $item->R2S_Value = round($lp * $readyToShipQty, 2);
+                $item->Transit_Value = round($lp * $transit, 2);
 
 
                 

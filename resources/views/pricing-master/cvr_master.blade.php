@@ -1,4 +1,4 @@
-@extends('layouts.vertical', ['title' => 'Pricing Masters Analysis'])
+@extends('layouts.vertical', ['title' => 'CVR Masters Analysis'])
 
 @section('css')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -480,8 +480,8 @@
 
 @section('content')
     @include('layouts.shared.page-title', [
-        'page_title' => 'Pricing Masters Analysis',
-        'sub_title' => 'Pricing Masters Analysis',
+        'page_title' => 'CVR Masters Analysis',
+        'sub_title' => 'CVR Masters Analysis',
     ])
 
     <!-- Image Preview -->
