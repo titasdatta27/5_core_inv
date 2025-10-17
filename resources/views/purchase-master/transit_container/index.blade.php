@@ -823,83 +823,6 @@ Object.entries(groupedData).forEach(([tabName, data], index) => {
 
 });
 
-//push container to inventory warehouse 
-// document.getElementById("push-inventory-btn").addEventListener("click", function () {
-//     // Find the active tab index
-//     const activeTab = document.querySelector(".nav-link.active");
-//     if (!activeTab) {
-//         alert("No container tab selected.");
-//         return;
-//     }
-
-//     const tabId = activeTab.getAttribute("data-bs-target"); // e.g. #tab-0
-//     const index = tabId.replace("#tab-", ""); // get the index
-//     const table = window.tabTables[index];
-
-//     if (!table) {
-//         alert("No data found for this container.");
-//         return;
-//     }
-
-//       // Get only selected rows
-//     const selectedRows = table.getSelectedData();
-
-//     if (selectedRows.length === 0) {
-//         alert("Please select at least one SKU to push.");
-//         return;
-//     }
-
-
-//     // Get data from the active container tab
-//     // const containerData = table.getData();
-
-//     // if (containerData.length === 0) {
-//     //     alert("This container has no data to push.");
-//     //     return;
-//     // }
-
-//     // Confirm before pushing
-//     if (!confirm("Are you sure you want to push this container’s inventory?")) {
-//         return;
-//     }
-
-//     // Send data to backend
-//     fetch("/inventory-warehouse/push", {
-//         method: "POST",
-//         headers: {
-//             "Content-Type": "application/json",
-//             "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
-//         },
-//         body: JSON.stringify({
-//             tab_name: activeTab.textContent.trim(),
-//             data: selectedRows
-//         })
-//     })
-//     .then(res => res.json())
-//     .then(response => {
-//         if (response.success) {
-//             alert("Inventory pushed successfully!");
-//              // Mark pushed rows as green and unselectable
-//             table.getSelectedRows().forEach(row => {
-//                 row.getElement().style.backgroundColor = "#d4edda"; // green
-//                 row.deselect();
-//                 row.update({ pushed: 1 });
-//                 // disable checkbox
-//                 const checkboxCell = row.getCells()[0].getElement();
-//                 const checkbox = checkboxCell.querySelector('input[type="checkbox"]');
-//                 if (checkbox) checkbox.disabled = true;
-//             });
-//             window.location.href = "/inventory-warehouse";
-//         } else {
-//             alert(response.message || "Push failed!");
-//         }
-//     })
-//     .catch(err => {
-//         console.error("Push error:", err);
-//         alert("Something went wrong while pushing inventory.");
-//     });
-// });
-
 document.getElementById("push-inventory-btn").addEventListener("click", async function () {
     const activeTab = document.querySelector(".nav-link.active");
     if (!activeTab) return alert("No container tab selected.");
@@ -975,9 +898,6 @@ document.getElementById("push-inventory-btn").addEventListener("click", async fu
 });
 
 
-
-
-
 //push arrived container to inventory warehouse 
 document.getElementById("push-arrived-container-btn").addEventListener("click", function () {
     // Find the active tab index
@@ -996,16 +916,16 @@ document.getElementById("push-arrived-container-btn").addEventListener("click", 
         return;
     }
 
-    // Get data from the active container tab
-    const containerData = table.getData();
+    // Get selected data only
+    const selectedData = table.getSelectedData();
 
-    if (containerData.length === 0) {
-        alert("This container has no data to push.");
+    if (selectedData.length === 0) {
+        alert("Please select at least one item to push to arrived container.");
         return;
     }
 
     // Confirm before pushing
-    if (!confirm("Are you sure you want to push this container to arrived container?")) {
+    if (!confirm(`Are you sure you want to push ${selectedData.length} selected item(s) to arrived container?`)) {
         return;
     }
 
@@ -1018,13 +938,13 @@ document.getElementById("push-arrived-container-btn").addEventListener("click", 
         },
         body: JSON.stringify({
             tab_name: activeTab.textContent.trim(),
-            data: containerData
+            data: selectedData
         })
     })
     .then(res => res.json())
     .then(response => {
         if (response.success) {
-            alert("Container saved in Arrived Container successfully!");
+            alert("Selected items saved in Arrived Container successfully!");
             window.location.reload();
         } else {
             alert(response.message || "Push failed!");
@@ -1032,7 +952,7 @@ document.getElementById("push-arrived-container-btn").addEventListener("click", 
     })
     .catch(err => {
         console.error("Push error:", err);
-        alert("Something went wrong while Arrived Container.");
+        alert("Something went wrong while pushing to Arrived Container.");
     });
 });
 
