@@ -400,10 +400,53 @@
                         <button type="button" class="btn btn-success ms-2" id="downloadExcel">
                             <i class="fas fa-file-excel me-1"></i> Download Excel
                         </button>
+
+                        <button type="button" class="btn btn-success ms-2" id="viewArchivedBtn">
+                            <i class="fas fa-box-archive me-1"></i> View Archived Products
+                        </button>
+
                         <button type="button" class="btn btn-warning ms-2" id="importFromApiBtn" hidden>
                             <i class="fas fa-cloud-download-alt me-1"></i> Import from API Sheet
                         </button>
                     </div>
+
+
+                    <div class="modal fade" id="archivedProductsModal" tabindex="-1" aria-labelledby="archivedProductsModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+                            <div class="modal-content border-0" style="border-radius: 18px; overflow: hidden;">
+                            <div class="modal-header bg-primary text-white">
+                                <h5 class="modal-title" id="archivedProductsModalLabel">
+                                <i class="fas fa-box-archive me-2"></i>Archived Products
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body p-0">
+                                <div class="table-responsive">
+                                <table class="table table-striped table-hover mb-0" id="archivedProductsTable">
+                                    <thead class="table-primary">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>SKU</th>
+                                        {{-- <th>Product Name</th> --}}
+                                        <th>Archived At</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <!-- Dynamic rows will load here -->
+                                    </tbody>
+                                </table>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-secondary" data-bs-dismiss="modal">
+                                <i class="fas fa-times me-1"></i>Close
+                                </button>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+
 
                     <!-- Permission Modal -->
                     <div class="modal fade" id="permissionModal" tabindex="-1" aria-labelledby="permissionModalLabel"
@@ -1440,8 +1483,8 @@
                                     : ''
                                 }
                                 ${hasDeletePermission ? 
-                                    `<button class="btn btn-sm btn-outline-danger delete-btn" data-id="${escapeHtml(item.id)}" data-sku="${escapeHtml(item.SKU)}">
-                                                            <i class="bi bi-trash"></i>
+                                    `<button class="btn btn-sm btn-outline-warning delete-btn" data-id="${escapeHtml(item.id)}" data-sku="${escapeHtml(item.SKU)}">
+                                                            <i class="bi bi-archive"></i>
                                                         </button>` 
                                     : ''
                                 }
@@ -1586,8 +1629,8 @@
                                 : ''
                             }
                             ${hasDeletePermission ? 
-                                `<button class="btn btn-sm btn-outline-danger delete-btn" data-id="${escapeHtml(item.id)}" data-sku="${escapeHtml(item.SKU)}">
-                                                        <i class="bi bi-trash"></i>
+                                `<button class="btn btn-sm btn-outline-warning delete-btn" data-id="${escapeHtml(item.id)}" data-sku="${escapeHtml(item.SKU)}">
+                                                        <i class="bi bi-archive"></i>
                                                     </button>` 
                                 : ''
                             }
@@ -1758,8 +1801,8 @@
                             : ''
                         }
                         ${hasDeletePermission ? 
-                            `<button class="btn btn-sm btn-outline-danger delete-btn" data-id="${escapeHtml(item.id)}" data-sku="${escapeHtml(item.SKU)}">
-                                                                            <i class="bi bi-trash"></i>
+                            `<button class="btn btn-sm btn-outline-warning delete-btn" data-id="${escapeHtml(item.id)}" data-sku="${escapeHtml(item.SKU)}">
+                                                                            <i class="bi bi-archive"></i>
                                                                         </button>` 
                             : ''
                         }
@@ -1819,6 +1862,88 @@
                 setupSelectionMode();
                 setupBatchProcessing();
             }
+
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+
+            //archive functionality
+            $('#viewArchivedBtn').on('click', function() {
+                $.ajax({
+                    url: '/product_master/archived',
+                    method: 'GET',
+                    beforeSend: function() {
+                        $('#archivedProductsTable tbody').html(`
+                            <tr><td colspan="5" class="text-center py-3">
+                                <div class="spinner-border text-primary" role="status"></div>
+                            </td></tr>
+                        `);
+                    },
+                    success: function(res) {
+                        const tableBody = $('#archivedProductsTable tbody');
+                        tableBody.empty();
+
+                        if (res.data.length === 0) {
+                            tableBody.append(`
+                                <tr><td colspan="5" class="text-center py-3 text-muted">
+                                    No archived products found.
+                                </td></tr>
+                            `);
+                            return;
+                        }
+
+                        res.data.forEach(product => {
+                            tableBody.append(`
+                                <tr>
+                                    <td>${product.id}</td>
+                                    <td>${product.sku}</td>
+                                    <td>${product.deleted_at ? new Date(product.deleted_at).toLocaleString() : '-'}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-success restore-btn" data-id="${product.id}">
+                                            <i class="fas fa-undo me-1"></i>Restore
+                                        </button>
+                                    </td>
+                                </tr>
+                            `);
+                        });
+
+                        // Attach restore button events
+                        $('.restore-btn').off('click').on('click', function() {
+                            const id = $(this).data('id');
+                            $.ajax({
+                                url: '/product_master/restore',
+                                method: 'POST',
+                                data: { ids: [id] },
+                                success: function(res) {
+                                    if (res.success) {
+                                        showToast('success', res.message || 'Product restored successfully!');
+                                        $('#viewArchivedBtn').trigger('click'); // reload modal list
+                                        loadData(); // reload main table
+                                    } else {
+                                        showToast('danger', res.message || 'Failed to restore.');
+                                    }
+                                },
+                                error: function() {
+                                    showToast('danger', 'Restore failed.');
+                                }
+                            });
+                        });
+                    },
+                    error: function() {
+                        $('#archivedProductsTable tbody').html(`
+                            <tr><td colspan="5" class="text-center text-danger py-3">
+                                Failed to load archived products.
+                            </td></tr>
+                        `);
+                    }
+                });
+
+                const modal = new bootstrap.Modal(document.getElementById('archivedProductsModal'));
+                modal.show();
+            });
+
 
             function setupSelectFilter(){
                 const fieldSelect = document.querySelector('.field-selector-wrapper select');
@@ -3319,36 +3444,32 @@
                             <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered">
                                 <div class="modal-content border-0" style="border-radius: 18px; overflow: hidden;">
-                                <div class="modal-header" style="background: linear-gradient(135deg, #ff6b6b 0%, #ff0000 100%); color: #fff;">
+                                <div class="modal-header" style="background: linear-gradient(135deg, #facc15 0%, #eab308 100%); color: #fff;">
                                     <div class="d-flex align-items-center w-100">
                                     <div class="me-3" style="font-size: 2.5rem;">
                                         <i class="fas fa-exclamation-triangle fa-shake"></i>
                                     </div>
                                     <div>
                                         <h5 class="modal-title mb-0" id="deleteConfirmModalLabel" style="font-weight: 800; letter-spacing: 1px;">
-                                        Delete Product?
+                                        Archive Product?
                                         </h5>
-                                        <small class="text-white-50">This action cannot be undone!</small>
                                     </div>
                                     <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
                                 </div>
                                 <div class="modal-body text-center py-4">
                                     <div class="mb-3" style="font-size: 1.2rem;">
-                                    Are you sure you want to <span class="fw-bold text-danger">delete</span> product<br>
-                                    <span class="badge bg-danger fs-6 px-3 py-2 mt-2" style="font-size:1.1rem;">SKU: ${escapeHtml(sku)}</span>?
+                                    Are you sure you want to <span class="fw-bold text-warning">Archive</span> product<br>
+                                    <span class="badge bg-warning fs-6 px-3 py-2 mt-2" style="font-size:1.1rem;">SKU: ${escapeHtml(sku)}</span>?
                                     </div>
-                                    <div class="mb-2 text-warning" style="font-size: 1rem;">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    This will move the product to trash (soft delete).
-                                    </div>
+                                    
                                 </div>
                                 <div class="modal-footer justify-content-center" style="background: #fff;">
                                     <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">
                                     <i class="fas fa-times me-1"></i>Cancel
                                     </button>
-                                    <button type="button" class="btn btn-danger px-4" id="confirmDeleteBtn">
-                                    <i class="fas fa-trash me-1"></i>Yes, Delete
+                                    <button type="button" class="btn btn-warning px-4" id="confirmDeleteBtn">
+                                    <i class="fas fa-archive me-1"></i> Archive
                                     </button>
                                 </div>
                                 </div>

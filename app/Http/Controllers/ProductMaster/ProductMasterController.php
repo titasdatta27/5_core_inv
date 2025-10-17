@@ -628,4 +628,102 @@ class ProductMasterController extends Controller
 
         return response()->json($data);
     }
+
+
+    // public function archive(Request $request)
+    // {
+    //     try {
+    //         $productIds = $request->input('ids');
+
+    //         if (empty($productIds)) {
+    //             return response()->json([
+    //                 'success' => false,
+    //                 'message' => 'No products selected for archiving.',
+    //             ], 400);
+    //         }
+
+    //         if (!is_array($productIds)) {
+    //             $productIds = [$productIds];
+    //         }
+
+    //         $products = ProductMaster::whereIn('id', $productIds)->get();
+
+    //         if ($products->isEmpty()) {
+    //             return response()->json([
+    //                 'success' => false,
+    //                 'message' => 'No matching products found.',
+    //             ], 404);
+    //         }
+
+    //         foreach ($products as $product) {
+    //             $product->archived_at = now();
+    //             $product->save();
+    //         }
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => count($productIds) . ' product(s) archived successfully.',
+    //         ]);
+    //     } catch (\Exception $e) {
+    //         Log::error('Error archiving product(s): ' . $e->getMessage());
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Failed to archive product(s). Please try again.',
+    //         ], 500);
+    //     }
+    // }
+
+
+    public function getArchived()
+    {
+        try {
+            $archived = ProductMaster::onlyTrashed()->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $archived
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error fetching archived products: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch archived products.'
+            ], 500);
+        }
+    }
+
+    public function restore(Request $request)
+    {
+        try {
+            $ids = $request->input('ids');
+
+            if (empty($ids)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No products selected for restoration.'
+                ], 400);
+            }
+
+            if (!is_array($ids)) {
+                $ids = [$ids];
+            }
+
+            ProductMaster::withTrashed()
+            ->whereIn('id', $ids)
+            ->update(['deleted_at' => null]);
+
+            return response()->json([
+                'success' => true,
+                'message' => count($ids) . ' product(s) restored successfully.'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error restoring products: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to restore products.'
+            ], 500);
+        }
+    }
+
+
 }

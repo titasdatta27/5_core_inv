@@ -1130,6 +1130,12 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     //data delete routes
     Route::delete('/product_master/delete', [ProductMasterController::class, 'destroy'])->name('product_master.destroy');
 
+    //data archive routes
+    // Route::post('/product_master/archive', [ProductMasterController::class, 'archive']);
+    Route::get('/product_master/archived', [ProductMasterController::class, 'getArchived']);
+    Route::post('/product_master/restore', [ProductMasterController::class, 'restore']);
+
+
     //reverb update
     Route::post('/update-reverb-column', [ReverbController::class, 'updateReverbColumn']);
 
