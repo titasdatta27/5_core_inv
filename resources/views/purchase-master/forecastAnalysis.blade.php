@@ -475,6 +475,15 @@
                     }
                 },
                 {
+                    title: "LP",
+                    field: "LP",
+                    accessor: row => row["LP"],
+                    formatter: function(cell) {
+                        const value = cell.getValue() || 0;
+                        return `<span style="display:block; text-align:center; font-weight:bold;">$${value.toLocaleString()}</span>`;
+                    }
+                },
+                {
                     title: "OV L30",
                     field: "L30",
                     accessor: row => row["L30"],
@@ -536,6 +545,29 @@
                         }
                     }
                 },
+                  {
+                    title: "S-MSL",
+                    field: "s_msl",
+                    headerSort: false,
+                    formatter: function(cell) {
+                        const value = cell.getValue();
+                        const rowData = cell.getRow().getData();
+
+                        const sku = rowData.SKU ?? '';
+                        const parent = rowData.Parent ?? '';
+
+                        return `<div 
+                        class="editable-qty" 
+                        contenteditable="true" 
+                        data-field="S-MSL"
+                        data-original="${value ?? ''}" 
+                        data-sku='${sku}' 
+                        data-parent='${parent}' 
+                        style="outline:none; min-width:50px; text-align:center;">
+                        ${value ?? ''}
+                    </div>`;
+                    }
+                },
                 {
                     title: "MSL_VL",
                     field: "MSL_C",
@@ -559,42 +591,7 @@
                         return `<div style="text-align:center; font-weight:bold;">$${roundedValue.toLocaleString()}</div>`;
                     }
                 },
-                {
-                    title: "MSL",
-                    field: "msl",
-                    formatter: function(cell) {
-                        const value = cell.getValue() || 0;
-                        return `
-                        <div style="text-align:center; font-weight:bold;">
-                            ${value}
-                            <button class="btn btn-sm btn-link text-info open-month-modal" style="padding: 0 4px;" title="View Monthly">
-                                <i class="bi bi-calendar3"></i>
-                            </button>
-                        </div>
-                    `;
-                    },
-                    cellClick: function(e, cell) {
-                        if (e.target.closest(".open-month-modal")) {
-                            const row = cell.getRow().getData();
-                            const sku = row["SKU"] || '';
-                            const monthData = {
-                                "JAN": row["jan"],
-                                "FEB": row["feb"],
-                                "MAR": row["Mar"],
-                                "APR": row["Apr"],
-                                "MAY": row["May"],
-                                "JUN": row["Jun"],
-                                "JUL": row["Jul"],
-                                "AUG": row["Aug"],
-                                "SEP": row["Sep"],
-                                "OCT": row["Oct"],
-                                "NOV": row["Nov"],
-                                "DEC": row["Dec"]
-                            };
-                            openMonthModal(monthData, sku);
-                        }
-                    }
-                },
+       
                 {
                     title: "MIP",
                     field: "order_given",
