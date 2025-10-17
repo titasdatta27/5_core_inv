@@ -180,7 +180,6 @@
                                  Restock MSL LP: $<span id="total_restock_msl_lp_value" class="fw-semibold text-dark">0</span>
                             </button>
 
-                           
                             <button id="total_mip_value" class="btn btn-sm btn-success fw-semibold text-dark">
                                  MIP Value: $<span id="total_mip_value_display" class="fw-semibold text-dark">0</span>
                             </button>
@@ -414,6 +413,9 @@
                     headerFilterFunc: "like",
                     accessor: row => row["Parent"]
                 },
+
+
+           
                 {
                     title: "SKU",
                     field: "SKU",
@@ -423,6 +425,7 @@
                     headerFilterFunc: "like",
                     accessor: row => row["SKU"]
                 },
+                
                 {
                     title: "INV",
                     field: "INV",
@@ -630,6 +633,45 @@
                     }
                 },
                 {
+                    title: "MIP Value",
+                    field: "MIP_Value",
+                    accessor: row => (row ? row["MIP_Value"] : null),
+                    sorter: "number",
+                    headerSort: true,
+                    formatter: function(cell) {
+                        const value = cell.getValue();
+
+                        return value ?? '';
+                    }
+                },
+
+                {
+                    title: "R2S Value",
+                    field: "R2S_Value",
+                    accessor: row => (row ? row["R2S_Value"] : null),
+                    sorter: "number",
+                    headerSort: true,
+                    formatter: function(cell) {
+                        const value = cell.getValue();
+
+                        return value ?? '';
+                    }
+                },
+
+                {
+                    title: "Transit Value",
+                    field: "Transit_Value",
+                    accessor: row => (row ? row["Transit_Value"] : null),
+                    sorter: "number",
+                    headerSort: true,
+                    formatter: function(cell) {
+                        const value = cell.getValue();
+
+                        return value ?? '';
+                    }
+                },
+
+                {
                     title: "Transit",
                     field: "transit",
                     accessor: row => (row ? row["transit"] : null),
@@ -654,41 +696,7 @@
                         </div>`;
                     }
                 },
-
-                {
-                    title: "MIP Value",
-                    field: "MIP_Value",
-                    accessor: row => row["MIP_Value"] ?? null,
-                    sorter: "number",
-                    headerSort: true,
-                    formatter: function(cell) {
-                        const value = cell.getValue() || 0;
-                        return `<span style="display:block; text-align:center; font-weight:bold;">$${value.toLocaleString()}</span>`;
-                    }
-                },
-
-                {
-                    title: "R2S Value",
-                    field: "R2S_Value",
-                    accessor: row => row["R2S_Value"] ?? null,
-                    sorter: "number",
-                    headerSort: true,
-                    formatter: function(cell) {
-                        const value = cell.getValue() || 0;
-                        return `<span style="display:block; text-align:center; font-weight:bold;">$${value.toLocaleString()}</span>`;
-                    }
-                },
-                {
-                    title: "Transit Value",
-                    field: "Transit_Value",
-                    accessor: row => row["Transit_Value"] ?? null,
-                    sorter: "number",
-                    headerSort: true,
-                    formatter: function(cell) {
-                        const value = cell.getValue() || 0;
-                        return `<span style="display:block; text-align:center; font-weight:bold;">$${value.toLocaleString()}</span>`;
-                    }
-                },
+                
                 {
                     title: "2 ORDER",
                     field: "to_order",
@@ -734,6 +742,8 @@
                     </div>`;
                     }
                 },
+
+                 
                 {
                     title: "Supplier",
                     field: "Supplier Tag",
@@ -825,6 +835,40 @@
                     totalLpValueElement.textContent = roundedTotal.toLocaleString('en-US');
                 }
 
+                // Calculate and update total Restock MSL
+                const totalRestockMsl = response.data.reduce((sum, item) => {
+                    if (!item.is_parent && (parseFloat(item.INV) || 0) === 0) {
+                        const lp = parseFloat(item.LP) || 0;
+                        return sum + (lp / 4);
+                    }
+                    return sum;
+                }, 0);
+                const totalRestockMslElement = document.getElementById('total_restock_msl_value');
+                if (totalRestockMslElement) {
+                    const wholeNumber = Math.round(totalRestockMsl);
+                    totalRestockMslElement.textContent = wholeNumber.toLocaleString('en-US');
+                }
+
+                // Calculate restock count and average shopify price for restock SKUs
+                const restockItems = response.data.filter(item => !item.is_parent && (parseFloat(item.INV) || 0) === 0);
+                const restockCount = restockItems.length;
+                const totalShopifyPrice = restockItems.reduce((sum, item) => sum + (parseFloat(item.shopifyb2c_price) || 0), 0);
+                const averageShopifyPrice = restockCount > 0 ? totalShopifyPrice / restockCount : 0;
+                const totalMinimalMsl = restockItems.reduce((sum, item) => sum + (parseFloat(item.MSL_SP) || 0), 0);
+                const totalMinimalMslElement = document.getElementById('total_minimal_msl_value');
+                if (totalMinimalMslElement) {
+                    const wholeNumber = Math.round(totalMinimalMsl);
+                    totalMinimalMslElement.textContent = wholeNumber.toLocaleString('en-US');
+                }
+
+                // Calculate sum of restock shopify prices
+                const sumRestockShopifyPrice = restockItems.reduce((sum, item) => sum + (parseFloat(item.shopifyb2c_price) || 0), 0);
+                const sumRestockShopifyPriceElement = document.getElementById('sum_restock_shopify_price_value');
+                if (sumRestockShopifyPriceElement) {
+                    const wholeNumber = Math.round(sumRestockShopifyPrice);
+                    sumRestockShopifyPriceElement.textContent = wholeNumber.toLocaleString('en-US');
+                }
+
                 // Calculate and update total MIP Value
                 const totalMipValue = response.data.reduce((sum, item) => {
                     if (!item.is_parent) {
@@ -864,41 +908,7 @@
                     totalTransitValueElement.textContent = roundedTotal.toLocaleString('en-US');
                 }
 
-                // Calculate and update total Restock MSL
-                const totalRestockMsl = response.data.reduce((sum, item) => {
-                    if (!item.is_parent && (parseFloat(item.INV) || 0) === 0) {
-                        const lp = parseFloat(item.LP) || 0;
-                        return sum + (lp / 4);
-                    }
-                    return sum;
-                }, 0);
-                const totalRestockMslElement = document.getElementById('total_restock_msl_value');
-                if (totalRestockMslElement) {
-                    const wholeNumber = Math.round(totalRestockMsl);
-                    totalRestockMslElement.textContent = wholeNumber.toLocaleString('en-US');
-                }
-
-                // Calculate restock count and average shopify price for restock SKUs
-                const restockItems = response.data.filter(item => !item.is_parent && (parseFloat(item.INV) || 0) === 0);
-                const restockCount = restockItems.length;
-                const totalShopifyPrice = restockItems.reduce((sum, item) => sum + (parseFloat(item.shopifyb2c_price) || 0), 0);
-                const averageShopifyPrice = restockCount > 0 ? totalShopifyPrice / restockCount : 0;
-                const totalMinimalMsl = restockItems.reduce((sum, item) => sum + (parseFloat(item.MSL_SP) || 0), 0);
-                const totalMinimalMslElement = document.getElementById('total_minimal_msl_value');
-                if (totalMinimalMslElement) {
-                    const wholeNumber = Math.round(totalMinimalMsl);
-                    totalMinimalMslElement.textContent = wholeNumber.toLocaleString('en-US');
-                }
-
-                // Calculate sum of restock shopify prices
-                const sumRestockShopifyPrice = restockItems.reduce((sum, item) => sum + (parseFloat(item.shopifyb2c_price) || 0), 0);
-                const sumRestockShopifyPriceElement = document.getElementById('sum_restock_shopify_price_value');
-                if (sumRestockShopifyPriceElement) {
-                    const wholeNumber = Math.round(sumRestockShopifyPrice);
-                    sumRestockShopifyPriceElement.textContent = wholeNumber.toLocaleString('en-US');
-                }
-
-                // Calculate total restock MSL LP
+                   // Calculate total restock MSL LP
                 const totalLp = restockItems.reduce((sum, item) => sum + (parseFloat(item.LP) || 0), 0);
                 const averageLp = restockCount > 0 ? totalLp / restockCount : 0;
                 const totalRestockMslLp = restockCount * (averageLp / 4);
@@ -907,6 +917,7 @@
                     const wholeNumber = Math.round(totalRestockMslLp);
                     totalRestockMslLpElement.textContent = wholeNumber.toLocaleString('en-US');
                 }
+
 
                 const groupedMSL = {};
                 const groupedS_MSL = {};
@@ -1191,45 +1202,52 @@
                 const visibleAverageLp = visibleRestockCount > 0 ? visibleTotalLp / visibleRestockCount : 0;
                 const totalRestockMslLp = visibleRestockCount * (visibleAverageLp / 4);
 
-                // Update total restock MSL LP display
-                const totalRestockMslLpElement = document.getElementById('total_restock_msl_lp_value');
-                if (totalRestockMslLpElement) {
-                    const wholeNumber = Math.round(totalRestockMslLp);
-                    totalRestockMslLpElement.textContent = wholeNumber.toLocaleString('en-US');
-                }
-
-                // Calculate total MIP_Value, R2S_Value, Transit_Value for visible rows
+                // Calculate total MIP Value for visible rows
                 let totalMipValue = 0;
-                let totalR2sValue = 0;
-                let totalTransitValue = 0;
                 visibleRows.forEach(row => {
                     const data = row.getData();
                     if (!data.is_parent) {
                         totalMipValue += parseFloat(data.MIP_Value) || 0;
+                    }
+                });
+
+                // Update total MIP Value display
+                const totalMipValueElement = document.getElementById('total_mip_value_display');
+                if (totalMipValueElement) {
+                    const roundedTotal = Math.round(totalMipValue);
+                    totalMipValueElement.textContent = roundedTotal.toLocaleString('en-US');
+                }
+
+                // Calculate total R2S Value for visible rows
+                let totalR2sValue = 0;
+                visibleRows.forEach(row => {
+                    const data = row.getData();
+                    if (!data.is_parent) {
                         totalR2sValue += parseFloat(data.R2S_Value) || 0;
+                    }
+                });
+
+                // Update total R2S Value display
+                const totalR2sValueElement = document.getElementById('total_r2s_value_display');
+                if (totalR2sValueElement) {
+                    const roundedTotal = Math.round(totalR2sValue);
+                    totalR2sValueElement.textContent = roundedTotal.toLocaleString('en-US');
+                }
+
+                // Calculate total Transit Value for visible rows
+                let totalTransitValue = 0;
+                visibleRows.forEach(row => {
+                    const data = row.getData();
+                    if (!data.is_parent) {
                         totalTransitValue += parseFloat(data.Transit_Value) || 0;
                     }
                 });
 
-                // Update total MIP_Value display
-                const totalMipValueElement = document.getElementById('total_mip_value_display');
-                if (totalMipValueElement) {
-                    const wholeNumber = Math.round(totalMipValue);
-                    totalMipValueElement.textContent = wholeNumber.toLocaleString('en-US');
-                }
-
-                // Update total R2S_Value display
-                const totalR2sValueElement = document.getElementById('total_r2s_value_display');
-                if (totalR2sValueElement) {
-                    const wholeNumber = Math.round(totalR2sValue);
-                    totalR2sValueElement.textContent = wholeNumber.toLocaleString('en-US');
-                }
-
-                // Update total Transit_Value display
+                // Update total Transit Value display
                 const totalTransitValueElement = document.getElementById('total_transit_value_display');
                 if (totalTransitValueElement) {
-                    const wholeNumber = Math.round(totalTransitValue);
-                    totalTransitValueElement.textContent = wholeNumber.toLocaleString('en-US');
+                    const roundedTotal = Math.round(totalTransitValue);
+                    totalTransitValueElement.textContent = roundedTotal.toLocaleString('en-US');
                 }
             }, 50);
 
