@@ -5,6 +5,7 @@ namespace App\Http\Controllers\MarketPlace\ZeroViewMarketPlace;
 use App\Http\Controllers\Controller;
 use App\Models\DobaDataView;
 use App\Models\DobaListingStatus;
+use App\Models\DobaSheetdata;
 use App\Models\ProductMaster;
 use App\Models\ShopifySku;
 use Illuminate\Http\Request;
@@ -189,28 +190,101 @@ class DobaZeroController extends Controller
         return $zeroViewCount;
     }
 
+    // public function getLivePendingAndZeroViewCounts()
+    // {
+    //     $productMasters = ProductMaster::whereNull('deleted_at')->get();
+    //     $skus = $productMasters->pluck('sku')->unique()->toArray();
+
+    //     $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy('sku');
+    //     $ebayDataViews = DobaListingStatus::whereIn('sku', $skus)->get()->keyBy('sku');
+    //     // $ebayMetrics = Ebay2Metric::whereIn('sku', $skus)->get()->keyBy('sku');
+
+    //     $ebayMetrics = DB::connection('apicentral')
+    //         ->table('doba_api_data as api_doba')
+    //         ->select(
+    //             'api_doba.spu as sku',
+    //             'api_doba.sellPrice as doba_price',
+    //             DB::raw('COALESCE(doba_m.l30, 0) as l30'),
+    //             DB::raw('COALESCE(doba_m.l60, 0) as l60')
+    //         )
+    //         ->leftJoin('doba_metrics as doba_m', 'api_doba.spu', '=', 'doba_m.sku')
+    //         ->whereIn('api_doba.spu', $skus)
+    //         ->get()
+    //         ->keyBy('sku');
+
+
+    //     $listedCount = 0;
+    //     $zeroInvOfListed = 0;
+    //     $liveCount = 0;
+    //     $zeroViewCount = 0;
+
+    //     foreach ($productMasters as $item) {
+    //         $sku = trim($item->sku);
+    //         $inv = $shopifyData[$sku]->inv ?? 0;
+    //         $isParent = stripos($sku, 'PARENT') !== false;
+    //         if ($isParent) continue;
+
+    //         $status = $ebayDataViews[$sku]->value ?? null;
+    //         if (is_string($status)) {
+    //             $status = json_decode($status, true);
+    //         }
+    //         $listed = $status['listed'] ?? (floatval($inv) > 0 ? 'Pending' : 'Listed');
+    //         $live = $status['live'] ?? null;
+
+    //         // Listed count (for live pending)
+    //         if ($listed === 'Listed') {
+    //             $listedCount++;
+    //             if (floatval($inv) <= 0) {
+    //                 $zeroInvOfListed++;
+    //             }
+    //         }
+
+    //         // Live count
+    //         if ($live === 'Live') {
+    //             $liveCount++;
+    //         }
+
+    //         // Zero view: INV > 0, views == 0 (from ebay_metric table), not parent SKU (NR ignored)
+    //         $views = $ebayMetrics[$sku]->views ?? null;
+    //         // if (floatval($inv) > 0 && $views !== null && intval($views) === 0) {
+    //         //     $zeroViewCount++;
+    //         // }
+    //         if ($inv > 0) {
+    //             if ($views === null) {
+    //                 // Do nothing, ignore null
+    //             } elseif (intval($views) === 0) {
+    //                 $zeroViewCount++;
+    //             }
+    //         }
+    //     }
+
+    //     // live pending = listed - 0-inv of listed - live
+    //     $livePending = $listedCount - $zeroInvOfListed - $liveCount;
+
+    //     return [
+    //         'live_pending' => $livePending,
+    //         'zero_view' => $zeroViewCount,
+    //     ];
+    // }
+
     public function getLivePendingAndZeroViewCounts()
     {
         $productMasters = ProductMaster::whereNull('deleted_at')->get();
-        $skus = $productMasters->pluck('sku')->unique()->toArray();
 
-        $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy('sku');
-        $ebayDataViews = DobaListingStatus::whereIn('sku', $skus)->get()->keyBy('sku');
-        // $ebayMetrics = Ebay2Metric::whereIn('sku', $skus)->get()->keyBy('sku');
+        // Normalize SKUs (avoid case/space mismatch)
+        $skus = $productMasters->pluck('sku')->map(fn($s) => strtoupper(trim($s)))->unique()->toArray();
 
-        $ebayMetrics = DB::connection('apicentral')
-            ->table('doba_api_data as api_doba')
-            ->select(
-                'api_doba.spu as sku',
-                'api_doba.sellPrice as doba_price',
-                DB::raw('COALESCE(doba_m.l30, 0) as l30'),
-                DB::raw('COALESCE(doba_m.l60, 0) as l60')
-            )
-            ->leftJoin('doba_metrics as doba_m', 'api_doba.spu', '=', 'doba_m.sku')
-            ->whereIn('api_doba.spu', $skus)
-            ->get()
-            ->keyBy('sku');
+        $shopifyData = ShopifySku::whereIn('sku', $skus)->get()
+            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
 
+        $dobaListingStatus = DobaListingStatus::whereIn('sku', $skus)->get()
+            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
+
+        $dobaDataViews = DobaDataView::whereIn('sku', $skus)->get()
+            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
+
+        $dobaMetrics = DobaSheetdata::whereIn('sku', $skus)->get()
+            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
 
         $listedCount = 0;
         $zeroInvOfListed = 0;
@@ -218,19 +292,31 @@ class DobaZeroController extends Controller
         $zeroViewCount = 0;
 
         foreach ($productMasters as $item) {
-            $sku = trim($item->sku);
+            $sku = strtoupper(trim($item->sku));
             $inv = $shopifyData[$sku]->inv ?? 0;
-            $isParent = stripos($sku, 'PARENT') !== false;
-            if ($isParent) continue;
 
-            $status = $ebayDataViews[$sku]->value ?? null;
+            // Skip parent SKUs
+            if (stripos($sku, 'PARENT') !== false) continue;
+
+            // --- Amazon Listing Status ---
+            $status = $dobaListingStatus[$sku]->value ?? null;
             if (is_string($status)) {
                 $status = json_decode($status, true);
             }
-            $listed = $status['listed'] ?? (floatval($inv) > 0 ? 'Pending' : 'Listed');
-            $live = $status['live'] ?? null;
 
-            // Listed count (for live pending)
+            // $listed = $status['listed'] ?? (floatval($inv) > 0 ? 'Pending' : 'Listed');
+            $listed = $status['listed'] ?? null;
+
+            // --- Amazon Live Status ---
+            $dataView = $dobaDataViews[$sku]->value ?? null;
+            if (is_string($dataView)) {
+                $dataView = json_decode($dataView, true);
+            }
+            // $live = ($dataView['Live'] ?? false) === true ? 'Live' : null;
+            $live = (!empty($dataView['Live']) && $dataView['Live'] === true) ? 'Live' : null;
+
+
+            // --- Listed count ---
             if ($listed === 'Listed') {
                 $listedCount++;
                 if (floatval($inv) <= 0) {
@@ -238,27 +324,58 @@ class DobaZeroController extends Controller
                 }
             }
 
-            // Live count
+            // --- Live count ---
             if ($live === 'Live') {
                 $liveCount++;
             }
 
-            // Zero view: INV > 0, views == 0 (from ebay_metric table), not parent SKU (NR ignored)
-            $views = $ebayMetrics[$sku]->views ?? null;
-            // if (floatval($inv) > 0 && $views !== null && intval($views) === 0) {
-            //     $zeroViewCount++;
-            // }
-            if ($inv > 0) {
-                if ($views === null) {
-                    // Do nothing, ignore null
-                } elseif (intval($views) === 0) {
-                    $zeroViewCount++;
+            // --- Views / Zero-View logic ---
+            $metricRecord = $dobaMetrics[$sku] ?? null;
+            $views = null;
+
+            if ($metricRecord) {
+                // Direct field
+                if (!empty($metricRecord->views) || $metricRecord->views === "0" || $metricRecord->views === 0) {
+                    $views = (int)$metricRecord->views;
+                }
+                // Or inside JSON column `value`
+                elseif (!empty($metricRecord->value)) {
+                    $metricData = json_decode($metricRecord->value, true);
+                    if (isset($metricData['views'])) {
+                        $views = (int)$metricData['views'];
+                    }
                 }
             }
+
+            // Normalize $inv to numeric
+            $inv = floatval($inv);
+
+            // Count as zero-view if views are exactly 0 and inv > 0
+            if ($inv > 0 && $views === 0) {
+                $zeroViewCount++;
+            }
+
+            // $metricRecord = $dobaMetrics[$sku] ?? null;
+            // $views = null;
+
+            // if ($metricRecord) {
+            //     // Direct field (if column exists)
+            //     if (!empty($metricRecord->views)) {
+            //         $views = $metricRecord->views;
+            //     }
+            //     // Or inside JSON column `value`
+            //     elseif (!empty($metricRecord->value)) {
+            //         $metricData = json_decode($metricRecord->value, true);
+            //         $views = $metricData['views'] ?? null;
+            //     }
+            // }
+
+            // if ($inv > 0 && $views !== null && intval($views) === 0) {
+            //     $zeroViewCount++;
+            // }
         }
 
-        // live pending = listed - 0-inv of listed - live
-        $livePending = $listedCount - $zeroInvOfListed - $liveCount;
+        $livePending = $listedCount - $liveCount;
 
         return [
             'live_pending' => $livePending,
