@@ -560,42 +560,6 @@
                     }
                 },
                 {
-                    title: "MSL",
-                    field: "msl",
-                    formatter: function(cell) {
-                        const value = cell.getValue() || 0;
-                        return `
-                        <div style="text-align:center; font-weight:bold;">
-                            ${value}
-                            <button class="btn btn-sm btn-link text-info open-month-modal" style="padding: 0 4px;" title="View Monthly">
-                                <i class="bi bi-calendar3"></i>
-                            </button>
-                        </div>
-                    `;
-                    },
-                    cellClick: function(e, cell) {
-                        if (e.target.closest(".open-month-modal")) {
-                            const row = cell.getRow().getData();
-                            const sku = row["SKU"] || '';
-                            const monthData = {
-                                "JAN": row["jan"],
-                                "FEB": row["feb"],
-                                "MAR": row["Mar"],
-                                "APR": row["Apr"],
-                                "MAY": row["May"],
-                                "JUN": row["Jun"],
-                                "JUL": row["Jul"],
-                                "AUG": row["Aug"],
-                                "SEP": row["Sep"],
-                                "OCT": row["Oct"],
-                                "NOV": row["Nov"],
-                                "DEC": row["Dec"]
-                            };
-                            openMonthModal(monthData, sku);
-                        }
-                    }
-                },
-                {
                     title: "MIP",
                     field: "order_given",
                     accessor: row => (row ? row["order_given"] : null),
@@ -609,15 +573,15 @@
                         const parent = rowData.Parent ?? '';
 
                         return `<div 
-                        class="editable-qty" 
-                        contenteditable="true" 
-                        data-field="order_given" 
-                        data-original='${value ?? ''}' 
-                        data-sku='${sku}' 
-                        data-parent='${parent}' 
-                        style="outline:none; min-width:40px; text-align:center; font-weight:bold;">
-                        ${value ?? ''}
-                    </div>`;
+                            class="editable-qty" 
+                            contenteditable="false" 
+                            data-field="order_given" 
+                            data-original='${value ?? ''}' 
+                            data-sku='${sku}' 
+                            data-parent='${parent}' 
+                            style="outline:none; min-width:40px; text-align:center; font-weight:bold;" readonly>
+                            ${value ?? ''}
+                        </div>`;
                     }
                 },
                 {

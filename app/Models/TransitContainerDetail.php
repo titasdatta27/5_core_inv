@@ -22,6 +22,7 @@ class TransitContainerDetail extends Model
         'product_size_link',
         'status',
         'changes',
+        'rec_qty',
         'no_of_units',
         'total_ctn',
         'rate',
