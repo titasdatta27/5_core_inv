@@ -72,58 +72,23 @@ class ZeroVisibilityMasterController extends Controller
 
         $totalSkuCount = count($productSKUs);
 
-        // --- Get eBay zero view count ---
-        // $ebayZeroCount = app(EbayZeroController::class)->getZeroViewCount();
-        // ZeroVisibilityMaster::where('channel_name', 'eBay')
-        //     ->update(['zero_visibility_sku_count' => $ebayZeroCount]);
-
-        // // --- Get Amazon zero view count ---
-        // $amazonZeroCount = app(AmazonZeroController::class)->getZeroViewCount();
-        // ZeroVisibilityMaster::where('channel_name', 'Amazon')
-        //     ->update(['zero_visibility_sku_count' => $amazonZeroCount]);
-
-        // // --- Get Shopify B2C zero view count ---
-        // $shopifyB2CZeroCount = app(Shopifyb2cZeroController::class)->getZeroViewCount();
-        // ZeroVisibilityMaster::where('channel_name', 'Shopify B2C')
-        //     ->update(['zero_visibility_sku_count' => $shopifyB2CZeroCount]);
-
-        // // --- Get Macy's zero view count ---
-        // $macyZeroCount = app(MacyZeroController::class)->getZeroViewCount();
-        // ZeroVisibilityMaster::where('channel_name', 'Macys')
-        //     ->update(['zero_visibility_sku_count' => $macyZeroCount]);
-
-        // // --- Get Newegg B2C zero view count ---
-        // $neweggB2CZeroCount = app(Neweggb2cZeroController::class)->getZeroViewCount();
-        // ZeroVisibilityMaster::where('channel_name', `Newegg B2C`)
-        //     ->update(['zero_visibility_sku_count' => $neweggB2CZeroCount]);
-
-        // // --- Get Wayfair zero view count ---
-        // $wayfairZeroCount = app(WayfairZeroController::class)->getZeroViewCount();
-        // ZeroVisibilityMaster::where('channel_name', 'Wayfair')
-        //     ->update(['zero_visibility_sku_count' => $wayfairZeroCount]);
-
-        // // --- Get Temu zero view count ---
-        // $temuZeroCount = app(TemuZeroController::class)->getZeroViewCount();
-        // ZeroVisibilityMaster::where('channel_name', 'Temu')
-        //     ->update(['zero_visibility_sku_count' => $temuZeroCount]);
-
         $channels = ZeroVisibilityMaster::all();
 
         // Mapping for special channel/controller names
         $controllerMap = [
-            'ebay' => 'EbayZeroController',
-            'ebaythree' => 'Ebay3ZeroController',
-            'ebay3' => 'Ebay3ZeroController',
-            'ebaytwo' => 'Ebay2ZeroController',
-            'ebay2' => 'Ebay2ZeroController',
-            'ebayvariation' => 'EbayVariationZeroController',
-            'tiktokshop' => 'TiktokShopZeroController',
-            'doba' => 'DobaZeroController',
-            'walmart' => 'WalmartZeroController',
-            'shein' => 'SheinZeroController',
-            'bestbuyusa' => 'BestbuyUSAZeroController',
-            'aliexpress' => 'AliexpressZeroController',
-            'business5core'=>'Business5CoreZeroController',
+            'ebay'          => 'EbayZeroController',
+            'ebaythree'     => 'Ebay3ZeroController',
+            'ebay3'         => 'Ebay3ZeroController',
+            'ebaytwo'       => 'Ebay2ZeroController',
+            'ebay2'         => 'Ebay2ZeroController',
+            // 'ebayvariation' => 'EbayVariationZeroController',
+            'tiktokshop'    => 'TiktokShopZeroController',
+            'doba'          => 'DobaZeroController',
+            'walmart'       => 'WalmartZeroController',
+            'shein'         => 'SheinZeroController',
+            'bestbuyusa'    => 'BestbuyUSAZeroController',
+            'aliexpress'    => 'AliexpressZeroController',
+            'business5core' =>'Business5CoreZeroController',
             // Add more mappings as needed
         ];
 

@@ -581,20 +581,44 @@ class AmazonZeroController extends Controller
             $views = null;
 
             if ($metricRecord) {
-                // Direct field (if column exists)
-                if (!empty($metricRecord->sessions_l30)) {
-                    $views = $metricRecord->sessions_l30;
+                // Direct field
+                if (!empty($metricRecord->sessions_l30) || $metricRecord->sessions_l30 === "0" || $metricRecord->sessions_l30 === 0) {
+                    $views = (int)$metricRecord->sessions_l30;
                 }
                 // Or inside JSON column `value`
                 elseif (!empty($metricRecord->value)) {
                     $metricData = json_decode($metricRecord->value, true);
-                    $views = $metricData['sessions_l30'] ?? null;
+                    if (isset($metricData['sessions_l30'])) {
+                        $views = (int)$metricData['sessions_l30'];
+                    }
                 }
             }
 
-            if ($inv > 0 && $views !== null && intval($views) === 0) {
+            // Normalize $inv to numeric
+            $inv = floatval($inv);
+
+            // Count as zero-view if views are exactly 0 and inv > 0
+            if ($inv > 0 && $views === 0) {
                 $zeroViewCount++;
             }
+            // $metricRecord = $amazonMetrics[$sku] ?? null;
+            // $views = null;
+
+            // if ($metricRecord) {
+            //     // Direct field (if column exists)
+            //     if (!empty($metricRecord->sessions_l30)) {
+            //         $views = $metricRecord->sessions_l30;
+            //     }
+            //     // Or inside JSON column `value`
+            //     elseif (!empty($metricRecord->value)) {
+            //         $metricData = json_decode($metricRecord->value, true);
+            //         $views = $metricData['sessions_l30'] ?? null;
+            //     }
+            // }
+
+            // if ($inv > 0 && $views !== null && intval($views) === 0) {
+            //     $zeroViewCount++;
+            // }
         }
 
         $livePending = $listedCount - $liveCount;
