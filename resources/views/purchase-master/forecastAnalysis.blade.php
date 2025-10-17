@@ -591,7 +591,6 @@
                         return `<div style="text-align:center; font-weight:bold;">$${roundedValue.toLocaleString()}</div>`;
                     }
                 },
-       
                 {
                     title: "MIP",
                     field: "order_given",
@@ -606,15 +605,15 @@
                         const parent = rowData.Parent ?? '';
 
                         return `<div 
-                        class="editable-qty" 
-                        contenteditable="true" 
-                        data-field="order_given" 
-                        data-original='${value ?? ''}' 
-                        data-sku='${sku}' 
-                        data-parent='${parent}' 
-                        style="outline:none; min-width:40px; text-align:center; font-weight:bold;">
-                        ${value ?? ''}
-                    </div>`;
+                            class="editable-qty" 
+                            contenteditable="false" 
+                            data-field="order_given" 
+                            data-original='${value ?? ''}' 
+                            data-sku='${sku}' 
+                            data-parent='${parent}' 
+                            style="outline:none; min-width:40px; text-align:center; font-weight:bold;" readonly>
+                            ${value ?? ''}
+                        </div>`;
                     }
                 },
                 {

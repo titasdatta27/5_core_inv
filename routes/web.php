@@ -1058,6 +1058,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::post('/ready-to-ship/inline-update-by-sku', [ReadyToShipController::class, 'inlineUpdateBySku']);
     Route::post('/ready-to-ship/revert-back-mfrg', [ReadyToShipController::class, 'revertBackMfrg']);
     Route::post('/ready-to-ship/move-to-transit', [ReadyToShipController::class, 'moveToTransit']);
+    Route::post('/ready-to-ship/delete-items', [ReadyToShipController::class, 'deleteItems']);
 
 
     //China Load

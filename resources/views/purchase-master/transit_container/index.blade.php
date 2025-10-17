@@ -510,6 +510,7 @@ Object.entries(groupedData).forEach(([tabName, data], index) => {
                 style="height:40px;border-radius:4px;border:1px solid #ccc;cursor:zoom-in;">`;
               }
             },
+            { title: "Rec Qty", field: "rec_qty"},
             { title: "Qty / Ctns", field: "no_of_units", editor: "input" },
             { title: "Qty Ctns", field: "total_ctn", editor: "input" },
             { 
