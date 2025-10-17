@@ -138,122 +138,36 @@ class WalmartZeroController extends Controller
         return $zeroViewCount;
     }
 
-    public function getLivePendingAndZeroViewCounts()
-    {
-        $productMasters = ProductMaster::whereNull('deleted_at')->get();
-        $skus = $productMasters->pluck('sku')->unique()->toArray();
-
-        $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy('sku');
-        $ebayDataViews = WalmartListingStatus::whereIn('sku', $skus)->get()->keyBy('sku');
-
-        $ebayMetrics = DB::connection('apicentral')
-            ->table('walmart_api_data as api')
-            ->select(
-                'api.sku',
-                'api.price',
-                DB::raw('COALESCE(m.l30, 0) as l30'),
-                DB::raw('COALESCE(m.l60, 0) as l60')
-            )
-            ->leftJoin('walmart_metrics as m', 'api.sku', '=', 'm.sku')
-            ->whereIn('api.sku', $skus)
-            ->get()
-            ->keyBy('sku');
-
-        $walmartSheetViews = WalmartProductSheet::select('sku', 'views')
-            ->whereIn('sku', $skus)
-            ->get()
-            ->keyBy('sku');
-
-
-        $listedCount = 0;
-        $zeroInvOfListed = 0;
-        $liveCount = 0;
-        $zeroViewCount = 0;
-
-        foreach ($productMasters as $item) {
-            $sku = trim($item->sku);
-            $inv = $shopifyData[$sku]->inv ?? 0;
-            $isParent = stripos($sku, 'PARENT') !== false;
-            if ($isParent) continue;
-
-            $status = $ebayDataViews[$sku]->value ?? null;
-            if (is_string($status)) {
-                $status = json_decode($status, true);
-            }
-            $listed = $status['listed'] ?? (floatval($inv) > 0 ? 'Pending' : 'Listed');
-            $live = $status['live'] ?? null;
-
-            // Listed count (for live pending)
-            if ($listed === 'Listed') {
-                $listedCount++;
-                if (floatval($inv) <= 0) {
-                    $zeroInvOfListed++;
-                }
-            }
-
-            // Live count
-            if ($live === 'Live') {
-                $liveCount++;
-            }
-
-            // Zero view: INV > 0, views == 0 (from ebay_metric table), not parent SKU (NR ignored)
-            $views = $walmartSheetViews[$sku]->views ?? null;
-            // if (floatval($inv) > 0 && $views !== null && intval($views) === 0) {
-            //     $zeroViewCount++;
-            // }
-            if ($inv > 0) {
-                if ($views === null) {
-                    // Do nothing, ignore null
-                } elseif (intval($views) === 0) {
-                    $zeroViewCount++;
-                }
-            }
-        }
-
-        // live pending = listed - 0-inv of listed - live
-        $livePending = $listedCount - $zeroInvOfListed - $liveCount;
-
-        return [
-            'live_pending' => $livePending,
-            'zero_view' => $zeroViewCount,
-        ];
-    }
-
-
     // public function getLivePendingAndZeroViewCounts()
     // {
     //     $productMasters = ProductMaster::whereNull('deleted_at')->get();
     //     $skus = $productMasters->pluck('sku')->unique()->toArray();
 
     //     $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy('sku');
+    //     $ebayDataViews = WalmartListingStatus::whereIn('sku', $skus)->get()->keyBy('sku');
 
-    //     // Live/Listed data from walmart_data_view
-    //     $walmartDataView = DB::table('walmart_data_view')
-    //         ->whereIn('sku', $skus)
-    //         ->get()
-    //         ->keyBy('sku');
-
-    //     // NR data from walmart_listing_statuses
-    //     $nrData = DB::table('walmart_listing_statuses')
-    //         ->whereIn('sku', $skus)
-    //         ->get()
-    //         ->keyBy('sku');
-
-    //     // Views / metrics data
     //     $ebayMetrics = DB::connection('apicentral')
     //         ->table('walmart_api_data as api')
     //         ->select(
-    //             'api.sku'
+    //             'api.sku',
+    //             'api.price',
+    //             DB::raw('COALESCE(m.l30, 0) as l30'),
+    //             DB::raw('COALESCE(m.l60, 0) as l60')
     //         )
     //         ->leftJoin('walmart_metrics as m', 'api.sku', '=', 'm.sku')
     //         ->whereIn('api.sku', $skus)
     //         ->get()
     //         ->keyBy('sku');
 
+    //     $walmartSheetViews = WalmartProductSheet::select('sku', 'views')
+    //         ->whereIn('sku', $skus)
+    //         ->get()
+    //         ->keyBy('sku');
+
+
     //     $listedCount = 0;
+    //     $zeroInvOfListed = 0;
     //     $liveCount = 0;
-    //     $nrCount = 0;
-    //     $zeroInvCount = 0;
     //     $zeroViewCount = 0;
 
     //     foreach ($productMasters as $item) {
@@ -262,49 +176,150 @@ class WalmartZeroController extends Controller
     //         $isParent = stripos($sku, 'PARENT') !== false;
     //         if ($isParent) continue;
 
-    //         // Listed / Live data
-    //         $dataViewValue = $walmartDataView[$sku]->value ?? null;
-    //         if (is_string($dataViewValue)) {
-    //             $dataViewValue = json_decode($dataViewValue, true);
+    //         $status = $ebayDataViews[$sku]->value ?? null;
+    //         if (is_string($status)) {
+    //             $status = json_decode($status, true);
     //         }
-    //         $isListed = isset($dataViewValue['Listed']) && $dataViewValue['Listed'] === true;
-    //         $isLive = isset($dataViewValue['Live']) && $dataViewValue['Live'] === true;
+    //         $listed = $status['listed'] ?? (floatval($inv) > 0 ? 'Pending' : 'Listed');
+    //         $live = $status['live'] ?? null;
 
-    //         if ($isListed) {
+    //         // Listed count (for live pending)
+    //         if ($listed === 'Listed') {
     //             $listedCount++;
     //             if (floatval($inv) <= 0) {
-    //                 $zeroInvCount++;
+    //                 $zeroInvOfListed++;
     //             }
     //         }
-    //         if ($isLive) {
+
+    //         // Live count
+    //         if ($live === 'Live') {
     //             $liveCount++;
     //         }
 
-    //         // NR data
-    //         $nrValue = $nrData[$sku]->value ?? null;
-    //         if (is_string($nrValue)) {
-    //             $nrValue = json_decode($nrValue, true);
-    //         }
-    //         $isNR = isset($nrValue['nr_req']) && $nrValue['nr_req'] === 'NR';
-    //         if ($isNR) {
-    //             $nrCount++;
-    //         }
-
-    //         // Zero view
-    //         $views = $ebayMetrics[$sku]->views ?? null;
-    //         if ($inv > 0 && $views !== null && intval($views) === 0) {
-    //             $zeroViewCount++;
+    //         // Zero view: INV > 0, views == 0 (from ebay_metric table), not parent SKU (NR ignored)
+    //         $views = $walmartSheetViews[$sku]->views ?? null;
+    //         // if (floatval($inv) > 0 && $views !== null && intval($views) === 0) {
+    //         //     $zeroViewCount++;
+    //         // }
+    //         if ($inv > 0) {
+    //             if ($views === null) {
+    //                 // Do nothing, ignore null
+    //             } elseif (intval($views) === 0) {
+    //                 $zeroViewCount++;
+    //             }
     //         }
     //     }
 
-    //     $livePending = $listedCount - $liveCount - $nrCount - $zeroInvCount;
-    //     dd($listedCount, $liveCount, $nrCount, $zeroInvCount, $livePending, $zeroViewCount);
+    //     // live pending = listed - 0-inv of listed - live
+    //     $livePending = $listedCount - $zeroInvOfListed - $liveCount;
 
     //     return [
     //         'live_pending' => $livePending,
     //         'zero_view' => $zeroViewCount,
     //     ];
     // }
+
+
+    public function getLivePendingAndZeroViewCounts()
+    {
+        $productMasters = ProductMaster::whereNull('deleted_at')->get();
+
+        // Normalize SKUs (avoid case/space mismatch)
+        $skus = $productMasters->pluck('sku')->map(fn($s) => strtoupper(trim($s)))->unique()->toArray();
+
+        $shopifyData = ShopifySku::whereIn('sku', $skus)->get()
+            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
+
+        $walmartListingStatus = WalmartListingStatus::whereIn('sku', $skus)->get()
+            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
+
+        $walmartDataViews = WalmartDataView::whereIn('sku', $skus)->get()
+            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
+
+        $walamrtMetrics = WalmartProductSheet::whereIn('sku', $skus)->get()
+            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
+
+        $listedCount = 0;
+        $zeroInvOfListed = 0;
+        $liveCount = 0;
+        $zeroViewCount = 0;
+
+        foreach ($productMasters as $item) {
+            $sku = strtoupper(trim($item->sku));
+            $inv = $shopifyData[$sku]->inv ?? 0;
+
+            // Skip parent SKUs
+            if (stripos($sku, 'PARENT') !== false) continue;
+
+            // --- Amazon Listing Status ---
+            $status = $walmartListingStatus[$sku]->value ?? null;
+            if (is_string($status)) {
+                $status = json_decode($status, true);
+            }
+
+            // $listed = $status['listed'] ?? (floatval($inv) > 0 ? 'Pending' : 'Listed');
+            $listed = $status['listed'] ?? null;
+
+            // --- Amazon Live Status ---
+            $dataView = $walmartDataViews[$sku]->value ?? null;
+            if (is_string($dataView)) {
+                $dataView = json_decode($dataView, true);
+            }
+            // $live = ($dataView['Live'] ?? false) === true ? 'Live' : null;
+            $live = (!empty($dataView['Live']) && $dataView['Live'] === true) ? 'Live' : null;
+
+
+            // --- Listed count ---
+            if ($listed === 'Listed') {
+                $listedCount++;
+                if (floatval($inv) <= 0) {
+                    $zeroInvOfListed++;
+                }
+            }
+
+            // --- Live count ---
+            if ($live === 'Live') {
+                $liveCount++;
+            }
+
+            // --- Views / Zero-View logic ---
+            $metricRecord = $walamrtMetrics[$sku] ?? null;
+            $views = null;
+
+            if ($metricRecord) {
+                // Direct field
+                if (!empty($metricRecord->views) || $metricRecord->views === "0" || $metricRecord->views === 0) {
+                    $views = (int)$metricRecord->views;
+                }
+                // Or inside JSON column `value`
+                elseif (!empty($metricRecord->value)) {
+                    $metricData = json_decode($metricRecord->value, true);
+                    if (isset($metricData['views'])) {
+                        $views = (int)$metricData['views'];
+                    }
+                }
+            }
+
+            // Normalize $inv to numeric
+            $inv = floatval($inv);
+
+            // Count as zero-view if views are exactly 0 and inv > 0
+            if ($inv > 0 && $views === 0) {
+                $zeroViewCount++;
+            }
+
+        }
+
+        $livePending = $listedCount - $liveCount;
+
+        return [
+            'live_pending' => $livePending,
+            'zero_view' => $zeroViewCount,
+        ];
+    }
+
+
+   
 
 
 }
