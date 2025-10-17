@@ -94,6 +94,7 @@ class ArrivedContainerController extends Controller
             ArrivedContainer::updateOrCreate(
                 [
                     'transit_container_id' => $row['id'],
+                    'tab_name'          => $row['tab_name'] ?? $tabName,
                 ],
                 [
                     'tab_name'          => $row['tab_name'] ?? null,
