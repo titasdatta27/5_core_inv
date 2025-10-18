@@ -164,8 +164,8 @@ class ForecastAnalysisController extends Controller
                     $totalSum += $value;
                 }
 
-                $item->{'Total'} = ($item->L30 ?? 0) + $totalSum;
-                $item->{'Total month'} = $totalMonthCount + ((isset($item->L30) && $item->L30 != 0) ? 1 : 0);
+                $item->{'Total'} = $totalSum;
+                $item->{'Total month'} = $totalMonthCount;
                 
                 $msl = $item->{'Total month'} > 0 ? ($item->{'Total'} / $item->{'Total month'}) * 4 : 0;
                 
@@ -546,8 +546,8 @@ class ForecastAnalysisController extends Controller
                         if($value!==0) $totalMonthCount++;
                         $totalSum += $value;
                     }
-                    $item->{'Total'} = ($item->L30 ?? 0) + $totalSum;
-                    $item->{'Total month'} = $totalMonthCount + ((isset($item->L30) && $item->L30!=0)?1:0);
+                    $item->{'Total'} = $totalSum;
+                    $item->{'Total month'} = $totalMonthCount;
                     
                     // Calculate MSL
                     $msl = $item->{'Total month'} > 0 ? ($item->{'Total'} / $item->{'Total month'}) * 4 : 0;

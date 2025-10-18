@@ -2630,6 +2630,8 @@
                             <option value="Promotion" ${item.REASON === 'Promotion' ? 'selected' : ''}>Promotion</option>
                             <option value="Suspense" ${item.REASON === 'Suspense' ? 'selected' : ''}>Suspense</option>
                             <option value="Unknown" ${item.REASON === 'Unknown' ? 'selected' : ''}>Unknown</option>
+                            <option value="Adjustment" ${item.REASON === 'Adjustment' ? 'selected' : ''}>Adjustment</option>
+                            <option value="Combo" ${item.REASON === 'Combo' ? 'selected' : ''}>Combo</option>
                         </select>
                     `));
 
