@@ -181,7 +181,7 @@ use App\Http\Controllers\Campaigns\EbayOverUtilizedBgtController;
 use App\Http\Controllers\Campaigns\EbayPinkDilAdController;
 use App\Http\Controllers\Campaigns\EbayPMPAdsController;
 use App\Http\Controllers\Campaigns\EbayRunningAdsController;
-use App\Http\Controllers\Campaigns\GoogleShoppingAdsController;
+use App\Http\Controllers\Campaigns\GoogleAdsController;
 use App\Http\Controllers\Campaigns\WalmartMissingAdsController;
 use App\Http\Controllers\Campaigns\WalmartUtilisationController;
 use App\Http\Controllers\Channels\ApprovalsChannelMasterController;
@@ -1998,15 +1998,23 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     // shopify amazon stock mapping
     
 
-    Route::controller(GoogleShoppingAdsController::class)->group(function () {
+    Route::controller(GoogleAdsController::class)->group(function () {
         Route::get('/google/shopping', 'index')->name('google.shopping');
-        Route::get('/google/shopping/serp', 'googleShoppingSerp')->name('google.shopping.serp');
-        Route::get('/google/shopping/pmax', 'googleShoppingPmax')->name('google.shopping.pmax');
+        Route::get('/google/shopping/running', 'googleShoppingAdsRunning')->name('google.shopping.running');
         Route::get('/google/shopping/over/utilize', 'googleOverUtilizeView')->name('google.shopping.over.utilize');
         Route::get('/google/shopping/under/utilize', 'googleUnderUtilizeView')->name('google.shopping.under.utilize');
-        Route::get('/google/shopping/running', 'googleShoppingAdsRunning')->name('google.shopping.running');
+        Route::get('/google/shopping/report', 'googleShoppingAdsReport')->name('google.shopping.report');
+
+        Route::get('/google/serp/list', 'googleSerpView')->name('google.serp.list');
+        Route::get('/google/serp/report', 'googleSerpReportView')->name('google.serp.report');
+
+        Route::get('/google/pmax/list', 'googlePmaxView')->name('google.pmax.list');
+
         Route::get('/google/shopping/data', 'getGoogleShoppingAdsData');
-        Route::get('/google-search/shopping/data', 'getGoogleSearchShoppingAdsData');
+        Route::get('/google/shopping/ads-report/data', 'getGoogleShoppingAdsReportData');
+        
+        Route::get('/google/search/data', 'getGoogleSearchAdsData');
+        Route::get('/google/search/report/data', 'getGoogleSearchAdsReportData');
     });
 
     Route::controller(FbaDataController::class)->group(function () {
