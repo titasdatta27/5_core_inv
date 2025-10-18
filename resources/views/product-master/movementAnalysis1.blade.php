@@ -126,7 +126,7 @@
                     let inv = cell.getRow().getData().INV || 1;
                     return (l30 / inv).toFixed(2) + "%";
                 }},
-                ...["jan","feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"].map(m => ({title: m.toUpperCase(), field: `months.${m}`})),
+                ...["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"].map(m => ({title: m.toUpperCase(), field: `months.${m}`})),
                 {title: "Total", field: "total"},
                 {
                     title: "Monthly Total", 

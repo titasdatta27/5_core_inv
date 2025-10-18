@@ -224,6 +224,10 @@ class Kernel extends ConsoleKernel
         $schedule->command('app:fetch-fba-monthly-sales')
             ->dailyAt('02:00')
             ->timezone('America/Los_Angeles');
+        // Movement Analysis Command for Shopify Order Items (apicentral database)
+        $schedule->command('movement:generate')
+            ->dailyAt('12:00')
+            ->timezone('Asia/Kolkata');
     }
 
     /**
