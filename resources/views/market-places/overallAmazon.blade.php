@@ -1587,7 +1587,6 @@
                                     </div>
                                 </th>
 
-
                                 <th data-field="cvr" style="vertical-align: middle; white-space: nowrap;">
                                     <div class="d-flex flex-column align-items-center" style="gap: 4px">
                                         <div class="d-flex align-items-center">
@@ -1616,12 +1615,26 @@
                                 <th data-field="pft" style="vertical-align: middle; white-space: nowrap;">
                                     <div class="d-flex flex-column align-items-center">
                                         <div class="d-flex align-items-center" style="gap: 4px">
-                                            GPRFT <span class="sort-arrow">↓</span>
+                                            PRFT 
                                         </div>
-                                        <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
-                                        <div class="metric-total" id="pft-total">0%</div>
                                     </div>
                                 </th>
+                                <th data-field="gprft" style="vertical-align: middle; white-space: nowrap;">
+                                    <div class="d-flex flex-column align-items-center">
+                                        <div class="d-flex align-items-center" style="gap: 4px">
+                                            GPRFT 
+                                        </div>
+                                    </div>
+                                </th>
+
+                                <th data-field="profit" style="vertical-align: middle; white-space: nowrap;">
+                                    <div class="d-flex flex-column align-items-center">
+                                        <div class="d-flex align-items-center" style="gap: 4px">
+                                            TPRFT 
+                                        </div>
+                                    </div>
+                                </th>
+
                                 <th data-field="total_sales" style="vertical-align: middle; white-space: nowrap;">
                                     <div class="d-flex flex-column align-items-center">
                                         <div class="d-flex align-items-center">
@@ -1667,16 +1680,6 @@
                                         <div class="metric-total" id="Tpft-total">0%</div>
                                     </div>
                                 </th> --}}
-
-                                <th data-field="profit" style="vertical-align: middle; white-space: nowrap;">
-                                    <div class="d-flex flex-column align-items-center">
-                                        <div class="d-flex align-items-center" style="gap: 4px">
-                                            TPRFT <span class="sort-arrow">↓</span>
-                                        </div>
-                                        <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
-                                        <div class="metric-total" id="profit-total">0%</div>
-                                    </div>
-                                </th>
 
                                 {{-- <th data-field="profit" style="vertical-align: middle; white-space: nowrap;">
                                         <div class="d-flex flex-column align-items-center">
@@ -3060,16 +3063,7 @@
                             'PFT_percentage']) ?
                         `<span class="dil-percent-value ${getPftColor(item['PFT_percentage'])}">
                             ${Math.round(item['PFT_percentage'])}%
-                        </span>
-                        <span class="tooltip-container" style="margin-left:8px">
-                            <i class="fas fa-tag text-warning price-view-trigger" 
-                                style="transform:translateY(1px)"
-                                data-bs-toggle="tooltip" 
-                                data-bs-placement="top-end" 
-                                title="Pricing view"
-                                data-item='${JSON.stringify(item.raw_data)}'></i>
-                        </span>` :
-                        ''
+                        </span>` : ''
                     ));
 
 
@@ -3096,18 +3090,23 @@
                     let costPercentage = (percentage + amazonAdUpdates) / 100; 
                     let netPft = (price * costPercentage) - ship - lp - (spend / aL30);
                     let tpft = (netPft / price) * 100;
+                    
+                    const totalAmazonPercentage = (percentage - amazonAdUpdates) / 100;
+                    const netGpft = (price * totalAmazonPercentage) - ship - lp;
+                    let gPft = (netGpft / price) * 100;
 
-                    // total sales 
+                    // GPFT with color coding
+                    if(isNaN(gPft) || !isFinite(gPft)) {
+                        gPft = 0;
+                    }
+
                     $row.append($('<td>').html(
-                        `$${soldAmount.toFixed(2)}`
+                        `
+                            <span class="dil-percent-value ${getPftColor(gPft)}">
+                                ${gPft.toFixed(0)}%
+                            </span>
+                        ` 
                     ));
-
-
-                    // spend in advertising     
-                    $row.append($('<td>').html(
-                        `$${adSpend.toFixed(2)}`
-                    ));
-
 
                     // var tpft = rawPft + amazonAdUpdates - tacos;
                     if(isNaN(tpft) || !isFinite(tpft)) {
@@ -3137,6 +3136,16 @@
                         ` 
                     ));
 
+                    // total sales 
+                    $row.append($('<td>').html(
+                        `$${soldAmount.toFixed(2)}`
+                    ));
+
+
+                    // spend in advertising     
+                    $row.append($('<td>').html(
+                        `$${adSpend.toFixed(2)}`
+                    ));
 
                     // ROI with color coding
                     $row.append($('<td>').html(
