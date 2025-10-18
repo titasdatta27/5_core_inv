@@ -57,10 +57,19 @@ class AmazonZeroController extends Controller
         });
 
         // 2. Fetch AmazonDatasheet and ShopifySku for those SKUs
-        $amazonDatasheetsBySku = AmazonDatasheet::whereIn('sku', $skus)->get()->keyBy(function ($item) {
+        // Use groupBy to handle duplicate SKUs, then take the earliest record for each (lowest ID)
+        $amazonDatasheetsBySku = AmazonDatasheet::whereIn('sku', $skus)
+            ->get()
+            ->groupBy(function ($item) {
+                return strtoupper($item->sku);
+            })
+            ->map(function ($group) {
+                // Return the record with the lowest ID (earliest/original)
+                return $group->sortBy('id')->first();
+            });
+        $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy(function ($item) {
             return strtoupper($item->sku);
         });
-        $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy('sku');
 
         // 3. JungleScout Data (by parent)
         $parents = $productMasters->pluck('parent')->filter()->unique()->map('strtoupper')->values()->all();
@@ -83,7 +92,7 @@ class AmazonZeroController extends Controller
             $parent = $pm->parent;
 
             $amazonSheet = $amazonDatasheetsBySku[$sku] ?? null;
-            $shopify = $shopifyData[$pm->sku] ?? null;
+            $shopify = $shopifyData[$sku] ?? null;
 
             $row = [];
             $row['Parent'] = $parent;
@@ -206,10 +215,19 @@ class AmazonZeroController extends Controller
         });
 
         // 2. Fetch AmazonDatasheet and ShopifySku for those SKUs
-        $amazonDatasheetsBySku = AmazonDatasheet::whereIn('sku', $skus)->get()->keyBy(function ($item) {
+        // Use groupBy to handle duplicate SKUs, then take the earliest record for each (lowest ID)
+        $amazonDatasheetsBySku = AmazonDatasheet::whereIn('sku', $skus)
+            ->get()
+            ->groupBy(function ($item) {
+                return strtoupper($item->sku);
+            })
+            ->map(function ($group) {
+                // Return the record with the lowest ID (earliest/original)
+                return $group->sortBy('id')->first();
+            });
+        $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy(function ($item) {
             return strtoupper($item->sku);
         });
-        $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy('sku');
 
         // 3. Fetch API data (Google Sheet)
         $response = $this->apiController->fetchDataFromAmazonGoogleSheet();
@@ -227,7 +245,7 @@ class AmazonZeroController extends Controller
             $sku = strtoupper($pm->sku);
             $apiItem = $apiDataBySku[$sku] ?? null;
             $amazonSheet = $amazonDatasheetsBySku[$sku] ?? null;
-            $shopify = $shopifyData[$pm->sku] ?? null;
+            $shopify = $shopifyData[$sku] ?? null;
 
             $row = [];
             $row['NR'] = 'REQ';
@@ -531,8 +549,14 @@ class AmazonZeroController extends Controller
         $amazonDataViews = AmazonDataView::whereIn('sku', $skus)->get()
             ->keyBy(fn($s) => strtoupper(trim($s->sku)));
 
-        $amazonMetrics = AmazonDatasheet::whereIn('sku', $skus)->get()
-            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
+        // Use groupBy to handle duplicate SKUs, then take the earliest record for each (lowest ID)
+        $amazonMetrics = AmazonDatasheet::whereIn('sku', $skus)
+            ->get()
+            ->groupBy(fn($s) => strtoupper(trim($s->sku)))
+            ->map(function ($group) {
+                // Return the record with the lowest ID (earliest/original)
+                return $group->sortBy('id')->first();
+            });
 
         $listedCount = 0;
         $zeroInvOfListed = 0;
