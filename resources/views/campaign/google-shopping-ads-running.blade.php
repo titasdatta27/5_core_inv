@@ -210,7 +210,7 @@
 
             var table = new Tabulator("#budget-under-table", {
                 index: "Sku",
-                ajaxURL: "/google-search/shopping/data",
+                ajaxURL: "/google/shopping/data",
                 layout: "fitData",
                 movableColumns: true,
                 resizableColumns: true,

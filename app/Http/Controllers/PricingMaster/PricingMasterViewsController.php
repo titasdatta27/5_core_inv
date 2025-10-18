@@ -235,7 +235,20 @@ class PricingMasterViewsController extends Controller
 
         $ebayListingData = EbayListingStatus::whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
         // $dobaData    = DobaMetric::whereIn('sku', $skus)->get()->keyBy('sku');
-        $ebayData    = EbayMetric::whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
+       $ebayData = DB::connection('apicentral')
+        ->table('ebay_one_metrics')
+        ->select(
+            'sku',
+            'ebay_l30',
+            'ebay_l60',
+            'ebay_price',
+            'views',
+
+        )
+        ->whereIn('sku', $nonParentSkus)
+        ->get()
+        ->keyBy('sku');
+
         $temuListingData = TemuListingStatus::whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
         $ebayTwoListingData = EbayTwoListingStatus::whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
         $ebayThreeListingData = EbayThreeListingStatus::whereIn('sku', $nonParentSkus)->get()->keyBy('sku');

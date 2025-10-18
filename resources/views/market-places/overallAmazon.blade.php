@@ -1730,7 +1730,7 @@
                                 <th data-field="ad cost/ pc" style="vertical-align: middle; white-space: nowrap;">
                                     <div class="d-flex flex-column align-items-center">
                                         <div class="d-flex align-items-center">
-                                            AD COST <br> PER PC<span class="sort-arrow">↓</span>
+                                            CPS<span class="sort-arrow">↓</span>
                                         </div>
                                     </div>
                                 </th>
@@ -3095,7 +3095,6 @@
                     let percentage = {{ $amazonPercentage ?? 0 }};
                     let costPercentage = (percentage + amazonAdUpdates) / 100; 
                     let netPft = (price * costPercentage) - ship - lp - (spend / aL30);
-                    console.log("SKU ", sku, price, costPercentage, ship, lp, spend);
                     let tpft = (netPft / price) * 100;
 
                     // total sales 
@@ -3163,9 +3162,9 @@
 
 
                     // CVR with color coding and tooltip
-
+                    let cps = aL30 > 0 ? (spend / aL30).toFixed(2) : 0;
                     $row.append($('<td>').text(
-                        typeof item['ad cost/ pc'] === 'number' ? item['ad cost/ pc'].toFixed(2) : 0
+                        `${cps}`
                     ));
 
 

@@ -1573,6 +1573,27 @@
                                             <div class="metric-total" id="pft-total">0%</div>
                                         </div>
                                     </th>
+                                    <th data-field="ad-spend" style="vertical-align: middle; white-space: nowrap;">
+                                        <div class="d-flex flex-column align-items-center" style="gap: 4px">
+                                            <div class="d-flex align-items-center">
+                                                Ad Spend
+                                            </div>
+                                        </div>
+                                    </th>
+                                    <th data-field="cps" style="vertical-align: middle; white-space: nowrap;">
+                                        <div class="d-flex flex-column align-items-center" style="gap: 4px">
+                                            <div class="d-flex align-items-center">
+                                                CPS
+                                            </div>
+                                        </div>
+                                    </th>
+                                    <th data-field="tprft" style="vertical-align: middle; white-space: nowrap;">
+                                        <div class="d-flex flex-column align-items-center" style="gap: 4px">
+                                            <div class="d-flex align-items-center">
+                                                TPRFT
+                                            </div>
+                                        </div>
+                                    </th>
                                     <th data-field="roi" style="vertical-align: middle; white-space: nowrap;">
                                         <div class="d-flex flex-column align-items-center" style="gap: 4px">
                                             <div class="d-flex align-items-center">
@@ -1755,16 +1776,19 @@
                     }
 
                     $.ajax({
-                        url: '/update-all-ebay-skus',
+                        url: '/update-all-ebay1-skus',
                         type: 'POST',
                         data: {
-                            percent: percent,
+                            type: 'percentage',
+                            value: percent,
                             _token: $('meta[name="csrf-token"]').attr('content')
                         },
                         success: function(response) {
                             showNotification('success', 'Percentage updated successfully!');
                             $input.prop('disabled', true);
                             $icon.removeClass('fa-check').addClass('fa-pen');
+                            // Reload the data table if needed
+                            loadData();
                         },
                         error: function(xhr) {
                             showNotification('danger', 'Error updating percentage.');
@@ -2377,6 +2401,7 @@
                                         .SROI))) ? parseFloat(item.SROI) : 0,
                                     LP: item.LP_productmaster || 0,
                                     SHIP: item.Ship_productmaster || 0,
+                                    spend_l30: item.spend_l30 || 0,
                                 };
                             });
 
@@ -2766,6 +2791,55 @@
                         ''
                     ));
 
+                    $row.append($('<td>').html(
+                        `${item.spend_l30.toFixed(2)}`
+                    ));
+                    // Cost per sale (CPS) calculation
+                    let cps = item['eBay L30'] > 0 ? (item.spend_l30 / item['eBay L30']).toFixed(2) : 0;
+                    $row.append($('<td>').html(
+                        `${cps}`
+                    ));
+
+                    // TPRFT with color coding
+                    const price = Number(item['eBay Price']) || 0;
+                    const ship = Number(item.SHIP) || 0;
+                    const lp = Number(item.LP) || 0;
+                    const spend = Number(item.spend_l30) || 0;
+                    const eL30 = Number(item['eBay L30']) || 0;
+                    const costPercentage = {{ $ebayPercentage ?? 0}};
+
+                    const netPft = (price * costPercentage) - ship - lp - (spend / eL30);
+                    let tpft = (netPft / price) * 100;
+                    
+                    if(isNaN(tpft) || !isFinite(tpft)) {
+                        tpft = 0;
+                    }
+                    
+                    $.ajax({
+                        url: '/update-ebay-nr-data',
+                        type: 'POST',
+                        data: {
+                            sku: item['(Child) sku'],
+                            field: 'TPFT',
+                            value: tpft.toFixed(2),
+                            _token: $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: function(res) {
+
+                        },
+                        error: function(err) {
+                            console.error("Auto-save failed:", err);
+                        }
+                    });
+
+                    $row.append($('<td>').html(
+                        `
+                            <span class="dil-percent-value ${getPftColor(tpft)}">
+                                ${tpft.toFixed(0)}%
+                            </span>
+                        ` 
+                    ));
+
                     // ROI with color coding
                     $row.append($('<td>').html(
                         typeof item.Roi === 'number' && !isNaN(item.Roi) ?
@@ -2806,24 +2880,24 @@
                     $row.append($('<td>').html(
                         item.SPRICE !== null && !isNaN(parseFloat(item.SPRICE)) ?
                         `
-    <div class="d-flex align-items-center gap-2">
-        <span class="badge bg-primary s_price" 
-              style="font-size:16px; padding:8px 14px; border-radius:8px;">
-            $${Math.round(parseFloat(item.SPRICE))}
-        </span>
-        <div class="btn-group" role="group">
-            <!-- Edit Button -->
-            <button class="btn btn-outline-primary openPricingBtn"
-                style="font-size:15px; padding:6px 12px; border-radius:8px;"
-                title="Edit SPRICE"
-                data-lp="${item.LP}"
-                data-ship="${item.SHIP}"
-                data-sku="${item["(Child) sku"]}">
-                <i class="fa fa-edit"></i>
-            </button>
-        </div>
-    </div>
-    ` : ''
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-primary s_price" 
+                                style="font-size:16px; padding:8px 14px; border-radius:8px;">
+                                $${Math.round(parseFloat(item.SPRICE))}
+                            </span>
+                            <div class="btn-group" role="group">
+                                <!-- Edit Button -->
+                                <button class="btn btn-outline-primary openPricingBtn"
+                                    style="font-size:15px; padding:6px 12px; border-radius:8px;"
+                                    title="Edit SPRICE"
+                                    data-lp="${item.LP}"
+                                    data-ship="${item.SHIP}"
+                                    data-sku="${item["(Child) sku"]}">
+                                    <i class="fa fa-edit"></i>
+                                </button>
+                            </div>
+                        </div>
+                        ` : ''
                     ));
 
 
@@ -2831,23 +2905,23 @@
                     $row.append($('<td>').attr('id', `spft-${item["(Child) sku"]}`).html(
                         item.SPFT !== null && !isNaN(parseFloat(item.SPFT)) ?
                         `<span style="
-        font-size:14px; 
-        padding:6px 12px; 
-        border-radius:8px; 
-        color:#fff; 
-        background-color:${
-            parseFloat(item.SPFT) <= 10 
-                ? '#dc3545'   // 🔴 red
-                : parseFloat(item.SPFT) <= 15 
-                    ? '#ffc107'   // 🟡 yellow
-                    : parseFloat(item.SPFT) <= 20 
-                        ? '#0d6efd'   // 🔵 blue
-                        : '#198754'   // 🟢 green
-        };">
-        ${(parseFloat(item.SPFT) - Math.floor(parseFloat(item.SPFT)) >= 0.5 
-            ? Math.ceil(parseFloat(item.SPFT)) 
-            : Math.floor(parseFloat(item.SPFT)))}%
-     </span>` :
+                            font-size:14px; 
+                            padding:6px 12px; 
+                            border-radius:8px; 
+                            color:#fff; 
+                            background-color:${
+                                parseFloat(item.SPFT) <= 10 
+                                    ? '#dc3545'   // 🔴 red
+                                    : parseFloat(item.SPFT) <= 15 
+                                        ? '#ffc107'   // 🟡 yellow
+                                        : parseFloat(item.SPFT) <= 20 
+                                            ? '#0d6efd'   // 🔵 blue
+                                            : '#198754'   // 🟢 green
+                            };">
+                            ${(parseFloat(item.SPFT) - Math.floor(parseFloat(item.SPFT)) >= 0.5 
+                                ? Math.ceil(parseFloat(item.SPFT)) 
+                                : Math.floor(parseFloat(item.SPFT)))}%
+                        </span>` :
                         ''
                     ));
 
@@ -2855,24 +2929,23 @@
                     $row.append($('<td>').attr('id', `sroi-${item["(Child) sku"]}`).html(
                         item.SROI !== null && !isNaN(parseFloat(item.SROI)) ?
                         `<span style="
-        font-size:14px; 
-        padding:6px 12px; 
-        border-radius:8px; 
-        color:#fff; 
-        background-color:${
-            parseFloat(item.SROI) <= 50 
-                ? '#dc3545'   // 🔴 red
-                : parseFloat(item.SROI) <= 100 
-                    ? '#ffc107'   // 🟡 yellow
-                    : parseFloat(item.SROI) <= 150 
-                        ? '#198754'   // 🟢 green
-                        : '#6f42c1'   // 🟣 purple
-        };">
-        ${(parseFloat(item.SROI) - Math.floor(parseFloat(item.SROI)) >= 0.5 
-            ? Math.ceil(parseFloat(item.SROI)) 
-            : Math.floor(parseFloat(item.SROI)))}%
-     </span>` :
-                        ''
+                            font-size:14px; 
+                            padding:6px 12px; 
+                            border-radius:8px; 
+                            color:#fff; 
+                            background-color:${
+                                parseFloat(item.SROI) <= 50 
+                                    ? '#dc3545'   // 🔴 red
+                                    : parseFloat(item.SROI) <= 100 
+                                        ? '#ffc107'   // 🟡 yellow
+                                        : parseFloat(item.SROI) <= 150 
+                                            ? '#198754'   // 🟢 green
+                                            : '#6f42c1'   // 🟣 purple
+                            };">
+                            ${(parseFloat(item.SROI) - Math.floor(parseFloat(item.SROI)) >= 0.5 
+                                ? Math.ceil(parseFloat(item.SROI)) 
+                                : Math.floor(parseFloat(item.SROI)))}%
+                        </span>` : ''
                     ));
 
 

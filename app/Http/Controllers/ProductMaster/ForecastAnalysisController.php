@@ -153,7 +153,7 @@ class ForecastAnalysisController extends Controller
                 $months = json_decode($movementMap->get($sheetSku)->months ?? '{}', true);
                 $months = is_array($months) ? $months : [];
 
-                $monthNames = ['Dec', 'jan', 'feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov'];
+                $monthNames = ['Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov'];
                 $totalMonthCount = 0;
                 $totalSum = 0;
 
@@ -167,17 +167,13 @@ class ForecastAnalysisController extends Controller
                 $item->{'Total'} = $totalSum;
                 $item->{'Total month'} = $totalMonthCount;
                 
-                // Calculate MSL
                 $msl = $item->{'Total month'} > 0 ? ($item->{'Total'} / $item->{'Total month'}) * 4 : 0;
                 
-                // Use effective MSL (manual s-msl if available, otherwise calculated msl)
                 $effectiveMsl = (isset($item->{'s-msl'}) && $item->{'s-msl'} > 0) ? $item->{'s-msl'} : $msl;
                 
-                // Calculate MSL_C (MSL * LP / 4)
                 $lp = is_numeric($item->{'LP'}) ? (float)$item->{'LP'} : 0;
                 $item->{'MSL_C'} = round($msl * $lp / 4, 2);
                 
-                // Calculate MSL SP (shopify price * effective MSL / 4)
                 $item->{'MSL_SP'} = floor($shopifyb2c_price * $effectiveMsl / 4);
 
                 $cp = (float)($item->{'CP'} ?? 0);
@@ -189,8 +185,6 @@ class ForecastAnalysisController extends Controller
                 $item->R2S_Value = round($lp * $readyToShipQty, 2);
                 $item->Transit_Value = round($lp * $transit, 2);
 
-
-                
             }
 
             $processedData[] = $item;

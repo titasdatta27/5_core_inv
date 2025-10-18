@@ -37,6 +37,7 @@ class Kernel extends ConsoleKernel
         \App\Console\Commands\AutoUpdateAmazonFbaUnderKwBids::class,
         \App\Console\Commands\AutoUpdateAmazonFbaOverPtBids::class,
         \App\Console\Commands\AutoUpdateAmazonFbaUnderPtBids::class,
+        \App\Console\Commands\GenerateMovementAnalysis::class,
 
     ];
 
@@ -224,6 +225,10 @@ class Kernel extends ConsoleKernel
         $schedule->command('app:fetch-fba-monthly-sales')
             ->dailyAt('02:00')
             ->timezone('America/Los_Angeles');
+        // Movement Analysis Command for Shopify Order Items (apicentral database)
+        $schedule->command('movement:generate')
+            ->dailyAt('12:00')
+            ->timezone('Asia/Kolkata');
     }
 
     /**

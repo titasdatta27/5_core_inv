@@ -757,6 +757,36 @@
                 }
             });
 
+            let initialSpendL30Data = {};
+
+            table.on("dataLoaded", function(data) {
+                data.forEach(row => {
+                if (row.SPEND_L30 !== undefined) {
+                    initialSpendL30Data[row.sku] = row.SPEND_L30;
+
+                    fetch('/update-ebay-nr-data', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        sku: row.sku,
+                        field: 'Spend_L30', 
+                        value: row.SPEND_L30
+                    })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                    console.log('SPEND_L30 saved for SKU:', row.sku);
+                    })
+                    .catch(err => {
+                    console.error('Error saving SPEND_L30:', err);
+                    });
+                }
+                });
+            });
+
             table.on("tableBuilt", function() {
 
                 function combinedFilter(data) {
