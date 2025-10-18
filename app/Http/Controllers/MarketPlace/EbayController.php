@@ -308,6 +308,7 @@ class EbayController extends Controller
             $row['Listed'] = null;
             $row['Live'] = null;
             $row['APlus'] = null;
+            $row['spend_l30'] = null;
             if (isset($nrValues[$pm->sku])) {
                 $raw = $nrValues[$pm->sku];
                 if (!is_array($raw)) {
@@ -318,6 +319,7 @@ class EbayController extends Controller
                     $row['SPRICE'] = $raw['SPRICE'] ?? null;
                     $row['SPFT'] = $raw['SPFT'] ?? null;
                     $row['SROI'] = $raw['SROI'] ?? null;
+                    $row['spend_l30'] = $raw['Spend_L30'] ?? null;
                     $row['Listed'] = isset($raw['Listed']) ? filter_var($raw['Listed'], FILTER_VALIDATE_BOOLEAN) : null;
                     $row['Live'] = isset($raw['Live']) ? filter_var($raw['Live'], FILTER_VALIDATE_BOOLEAN) : null;
                     $row['APlus'] = isset($raw['APlus']) ? filter_var($raw['APlus'], FILTER_VALIDATE_BOOLEAN) : null;

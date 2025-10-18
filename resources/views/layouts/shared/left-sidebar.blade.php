@@ -2184,13 +2184,13 @@
                         <li class="side-nav-item">
                             <a data-bs-toggle="collapse" href="#sidebarGoogleShopping" aria-expanded="false"
                                 aria-controls="sidebarGoogleShopping">
-                                <span> Google Shopping </span>
+                                <span> Google Ads </span>
                                 <span class="menu-arrow"></span>
                             </a>
                             <div class="collapse" id="sidebarGoogleShopping">
                                 <ul class="side-nav-third-level">
                                     <li>
-                                        <a href="{{ route('google.shopping.running') }}">G-Shopping Ads Running</a>
+                                        <a href="{{ route('google.shopping.running') }}">G-Shopping Running Ads</a>
                                     </li>
                                     <li>
                                         <a href="{{ route('google.shopping.over.utilize') }}">G-Shopping Over
@@ -2201,10 +2201,16 @@
                                             Util.</a>
                                     </li>
                                     <li>
-                                        <a href="{{ route('google.shopping.serp') }}">Google SERP</a>
+                                        <a href="{{ route('google.shopping.report') }}">G-Shopping Report</a>
                                     </li>
                                     <li>
-                                        <a href="{{ route('google.shopping.pmax') }}">Google PMAX</a>
+                                        <a href="{{ route('google.serp.list') }}">Google SERP</a>
+                                    </li>
+                                    <li>
+                                        <a href="{{ route('google.serp.report') }}">Google SERP Report</a>
+                                    </li>
+                                    <li>
+                                        <a href="{{ route('google.pmax.list') }}">Google PMAX</a>
                                     </li>
                                 </ul>
                             </div>

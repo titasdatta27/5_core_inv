@@ -1730,7 +1730,7 @@
                                 <th data-field="ad cost/ pc" style="vertical-align: middle; white-space: nowrap;">
                                     <div class="d-flex flex-column align-items-center">
                                         <div class="d-flex align-items-center">
-                                            AD COST <br> PER PC<span class="sort-arrow">↓</span>
+                                            CPS<span class="sort-arrow">↓</span>
                                         </div>
                                     </div>
                                 </th>
@@ -3163,9 +3163,9 @@
 
 
                     // CVR with color coding and tooltip
-
+                    let cps = aL30 > 0 ? (spend / aL30).toFixed(2) : 0;
                     $row.append($('<td>').text(
-                        typeof item['ad cost/ pc'] === 'number' ? item['ad cost/ pc'].toFixed(2) : 0
+                        `${cps}`
                     ));
 
 
