@@ -1659,7 +1659,13 @@
                                     </div>
                                 </th>
 
-
+                                <th data-field="ad cost/ pc" style="vertical-align: middle; white-space: nowrap;">
+                                    <div class="d-flex flex-column align-items-center">
+                                        <div class="d-flex align-items-center">
+                                            CPS<span class="sort-arrow">↓</span>
+                                        </div>
+                                    </div>
+                                </th>
                                 {{-- <th data-field="spend" style="vertical-align: middle; white-space: nowrap;">
                                     <div class="d-flex flex-column align-items-center">
                                         <div class="d-flex align-items-center" style="gap: 4px">
@@ -1727,14 +1733,6 @@
                                         </div>
                                         <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
                                         <div class="metric-total" id="tacos-total">0%</div>
-                                    </div>
-                                </th>
-
-                                <th data-field="ad cost/ pc" style="vertical-align: middle; white-space: nowrap;">
-                                    <div class="d-flex flex-column align-items-center">
-                                        <div class="d-flex align-items-center">
-                                            CPS<span class="sort-arrow">↓</span>
-                                        </div>
                                     </div>
                                 </th>
 
@@ -3147,6 +3145,12 @@
                         `$${adSpend.toFixed(2)}`
                     ));
 
+                    // CPS with color coding and tooltip
+                    let cps = aL30 > 0 ? (spend / aL30).toFixed(2) : 0;
+                    $row.append($('<td>').text(
+                        `${cps}`
+                    ));
+
                     // ROI with color coding
                     $row.append($('<td>').html(
                         typeof item.ROI_percentage === 'number' && !isNaN(item.ROI_percentage) ?
@@ -3168,14 +3172,6 @@
                                 data-bs-toggle="tooltip" data-bs-placement="bottom" title="Advertisement view"
                                 data-item='${JSON.stringify(item.raw_data)}'></i>`
                     ));
-
-
-                    // CVR with color coding and tooltip
-                    let cps = aL30 > 0 ? (spend / aL30).toFixed(2) : 0;
-                    $row.append($('<td>').text(
-                        `${cps}`
-                    ));
-
 
                     // SPRICE + Edit Button (no decimals)
                     $row.append($('<td>').html(
