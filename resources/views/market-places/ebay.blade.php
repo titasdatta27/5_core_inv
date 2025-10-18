@@ -1587,6 +1587,13 @@
                                             </div>
                                         </div>
                                     </th>
+                                    <th data-field="tprft" style="vertical-align: middle; white-space: nowrap;">
+                                        <div class="d-flex flex-column align-items-center" style="gap: 4px">
+                                            <div class="d-flex align-items-center">
+                                                TPRFT
+                                            </div>
+                                        </div>
+                                    </th>
                                     <th data-field="roi" style="vertical-align: middle; white-space: nowrap;">
                                         <div class="d-flex flex-column align-items-center" style="gap: 4px">
                                             <div class="d-flex align-items-center">
@@ -1769,16 +1776,19 @@
                     }
 
                     $.ajax({
-                        url: '/update-all-ebay-skus',
+                        url: '/update-all-ebay1-skus',
                         type: 'POST',
                         data: {
-                            percent: percent,
+                            type: 'percentage',
+                            value: percent,
                             _token: $('meta[name="csrf-token"]').attr('content')
                         },
                         success: function(response) {
                             showNotification('success', 'Percentage updated successfully!');
                             $input.prop('disabled', true);
                             $icon.removeClass('fa-check').addClass('fa-pen');
+                            // Reload the data table if needed
+                            loadData();
                         },
                         error: function(xhr) {
                             showNotification('danger', 'Error updating percentage.');
@@ -2788,6 +2798,46 @@
                     let cps = item['eBay L30'] > 0 ? (item.spend_l30 / item['eBay L30']).toFixed(2) : 0;
                     $row.append($('<td>').html(
                         `${cps}`
+                    ));
+
+                    // TPRFT with color coding
+                    const price = Number(item['eBay Price']) || 0;
+                    const ship = Number(item.SHIP) || 0;
+                    const lp = Number(item.LP) || 0;
+                    const spend = Number(item.spend_l30) || 0;
+                    const eL30 = Number(item['eBay L30']) || 0;
+                    const costPercentage = {{ $ebayPercentage ?? 0}};
+
+                    const netPft = (price * costPercentage) - ship - lp - (spend / eL30);
+                    let tpft = (netPft / price) * 100;
+                    
+                    if(isNaN(tpft) || !isFinite(tpft)) {
+                        tpft = 0;
+                    }
+                    
+                    $.ajax({
+                        url: '/update-ebay-nr-data',
+                        type: 'POST',
+                        data: {
+                            sku: item['(Child) sku'],
+                            field: 'TPFT',
+                            value: tpft.toFixed(2),
+                            _token: $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: function(res) {
+
+                        },
+                        error: function(err) {
+                            console.error("Auto-save failed:", err);
+                        }
+                    });
+
+                    $row.append($('<td>').html(
+                        `
+                            <span class="dil-percent-value ${getPftColor(tpft)}">
+                                ${tpft.toFixed(0)}%
+                            </span>
+                        ` 
                     ));
 
                     // ROI with color coding

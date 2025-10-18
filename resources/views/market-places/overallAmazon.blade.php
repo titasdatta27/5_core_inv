@@ -3095,7 +3095,6 @@
                     let percentage = {{ $amazonPercentage ?? 0 }};
                     let costPercentage = (percentage + amazonAdUpdates) / 100; 
                     let netPft = (price * costPercentage) - ship - lp - (spend / aL30);
-                    console.log("SKU ", sku, price, costPercentage, ship, lp, spend);
                     let tpft = (netPft / price) * 100;
 
                     // total sales 
