@@ -215,17 +215,15 @@ class AmazonZeroController extends Controller
         });
 
         // 2. Fetch AmazonDatasheet and ShopifySku for those SKUs
-        // Use SQL subquery to handle duplicate SKUs - get only the record with lowest ID per SKU
+        // Use groupBy to handle duplicate SKUs, then take the earliest record for each (lowest ID)
         $amazonDatasheetsBySku = AmazonDatasheet::whereIn('sku', $skus)
-            ->whereIn('id', function ($query) use ($skus) {
-                $query->selectRaw('MIN(id)')
-                    ->from('amazon_datsheets')
-                    ->whereIn('sku', $skus)
-                    ->groupBy('sku');
-            })
             ->get()
-            ->keyBy(function ($item) {
+            ->groupBy(function ($item) {
                 return strtoupper($item->sku);
+            })
+            ->map(function ($group) {
+                // Return the record with the lowest ID (earliest/original)
+                return $group->sortBy('id')->first();
             });
         $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy(function ($item) {
             return strtoupper($item->sku);
@@ -551,16 +549,14 @@ class AmazonZeroController extends Controller
         $amazonDataViews = AmazonDataView::whereIn('sku', $skus)->get()
             ->keyBy(fn($s) => strtoupper(trim($s->sku)));
 
-        // Use SQL subquery to handle duplicate SKUs - get only the record with lowest ID per SKU
+        // Use groupBy to handle duplicate SKUs, then take the earliest record for each (lowest ID)
         $amazonMetrics = AmazonDatasheet::whereIn('sku', $skus)
-            ->whereIn('id', function ($query) use ($skus) {
-                $query->selectRaw('MIN(id)')
-                    ->from('amazon_datsheets')
-                    ->whereIn('sku', $skus)
-                    ->groupBy('sku');
-            })
             ->get()
-            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
+            ->groupBy(fn($s) => strtoupper(trim($s->sku)))
+            ->map(function ($group) {
+                // Return the record with the lowest ID (earliest/original)
+                return $group->sortBy('id')->first();
+            });
 
         $listedCount = 0;
         $zeroInvOfListed = 0;
