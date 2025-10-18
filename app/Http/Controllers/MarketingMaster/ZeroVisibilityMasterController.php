@@ -212,17 +212,26 @@ class ZeroVisibilityMasterController extends Controller
 
         // Mapping for special channel/controller names
         $controllerMap = [
-            'ebay' => 'EbayZeroController',
-            'ebaythree' => 'Ebay3ZeroController',
-            'ebaytwo' => 'Ebay2ZeroController',
-            'ebay2' => 'Ebay2ZeroController',
+            'ebay'          => 'EbayZeroController',
+            'ebaythree'     => 'Ebay3ZeroController',
+            'ebaytwo'       => 'Ebay2ZeroController',
+            'ebay2'         => 'Ebay2ZeroController',
             'ebayvariation' => 'EbayVariationZeroController',
-            'tiktokshop' => 'TiktokShopZeroController',
-            'doba' => 'DobaZeroController',
-            'walmart' => 'WalmartZeroController',
-            'shein' => 'SheinZeroController',
-            'bestbuyusa' => 'BestbuyUSAZeroController',
-            'aliexpress' => 'AliexpressZeroController',
+            'tiktokshop'    => 'TiktokShopZeroController',
+            'doba'          => 'DobaZeroController',
+            'walmart'       => 'WalmartZeroController',
+            'shein'         => 'SheinZeroController',
+            'bestbuyusa'    => 'BestbuyUSAZeroController',
+            'aliexpress'    => 'AliexpressZeroController',
+            'tiendamia'     => 'TiendamiaZeroController',
+            'pls'           => 'PLSZeroController',
+            'mercariwship'  => 'MercariWShipZeroController',
+            'mercariwoship' => 'MercariWoShipZeroController',
+            'instagramshop' => 'InstagramShopZeroController',
+            'fbshop'        => 'FBShopZeroController',
+            'fbmarketplace' => 'FBMarketplaceZeroController',
+            'faire'         => 'FaireZeroController',
+            'business5core' => 'Business5CoreZeroController',
             // Add more mappings as needed
         ];
 
