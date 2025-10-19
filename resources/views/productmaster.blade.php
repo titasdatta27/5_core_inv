@@ -397,6 +397,10 @@
                                 <i class="fas fa-plus me-1"></i> ADD PRODUCT
                             </button>
 
+                        <button id="missingImagesBtn" class="btn btn-warning ms-2">
+                            <i class="bi bi-image"></i> Show Missing Data
+                        </button>
+
                         <button type="button" class="btn btn-success ms-2" id="downloadExcel">
                             <i class="fas fa-file-excel me-1"></i> Download Excel
                         </button>
@@ -447,6 +451,38 @@
                         </div>
                     </div>
 
+
+                    <!-- Missing Images Modal -->
+                    <div class="modal fade" id="missingImagesModal" tabindex="-1" aria-labelledby="missingImagesModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                        <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="missingImagesModalLabel">Products Missing Images</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <table class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                <th>Parent</th>
+                                <th>SKU</th>
+                                <th>Status</th>
+                                {{-- <th>LP</th> --}}
+                                <th>CP$</th>
+                                {{-- <th>INV</th>
+                                <th>OV L30</th> --}}
+                                <th>Image</th>
+                                <th>Dimensions (L×W×H)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="missingImagesTableBody">
+                                <!-- Rows will be filled dynamically -->
+                            </tbody>
+                            </table>
+                        </div>
+                        </div>
+                    </div>
+                    </div>
 
                     <!-- Permission Modal -->
                     <div class="modal fade" id="permissionModal" tabindex="-1" aria-labelledby="permissionModalLabel"
@@ -1660,6 +1696,87 @@
                 updateSelectionCount();
                 // restoreSelectAllState();
             }
+
+
+            // Handle Missing Images / Dimensions / CP  on Button Click
+            document.getElementById('missingImagesBtn').addEventListener('click', function() {
+                if (!Array.isArray(tableData) || tableData.length === 0) {
+                    showError('No data loaded yet.');
+                    return;
+                }
+
+                // Filter SKUs that are missing image OR missing dimension OR missing CP
+                const missingData = tableData.filter(item => {
+                    const sku = String(item.SKU || '').trim().toUpperCase();
+                    const isNotParent = !sku.startsWith('PARENT');
+
+                    // Missing image
+                    const hasNoImage = !item.image_path || item.image_path.trim() === '';
+
+                    // Missing or zero dimensions
+                    const l = parseFloat(item.l);
+                    const w = parseFloat(item.w);
+                    const h = parseFloat(item.h);
+                    const missingDimensions = (
+                        isNaN(l) || isNaN(w) || isNaN(h) || l <= 0 || w <= 0 || h <= 0
+                    );
+
+                    // Missing or invalid CP
+                    const cpRaw = (item.cp || '').toString().trim();
+                    const cpValue = parseFloat(cpRaw);
+                    const missingCP = (
+                        cpRaw === '' || cpRaw === '-' || isNaN(cpValue) || cpValue <= 0
+                    );
+
+                    // Include if any missing condition is true (and not a parent SKU)
+                    return isNotParent && (hasNoImage || missingDimensions || missingCP);
+                });
+
+                const tbody = document.getElementById('missingImagesTableBody');
+                tbody.innerHTML = '';
+
+                if (missingData.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center text-success">All child products have images, dimensions, and CP values 🎉</td></tr>';
+                } else {
+                    missingData.forEach(item => {
+                        const cpRaw = (item.cp || '').toString().trim();
+                        const cpValue = parseFloat(cpRaw);
+                        const isMissingCP = (cpRaw === '' || cpRaw === '-' || isNaN(cpValue) || cpValue <= 0);
+
+                        const hasImage = item.image_path && item.image_path.trim() !== '';
+                        const hasValidDims = (
+                            parseFloat(item.l) > 0 && parseFloat(item.w) > 0 && parseFloat(item.h) > 0
+                        );
+
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${escapeHtml(item.Parent || '-')}</td>
+                            <td>${escapeHtml(item.SKU || '-')}</td>
+                            <td>${escapeHtml(item.status || '-')}</td>
+
+                            <td class="${isMissingCP ? 'text-danger fw-bold' : ''}">
+                                ${isMissingCP ? 'Missing CP' : formatNumber(item.cp, 2)}
+                            </td>
+
+                            <td>${hasImage ? '<span class="text-success">✔</span>' : '<span class="text-danger"> Missing Image</span>'}</td>
+
+                            <td>${hasValidDims 
+                                ? `${formatNumber(item.l, 2)} × ${formatNumber(item.w, 2)} × ${formatNumber(item.h, 2)}`
+                                : '<span class="text-danger"> Missing Dimensions</span>'}
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+
+                // Update modal title with count
+                document.getElementById('missingImagesModalLabel').textContent = 
+                    `Products Missing Image / Dimensions / CP (${missingData.length})`;
+
+                // Show the modal
+                const modal = new bootstrap.Modal(document.getElementById('missingImagesModal'));
+                modal.show();
+            });
 
 
             // Updated function to show all columns except those in the hidden list
