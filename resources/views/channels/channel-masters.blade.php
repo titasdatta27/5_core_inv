@@ -605,7 +605,7 @@
                 </div>
 
                 <div class="mb-3">
-                    <label for="editpercentage" class="form-label">Type</label>
+                    <label for="editpercentage" class="form-label">Channel Percentage</label>
                     <input type="text" class="form-control" id="editpercentage" name="type" required>
                 </div>
 
@@ -1935,10 +1935,17 @@
                         {
                             data: 'type',
                             render: function (v, t, row) {
-                                return `<input type="text" class="form-control form-control-sm type-input"
-                                            value="${v || ''}" data-channel="${row['Channel']}"  style="min-width: 100px;" placeholder="Enter Type">`;
+                                return `<span style="display:inline-block; min-width:100px;">${v ? v : '-'}</span>`;
                             }
                         },
+
+                        // {
+                        //     data: 'type',
+                        //     render: function (v, t, row) {
+                        //         return `<input type="text" class="form-control form-control-sm type-input"
+                        //                     value="${v || ''}" data-channel="${row['Channel']}"  style="min-width: 100px;" placeholder="Enter Type">`;
+                        //     }
+                        // },
                         { data: 'Listing Counts', render: v => `<span class="metric-value">${toNum(v).toLocaleString('en-US')}</span>` },
                         {
                             data: 'W/Ads',

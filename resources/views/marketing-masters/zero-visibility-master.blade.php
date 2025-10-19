@@ -1098,7 +1098,7 @@
                                 'ebaythree': '/zero-ebay3',
                                 'ebayvariation': '/zero-ebayvariation',
                                 'temu': '/temu-zero-view',
-                                'macy': '/macys-zero-view',
+                                'macys': '/macys-zero-view',
                                 'wayfair': '/Wayfair-zero-view',
                                 'reverb': '/reverb/zero/view',
                                 'shopifyb2c': '/shopifyB2C-zero-view',
