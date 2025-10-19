@@ -173,18 +173,24 @@ class Business5CoreZeroController extends Controller
             $views = null;
 
             if ($metricRecord) {
-                // Direct field (if column exists)
-                if (!empty($metricRecord->views)) {
-                    $views = $metricRecord->views;
+                // Direct field
+                if (!empty($metricRecord->views) || $metricRecord->views === "0" || $metricRecord->views === 0) {
+                    $views = (int)$metricRecord->views;
                 }
                 // Or inside JSON column `value`
                 elseif (!empty($metricRecord->value)) {
                     $metricData = json_decode($metricRecord->value, true);
-                    $views = $metricData['views'] ?? null;
+                    if (isset($metricData['views'])) {
+                        $views = (int)$metricData['views'];
+                    }
                 }
             }
 
-            if ($inv > 0 && $views !== null && intval($views) === 0) {
+            // Normalize $inv to numeric
+            $inv = floatval($inv);
+
+            // Count as zero-view if views are exactly 0 and inv > 0
+            if ($inv > 0 && $views === 0) {
                 $zeroViewCount++;
             }
         }

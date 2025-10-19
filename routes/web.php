@@ -648,7 +648,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     //update sku inv and l30
     Route::post('/update-all-amazon-skus', [OverallAmazonController::class, 'updateAllAmazonSkus']);
     Route::post('/update-all-amazon-fba-skus', [OverallAmazonFbaController::class, 'updateAllAmazonfbaSkus']);
-    Route::post('/update-all-ebay-skus', [EbayController::class, 'updateAllEbaySkus']);
+    Route::post('/update-all-ebay1-skus', [EbayController::class, 'updateAllEbaySkus']);
     Route::post('/update-all-ebay-skus', [EbayTwoController::class, 'updateAllEbay2Skus']);
 
     Route::post('/update-all-shopifyB2C-skus', [Shopifyb2cController::class, 'updateAllShopifyB2CSkus']);
