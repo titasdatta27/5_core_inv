@@ -2661,14 +2661,39 @@
                         sbidColor = "pink";
                     }
 
+                    if(sbidColor === "pink" && item['eBay L30'] === 0){
+                        sbid = 10;
+                    }
+
+                    if(sbidColor === "green" && item['eBay L30'] != 0){
+                        sbid = 5;
+                    }
+
+                    if(sbidColor === "green" && item['eBay L30'] === 0){
+                        sbid = 10;
+                    }
+
+                    if(sbidColor === "yellow" && item['eBay L30'] != 0){
+                        sbid = 8;
+                    }
+
+                    if(sbidColor === "yellow" && item['eBay L30'] === 0){
+                        sbid = 10;
+                    }
+
+                    if(sbidColor === "red" && item['eBay L30'] != 0){
+                        sbid = 8;
+                    }
+
+                    if(sbidColor === "red" && item['eBay L30'] === 0){
+                        sbid = 10;
+                    }
+
                     let reqViews = item.INV * 10;
                     let reqViewsColor = "";
 
                     if (reqViews > item.VIEWS) {
                         reqViewsColor = "red";
-                        if (sbidColor !== "pink") {
-                            sbid = sbid + 2;
-                        }  
                     } else {
                         reqViewsColor = "green";
                     }

@@ -48,6 +48,7 @@ class EbayController extends Controller
             "mode" => $mode,
             "demo" => $demo,
             "ebayPercentage" => $percentage,
+            "ebayAdUpdates" => $adUpdates,
         ]);
     }
 
@@ -277,6 +278,7 @@ class EbayController extends Controller
                 2
             );
             $row["percentage"] = $percentage;
+            $row['ad_updates'] = $adUpdates;
             $row["LP_productmaster"] = $lp;
             $row["Ship_productmaster"] = $ship;
 

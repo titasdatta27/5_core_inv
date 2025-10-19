@@ -922,6 +922,19 @@
                             <i class="fa fa-pen"></i>
                         </button>
                     </div>
+
+                    <!-- 🔹 Ads Percentage Edit -->
+                    <div id="ads-edit-div" class="d-flex align-items-center ms-4">
+                        <div class="input-group" style="width: 120px;">
+                            <input type="number" id="updateAllSkusAds" class="form-control" min="0" max="1000"
+                                value="{{ $ebayAdUpdates }}" step="0.01" placeholder="Ads Percentage" disabled />
+                            <span class="input-group-text"></span>
+                        </div>
+                        <button id="editAdsBtn" class="btn btn-outline-primary ms-2">
+                            <i class="fa fa-pen"></i>
+                        </button>
+                    </div>
+
                     <div class="d-inline-flex align-items-center ms-2">
                         <div class="badge bg-danger text-white px-3 py-2 me-2" style="font-size: 1rem; border-radius: 8px;">
                             0 SOLD - <span id="zero-sold-count">0</span>
@@ -1567,10 +1580,22 @@
                                     <th data-field="pft" style="vertical-align: middle; white-space: nowrap;">
                                         <div class="d-flex flex-column align-items-center" style="gap: 4px">
                                             <div class="d-flex align-items-center">
-                                                PFT <span class="sort-arrow">↓</span>
+                                                PFT
                                             </div>
-                                            <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
-                                            <div class="metric-total" id="pft-total">0%</div>
+                                        </div>
+                                    </th>
+                                    <th data-field="gpft" style="vertical-align: middle; white-space: nowrap;">
+                                        <div class="d-flex flex-column align-items-center" style="gap: 4px">
+                                            <div class="d-flex align-items-center">
+                                                GPRFT
+                                            </div>
+                                        </div>
+                                    </th>
+                                    <th data-field="tprft" style="vertical-align: middle; white-space: nowrap;">
+                                        <div class="d-flex flex-column align-items-center" style="gap: 4px">
+                                            <div class="d-flex align-items-center">
+                                                TPRFT
+                                            </div>
                                         </div>
                                     </th>
                                     <th data-field="ad-spend" style="vertical-align: middle; white-space: nowrap;">
@@ -1584,13 +1609,6 @@
                                         <div class="d-flex flex-column align-items-center" style="gap: 4px">
                                             <div class="d-flex align-items-center">
                                                 CPS
-                                            </div>
-                                        </div>
-                                    </th>
-                                    <th data-field="tprft" style="vertical-align: middle; white-space: nowrap;">
-                                        <div class="d-flex flex-column align-items-center" style="gap: 4px">
-                                            <div class="d-flex align-items-center">
-                                                TPRFT
                                             </div>
                                         </div>
                                     </th>
@@ -1800,6 +1818,53 @@
                 }
             });
 
+            // Ad Updates update
+            $('#editAdsBtn').on('click', function() {
+                var $input = $('#updateAllSkusAds');
+                var $icon = $(this).find('i');
+                var originalValue = $input.val();
+
+                if ($icon.hasClass('fa-pen')) {
+                    $input.prop('disabled', false).focus();
+                    $icon.removeClass('fa-pen').addClass('fa-check');
+                } else {
+                    var adUpdates = parseFloat($input.val());
+
+                    if (isNaN(adUpdates) || adUpdates < 0 || adUpdates > 1000) {
+                        showNotification('danger', 'Invalid ad updates value. Must be between 0 and 1000.');
+                        $input.val(originalValue);
+                        return;
+                    }
+
+                    // Ad Updates
+                    $.ajax({
+                        url: '/update-all-ebay1-skus',
+                        type: 'POST',
+                        data: {
+                            type: 'ad_updates',
+                            value: adUpdates,
+                            _token: $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: function(response) {
+                            if (response.status === 200) {
+                                showNotification('success', 'Ad Updates updated successfully!');
+                                $input.prop('disabled', true);
+                                $icon.removeClass('fa-check').addClass('fa-pen');
+                                // Update the input value with the new value from server
+                                $input.val(response.data.ad_updates);
+                                // Reload the data table if needed
+                                loadData();
+                            }
+                        },
+                        error: function() {
+                            showNotification('danger', 'Error updating Ad Updates.');
+                            $input.val(originalValue);
+                            $input.prop('disabled', true);
+                            $icon.removeClass('fa-check').addClass('fa-pen');
+                        }
+                    });
+                }
+            });
 
             // Cache system
             const ebayViewDataCache = {
@@ -2782,7 +2847,20 @@
                             </span>
                         </div>`
                     ));
+                    
+                    const price = Number(item['eBay Price']) || 0;
+                    const ship = Number(item.SHIP) || 0;
+                    const lp = Number(item.LP) || 0;
+                    const spend = Number(item.spend_l30) || 0;
+                    const eL30 = Number(item['eBay L30']) || 0;
+                    const ebayPercentage = {{ $ebayPercentage ?? 0}};
+                    const ebayAdPercentage = {{ $ebayAdUpdates ?? 0}};
 
+                    const totalEbayPercentage = (ebayPercentage - ebayAdPercentage) / 100;
+
+                    const netPft = (price * (ebayPercentage / 100)) - ship - lp - (spend / eL30);
+                    const netGpft = (price * totalEbayPercentage) - ship - lp;
+                    let gPft = (netGpft / price) * 100;
 
                     // PFT with color coding
                     $row.append($('<td>').html(
@@ -2791,24 +2869,19 @@
                         ''
                     ));
 
+                    // GPFT with color coding
+                    if(isNaN(gPft) || !isFinite(gPft)) {
+                        gPft = 0;
+                    }
                     $row.append($('<td>').html(
-                        `${item.spend_l30.toFixed(2)}`
-                    ));
-                    // Cost per sale (CPS) calculation
-                    let cps = item['eBay L30'] > 0 ? (item.spend_l30 / item['eBay L30']).toFixed(2) : 0;
-                    $row.append($('<td>').html(
-                        `${cps}`
+                        `
+                            <span class="dil-percent-value ${getPftColor(gPft)}">
+                                ${gPft.toFixed(0)}%
+                            </span>
+                        ` 
                     ));
 
                     // TPRFT with color coding
-                    const price = Number(item['eBay Price']) || 0;
-                    const ship = Number(item.SHIP) || 0;
-                    const lp = Number(item.LP) || 0;
-                    const spend = Number(item.spend_l30) || 0;
-                    const eL30 = Number(item['eBay L30']) || 0;
-                    const costPercentage = {{ $ebayPercentage ?? 0}};
-
-                    const netPft = (price * costPercentage) - ship - lp - (spend / eL30);
                     let tpft = (netPft / price) * 100;
                     
                     if(isNaN(tpft) || !isFinite(tpft)) {
@@ -2838,6 +2911,15 @@
                                 ${tpft.toFixed(0)}%
                             </span>
                         ` 
+                    ));
+
+                    $row.append($('<td>').html(
+                        `${item.spend_l30.toFixed(2)}`
+                    ));
+                    // Cost per sale (CPS) calculation
+                    let cps = item['eBay L30'] > 0 ? (item.spend_l30 / item['eBay L30']).toFixed(2) : 0;
+                    $row.append($('<td>').html(
+                        `${cps}`
                     ));
 
                     // ROI with color coding
