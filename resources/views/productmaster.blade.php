@@ -357,6 +357,7 @@
                                         <option value="frght">FRGHT</option>
                                         <option value="ship">SHIP</option>
                                         <option value="temu_ship">TEMU SHIP</option>
+                                        <option value="moq">MOQ</option>
                                         <option value="ebay2_ship">EBAY2 SHIP</option>
                                         <option value="initial_quantity">INITIAL QTY</option>
                                         <option value="label_qty">Label QTY</option>
@@ -700,6 +701,18 @@
                                                         style="border: 2px solid #E2E8F0; border-radius: 6px; padding: 0.75rem; background-color: white;">
                                                 </div>
                                             </div>
+
+                                    
+
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label for="moq" class="form-label fw-bold"
+                                                        style="color: #4A5568;">MOQ</label>
+                                                    <input type="text" class="form-control" id="moq"
+                                                        placeholder="Enter MOQ"
+                                                        style="border: 2px solid #E2E8F0; border-radius: 6px; padding: 0.75rem; background-color: white;">
+                                                </div>
+                                            </div>
                                             <div class="col-md-3">
                                                 <div class="form-group">
                                                     <label for="ebay2_ship" class="form-label fw-bold"
@@ -936,6 +949,7 @@
                                                         <option value="frght">FRGHT</option>
                                                         <option value="ship">SHIP</option>
                                                         <option value="temu_ship">TEMU SHIP</option>
+                                                        <option value="moq">MOQ</option>
                                                         <option value="ebay2_ship">EBAY2 SHIP</option>
                                                         <option value="initial_quantity">INITIAL QUANTITY</option>
                                                         <option value="label_qty">Label QTY</option>
@@ -1030,6 +1044,7 @@
                                     <th>FRGHT</th>
                                     <th>SHIP</th>
                                     <th>TEMU SHIP</th>
+                                    <th>MOQ</th>
                                     <th>EBAY2 SHIP</th>
                                     <th>INITIAL QUANTITY</th>
                                     <th>Label QTY</th>
@@ -1075,7 +1090,7 @@
             // Emails and columns setup
             const emails = @json($emails ?? []);
             const columns = ["UPC","INV", "OV L30", "STATUS", "Unit", "LP", "CP$", "FRGHT", "SHIP",
-                "TEMU SHIP", "EBAY2 SHIP", "INITIAL QUANTITY", "Label QTY", "WT ACT", "WT DECL", "L", "W", "H", "CBM", "L(2)", "Action"
+                "TEMU SHIP", "MOQ", "EBAY2 SHIP", "INITIAL QUANTITY", "Label QTY", "WT ACT", "WT DECL", "L", "W", "H", "CBM", "L(2)", "Action"
             ];
             let selectedColumns = [];
             let selectedEmail = '';
@@ -1362,7 +1377,7 @@
                 // All available columns
                 const allColumns = [
                     "Parent", "SKU", "UPC", "INV", "OV L30", "STATUS", "Unit", "LP", "CP$",
-                    "FRGHT", "SHIP", "TEMU SHIP", "EBAY2 SHIP", "INITIAL QUANTITY", "Label QTY", "WT ACT", "WT DECL", "L", "W", "H",
+                "FRGHT", "SHIP", "TEMU SHIP", "MOQ", "EBAY2 SHIP", "INITIAL QUANTITY", "Label QTY", "WT ACT", "WT DECL", "L", "W", "H",
                     "CBM", "L(2)", "Action"
                 ];
 
@@ -1468,6 +1483,9 @@
                                     break;
                                     case "TEMU SHIP":
                                     cell.textContent = escapeHtml(item.temu_ship) || '-';
+                                    break;
+                                    case "MOQ":
+                                    cell.textContent = escapeHtml(item.moq) || '-';
                                     break;
                                     case "EBAY2 SHIP":
                                     cell.textContent = escapeHtml(item.ebay2_ship) || '-';
@@ -1614,6 +1632,9 @@
                                 break;
                             case "TEMU SHIP":
                                 cell.textContent = escapeHtml(item.temu_ship) || '-';
+                                break;
+                            case "MOQ":
+                                cell.textContent = escapeHtml(item.moq) || '-';
                                 break;
                             case "EBAY2 SHIP":
                                 cell.textContent = escapeHtml(item.ebay2_ship) || '-';
@@ -1797,7 +1818,7 @@
                 // All available columns
                 const allColumns = [
                     "Parent", "SKU", "UPC", "INV", "OV L30", "STATUS", "Unit", "LP", "CP$",
-                    "FRGHT", "SHIP", "TEMU SHIP", "EBAY2 SHIP", "INITIAL QUANTITY", "Label QTY", "WT ACT", "WT DECL", "L", "W", "H",
+                    "FRGHT", "SHIP", "TEMU SHIP", "MOQ", "EBAY2 SHIP", "INITIAL QUANTITY", "Label QTY", "WT ACT", "WT DECL", "L", "W", "H",
                     "CBM", "L(2)", "Action"
                 ];
 
@@ -2235,7 +2256,7 @@
                     const hiddenColumns = getUserHiddenColumns();
                     const allColumns = [
                         "Parent", "SKU", "UPC", "INV", "OV L30", "STATUS", "Unit", "LP", "CP$",
-                        "FRGHT", "SHIP", "TEMU SHIP", "EBAY2 SHIP", "INITIAL QUANTITY", "Label QTY", "WT ACT", "WT DECL", "L", "W", "H",
+                        "FRGHT", "SHIP", "TEMU SHIP", "MOQ", "EBAY2 SHIP", "INITIAL QUANTITY", "Label QTY", "WT ACT", "WT DECL", "L", "W", "H",
                         "CBM", "L(2)", "DC", "Pcs/Box", "L1", "B", "H1", "Weight", "MSRP", "MAP", "UPC"
                     ];
 
@@ -2279,6 +2300,9 @@
                         },
                         "TEMU SHIP": {
                             key: "temu_ship"
+                        },
+                        "MOQ": {
+                            key: "moq"
                         },
                         "EBAY2 SHIP": {
                             key: "ebay2_ship"
@@ -2592,6 +2616,7 @@
                     lps: document.getElementById('lps').value || null,
                     ship: document.getElementById('ship').value || null,
                     temu_ship: document.getElementById('temu_ship').value || null,
+                    moq: document.getElementById('moq').value || null,
                     ebay2_ship: document.getElementById('ebay2_ship').value || null,
                     initial_quantity: document.getElementById('initial_quantity').value || null,
                     label_qty: document.getElementById('labelQty').value || null,
@@ -2731,6 +2756,7 @@
                     cp: product.cp || '',
                     ship: product.ship || '',
                     temu_ship: product.temu_ship || '',
+                    moq: product.moq || '',
                     ebay2_ship: product.ebay2_ship || '',
                     initial_quantity: product.initial_quantity || '',
                     wtAct: product.wt_act || '',
@@ -3142,6 +3168,10 @@
                     {
                         value: 'temu_ship',
                         text: 'TEMU SHIP'
+                    },
+                    {
+                        value: 'moq',
+                        text: 'MOQ'
                     },
                     {
                         value: 'ebay2_ship',

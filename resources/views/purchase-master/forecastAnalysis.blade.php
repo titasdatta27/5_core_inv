@@ -86,7 +86,7 @@
                                 <button class="btn btn-sm btn-primary dropdown-toggle d-flex align-items-center gap-1"
                                     type="button" id="hide-column-dropdown" data-bs-toggle="dropdown">
                                     <i class="bi bi-grid-3x3-gap-fill"></i>
-                                    Manage Columns
+                                     Column
                                 </button>
                                 <ul class="dropdown-menu p-3 shadow-lg border rounded-3" id="column-dropdown-menu"
                                     style="max-height: 300px; overflow-y: auto; min-width: 250px;">
@@ -96,7 +96,7 @@
 
                             <!-- 2 ORDER Color Filter -->
                             <div class="dropdown">
-                                <button class="btn btn-sm btn-outline-warning dropdown-toggle d-flex align-items-center gap-1"
+                                <button class="btn btn-sm btn-info dropdown-toggle d-flex align-items-center gap-1"
                                     type="button" id="order-color-filter-dropdown" data-bs-toggle="dropdown">
                                     <i class="bi bi-funnel-fill"></i>
                                     2 ORDER
@@ -111,7 +111,7 @@
                             <div id="yellow-count-container" class="d-none px-2 btn btn-sm rounded-2 shadow-sm border border-danger bg-danger">
                                 <div class="d-flex align-items-center gap-1">
                                     <i class="bi bi-star-fill text-white"></i>
-                                    <span id="yellow-count-box" class="fw-semibold text-white">Approval Pending: 0</span>
+                                    <span id="yellow-count-box" class="fw-semibold text-white">App Pending: 0</span>
                                 </div>
                             </div>
 
@@ -136,15 +136,15 @@
                             </select>
 
                             <button id="total-transit" class="btn btn-sm btn-info">
-                                Show Transit
+                                 Transit
                             </button>
 
                             <button id="show-zero-inv" class="btn btn-sm btn-danger">
-                                Show 0 INV
+                                 0 INV
                             </button>
 
                             <button id="restock_needed" class="btn btn-sm btn-warning fw-semibold text-dark">
-                                Restock Needed: <span id = "total_restock" class="fw-semibold text-dark">0</span>
+                                Restock: <span id = "total_restock" class="fw-semibold text-dark">0</span>
                             </button>
 
                             <button id="total_msl_c" class="btn btn-sm btn-success fw-semibold text-dark">
@@ -157,39 +157,39 @@
 
 
                             <button id="total_inv_value" class="btn btn-sm btn-info fw-semibold text-dark">
-                                 INV Value: $<span id="total_inv_value_display" class="fw-semibold text-dark">0</span>
+                                 INV Val: $<span id="total_inv_value_display" class="fw-semibold text-dark">0</span>
                             </button>
 
                             <button id="total_lp_value" class="btn btn-sm btn-warning fw-semibold text-dark">
-                                 LP Value: $<span id="total_lp_value_display" class="fw-semibold text-dark">0</span>
+                                 LP Val: $<span id="total_lp_value_display" class="fw-semibold text-dark">0</span>
                             </button>
 
-                            <button id="total_restock_msl" class="btn btn-sm btn-dark fw-semibold text-white">
+                            {{-- <button id="total_restock_msl" class="btn btn-sm btn-dark fw-semibold text-white">
                                  Restock MSL: $<span id="total_restock_msl_value" class="fw-semibold text-white">0.00</span>
-                            </button>
+                            </button> --}}
 
                             <button id="total_minimal_msl" class="btn btn-sm btn-secondary fw-semibold text-white">
                                 Missing Sales: $<span id="total_minimal_msl_value" class="fw-semibold text-white">0</span>
                             </button>
 
-                            <button id="sum_restock_shopify_price" class="btn btn-sm btn-info fw-semibold text-dark">
+                            {{-- <button id="sum_restock_shopify_price" class="btn btn-sm btn-info fw-semibold text-dark">
                                 Sum Restock Shopify Price: $<span id="sum_restock_shopify_price_value" class="fw-semibold text-dark">0</span>
-                            </button>
+                            </button> --}}
 
-                            <button id="total_restock_msl_lp" class="btn btn-sm btn-warning fw-semibold text-dark">
+                            {{-- <button id="total_restock_msl_lp" class="btn btn-sm btn-warning fw-semibold text-dark">
                                  Restock MSL LP: $<span id="total_restock_msl_lp_value" class="fw-semibold text-dark">0</span>
-                            </button>
+                            </button> --}}
 
                             <button id="total_mip_value" class="btn btn-sm btn-success fw-semibold text-dark">
-                                 MIP Value: $<span id="total_mip_value_display" class="fw-semibold text-dark">0</span>
+                                 MIP Val: $<span id="total_mip_value_display" class="fw-semibold text-dark">0</span>
                             </button>
 
                             <button id="total_r2s_value" class="btn btn-sm btn-info fw-semibold text-dark">
-                                 R2S Value: $<span id="total_r2s_value_display" class="fw-semibold text-dark">0</span>
+                                 R2S Val: $<span id="total_r2s_value_display" class="fw-semibold text-dark">0</span>
                             </button>
 
                             <button id="total_transit_value" class="btn btn-sm btn-secondary fw-semibold text-dark">
-                                 Transit Value: $<span id="total_transit_value_display" class="fw-semibold text-dark">0</span>
+                                 Trn Val: $<span id="total_transit_value_display" class="fw-semibold text-dark">0</span>
                             </button>
                         </div>
                     </div>
@@ -435,54 +435,37 @@
                         return `<span style="display:block; text-align:center;">${value}</span>`;
                     }
                 },
-                {
-                    title: "Shopify Price",
-                    field: "shopifyb2c_price",
-                    accessor: row => row["shopifyb2c_price"],
-                    formatter: function(cell) {
-                        const value = cell.getValue() || 0;
-                        const roundedValue = (value);
-                        return `<span style="display:block; text-align:center; font-weight:bold;">$${roundedValue.toLocaleString()}</span>`;
-                    }
-                },
-                {
-                    title: "INV Value",
-                    field: "inv_value",
-                    accessor: row => row["inv_value"],
-                    formatter: function(cell) {
-                        const value = cell.getValue() || 0;
-                        const roundedValue = Math.round(parseFloat(value));
-                        return `<span style="display:block; text-align:center; font-weight:bold;">$${roundedValue.toLocaleString()}</span>`;
-                    }
-                },
-                {
-                    title: "LP Value",
-                    field: "lp_value",
-                    accessor: row => row["lp_value"],
-                    formatter: function(cell) {
-                        const value = cell.getValue() || 0;
-                        const roundedValue = Math.round(parseFloat(value));
-                        return `<span style="display:block; text-align:center; font-weight:bold;">$${roundedValue.toLocaleString()}</span>`;
-                    }
-                },
-                {
-                    title: "CP",
-                    field: "CP",
-                    accessor: row => row["CP"],
-                    formatter: function(cell) {
-                        const value = cell.getValue() || 0;
-                        return `<span style="display:block; text-align:center; font-weight:bold;">$${value.toLocaleString()}</span>`;
-                    }
-                },
-                {
-                    title: "LP",
-                    field: "LP",
-                    accessor: row => row["LP"],
-                    formatter: function(cell) {
-                        const value = cell.getValue() || 0;
-                        return `<span style="display:block; text-align:center; font-weight:bold;">$${value.toLocaleString()}</span>`;
-                    }
-                },
+                // {
+                //     title: "Shopify Price",
+                //     field: "shopifyb2c_price",
+                //     accessor: row => row["shopifyb2c_price"],
+                //     formatter: function(cell) {
+                //         const value = cell.getValue() || 0;
+                //         const roundedValue = (value);
+                //         return `<span style="display:block; text-align:center; font-weight:bold;">$${roundedValue.toLocaleString()}</span>`;
+                //     }
+                // },
+                // {
+                //     title: "INV Value",
+                //     field: "inv_value",
+                //     accessor: row => row["inv_value"],
+                //     formatter: function(cell) {
+                //         const value = cell.getValue() || 0;
+                //         const roundedValue = Math.round(parseFloat(value));
+                //         return `<span style="display:block; text-align:center; font-weight:bold;">$${roundedValue.toLocaleString()}</span>`;
+                //     }
+                // },
+                // {
+                //     title: "LP Value",
+                //     field: "lp_value",
+                //     accessor: row => row["lp_value"],
+                //     formatter: function(cell) {
+                //         const value = cell.getValue() || 0;
+                //         const roundedValue = Math.round(parseFloat(value));
+                //         return `<span style="display:block; text-align:center; font-weight:bold;">$${roundedValue.toLocaleString()}</span>`;
+                //     }
+                // },
+               
                 {
                     title: "OV L30",
                     field: "L30",
@@ -506,6 +489,30 @@
                             return `<div class="text-center"><span class="dil-percent-value ${color}">${Math.round(dilDecimal * 100)}%</span></div>`;
                         }
                         return `<div class="text-center"><span class="dil-percent-value red">0%</span></div>`;
+                    }
+                },
+
+
+                  
+                {
+                    title: "2 Ord",
+                    field: "to_order",
+                    formatter: function(cell) {
+                        const value = cell.getValue();
+                        const isNegative = value < 0;
+
+                        return `<div style="text-align: center;">
+                        <span style="
+                            background-color: ${isNegative ? '#dc3545' : '#ffc107'};
+                            color: ${isNegative ? 'white' : 'black'};
+                            padding: 2px 6px;
+                            border-radius: 4px;
+                            display: inline-block;
+                            min-width: 30px;
+                            text-align: center;
+                            font-weight: bold;
+                        ">${value}</span>
+                    </div>`;
                     }
                 },
 
@@ -545,52 +552,50 @@
                         }
                     }
                 },
-                  {
-                    title: "S-MSL",
-                    field: "s_msl",
-                    headerSort: false,
-                    formatter: function(cell) {
-                        const value = cell.getValue();
-                        const rowData = cell.getRow().getData();
 
-                        const sku = rowData.SKU ?? '';
-                        const parent = rowData.Parent ?? '';
 
-                        return `<div 
-                        class="editable-qty" 
-                        contenteditable="true" 
-                        data-field="S-MSL"
-                        data-original="${value ?? ''}" 
-                        data-sku='${sku}' 
-                        data-parent='${parent}' 
-                        style="outline:none; min-width:50px; text-align:center;">
-                        ${value ?? ''}
-                    </div>`;
-                    }
-                },
                 {
-                    title: "MSL_VL",
-                    field: "MSL_C",
-                    accessor: row => row["MSL_C"],
-                    formatter: function(cell) {
-                        const value = cell.getValue() || 0;
-                        const wholeNumber = Math.round(parseFloat(value));
-                        return `<div style="text-align:center; font-weight:bold;">${wholeNumber}</div>`;
-                    },
-                    sum: function(cells) {
-                        return cells.reduce((acc, cell) => acc + (cell.getValue() || 0), 0);
-                    }
+                    title: "M AVG ",
+                    field: "MSL_Four",
+                  
                 },
-                {
-                    title: "MSL SP",
-                    field: "MSL_SP",
-                    accessor: row => row["MSL_SP"],
-                    formatter: function(cell) {
-                        const value = cell.getValue() || 0;
-                        const roundedValue = Math.floor(parseFloat(value));
-                        return `<div style="text-align:center; font-weight:bold;">$${roundedValue.toLocaleString()}</div>`;
-                    }
-                },
+                //   {
+                //     title: "S-MSL",
+                //     field: "s_msl",
+                //     headerSort: false,
+                //     formatter: function(cell) {
+                //         const value = cell.getValue();
+                //         const rowData = cell.getRow().getData();
+
+                //         const sku = rowData.SKU ?? '';
+                //         const parent = rowData.Parent ?? '';
+
+                //         return `<div 
+                //         class="editable-qty" 
+                //         contenteditable="true" 
+                //         data-field="S-MSL"
+                //         data-original="${value ?? ''}" 
+                //         data-sku='${sku}' 
+                //         data-parent='${parent}' 
+                //         style="outline:none; min-width:50px; text-align:center;">
+                //         ${value ?? ''}
+                //     </div>`;
+                //     }
+                // },
+                // {
+                //     title: "MSL_VL",
+                //     field: "MSL_C",
+                //     accessor: row => row["MSL_C"],
+                //     formatter: function(cell) {
+                //         const value = cell.getValue() || 0;
+                //         const wholeNumber = Math.round(parseFloat(value));
+                //         return `<div style="text-align:center; font-weight:bold;">${wholeNumber}</div>`;
+                //     },
+                //     sum: function(cells) {
+                //         return cells.reduce((acc, cell) => acc + (cell.getValue() || 0), 0);
+                //     }
+                // },
+                
                 {
                     title: "MIP",
                     field: "order_given",
@@ -628,47 +633,47 @@
                         return value ?? '';
                     }
                 },
+                // {
+                //     title: "MIP Value",
+                //     field: "MIP_Value",
+                //     accessor: row => (row ? row["MIP_Value"] : null),
+                //     sorter: "number",
+                //     headerSort: true,
+                //     formatter: function(cell) {
+                //         const value = cell.getValue();
+
+                //         return value ?? '';
+                //     }
+                // },
+
+                // {
+                //     title: "R2S Value",
+                //     field: "R2S_Value",
+                //     accessor: row => (row ? row["R2S_Value"] : null),
+                //     sorter: "number",
+                //     headerSort: true,
+                //     formatter: function(cell) {
+                //         const value = cell.getValue();
+
+                //         return value ?? '';
+                //     }
+                // },
+
+                // {
+                //     title: "Transit Value",
+                //     field: "Transit_Value",
+                //     accessor: row => (row ? row["Transit_Value"] : null),
+                //     sorter: "number",
+                //     headerSort: true,
+                //     formatter: function(cell) {
+                //         const value = cell.getValue();
+
+                //         return value ?? '';
+                //     }
+                // },
+
                 {
-                    title: "MIP Value",
-                    field: "MIP_Value",
-                    accessor: row => (row ? row["MIP_Value"] : null),
-                    sorter: "number",
-                    headerSort: true,
-                    formatter: function(cell) {
-                        const value = cell.getValue();
-
-                        return value ?? '';
-                    }
-                },
-
-                {
-                    title: "R2S Value",
-                    field: "R2S_Value",
-                    accessor: row => (row ? row["R2S_Value"] : null),
-                    sorter: "number",
-                    headerSort: true,
-                    formatter: function(cell) {
-                        const value = cell.getValue();
-
-                        return value ?? '';
-                    }
-                },
-
-                {
-                    title: "Transit Value",
-                    field: "Transit_Value",
-                    accessor: row => (row ? row["Transit_Value"] : null),
-                    sorter: "number",
-                    headerSort: true,
-                    formatter: function(cell) {
-                        const value = cell.getValue();
-
-                        return value ?? '';
-                    }
-                },
-
-                {
-                    title: "Transit",
+                    title: "Trnst",
                     field: "transit",
                     accessor: row => (row ? row["transit"] : null),
                     sorter: "number",
@@ -692,28 +697,14 @@
                         </div>`;
                     }
                 },
-                
-                {
-                    title: "2 ORDER",
-                    field: "to_order",
-                    formatter: function(cell) {
-                        const value = cell.getValue();
-                        const isNegative = value < 0;
 
-                        return `<div style="text-align: center;">
-                        <span style="
-                            background-color: ${isNegative ? '#dc3545' : '#ffc107'};
-                            color: ${isNegative ? 'white' : 'black'};
-                            padding: 2px 6px;
-                            border-radius: 4px;
-                            display: inline-block;
-                            min-width: 30px;
-                            text-align: center;
-                            font-weight: bold;
-                        ">${value}</span>
-                    </div>`;
-                    }
+                {
+                    title: "MOQ",
+                    field: "MOQ",
+                    accessor: row => row["MOQ"],
+                   
                 },
+
                 {
                     title: "Appr. QTY",
                     field: "Approved QTY",
@@ -745,30 +736,54 @@
                     field: "Supplier Tag",
                     accessor: row => row["Supplier Tag"]
                 },
-                {
-                    title: "NRP",
-                    field: "nr",
-                    accessor: row => row ? (row["nr"] ?? null) : null,
-                    headerSort: false,
-                    formatter: function(cell) {
-                        const value = cell.getValue() ?? '';
-                        const rowData = cell.getRow().getData();
+{
+    title: "NRP",
+    field: "nr",
+    headerSort: false,
+    formatter: function(cell) {
+        const value = cell.getValue() ?? '';
+        const rowData = cell.getRow().getData();
+        const sku = rowData["SKU"] || '';
+        const parent = rowData["Parent"] || '';
 
-                        return `
-                        <select class="form-select form-select-sm editable-select"
-                            data-type="NR"
-                            data-sku='${rowData["SKU"]}'
-                            data-parent='${rowData["Parent"]}'
-                            style="width: auto; min-width: 85px; padding: 4px 24px 4px 8px;
-                                font-size: 0.875rem; border-radius: 4px; border: 1px solid #dee2e6;
-                                background-color: #fff;">
-                            <option value="REQ" ${value === 'REQ' ? 'selected' : ''}>REQ</option>
-                            <option value="NR" ${value === 'NR' ? 'selected' : ''}>NR</option>
-                            <option value="LATER" ${value === 'LATER' ? 'selected' : ''}>LATER</option>
-                        </select>
-                    `;
-                    }
-                },
+        // Corrected color logic with proper #
+        let bgColor = '#ffffff'; // default white
+        let textColor = '#000000'; // default black
+
+        if (value === 'NR') {
+            bgColor = '#dc3545'; // red
+            textColor = '#ffffff';
+        } else if (value === 'REQ') {
+            bgColor = '#28a745'; // green
+            textColor = '#ffffff';
+        } else if (value === 'LATER') {
+            bgColor = '#ffc107'; // yellow
+            textColor = '#000000';
+        }
+
+        return `
+            <select class="form-select form-select-sm editable-select"
+                data-type="NR"
+                data-sku='${sku}'
+                data-parent='${parent}'
+                style="
+                    width: auto; 
+                    min-width: 85px; 
+                    padding: 4px 8px;
+                    font-size: 0.875rem; 
+                    border-radius: 4px; 
+                    border: 1px solid #dee2e6;
+                    background-color: ${bgColor};
+                    color: ${textColor};
+                ">
+                <option value="REQ" ${value === 'REQ' ? 'selected' : ''}>REQ</option>
+                <option value="NR" ${value === 'NR' ? 'selected' : ''}>2BDC</option>
+                <option value="LATER" ${value === 'LATER' ? 'selected' : ''}>LATER</option>
+            </select>
+        `;
+    }
+}
+,
                 {
                     title: "Hide",
                     field: "hide",
@@ -792,6 +807,36 @@
                             <option value="@Senior" ${value === '@Senior' ? 'selected' : ''}>@Senior</option>
                         </select>
                     `;
+                    }
+                },
+
+                {
+                    title: "MSL SP",
+                    field: "MSL_SP",
+                    accessor: row => row["MSL_SP"],
+                    formatter: function(cell) {
+                        const value = cell.getValue() || 0;
+                        const roundedValue = Math.floor(parseFloat(value));
+                        return `<div style="text-align:center; font-weight:bold;">$${roundedValue.toLocaleString()}</div>`;
+                    }
+                },
+
+                 {
+                    title: "CP",
+                    field: "CP",
+                    accessor: row => row["CP"],
+                    formatter: function(cell) {
+                        const value = cell.getValue() || 0;
+                        return `<span style="display:block; text-align:center; font-weight:bold;">$${value.toLocaleString()}</span>`;
+                    }
+                },
+                {
+                    title: "LP",
+                    field: "LP",
+                    accessor: row => row["LP"],
+                    formatter: function(cell) {
+                        const value = cell.getValue() || 0;
+                        return `<span style="display:block; text-align:center; font-weight:bold;">$${value.toLocaleString()}</span>`;
                     }
                 },
             ],
@@ -837,6 +882,9 @@
                         const lp = parseFloat(item.LP) || 0;
                         return sum + (lp / 4);
                     }
+// lp* msl
+
+
                     return sum;
                 }, 0);
                 const totalRestockMslElement = document.getElementById('total_restock_msl_value');
@@ -1254,7 +1302,7 @@
                 r.nr !== 'NR'
             ).length;
 
-            document.getElementById('yellow-count-box').textContent = `Approval Pending: ${yellowCount}`;
+            document.getElementById('yellow-count-box').textContent = `Appr Req: ${yellowCount}`;
             document.getElementById('toggle-nr-rows').textContent = hideNRYes ? "Show NR" : "Hide NR";
         }
 
@@ -1363,6 +1411,7 @@
             const metricData = {
                 SH: row['SH'],
                 CP: row['CP'],
+                MOQ: row['MOQ'],
                 LP: row['LP'],
                 "Shopify Price": row['shopifyb2c_price'],
                 "MSL_C": row['MSL_C'],
@@ -1806,7 +1855,7 @@
             currentColorFilter = '';
             document.getElementById('yellow-count-container').classList.remove('d-none');
             document.getElementById('order-color-filter-dropdown').innerHTML =
-                '<i class="bi bi-funnel-fill"></i> Yellow Filter';
+                '<i class="bi bi-funnel-fill text-dark"></i> <span class="text-dark fw-bold">2 Ord</span>';
             setCombinedFilters();
 
             document.querySelectorAll('#order-color-filter-dropdown + .dropdown-menu [data-filter]').forEach(
@@ -1839,7 +1888,7 @@
                     const yellowCount = allData.filter(r => r.to_order >= 0 && !r.is_parent && (hideNRYes ?
                         r.nr !== 'NR' : true)).length;
                     document.getElementById('yellow-count-box').textContent =
-                        `Approval Pending: ${yellowCount}`;
+                        `Appr Req: ${yellowCount}`;
                 }
 
                 document.getElementById('toggle-nr-rows').textContent = hideNRYes ? "Show NR" : "Hide NR";
@@ -1998,4 +2047,20 @@
             }]);
         });
     </script>
+
+        <script>
+            (function(){
+                const select = document.currentScript.previousElementSibling;
+                const setColor = (val) => {
+                    if(val === 'REQ') select.style.backgroundColor = 'green';
+                    else if(val === 'NR') select.style.backgroundColor = 'red';
+                    else if(val === 'LATER') select.style.backgroundColor = 'yellow';
+                    select.style.color = (val === 'LATER') ? 'black' : 'white';
+                };
+                setColor(select.value);
+                select.addEventListener('change', function() {
+                    setColor(this.value);
+                });
+            })();
+        </script>
 @endsection

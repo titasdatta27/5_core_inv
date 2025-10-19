@@ -91,6 +91,7 @@ class ForecastAnalysisController extends Controller
 
             $item->{'CP'} = $values['cp'] ?? '';
             $item->{'LP'} = $values['lp'] ?? '';
+            $item->{'MOQ'} = $values['moq'] ?? '';
             $item->{'SH'} = $values['ship'] ?? '';
             $item->{'Freight'} = $values['frght'] ?? '';
             $item->{'CBM MSL'} = $values['cbm'] ?? '';
@@ -168,11 +169,19 @@ class ForecastAnalysisController extends Controller
                 $item->{'Total month'} = $totalMonthCount;
                 
                 $msl = $item->{'Total month'} > 0 ? ($item->{'Total'} / $item->{'Total month'}) * 4 : 0;
+
+              
                 
                 $effectiveMsl = (isset($item->{'s-msl'}) && $item->{'s-msl'} > 0) ? $item->{'s-msl'} : $msl;
                 
                 $lp = is_numeric($item->{'LP'}) ? (float)$item->{'LP'} : 0;
                 $item->{'MSL_C'} = round($msl * $lp / 4, 2);
+
+                $mslfour = $msl/4;
+
+                $item->{'MSL_Four'} = round($msl / 4, 2);
+
+                
                 
                 $item->{'MSL_SP'} = floor($shopifyb2c_price * $effectiveMsl / 4);
 
@@ -477,6 +486,7 @@ class ForecastAnalysisController extends Controller
 
                 $item->{'CP'} = $values['cp'] ?? '';
                 $item->{'LP'} = $values['lp'] ?? '';
+                $item->{'MOQ'} = $values['MOQ'] ?? '';
                 $item->{'SH'} = $values['ship'] ?? '';
                 $item->{'Freight'} = $values['frght'] ?? '';
                 $item->{'CBM MSL'} = $values['cbm'] ?? '';

@@ -423,10 +423,12 @@ class ProductMasterController extends Controller
         $keyMap = [
             'LP' => 'lp',
             'CP' => 'cp',
+            'MOQ' => 'moq',
             'FRGHT' => 'frght',
             'SHIP' => 'ship',
             'SHIP FBA' => 'ship_fba',
             'SHIP Temu' => 'ship_temu',
+            'MOQ' => 'moq',
             'SHIP eBay2' => 'ship_ebay2',
             'Label QTY' => 'label_qty',
             'WT ACT' => 'wt_act',

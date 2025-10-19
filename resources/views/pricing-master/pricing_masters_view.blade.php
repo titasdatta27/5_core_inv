@@ -2310,15 +2310,15 @@
                         </div>
                     </td>
                     <td>
-                        <div class="value-indicator">
-  ${(() => {
-    if (cvr && ['amz','ebay','ebay3','shein','reverb','temu','tiktok','aliexpress'].includes(r.prefix)) {
-        const val = Number(cvr.value) || 0; // convert to number safely
-        return `<span style="color: ${cvr.color}">${val.toFixed(1)}%</span>`;
-    }
-    return "N/A";
-  })()} 
-</div>
+                    <div class="value-indicator">
+                    ${(() => {
+                        if (cvr && ['amz','ebay','ebay3','shein','reverb','temu','tiktok','aliexpress'].includes(r.prefix)) {
+                            const val = Number(cvr.value) || 0; // convert to number safely
+                            return `<span style="color: ${cvr.color}">${val.toFixed(1)}%</span>`;
+                        }
+                        return "N/A";
+                    })()} 
+                    </div>
 
                     </td>
                       <td>
