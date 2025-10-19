@@ -472,7 +472,7 @@ class PricingMasterViewsController extends Controller
 
                     if ($l30 > 0 && $views > 0) {
                         $l30_sum += $l30;           // sum l30
-                        $views_sum += $views;   // sum views
+                        // sum views
                     }
                 }
             }
@@ -518,7 +518,7 @@ class PricingMasterViewsController extends Controller
                 (($walmartSheet && ($walmart->l30 ?? 0) > 0 && ($walmartSheet->views ?? 0) > 0) ? ($walmartSheet->views ?? 0) : 0)+
                 (($dobaSheet && ($doba->l30 ?? 0) > 0 && ($dobaSheet->views ?? 0) > 0) ? ($dobaSheet->views ?? 0) : 0);
 
-            $avgCvr = $views_sum > 0
+            $avgCvr = $views_sum
                 ? number_format(($l30_sum / $views_sum) * 100, 1) . ' %'
                 : '0.0 %';
 

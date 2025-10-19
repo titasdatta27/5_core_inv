@@ -2311,31 +2311,15 @@
                     </td>
                     <td>
                         <div class="value-indicator">
-                            ${(() => {
-                                if (r.prefix === 'amz' && cvr) {
-                                    return `<span style="color: ${cvr.color}">${Math.round(cvr.value)}%</span>`;
-                                } else if (r.prefix === 'ebay' && cvr) {
-                                    return `<span style="color: ${cvr.color}">${Math.round(cvr.value)}%</span>`;
-                                } else if (r.prefix === 'ebay3' && cvr) {
-                                    return `<span style="color: ${cvr.color}">${Math.round(cvr.value)}%</span>`;
-                                }
-                                else if (r.prefix === 'shein' && cvr) {
-                                    return `<span style="color: ${cvr.color}">${Math.round(cvr.value)}%</span>`;
-                                } else if (r.prefix === 'reverb' && cvr) {
-                                    return `<span style="color: ${cvr.color}">${Math.round(cvr.value)}%</span>`;
-                                } else if (r.prefix === 'temu' && cvr) {
-                                    return `<span style="color: ${cvr.color}">${Math.round(cvr.value)}%</span>`;
-                                }
-                                else if (r.prefix === 'tiktok' && cvr) {
-                                    return `<span style="color: ${cvr.color}">${Math.round(cvr.value)}%</span>`;
-                                }
-                                else if (r.prefix === 'aliexpress' && cvr) {
-                                    return `<span style="color: ${cvr.color}">${Math.round(cvr.value)}%</span>`;
-                                }
+  ${(() => {
+    if (cvr && ['amz','ebay','ebay3','shein','reverb','temu','tiktok','aliexpress'].includes(r.prefix)) {
+        const val = Number(cvr.value) || 0; // convert to number safely
+        return `<span style="color: ${cvr.color}">${val.toFixed(1)}%</span>`;
+    }
+    return "N/A";
+  })()} 
+</div>
 
-                                return "N/A";
-                            })()} 
-                        </div>
                     </td>
                       <td>
                         <div class="value-indicator">
@@ -2698,7 +2682,7 @@
 
             dialogEl.addEventListener('mousedown', dragStart);
             document.addEventListener('mousemove', drag);
-            document.addEventListener('mouseup', dragEnd);
+            document.addEventListener('mou seup', dragEnd);
 
             function dragStart(e) {
                 if (e.target.closest('.modal-header')) {

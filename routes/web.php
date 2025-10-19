@@ -240,6 +240,8 @@ use App\Http\Controllers\MarketingMaster\OverallCvrLqsController;
 use App\Http\Controllers\PurchaseMaster\SupplierRFQController;
 use App\Http\Controllers\StockMappingController;
 use App\Http\Controllers\MissingListingController;
+use App\Http\Controllers\ProductMarketing;
+
 /*  
 |--------------------------------------------------------------------------
 | Web Routes
@@ -2027,6 +2029,9 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::post('/channel-promotion/store', [ChannelPromotionMasterController::class, 'storeOrUpdatePromotion']);
 
 
+
+    Route::get('product-market', [ProductMarketing::class, 'product_master']);
+    Route::get('product-market/details', [ProductMarketing::class, 'product_market_details']);
 
 
     Route::get('', [RoutingController::class, 'index'])->name('root');

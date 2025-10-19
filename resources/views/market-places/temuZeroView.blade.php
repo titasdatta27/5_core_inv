@@ -2170,6 +2170,7 @@
                                     '', // Get R&A value from server data
                                     INV: item.INV || 0,
                                     L30: item.L30 || 0,
+                                    product_clicks_l30: item.product_clicks_l30 || 0,
 
                                     is_parent: item.Sku ? item.Sku
                                         .toUpperCase().includes("PARENT") : false,
