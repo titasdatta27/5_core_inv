@@ -70,7 +70,23 @@
 
             </li>
 
+            <li class="side-nav-item">
+                <a data-bs-toggle="collapse" href="#sidebarPages22" aria-expanded="false" aria-controls="sidebarPages22"
+                    class="side-nav-link">
+                    <i class="ri-user-line"></i>
+                    <span>Product Marketing</span>
+                    <span class="menu-arrow"></span>
+                </a>
+                <div class="collapse" id="sidebarPages22">
+                    <ul class="side-nav-second-level">
+                        <li>
+                            <a href="{{ url('product-market') }}">Product Marketing</a>
+                        </li>
+                  
+                    </ul>
+                </div>
 
+            </li>
 
             <li class="side-nav-item">
                 <a data-bs-toggle="collapse" href="#suppliers" aria-expanded="false" aria-controls="suppliers"

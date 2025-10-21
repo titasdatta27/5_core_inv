@@ -1125,6 +1125,9 @@
                 }
             });
         });
+        
+        // Set default view filter to "parent" on page load
+        currentViewFilter = "parent";
 
         // Filter by Dilution radio buttons for dil
         document.querySelectorAll("input[name='dilFilter']").forEach(input => {
@@ -2139,10 +2142,14 @@
     table.getRows().forEach(r => {
         const data = r.getData();
         const rowEl = r.getElement();
+        // Show PARENT rows by default
         if (!data["SKU"].toUpperCase().includes("PARENT")) {
             rowEl.style.display = "none";
         }
     });
+    
+    // Make sure "Parent" view filter is checked by default
+    document.getElementById('parentFilter').checked = true;
 });
 
 // Expand/Collapse parent on click

@@ -38,6 +38,7 @@ class Kernel extends ConsoleKernel
         \App\Console\Commands\AutoUpdateAmazonFbaOverPtBids::class,
         \App\Console\Commands\AutoUpdateAmazonFbaUnderPtBids::class,
         \App\Console\Commands\GenerateMovementAnalysis::class,
+        \App\Console\Commands\UpdateEbaySuggestedBid::class
 
     ];
 
@@ -136,22 +137,22 @@ class Kernel extends ConsoleKernel
             ->timezone('America/Los_Angeles');
         // Amazon over and under utilized bids update commands
         $schedule->command('amazon:auto-update-over-kw-bids')
-            ->dailyAt('12:00')
+            ->dailyAt('23:30')
             ->timezone('Asia/Kolkata');
         $schedule->command('amazon:auto-update-over-pt-bids')
-            ->dailyAt('12:00')
+            ->dailyAt('23:30')
             ->timezone('Asia/Kolkata'); 
         $schedule->command('amazon:auto-update-over-hl-bids')
-            ->dailyAt('12:00')
+            ->dailyAt('23:30')
             ->timezone('Asia/Kolkata');
         $schedule->command('amazon:auto-update-under-kw-bids')
-            ->dailyAt('12:00')
+            ->dailyAt('23:30')
             ->timezone('Asia/Kolkata');
         $schedule->command('amazon:auto-update-under-pt-bids')
-            ->dailyAt('12:00')
+            ->dailyAt('23:30')
             ->timezone('Asia/Kolkata'); 
         $schedule->command('amazon:auto-update-under-hl-bids')
-            ->dailyAt('12:00')
+            ->dailyAt('23:30')
             ->timezone('Asia/Kolkata');
         // amazon acos bgt update commands
         $schedule->command('amazon:auto-update-amz-bgt-kw')
@@ -196,6 +197,9 @@ class Kernel extends ConsoleKernel
             ->dailyAt('12:00')
             ->timezone('Asia/Kolkata');
         $schedule->command('ebay:auto-update-price-less-bids')
+            ->dailyAt('12:00')
+            ->timezone('Asia/Kolkata');
+        $schedule->command('ebay:update-suggestedbid')
             ->dailyAt('12:00')
             ->timezone('Asia/Kolkata');
         // end of bids update commands

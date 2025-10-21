@@ -272,6 +272,17 @@
 
         .custom-toast {
             z-index: 2000;
+            max-width: 400px;
+            width: auto;
+            min-width: 300px;
+            font-size: 16px;
+        }
+        
+        /* Toast styling to ensure visibility */
+        .toast-body {
+            padding: 12px 15px;
+            word-wrap: break-word;
+            white-space: normal;
         }
 
         /* Add to your CSS section */
@@ -2489,11 +2500,28 @@
                 document.getElementById('l')?.addEventListener('input', calculateCBM);
                 document.getElementById('h')?.addEventListener('input', calculateCBM);
                 document.getElementById('cp')?.addEventListener('input', calculateLP);
+                
+                // Add SKU availability check on input
+                document.getElementById('sku')?.addEventListener('input', function() {
+                    const skuField = this;
+                    const sku = skuField.value.trim();
+                    const saveBtn = document.getElementById('saveProductBtn');
+                    const originalSku = saveBtn.getAttribute('data-original-sku') || null;
+                    
+                    // Only validate if SKU has actual content and isn't a PARENT
+                    if (sku && !sku.toUpperCase().includes('PARENT')) {
+                        if (!checkSkuAvailability(sku, originalSku)) {
+                            showFieldError(skuField, 'This SKU already exists. Please use a different SKU.');
+                        } else {
+                            clearFieldError(skuField);
+                        }
+                    }
+                });
 
                 refreshParentsBtn.addEventListener('click', updateParentOptions);
 
                 saveBtn.addEventListener('click', async function() {
-                    if (!validateProductForm()) return;
+                    if (!validateProductForm(false)) return;
 
                     const formData = getFormData();
                     formData.append('operation', 'create');
@@ -2509,10 +2537,35 @@
                         });
                         const data = await response.json();
 
-                        if (!response.ok) throw new Error(data.message ||
-                            `Server returned status ${response.status}`);
-
-                        showAlert('success', 'Product saved to database!');
+                        if (!response.ok) {
+                            // Check if it's a duplicate entry error
+                            if (response.status === 409 || 
+                                (data.message && data.message.includes('already exists')) ||
+                                (data.message && data.message.includes('Duplicate entry'))) {
+                                
+                                // Show clear error message with SKU information
+                                showToast('warning', data.message || 'This SKU already exists in the database!');
+                                
+                                // Highlight the SKU field to draw attention
+                                const skuField = document.getElementById('sku');
+                                skuField.classList.add('is-invalid');
+                                
+                                // Create a feedback div if it doesn't exist
+                                let feedback = skuField.nextElementSibling;
+                                if (!feedback || !feedback.classList.contains('invalid-feedback')) {
+                                    feedback = document.createElement('div');
+                                    feedback.className = 'invalid-feedback';
+                                    skuField.parentNode.appendChild(feedback);
+                                }
+                                feedback.textContent = 'This SKU already exists. Please use a different SKU.';
+                                
+                                return;
+                            }
+                            throw new Error(data.message || `Server returned status ${response.status}`);
+                        }
+                        
+                        // Show success message
+                        showToast('success', 'Product successfully added to database!');
                         bootstrap.Modal.getInstance(modal).hide();
                         loadData();
                         resetProductForm();
@@ -2567,10 +2620,25 @@
                 const lp = cp + frght;
                 document.getElementById('lp').value = lp.toFixed(2);
             }
+            
+            // Function to check if SKU already exists in our data
+            function checkSkuAvailability(sku, originalSku = null) {
+                // If we're editing and the SKU hasn't changed, it's available
+                if (originalSku && sku === originalSku) {
+                    return true;
+                }
+                
+                // Check if SKU exists in current table data
+                const exists = tableData.some(product => product.SKU === sku);
+                return !exists;
+            }
 
             // Validate the product form
-            function validateProductForm() {
+            function validateProductForm(isUpdate = false) {
                 const sku = document.getElementById('sku').value;
+                // Get original SKU if in edit mode
+                const originalSku = isUpdate ? document.getElementById('saveProductBtn').getAttribute('data-original-sku') : null;
+                
                 // If SKU contains 'PARENT', skip required validation
                 if (sku && sku.toUpperCase().includes('PARENT')) {
                     // Clear any previous errors
@@ -2582,6 +2650,16 @@
 
                 let isValid = true;
                 const requiredFields = ['sku', 'labelQty', 'cp', 'ship', 'wtAct', 'wtDecl', 'w', 'l', 'h', 'unit'];
+                const skuField = document.getElementById('sku');
+                
+                // Check if SKU already exists (front-end validation)
+                if (sku && !checkSkuAvailability(sku, originalSku)) {
+                    showFieldError(skuField, 'This SKU already exists in the database. Please use a different SKU.');
+                    isValid = false;
+                    
+                    // Show toast with more detailed message
+                    showToast('warning', `Product with SKU "${sku}" already exists. Please use a different SKU.`);
+                }
 
                 requiredFields.forEach(id => {
                     const field = document.getElementById(id);
@@ -2591,7 +2669,7 @@
                     } else if (isNaN(field.value) && id !== 'sku' && id !== 'unit') {
                         showFieldError(field, 'Must be a number');
                         isValid = false;
-                    } else {
+                    } else if (id !== 'sku' || isValid) { // Only clear if not already marked as duplicate
                         clearFieldError(field);
                     }
                 });
@@ -2694,7 +2772,7 @@
                 newSaveBtn.innerHTML = '<i class="fas fa-save me-2"></i> Update Product';
 
                 newSaveBtn.addEventListener('click', async function() {
-                    if (!validateProductForm()) return;
+                    if (!validateProductForm(true)) return;
 
                     const formData = getFormData();
                     formData.append('operation', 'update');
@@ -2712,11 +2790,35 @@
                         const data = await response.json();
 
                         if (!response.ok) {
+                            // Check if it's a duplicate entry error
+                            if (response.status === 409 || 
+                                (data.message && data.message.includes('already exists')) ||
+                                (data.message && data.message.includes('Duplicate entry'))) {
+                                
+                                // Show clear error message with SKU information
+                                showToast('warning', data.message || 'Another product with this SKU already exists!');
+                                
+                                // Highlight the SKU field to draw attention
+                                const skuField = document.getElementById('sku');
+                                skuField.classList.add('is-invalid');
+                                
+                                // Create a feedback div if it doesn't exist
+                                let feedback = skuField.nextElementSibling;
+                                if (!feedback || !feedback.classList.contains('invalid-feedback')) {
+                                    feedback = document.createElement('div');
+                                    feedback.className = 'invalid-feedback';
+                                    skuField.parentNode.appendChild(feedback);
+                                }
+                                feedback.textContent = 'This SKU already exists. Please use a different SKU.';
+                                
+                                return;
+                            }
                             throw new Error(data.message ||
                                 `Server returned status ${response.status}`);
                         }
 
-                        showAlert('success', 'Product updated successfully!');
+                        // Show specific success message for update
+                        showToast('success', `Product ${formData.get('sku')} updated successfully!`);
                         modal.hide();
                         loadData();
                         resetProductForm();
@@ -3670,28 +3772,31 @@
 
                 const toast = document.createElement('div');
                 toast.className =
-                    `custom-toast toast align-items-center text-bg-${type} border-0 show position-fixed top-0 end-0 m-4`;
+                    `custom-toast toast align-items-center text-bg-${type} border-0 show position-fixed bottom-0 start-50 translate-middle-x mb-4`;
                 toast.style.zIndex = 2000;
                 toast.setAttribute('role', 'alert');
                 toast.setAttribute('aria-live', 'assertive');
                 toast.setAttribute('aria-atomic', 'true');
                 toast.innerHTML = `
                     <div class="d-flex">
-                        <div class="toast-body">${escapeHtml(message)}</div>
+                        <div class="toast-body" style="font-size: 15px; padding: 12px 15px;">${escapeHtml(message)}</div>
                         <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
                     </div>
                 `;
+                
+                // Make toast wider to accommodate longer messages and more noticeable
+                toast.style.minWidth = '350px';
+                toast.style.maxWidth = '450px';
+                toast.style.boxShadow = '0 5px 15px rgba(0,0,0,0.3)';
+                toast.style.borderRadius = '8px';
                 document.body.appendChild(toast);
 
                 setTimeout(() => {
                     toast.classList.remove('show');
                     setTimeout(() => toast.remove(), 500);
-                }, 3000);
+                }, 5000);
 
-                setTimeout(() => {
-                    toast.classList.remove('show');
-                    setTimeout(() => toast.remove(), 500);
-                }, 3000);
+                // Removed duplicate timeout
 
                 toast.querySelector('[data-bs-dismiss="toast"]').onclick = () => {
                     toast.classList.remove('show');

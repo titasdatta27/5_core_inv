@@ -287,6 +287,22 @@ class ProductMasterController extends Controller
                     }
                 }
 
+                // Check if changing SKU/parent would create a duplicate
+                if ($validated['sku'] !== $originalSku || $validated['parent'] !== $originalParent) {
+                    $duplicate = ProductMaster::where('sku', $validated['sku'])
+                        ->where('parent', $validated['parent'])
+                        ->where('id', '!=', $product->id)
+                        ->first();
+                    
+                    if ($duplicate) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Another product with this SKU already exists.',
+                            'data' => $duplicate
+                        ], 409); // 409 Conflict status code
+                    }
+                }
+                
                 $product->sku = $validated['sku'];
                 $product->parent = $validated['parent'];
                 $product->Values = $values;
@@ -309,7 +325,14 @@ class ProductMasterController extends Controller
                     ->where('parent', $validated['parent'])
                     ->first();
 
-                if ($existing && $existing->trashed()) {
+                if ($existing && !$existing->trashed()) {
+                    // Product already exists and is not deleted
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'A product with this SKU already exists in the database.',
+                        'data' => $existing
+                    ], 409); // 409 Conflict status code
+                } else if ($existing && $existing->trashed()) {
                     // Restore and update
                     $existing->restore();
                     $existing->Values = $values;
@@ -355,9 +378,25 @@ class ProductMasterController extends Controller
             }
         } catch (\Exception $e) {
             Log::error('Error saving product: ' . $e->getMessage());
+            
+            // Check for duplicate entry error (integrity constraint violation)
+            if (strpos($e->getMessage(), 'Integrity constraint violation') !== false && 
+                strpos($e->getMessage(), 'Duplicate entry') !== false) {
+                
+                // Extract the duplicate SKU from the error message
+                preg_match("/Duplicate entry '(.+)' for/", $e->getMessage(), $matches);
+                $duplicateSku = isset($matches[1]) ? $matches[1] : 'this SKU';
+                
+                return response()->json([
+                    'success' => false,
+                    'message' => "Product with SKU '{$duplicateSku}' already exists in the database.",
+                    'error_type' => 'duplicate_entry'
+                ], 409); // Conflict status code
+            }
+            
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage() // <-- TEMP: show real error
+                'message' => 'Error saving product: ' . $e->getMessage()
             ], 500);
         }
     }

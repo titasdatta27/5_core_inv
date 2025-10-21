@@ -1580,14 +1580,14 @@
                                     <th data-field="pft" style="vertical-align: middle; white-space: nowrap;">
                                         <div class="d-flex flex-column align-items-center" style="gap: 4px">
                                             <div class="d-flex align-items-center">
-                                                PFT
+                                                GRPFT
                                             </div>
                                         </div>
                                     </th>
                                     <th data-field="gpft" style="vertical-align: middle; white-space: nowrap;">
                                         <div class="d-flex flex-column align-items-center" style="gap: 4px">
                                             <div class="d-flex align-items-center">
-                                                GPRFT
+                                                PFT
                                             </div>
                                         </div>
                                     </th>
