@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Campaigns;
+
 use App\Http\Controllers\Controller;
 use App\Models\EbayDataView;
 use App\Models\EbayPriorityReport;

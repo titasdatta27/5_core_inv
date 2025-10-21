@@ -200,7 +200,7 @@ use App\Http\Controllers\Channels\ReviewMaster\ReviewDashboardController;
 use App\Http\Controllers\Channels\SetupAccountChannelController;
 use App\Http\Controllers\Channels\ShippingMasterController;
 use App\Http\Controllers\Channels\TrafficMasterController;
-use App\Http\Controllers\EbayMissingAdsController;
+use App\Http\Controllers\Campaigns\EbayMissingAdsController;
 use App\Http\Controllers\FbaDataController;
 use App\Http\Controllers\InventoryManagement\AutoStockBalanceController;
 use App\Http\Controllers\InventoryManagement\StockBalanceController;
