@@ -1,4 +1,4 @@
-@extends('layouts.vertical', ['title' => 'Temu Zero View', 'mode' => $mode ?? '', 'demo' => $demo ?? ''])
+@extends('layouts.vertical', ['title' => 'MercariWShip', 'mode' => $mode ?? '', 'demo' => $demo ?? ''])
 
 <meta name="csrf-token" content="{{ csrf_token() }}">
 @section('css')
@@ -982,92 +982,102 @@
             text-decoration: underline;
         }
 
-        /*popup modal style end */
-
-        /* Custom Resizable Table */
-        .custom-resizable-table th,
-        .custom-resizable-table td {
-            transition: width 0.2s, min-width 0.2s, max-width 0.2s;
-        }
-
-        .truncated-text {
-            transition: all 0.2s;
-            display: inline-block;
-            max-width: 100%;
-            white-space: nowrap;
-            overflow: hidden;
-            vertical-align: middle;
-        }
-        .nr-hide{
+        .nr-hide {
             display: none !important;
         }
+
+        /*popup modal style end */
     </style>
 @endsection
 
 @section('content')
-    @include('layouts.shared/page-title', [
-        'page_title' => 'Temu Zero View',
-        'sub_title' => 'MArket Place',
-    ])
+    @include('layouts.shared/page-title', ['page_title' => 'MercariWShip', 'sub_title' => 'Market Place'])
 
     <div class="row">
         <div class="col-12">
             <div class="card">
+                <div class="card-body d-flex align-items-center" style="gap: 12px;">
+                    <div id="percent-edit-div" class="d-flex align-items-center">
+                        <div class="input-group" style="width: 150px;">
+                            <input type="number" id="updateAllSkusPercent" class="form-control" min="0"
+                                max="100" value="{{ $percentage }}" step="0.01" title="Percent" disabled />
+                            <span class="input-group-text">%</span>
+                        </div>
+                        <button id="editPercentBtn" class="btn btn-outline-primary ms-2">
+                            <i class="fa fa-pen"></i>
+                        </button>
+                    </div>
+                    <div class="d-inline-flex align-items-center ms-2">
+                        <div class="badge bg-danger text-white px-3 py-2 me-2" style="font-size: 1rem; border-radius: 8px;">
+                            0 SOLD - <span id="zero-sold-count">0</span>
+                        </div>
+                        <div class="badge bg-primary text-white px-3 py-2" style="font-size: 1rem; border-radius: 8px;">
+                            SOLD - <span id="sold-count">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
                 <div class="card-body">
-                    <h4 class="header-title">Temu Zero View</h4>
+                    <h4 class="header-title">MercariWShip Product Analysis</h4>
 
                     <!-- Custom Dropdown Filters Row -->
-                    <div class="d-flex flex-wrap gap-2 mb-3">
-                        <!-- Dil% Filter -->
-                        <div class="dropdown manual-dropdown-container">
-                            <button class="btn btn-light dropdown-toggle" type="button" id="dilFilterDropdown">
-                                <span class="status-circle default"></span> OV DIL%
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="dilFilterDropdown">
-                                <li><a class="dropdown-item column-filter" href="#" data-column="Dil%"
-                                        data-color="all">
-                                        <span class="status-circle default"></span> All OV DIL</a></li>
-                                <li><a class="dropdown-item column-filter" href="#" data-column="Dil%"
-                                        data-color="red">
-                                        <span class="status-circle red"></span> Red</a></li>
-                                <li><a class="dropdown-item column-filter" href="#" data-column="Dil%"
-                                        data-color="yellow">
-                                        <span class="status-circle yellow"></span> Yellow</a></li>
-                                <li><a class="dropdown-item column-filter" href="#" data-column="Dil%"
-                                        data-color="green">
-                                        <span class="status-circle green"></span> Green</a></li>
-                                <li><a class="dropdown-item column-filter" href="#" data-column="Dil%"
-                                        data-color="pink">
-                                        <span class="status-circle pink"></span> Pink</a></li>
-                            </ul>
-                        </div>
+                    <div class="d-flex flex-wrap gap-2 mb-3 align-items-center justify-content-between">
+                        <div class="d-flex flex-wrap gap-2 align-items-center">
+                            <!-- Dil% Filter -->
+                            <div class="dropdown manual-dropdown-container">
+                                <button class="btn btn-light dropdown-toggle" type="button" id="dilFilterDropdown">
+                                    <span class="status-circle default"></span> OV DIL%
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="dilFilterDropdown">
+                                    <li><a class="dropdown-item column-filter" href="#" data-column="Dil%"
+                                            data-color="all">
+                                            <span class="status-circle default"></span> All OV DIL</a></li>
+                                    <li><a class="dropdown-item column-filter" href="#" data-column="Dil%"
+                                            data-color="red">
+                                            <span class="status-circle red"></span> Red</a></li>
+                                    <li><a class="dropdown-item column-filter" href="#" data-column="Dil%"
+                                            data-color="yellow">
+                                            <span class="status-circle yellow"></span> Yellow</a></li>
+                                    <li><a class="dropdown-item column-filter" href="#" data-column="Dil%"
+                                            data-color="green">
+                                            <span class="status-circle green"></span> Green</a></li>
+                                    <li><a class="dropdown-item column-filter" href="#" data-column="Dil%"
+                                            data-color="pink">
+                                            <span class="status-circle pink"></span> Pink</a></li>
+                                </ul>
+                            </div>
 
-                        <!-- A Dil% Filter -->
-                        <div class="dropdown manual-dropdown-container ">
-                            <button class="btn btn-light dropdown-toggle" type="button" id="aDilFilterDropdown">
-                                <span class="status-circle default"></span> A Dil%
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="aDilFilterDropdown">
-                                <li><a class="dropdown-item column-filter" href="#" data-column="A Dil%"
-                                        data-color="all">
-                                        <span class="status-circle default"></span> All A Dil</a></li>
-                                <li><a class="dropdown-item column-filter" href="#" data-column="A Dil%"
-                                        data-color="red">
-                                        <span class="status-circle red"></span> Red</a></li>
-                                <li><a class="dropdown-item column-filter" href="#" data-column="A Dil%"
-                                        data-color="yellow">
-                                        <span class="status-circle yellow"></span> Yellow</a></li>
-                                <li><a class="dropdown-item column-filter" href="#" data-column="A Dil%"
-                                        data-color="green">
-                                        <span class="status-circle green"></span> Green</a></li>
-                                <li><a class="dropdown-item column-filter" href="#" data-column="A Dil%"
-                                        data-color="pink">
-                                        <span class="status-circle pink"></span> Pink</a></li>
-                            </ul>
-                        </div>
+                            <!-- A Dil% Filter -->
+                            <div class="dropdown manual-dropdown-container ">
+                                <button class="btn btn-light dropdown-toggle" type="button" id="aDilFilterDropdown">
+                                    <span class="status-circle default"></span> A Dil%
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="aDilFilterDropdown">
+                                    <li><a class="dropdown-item column-filter" href="#" data-column="A Dil%"
+                                            data-color="all">
+                                            <span class="status-circle default"></span> All A Dil</a></li>
+                                    <li><a class="dropdown-item column-filter" href="#" data-column="A Dil%"
+                                            data-color="red">
+                                            <span class="status-circle red"></span> Red</a></li>
+                                    <li><a class="dropdown-item column-filter" href="#" data-column="A Dil%"
+                                            data-color="yellow">
+                                            <span class="status-circle yellow"></span> Yellow</a></li>
+                                    <li><a class="dropdown-item column-filter" href="#" data-column="A Dil%"
+                                            data-color="green">
+                                            <span class="status-circle green"></span> Green</a></li>
+                                    <li><a class="dropdown-item column-filter" href="#" data-column="A Dil%"
+                                            data-color="pink">
+                                            <span class="status-circle pink"></span> Pink</a></li>
+                                </ul>
+                            </div>
 
-                        <!-- PFT % Filter -->
-                        {{-- <div class="dropdown manual-dropdown-container">
+                            <!-- PFT % Filter -->
+                            {{-- <div class="dropdown manual-dropdown-container">
                             <button class="btn btn-light dropdown-toggle" type="button" id="pftFilterDropdown">
                                 <span class="status-circle default"></span> PFT%
                             </button>
@@ -1165,151 +1175,206 @@
                             </ul>
                         </div> --}}
 
-                        <!-- Task Board Button -->
-                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
-                            data-bs-target="#createTaskModal">
-                            <i class="bi bi-plus-circle me-2"></i>Create Task
-                        </button>
+                            <!-- Task Board Button -->
+                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                                data-bs-target="#createTaskModal">
+                                <i class="bi bi-plus-circle me-2"></i>Create Task
+                            </button>
 
-                        <!-- for popup modal start Modal -->
-                        <div class="modal fade" id="createTaskModal" tabindex="-1" aria-labelledby="createTaskModalLabel"
-                            aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered modal-lg">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h4 class="modal-title" id="createTaskModalLabel">📝 Create New Task Ebay to Task
-                                            Manager</h4>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                            aria-label="Close"></button>
-                                    </div>
+                            <!-- for popup modal start Modal -->
+                            <div class="modal fade" id="createTaskModal" tabindex="-1"
+                                aria-labelledby="createTaskModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h4 class="modal-title" id="createTaskModalLabel">📝 Create New Task Ebay to
+                                                Task
+                                                Manager</h4>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                        </div>
 
-                                    <div class="modal-body">
-                                        <form id="taskForm">
-                                            <div class="form-section">
-                                                <div class="row g-3">
-                                                    <div class="col-md-12">
-                                                        <label class="form-label">Group</label>
-                                                        <input type="text" class="form-control"
-                                                            placeholder="Enter Group">
-                                                    </div>
+                                        <div class="modal-body">
+                                            <form id="taskForm">
+                                                <div class="form-section">
+                                                    <div class="row g-3">
+                                                        <div class="col-md-12">
+                                                            <label class="form-label">Group</label>
+                                                            <input type="text" class="form-control"
+                                                                placeholder="Enter Group">
+                                                        </div>
 
-                                                    <div class="col-md-6">
-                                                        <label class="form-label">Title<span
-                                                                class="text-danger">*</span></label>
-                                                        <input type="text" class="form-control"
-                                                            placeholder="Enter Title">
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label class="form-label">Priority</label>
-                                                        <select class="form-select">
-                                                            <option>Low</option>
-                                                            <option>Medium</option>
-                                                            <option>High</option>
-                                                        </select>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Title<span
+                                                                    class="text-danger">*</span></label>
+                                                            <input type="text" class="form-control"
+                                                                placeholder="Enter Title">
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Priority</label>
+                                                            <select class="form-select">
+                                                                <option>Low</option>
+                                                                <option>Medium</option>
+                                                                <option>High</option>
+                                                            </select>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
 
-                                            <div class="form-section">
-                                                <div class="row g-3">
-                                                    <div class="col-md-6">
-                                                        <label class="form-label">Assignor<span
-                                                                class="text-danger">*</span></label>
-                                                        <select class="form-select">
-                                                            <option selected disabled>Select Assignor</option>
-                                                            <option>Srabani Ghosh</option>
-                                                            <option>Rahul Mehta</option>
-                                                            <option>Anjali Verma</option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label class="form-label">Status</label>
-                                                        <select class="form-select">
-                                                            <option disabled selected>Select Status</option>
-                                                            <option value="Todo">Todo</option>
-                                                            <option value="Not Started">Not Started</option>
-                                                            <option value="Working">Working</option>
-                                                            <option value="In Progress">In Progress</option>
-                                                            <option value="Monitor">Monitor</option>
-                                                            <option value="Done">Done</option>
-                                                            <option value="Need Help">Need Help</option>
-                                                            <option value="Review">Review</option>
-                                                            <option value="Need Approval">Need Approval</option>
-                                                            <option value="Dependent">Dependent</option>
-                                                            <option value="Approved">Approved</option>
-                                                            <option value="Hold">Hold</option>
-                                                            <option value="Rework">Rework</option>
-                                                            <option value="Urgent">Urgent</option>
-                                                            <option value="Q-Task">Q-Task</option>
-                                                        </select>
-                                                    </div>
+                                                <div class="form-section">
+                                                    <div class="row g-3">
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Assignor<span
+                                                                    class="text-danger">*</span></label>
+                                                            <select class="form-select">
+                                                                <option selected disabled>Select Assignor</option>
+                                                                <option>Srabani Ghosh</option>
+                                                                <option>Rahul Mehta</option>
+                                                                <option>Anjali Verma</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Status</label>
+                                                            <select class="form-select">
+                                                                <option disabled selected>Select Status</option>
+                                                                <option value="Todo">Todo</option>
+                                                                <option value="Not Started">Not Started</option>
+                                                                <option value="Working">Working</option>
+                                                                <option value="In Progress">In Progress</option>
+                                                                <option value="Monitor">Monitor</option>
+                                                                <option value="Done">Done</option>
+                                                                <option value="Need Help">Need Help</option>
+                                                                <option value="Review">Review</option>
+                                                                <option value="Need Approval">Need Approval</option>
+                                                                <option value="Dependent">Dependent</option>
+                                                                <option value="Approved">Approved</option>
+                                                                <option value="Hold">Hold</option>
+                                                                <option value="Rework">Rework</option>
+                                                                <option value="Urgent">Urgent</option>
+                                                                <option value="Q-Task">Q-Task</option>
+                                                            </select>
+                                                        </div>
 
-                                                    <div class="col-md-6">
-                                                        <label class="form-label">Assign To<span
-                                                                class="text-danger">*</span></label>
-                                                        <select class="form-select">
-                                                            <option>Please Select</option>
-                                                            <option>Dev Team</option>
-                                                            <option>QA Team</option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label class="form-label">Duration<span
-                                                                class="text-danger">*</span></label>
-                                                        <input type="text" id="duration" class="form-control"
-                                                            placeholder="Select start and end date/time">
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Assign To<span
+                                                                    class="text-danger">*</span></label>
+                                                            <select class="form-select">
+                                                                <option>Please Select</option>
+                                                                <option>Dev Team</option>
+                                                                <option>QA Team</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Duration<span
+                                                                    class="text-danger">*</span></label>
+                                                            <input type="text" id="duration" class="form-control"
+                                                                placeholder="Select start and end date/time">
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
 
-                                            <div class="form-section">
-                                                <div class="row g-3">
-                                                    <div class="col-md-6">
-                                                        <label class="form-label">L1</label>
-                                                        <input type="text" class="form-control"
-                                                            placeholder="Enter L1">
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label class="form-label">L2</label>
-                                                        <input type="text" class="form-control"
-                                                            placeholder="Enter L2">
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label class="form-label">Description</label>
-                                                        <textarea class="form-control" rows="4" placeholder="Enter Description"></textarea>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label class="form-label">Image</label>
-                                                        <label class="choose-file">
-                                                            Choose File
-                                                            <input type="file" class="form-control d-none">
-                                                        </label>
+                                                <div class="form-section">
+                                                    <div class="row g-3">
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">L1</label>
+                                                            <input type="text" class="form-control"
+                                                                placeholder="Enter L1">
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">L2</label>
+                                                            <input type="text" class="form-control"
+                                                                placeholder="Enter L2">
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Description</label>
+                                                            <textarea class="form-control" rows="4" placeholder="Enter Description"></textarea>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Image</label>
+                                                            <label class="choose-file">
+                                                                Choose File
+                                                                <input type="file" class="form-control d-none">
+                                                            </label>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        </form>
-                                    </div>
+                                            </form>
+                                        </div>
 
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary"
-                                            data-bs-dismiss="modal">Cancel</button>
-                                        <button type="button" class="btn btn-warning text-white"
-                                            id="createBtn">Create</button>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Cancel</button>
+                                            <button type="button" class="btn btn-warning text-white"
+                                                id="createBtn">Create</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+
+                            <!--for popup modal -->
+
+                            <!-- Close All Modals Button -->
+                            <button id="close-all-modals" class="btn btn-danger btn-sm" style="display: none;">
+                                <i class="fas fa-times"></i> Close All Modals
+                            </button>
                         </div>
 
-                        <!--for popup modal -->
+                        <div class="d-flex flex-wrap gap-2 align-items-center">
+                            <!-- Export Button -->
+                            <a href="{{ route('mercariwship.analytics.export') }}" class="btn btn-success">
+                                <i class="fas fa-file-export me-1"></i> Export Live/Listings
+                            </a>
 
-                        <!-- Close All Modals Button -->
-                        <button id="close-all-modals" class="btn btn-danger btn-sm" style="display: none;">
-                            <i class="fas fa-times"></i> Close All Modals
-                        </button>
+                            <!-- Import Button -->
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                data-bs-target="#mercariwshipImportModal">
+                                <i class="fas fa-file-import me-1"></i> Import Live/Listings
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="modal fade" id="mercariwshipImportModal" tabindex="-1" aria-labelledby="mercariwshipImportModalLabel"
+                        aria-hidden="true">
+                        <div class="modal-dialog">
+                            <form action="{{ route('mercariwship.analytics.import') }}" method="POST"
+                                enctype="multipart/form-data" class="modal-content" id="mercariwshipImportForm">
+                                @csrf
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="mercariwshipImportModalLabel">Import MercariWShip Data</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <!-- File Input -->
+                                    <div class="mb-3">
+                                        <label for="mercariwshipExcelFile" class="form-label">Select Excel File</label>
+                                        <input type="file" class="form-control" id="mercariwshipExcelFile" name="excel_file"
+                                            accept=".xlsx,.xls,.csv" required>
+                                    </div>
+
+                                    <!-- Sample File Link -->
+                                    <div class="alert alert-info">
+                                        <small>
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            Download the <a href="{{ route('mercariwship.analytics.sample') }}"
+                                                class="alert-link">sample file</a>
+                                            to see the required format. Columns should be: SKU, Listed, Live.
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Cancel</button>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-file-import me-1"></i> Import
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
 
                     <!-- play backward forwad  -->
-                    {{-- <div class="btn-group time-navigation-group" role="group" aria-label="Parent navigation">
+                    <div class="btn-group time-navigation-group" role="group" aria-label="Parent navigation">
                         <button id="play-backward" class="btn btn-light rounded-circle" title="Previous parent">
                             <i class="fas fa-step-backward"></i>
                         </button>
@@ -1323,10 +1388,10 @@
                         <button id="play-forward" class="btn btn-light rounded-circle" title="Next parent">
                             <i class="fas fa-step-forward"></i>
                         </button>
-                    </div> --}}
+                    </div>
 
                     <!-- Controls row -->
-                    {{-- <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
                         <!-- Left side controls -->
                         <div class="form-inline">
                             <div class="form-group mr-2">
@@ -1375,7 +1440,7 @@
                                     placeholder="Search all columns...">
                             </div>
                         </div>
-                    </div> --}}
+                    </div>
 
                     <div class="table-container">
                         <table class="custom-resizable-table" id="temu-table">
@@ -1432,26 +1497,89 @@
                                             <div class="metric-total" id="ovl30-total">0</div>
                                         </div>
                                     </th>
-                                    <th data-field="views" style="vertical-align: middle; white-space: nowrap;">
-                                        <div class="d-flex flex-column align-items-center">
-                                            <div class="d-flex align-items-center" style="gap: 4px">
-                                                VIEWS <span class="sort-arrow">↓</span>
+                                    <th data-field="sl_30" style="vertical-align: middle; white-space: nowrap;">
+                                        <div class="d-flex flex-column align-items-center" style="gap: 4px">
+                                            <div class="d-flex align-items-center">
+                                                SL 30 <span class="sort-arrow">↓</span>
                                             </div>
                                             <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
-                                            <!-- 0 view div after create task -->
-                                            <div id="zero-view-div"
-                                                style="display:inline-block; background:#dc3545; color:white; border-radius:8px; padding:8px 18px; font-weight:600; font-size:15px;">
-                                                0
+                                            <div class="metric-total" id="lDil-total">0</div>
+                                        </div>
+                                    </th>
+                                    <th data-field="w_dil" style="vertical-align: middle; white-space: nowrap;">
+                                        <div class="d-flex flex-column align-items-center" style="gap: 4px">
+                                            <div class="d-flex align-items-center">
+                                                S DIL <span class="sort-arrow">↓</span>
                                             </div>
+                                            <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
+                                            <div class="metric-total" id="wDil-total">0%</div>
                                         </div>
                                     </th>
                                     <th>NRL</th>
-                                    <th data-field="reason" style="vertical-align: middle; white-space: nowrap;">Reason
+
+                                    <th data-field="listed" style="vertical-align: middle; white-space: nowrap;">
+                                        <div class="d-flex flex-column align-items-center" style="gap: 4px">
+                                            <div class="d-flex align-items-center">
+                                                LISTED <span class="sort-arrow">↓</span>
+                                            </div>
+                                            <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
+                                            <div class="metric-total" id="listed-total">0</div>
+                                        </div>
                                     </th>
-                                    <th data-field="action_required" style="vertical-align: middle; white-space: nowrap;">
-                                        Action Required</th>
-                                    <th data-field="action_taken" style="vertical-align: middle; white-space: nowrap;">
-                                        Action Taken</th>
+
+                                    <th data-field="live" style="vertical-align: middle; white-space: nowrap;">
+                                        <div class="d-flex flex-column align-items-center" style="gap: 4px">
+                                            <div class="d-flex align-items-center">
+                                                LIVE <span class="sort-arrow">↓</span>
+                                            </div>
+                                            <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
+                                            <div class="metric-total" id="live-total">0</div>
+                                        </div>
+                                    </th>
+                                    <th data-field="views" style="vertical-align: middle; white-space: nowrap;">
+                                        <div class="d-flex flex-column align-items-center" style="gap: 4px">
+                                            <div class="d-flex align-items-center">
+                                                VIEWS <span class="sort-arrow">↓</span>
+                                            </div>
+                                            <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
+                                            <div class="metric-total" id="views-total">0</div>
+                                        </div>
+                                    </th>
+                                    <th data-field="price"
+                                        style="vertical-align: middle; white-space: nowrap; padding-right: 4px;">
+                                        <div class="d-flex flex-column align-items-center" style="gap: 4px">
+                                            <div class="d-flex align-items-center">
+                                                PRICE <span class="sort-arrow">↓</span>
+                                            </div>
+                                        </div>
+                                    </th>
+                                    <th data-field="pft" style="vertical-align: middle; white-space: nowrap;">
+                                        <div class="d-flex flex-column align-items-center" style="gap: 4px">
+                                            <div class="d-flex align-items-center">
+                                                PFT <span class="sort-arrow">↓</span>
+                                            </div>
+                                            <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
+                                            <div class="metric-total" id="pft-total">0%</div>
+                                        </div>
+                                    </th>
+                                    <th data-field="roi" style="vertical-align: middle; white-space: nowrap;">
+                                        <div class="d-flex flex-column align-items-center" style="gap: 4px">
+                                            <div class="d-flex align-items-center">
+                                                ROI <span class="sort-arrow">↓</span>
+                                            </div>
+                                            <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
+                                            <div class="metric-total" id="roi-total">0%</div>
+                                        </div>
+                                    </th>
+                                    <th data-field="cvr" style="vertical-align: middle; white-space: nowrap;">
+                                        <div class="d-flex flex-column align-items-center" style="gap: 4px">
+                                            <div class="d-flex align-items-center">
+                                                CVR <span class="sort-arrow">↓</span>
+                                            </div>
+                                            <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
+                                            <div class="metric-total" id="cvr-total">0%</div>
+                                        </div>
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -1478,42 +1606,9 @@
                             <div class="spinner-border text-primary" role="status">
                                 <span class="visually-hidden">Loading...</span>
                             </div>
-                            <div class="loader-text">Loading Temu Zero View data...</div>
+                            <div class="loader-text">Loading MercariWShip data...</div>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Reason/Action Modal -->
-    <div id="reasonActionModal" class="modal fade" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Update Reason / Action</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="reasonActionForm">
-                        <div class="mb-3">
-                            <label for="modalReason" class="form-label">Reason</label>
-                            <input type="text" class="form-control" id="modalReason" name="reason">
-                        </div>
-                        <div class="mb-3">
-                            <label for="modalActionRequired" class="form-label">Action Required</label>
-                            <input type="text" class="form-control" id="modalActionRequired" name="action_required">
-                        </div>
-                        <div class="mb-3">
-                            <label for="modalActionTaken" class="form-label">Action Taken</label>
-                            <input type="text" class="form-control" id="modalActionTaken" name="action_taken">
-                        </div>
-                        <input type="hidden" id="modalSlNo" name="sl_no">
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="saveReasonActionBtn">Save</button>
                 </div>
             </div>
         </div>
@@ -2043,17 +2138,6 @@
                 }
             }
 
-            // Update the 0 view count using Views field (clicks) instead of L30 (quantity)
-            function updateZeroViewDiv() {
-                const zeroCount = tableData.filter(item => {
-                    const clicks = parseFloat(item.Views) || 0;
-                    const inv = parseFloat(item.INV) || 0;
-                    return clicks === 0 && inv > 0 && item.NR !== 'NR';
-                }).length;
-
-                $('#zero-view-div').html(`${zeroCount}`);
-            }
-
             // Initialize everything
             function initTable() {
                 loadData().then(() => {
@@ -2073,7 +2157,6 @@
                     initPlaybackControls();
                     initRAEditHandlers();
                     initNRSelectChangeHandler();
-                    updateZeroViewDiv();
                 });
             }
 
@@ -2155,12 +2238,21 @@
             function loadData() {
                 showLoader();
                 return $.ajax({
-                    url: '/Temu/view-data',
+                    url: '/mercariwship/view-data',
                     type: 'GET',
                     dataType: 'json',
                     success: function(response) {
                         if (response && response.data) {
+                            console.log(response.data, 'ddd');
+
                             tableData = response.data.map((item, index) => {
+
+                                const valueJson = item.value ? JSON.parse(item.value) : {};
+                                const listedVal = valueJson.Listed !== undefined ? parseInt(
+                                    valueJson.Listed) : 0;
+                                const liveVal = valueJson.Live !== undefined ? parseInt(
+                                    valueJson.Live) : 0;
+
                                 return {
                                     sl_no: index + 1,
                                     'SL No.': item['SL No.'] || index + 1,
@@ -2170,22 +2262,17 @@
                                     'R&A': item['R&A'] !== undefined ? item['R&A'] :
                                     '', // Get R&A value from server data
                                     INV: item.INV || 0,
-                                    L30: item.L30 || 0, // Now comes directly from controller as quantity
-                                    product_clicks_l30: item.product_clicks_l30 || 0,
-                                    Views: item.product_clicks_l30 || 0,
-                                    product_impressions_l30: item.product_impressions_l30 || 0,
+                                    L30: item.L30 || 0,
 
                                     is_parent: item.Sku ? item.Sku
                                         .toUpperCase().includes("PARENT") : false,
                                     raw_data: item || {}, // Ensure raw_data always exists
                                     NR: item.NR || '',
-                                    A_Z_Reason: item.A_Z_Reason || '',
-                                    A_Z_ActionRequired: item.A_Z_ActionRequired || '',
-                                    A_Z_ActionTaken: item.A_Z_ActionTaken || '',
+                                    listed: listedVal,
+                                    live: liveVal,
                                 };
                             });
 
-                            console.log('Data loaded successfully:', tableData);
                             filteredData = [...tableData];
 
                         }
@@ -2200,11 +2287,27 @@
                 });
             }
 
+            // Add this function to update 0 SOLD and SOLD counts
+            function updateSoldCounts() {
+                let zeroSold = 0;
+                let totalSku = 0;
+                filteredData.forEach(item => {
+                    if (!item.is_parent) {
+                        const l30 = 0;
+                        const inv = parseFloat(item.INV) || 0;
+                        // 0 SOLD: L30 == 0, INV > 0
+                        if (l30 === 0 && inv > 0) zeroSold++;
+                        // SOLD: count all SKUs (not parent)
+                        totalSku++;
+                    }
+                });
+                $('#zero-sold-count').text(zeroSold);
+                $('#sold-count').text(totalSku - zeroSold);
+            }
+
             // Render table with current data
             function renderTable() {
                 const $tbody = $('#temu-table tbody');
-                const $tableContainer = $('.table-container');
-                const prevScrollTop = $tableContainer.scrollTop();
                 $tbody.empty();
 
                 if (isLoading) {
@@ -2217,19 +2320,24 @@
                     return;
                 }
 
-                // Get current column widths from header
-                const $headers = $('#amazonZero-table thead th');
-                const reasonCellWidth = $headers.eq(10).outerWidth() || 120;
-                const actionRequiredCellWidth = $headers.eq(11).outerWidth() || 120;
-                const actionTakenCellWidth = $headers.eq(12).outerWidth() || 120;
-
                 filteredData.forEach(item => {
                     const $row = $('<tr>');
                     if (item.is_parent) {
                         $row.addClass('parent-row');
                     }
-                    if (item.NR === 'NR') {
+                    if (item.NR === 'NRA') {
                         $row.addClass('nr-hide');
+                    }
+
+                    let rawData = {};
+                    if (typeof item.raw_data === 'string') {
+                        try {
+                            rawData = JSON.parse(item.raw_data || '{}');
+                        } catch (e) {
+                            console.error('Invalid JSON in raw_data for SKU', item['(Child) sku'], e);
+                        }
+                    } else if (typeof item.raw_data === 'object' && item.raw_data !== null) {
+                        rawData = item.raw_data;
                     }
 
                     // Helper functions for color coding
@@ -2332,60 +2440,121 @@
                         $row.append($raCell);
                     }
 
-                        $row.append($('<td>').text(item.INV));
-                        $row.append($('<td>').text(item.L30));
-                        $row.append($('<td>').text(item.Views));                    // Truncate function for dynamic column width
-                    function truncateWithTooltip(text, cellWidth) {
-                        if (!text) return '';
-                        let minLetters = 10;
-                        let letters = Math.max(minLetters, Math.floor(cellWidth / 12));
-                        const truncated = text.length > letters ? text.substring(0, letters) + '...' : text;
-                        return `<span class="truncated-text" title="${text.replace(/"/g, '&quot;')}">${truncated}</span>`;
-                    }
+                    $row.append($('<td>').text(item.INV));
+                    $row.append($('<td>').text(item.L30));
+                    // S Sales column
+                    $row.append($('<td>').html(`
+            <div class="sku-tooltip-container">
+                <span class="sku-text">${item.l30 || 0}</span>
+                <div class="sku-tooltip">
+                    <div class="sku-link"><strong>Sheet L30:</strong> ${item.l30 || 0}</div>
+                </div>
+            </div>
+        `));
+
+                    // S DIL with color coding - using the calculated S_DIL value
+                    const sheetDilValue = item.dil || 0;
+                    $row.append($('<td>').html(`
+            <span class="dil-percent-value ${getDilColor(sheetDilValue)}">
+                ${Math.round(sheetDilValue)}%
+            </span>
+        `));
 
                     if (item.is_parent) {
                         $row.append($('<td>')); // Empty cell for parent
                     } else {
-                        const currentNR = item.NR === 'REQ' || item.NR === 'NR' ? item.NR : 'REQ'; // default to REQ
+                        const currentNR = (item.NR === 'RA' || item.NR === 'NRA' || item.NR === 'LATER') ?
+                            item.NR : 'RA';
+
                         const $select = $(`
                             <select class="form-select form-select-sm nr-select" style="min-width: 100px;">
-                                <option value="NR" ${currentNR === 'NR' ? 'selected' : ''}>NR</option>
-                                <option value="REQ" ${currentNR === 'REQ' ? 'selected' : ''}>REQ</option>
+                                <option value="NRA" ${currentNR === 'NRA' ? 'selected' : ''}>NRA</option>
+                                <option value="RA" ${currentNR === 'RA' ? 'selected' : ''}>RA</option>
+                                <option value="LATER" ${currentNR === 'LATER' ? 'selected' : ''}>LATER</option>
                             </select>
                         `);
 
                         // Set background color based on value
-                        if (currentNR === 'NR') {
+                        if (currentNR === 'NRA') {
                             $select.css('background-color', '#dc3545');
                             $select.css('color', '#ffffff');
-                        } else if (currentNR === 'REQ') {
+                        } else if (currentNR === 'RA') {
                             $select.css('background-color', '#28a745');
                             $select.css('color', '#ffffff');
                         }
+
                         $select.data('sku', item.Sku);
                         $row.append($('<td>').append($select));
                     }
 
-                    // Reason column with plus icon and tooltip
-                    $row.append($('<td>').html(`
-                        ${truncateWithTooltip(item.A_Z_Reason, reasonCellWidth)}
-                        <i class="fas fa-plus reason-action-plus" style="cursor:pointer; color:#007bff; margin-left:8px;" 
-                        data-slno="${item['SL No.'] || item['sl_no']}" data-type="reason"></i>
-                    `));
+                    //Listed checkbox
+                    const listedVal = rawData.Listed === true || rawData.Listed === 'true' || rawData
+                        .Listed === 1 || rawData.Listed === '1';
+                    const $listedCb = $('<input>', {
+                        type: 'checkbox',
+                        class: 'listed-checkbox',
+                        checked: listedVal
+                    }).data('sku', item['Sku']);
 
-                    // Action Required column
-                    $row.append($('<td>').html(`
-                        ${truncateWithTooltip(item.A_Z_ActionRequired, actionRequiredCellWidth)}
-                        <i class="fas fa-plus reason-action-plus" style="cursor:pointer; color:#007bff; margin-left:8px;" 
-                        data-slno="${item['SL No.'] || item['sl_no']}" data-type="action_required"></i>
-                    `));
+                    $row.append($('<td>').append($listedCb));
 
-                    // Action Taken column
-                    $row.append($('<td>').html(`
-                        ${truncateWithTooltip(item.A_Z_ActionTaken, actionTakenCellWidth)}
-                        <i class="fas fa-plus reason-action-plus" style="cursor:pointer; color:#007bff; margin-left:8px;" 
-                        data-slno="${item['SL No.'] || item['sl_no']}" data-type="action_taken"></i>
-                    `));
+                    // Live checkbox
+                    const liveVal = rawData.Live === true || rawData.Live === 'true' || rawData.Live ===
+                        1 || rawData.Live === '1';
+                    const $liveCb = $('<input>', {
+                        type: 'checkbox',
+                        class: 'live-checkbox',
+                        checked: liveVal
+                    }).data('sku', item['Sku']);
+
+                    $row.append($('<td>').append($liveCb));
+                    $row.append($('<td>').html(
+                        `<span>${Math.round(item?.VIEWS || 0)}%</span>
+                         <span class="text-info tooltip-icon ad-view-trigger" 
+                               data-bs-toggle="tooltip" 
+                               data-bs-placement="left" 
+                               title="visibility View"
+                               data-item='${JSON.stringify(item.raw_data)}'>V</span>`
+                    ));
+
+
+                    //price with tooltip
+                    const safePrice = typeof item.price === 'number' ? item.price : parseFloat(item
+                        .price) || 0;
+                    $row.append($('<td>').html(
+                        `$${safePrice.toFixed(2)}
+                        <span class="" style="margin-left:8px">
+                            <i class="fas fa-tag text-warning price-view-trigger" 
+                            style="transform:translateY(1px)"
+                            data-bs-toggle="tooltip" 
+                            data-bs-placement="top-end" 
+                            title="Pricing view"
+                            data-item='${JSON.stringify(item.raw_data)}'"></i>
+                        </span>`
+                    ));
+
+                    // PFT with color coding (always show 0% if value is missing)
+                    const pftValue = (typeof item['PFT %'] === 'number' && !isNaN(item['PFT %'])) ? Math
+                        .round(item['PFT %'] * 100) : 0;
+                    $row.append($('<td>').html(
+                        `<span class="dil-percent-value ${getPftColor(item['PFT %'])}">${pftValue}%</span>`
+                    ));
+
+                    // ROI with color coding (always show 0% if value is missing)
+                    const roiValue = (typeof item.Roi === 'number' && !isNaN(item.Roi)) ? Math.round(item
+                        .Roi * 100) : 0;
+                    $row.append($('<td>').html(
+                        `<span class="dil-percent-value ${getRoiColor(item.Roi)}">${roiValue}%</span>`
+                    ));
+
+                    $row.append($('<td>').html(
+                        `<span class="dil-percent-value ${getCvrColor(item.SCVR || 0)}">${Math.round((item.SCVR || 0)  * 100)}%</span>
+    <i class="fas fa-check-circle text-success tooltip-icon conversion-view-trigger ms-2"
+        data-bs-toggle="tooltip" data-bs-placement="bottom" title="Conversion view"
+        data-item='${JSON.stringify(item.raw_data)}'></i>`
+                    ));
+
+
 
                     $tbody.append($row);
                 });
@@ -2394,87 +2563,82 @@
                 $('#visible-rows').text(`Showing all ${filteredData.length} rows`);
                 // Initialize tooltips
                 initTooltips();
-                // Restore scroll position
-                setTimeout(() => {
-                    $tableContainer.scrollTop(prevScrollTop);
-                }, 0);
+                updateSoldCounts();
             }
 
-                function initRAEditHandlers() {
-                    $(document).on('click', '.edit-icon', function(e) {
-                        e.stopPropagation();
-                        const $icon = $(this);
-                        const $checkbox = $icon.siblings('.ra-checkbox');
-                        const $row = $checkbox.closest('tr');
-                        const rowData = filteredData.find(item => item['SL No.'] == $row.find('td:eq(0)')
-                            .text());
+            function initRAEditHandlers() {
+                $(document).on('click', '.edit-icon', function(e) {
+                    e.stopPropagation();
+                    const $icon = $(this);
+                    const $checkbox = $icon.siblings('.ra-checkbox');
+                    const $row = $checkbox.closest('tr');
+                    const rowData = filteredData.find(item => item['SL No.'] == $row.find('td:eq(0)')
+                        .text());
 
-                        if ($icon.hasClass('fa-pen')) {
-                            // Enter edit mode
-                            $checkbox.prop('disabled', false)
-                                .data('original-value', $checkbox.is(':checked'));
-                            $icon.removeClass('fa-pen text-primary')
-                                .addClass('fa-save text-success')
-                                .attr('title', 'Save Changes');
-                        } else {
-                            // Prepare data for saveChanges
-                            const $cell = $checkbox.closest('.ra-cell');
-                            const slNo = $row.find('td:eq(0)').text();
-                            const title = "R&A";
-                            const updatedValue = $checkbox.is(':checked') ? "true" : "false";
+                    if ($icon.hasClass('fa-pen')) {
+                        // Enter edit mode
+                        $checkbox.prop('disabled', false)
+                            .data('original-value', $checkbox.is(':checked'));
+                        $icon.removeClass('fa-pen text-primary')
+                            .addClass('fa-save text-success')
+                            .attr('title', 'Save Changes');
+                    } else {
+                        // Prepare data for saveChanges
+                        const $cell = $checkbox.closest('.ra-cell');
+                        const slNo = $row.find('td:eq(0)').text();
+                        const title = "R&A";
+                        const updatedValue = $checkbox.is(':checked') ? "true" : "false";
 
-                            // Show saving indicator
-                            $icon.html('<i class="fas fa-spinner fa-spin"></i>');
+                        // Show saving indicator
+                        $icon.html('<i class="fas fa-spinner fa-spin"></i>');
 
-                            saveChanges(
-                                $cell,
-                                title,
-                                slNo,
-                                false, // isHyperlink
-                                updatedValue,
-                                true // isCheckbox
-                            );
+                        saveChanges(
+                            $cell,
+                            title,
+                            slNo,
+                            false, // isHyperlink
+                            updatedValue,
+                            true // isCheckbox
+                        );
 
-                            // Immediately disable checkbox after save
-                            $checkbox.prop('disabled', true);
-                            $icon.removeClass('fa-save text-success')
-                                .addClass('fa-pen text-primary');
-                        }
-                    });
+                        // Immediately disable checkbox after save
+                        $checkbox.prop('disabled', true);
+                        $icon.removeClass('fa-save text-success')
+                            .addClass('fa-pen text-primary');
+                    }
+                });
 
-                    // Handle direct checkbox changes (for keyboard accessibility)
-                    $(document).on('change', '.ra-checkbox:not(:disabled)', function(e) {
-                        e.stopPropagation();
-                        $(this).siblings('.edit-icon').trigger('click');
-                    });
-                }
+                // Handle direct checkbox changes (for keyboard accessibility)
+                $(document).on('change', '.ra-checkbox:not(:disabled)', function(e) {
+                    e.stopPropagation();
+                    $(this).siblings('.edit-icon').trigger('click');
+                });
+            }
 
-                function initNRSelectChangeHandler() {
-                    $(document).off('change', '.nr-select');
-                    $(document).on('change', '.nr-select', function () {
-                        const $select = $(this);
-                        const newValue = $select.val();
-                        const sku = $select.data('sku');
-                        console.log(sku,'sdsdd');
-                        
+            function initNRSelectChangeHandler() {
+                $(document).off('change', '.nr-select');
+                $(document).on('change', '.nr-select', function() {
+                    const $select = $(this);
+                    const newValue = $select.val();
+                    const sku = $select.data('sku');
 
-                        // Change background color based on selected value
-                        if (newValue === 'NR') {
-                            $select.css('background-color', '#dc3545').css('color', '#ffffff');
-                        } else {
-                            $select.css('background-color', '#28a745').css('color', '#ffffff');
-                        }
+                    // Change background color based on selected value
+                    if (newValue === 'NRA') {
+                        $select.css('background-color', '#dc3545').css('color', '#ffffff');
+                    } else {
+                        $select.css('background-color', '#28a745').css('color', '#ffffff');
+                    }
 
-                        // Send AJAX
-                        $.ajax({
-                            url: '/temu/save-nr',
-                            type: 'POST',
-                            data: {
-                                sku: sku,
-                                nr: newValue,
-                                _token: $('meta[name="csrf-token"]').attr('content')
+                    // Send AJAX
+                    $.ajax({
+                        url: '/temu/save-nr',
+                        type: 'POST',
+                        data: {
+                            sku: sku,
+                            nr: newValue,
+                            _token: $('meta[name="csrf-token"]').attr('content')
                         },
-                        success: function (response) {
+                        success: function(response) {
                             showNotification('success', 'NR updated successfully!');
 
                             // Update tableData and filteredData
@@ -2488,16 +2652,66 @@
                                     item.NR = newValue;
                                 }
                             });
-                            updateZeroViewDiv();
                             calculateTotals();
                             renderTable();
                         },
-                        error: function (xhr) {
+                        error: function(xhr) {
                             showNotification('danger', 'Failed to update NR.');
                         }
                     });
                 });
             }
+
+            $(document).on('change', '.listed-checkbox, .live-checkbox', function() {
+                const $cb = $(this);
+                const sku = $cb.data('sku');
+                const field = $cb.hasClass('listed-checkbox') ? 'Listed' : 'Live';
+                const value = $cb.is(':checked') ? 1 : 0;
+
+                $.ajax({
+                    url: '/mercariwship/update-listed-live',
+                    method: 'POST',
+                    data: {
+                        sku: sku,
+                        field: field,
+                        value: value,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(res) {
+                        // Update local filteredData to reflect the change for realtime totals
+                        let updated = false;
+                        for (let i = 0; i < filteredData.length; i++) {
+                            if (filteredData[i]['Sku'] === sku) {
+                                let raw = filteredData[i].raw_data;
+                                if (typeof raw === 'string') {
+                                    try {
+                                        raw = JSON.parse(raw || '{}');
+                                    } catch (e) {
+                                        raw = {};
+                                    }
+                                } else if (typeof raw !== 'object' || raw === null) {
+                                    raw = {};
+                                }
+                                raw[field] = value;
+                                filteredData[i].raw_data =
+                                    raw;
+                                updated = true;
+                                break;
+                            }
+                        }
+
+                        if (updated) {
+                            calculateTotals();
+                        }
+                        console.log(`${field} updated for SKU ${sku}`);
+                    },
+                    error: function(err) {
+                        console.error('Update failed', err);
+                        alert('Failed to update. Try again.');
+                        $cb.prop('checked', !value); // revert on error
+                    }
+                });
+            });
 
             window.openModal = function(selectedItem, type) {
                 try {
@@ -2800,9 +3014,7 @@
             function createFieldCard(field, data, type, itemId) {
                 const hyperlinkFields = ['LINK 1', 'LINK 2', 'LINK 3', 'LINK 4', 'LINK 5'];
 
-                const editableFields = [
-                    'SPRICE', 'Tannishtha done', 'LMP 1'
-                ];
+
 
                 const percentageFields = ['KwCtr60', 'KwCtr30'];
 
@@ -2923,13 +3135,13 @@
                 }
 
                 // Add edit icon if field is editable
-                if (editableFields.includes(field.title)) {
-                    const editIcon = document.createElement('div');
-                    editIcon.className = 'position-absolute top-0 end-0 p-2 edit-icon';
-                    editIcon.style.cssText = 'cursor:pointer; z-index: 1;';
-                    editIcon.innerHTML = '<i class="fas fa-pen text-primary"></i>';
-                    card.appendChild(editIcon);
-                }
+                // if (editableFields.includes(field.title)) {
+                //     const editIcon = document.createElement('div');
+                //     editIcon.className = 'position-absolute top-0 end-0 p-2 edit-icon';
+                //     editIcon.style.cssText = 'cursor:pointer; z-index: 1;';
+                //     editIcon.innerHTML = '<i class="fas fa-pen text-primary"></i>';
+                //     card.appendChild(editIcon);
+                // }
 
                 const cardBody = document.createElement('div');
                 cardBody.className = 'card-body';
@@ -2992,81 +3204,68 @@
                 const modalElement = document.getElementById(modalId);
                 if (!modalElement) return;
 
-                $(modalElement).off('click', '.edit-icon, .save-icon');
+                // Get editable fields from the same array used in createFieldCard
+                const editableFields = [
+                    'SPRICE', 'Tannishtha done', 'LMP 1'
+                ];
+                // Remove all edit/save icons
+                $(modalElement).find('.edit-icon, .save-icon').remove();
 
-                $(modalElement).on('click', '.edit-icon', function(e) {
-                    e.stopPropagation();
+                // Enable only editable fields
+                $(modalElement).find('.card').each(function() {
+                    const $card = $(this);
+                    const title = $card.find('.card-title').text().trim();
+                    if (!editableFields.includes(title)) return;
 
-                    const icon = $(this);
-                    const card = icon.closest('.card');
-                    const contentElement = card.find('.editable-content');
-                    const checkbox = contentElement.find('.form-check-input');
-                    const title = card.find('.card-title').text().trim();
+                    const $content = $card.find('.editable-content');
+                    const $checkbox = $content.find('.form-check-input');
+                    const isHyperlink = $content.data('is-hyperlink');
 
-                    // If it's a checkbox field, enable it and change to save icon
-                    if (checkbox.length > 0) {
-                        checkbox.prop('disabled', false);
-                        icon.html('<i class="fas fa-check text-success"></i>')
-                            .removeClass('edit-icon')
-                            .addClass('save-icon');
-                        return;
+                    if ($checkbox.length) {
+                        $checkbox.prop('disabled', false);
+                    } else {
+                        let originalContent = $content.text().trim();
+                        if (isHyperlink && $content.find('a').length) {
+                            originalContent = $content.find('a').attr('href');
+                            $content.html(originalContent);
+                        }
+                        $content
+                            .attr('contenteditable', 'true')
+                            .addClass('border border-primary')
+                            .data('original-content', originalContent);
                     }
-
-                    const isHyperlink = contentElement.data('is-hyperlink');
-                    const slNo = card.find('.hidden-sl-no').val();
-
-                    if (currentEditingElement && currentEditingElement.is(contentElement)) {
-                        return;
-                    }
-
-                    if (isEditMode && currentEditingElement) {
-                        exitEditMode(currentEditingElement);
-                    }
-
-                    let originalContent = contentElement.text().trim();
-                    if (isHyperlink && contentElement.find('a').length) {
-                        originalContent = contentElement.find('a').attr('href');
-                    }
-
-                    contentElement.data('original-content', originalContent)
-                        .html(originalContent)
-                        .attr('contenteditable', 'true')
-                        .addClass('border border-primary')
-                        .focus();
-
-                    isEditMode = true;
-                    currentEditingElement = contentElement;
-
-                    icon.html('<i class="fas fa-check text-success"></i>')
-                        .removeClass('edit-icon')
-                        .addClass('save-icon');
                 });
 
-                // Save handler
-                $(modalElement).on('click', '.save-icon', function(e) {
-                    e.stopPropagation();
-                    const icon = $(this);
-                    const card = icon.closest('.card');
-                    const contentElement = card.find('.editable-content');
-                    const checkbox = contentElement.find('.form-check-input');
-                    const title = card.find('.card-title').text().trim();
-                    const slNo = card.find('.hidden-sl-no').val();
-                    const isHyperlink = contentElement.data('is-hyperlink');
-
-                    // Get the updated value
-                    let updatedValue;
-                    if (checkbox.length > 0) {
-                        updatedValue = checkbox.prop('checked') ? "true" : "false";
-                        checkbox.prop('disabled', true);
-                    } else {
-                        updatedValue = contentElement.text().trim();
-                        if (isHyperlink && contentElement.find('a').length) {
-                            updatedValue = contentElement.find('a').attr('href');
-                        }
+                // Save on Enter for text fields
+                $(modalElement).off('keydown', '.editable-content[contenteditable="true"]');
+                $(modalElement).on('keydown', '.editable-content[contenteditable="true"]', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const $content = $(this);
+                        const $card = $content.closest('.card');
+                        const title = $card.find('.card-title').text().trim();
+                        const slNo = $card.find('.hidden-sl-no').val();
+                        const isHyperlink = $content.data('is-hyperlink');
+                        let updatedValue = $content.text().trim();
+                        if (isHyperlink) updatedValue = updatedValue;
+                        saveChanges($content, title, slNo, isHyperlink, updatedValue, false);
                     }
+                });
 
-                    saveChanges(contentElement, title, slNo, isHyperlink, updatedValue, checkbox.length >
-                        0);
+                // Save on Enter for checkboxes
+                $(modalElement).off('keydown', '.form-check-input');
+                $(modalElement).on('keydown', '.form-check-input', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const $checkbox = $(this);
+                        const $card = $checkbox.closest('.card');
+                        const $content = $card.find('.editable-content');
+                        const title = $card.find('.card-title').text().trim();
+                        const slNo = $card.find('.hidden-sl-no').val();
+                        const isHyperlink = $content.data('is-hyperlink');
+                        let updatedValue = $checkbox.prop('checked') ? "true" : "false";
+                        saveChanges($content, title, slNo, isHyperlink, updatedValue, true);
+                    }
                 });
             }
 
@@ -3372,41 +3571,16 @@
                     $('body').css('user-select', 'none');
                 });
 
-                let resizeDebounceTimer = null;
-
                 $(document).on('mousemove', function(e) {
                     if (!isResizing) return;
 
                     const $resizer = $('.resize-handle.resizing');
                     if ($resizer.length) {
                         const $th = $resizer.parent();
-                        const columnIndex = $th.index()
                         const newWidth = startWidth + (e.pageX - startX);
                         $th.css('width', newWidth + 'px');
                         $th.css('min-width', newWidth + 'px');
                         $th.css('max-width', newWidth + 'px');
-                        // Debounced update for truncated text
-                        if ([10, 11, 12].includes(columnIndex)) {
-                            clearTimeout(resizeDebounceTimer);
-                            resizeDebounceTimer = setTimeout(() => {
-                                const $table = $('#amazonZero-table');
-                                $table.find('tbody tr').each(function() {
-                                    const $cell = $(this).find('td').eq(columnIndex);
-                                    const $span = $cell.find('.truncated-text');
-                                    if ($span.length) {
-                                        const fullText = $span.attr('title') || $span
-                                            .text();
-                                        let minLetters = 10;
-                                        let letters = Math.max(minLetters, Math.floor(
-                                            newWidth / 12));
-                                        const truncated = fullText.length > letters ?
-                                            fullText.substring(0, letters) + '...' :
-                                            fullText;
-                                        $span.text(truncated);
-                                    }
-                                });
-                            }, 50); // 50ms debounce
-                        }
                     }
                 });
 
@@ -3417,30 +3591,6 @@
                     $('.resize-handle').removeClass('resizing');
                     $('body').css('user-select', '');
                     isResizing = false;
-                    // Get the new width of the resized column
-                    const $table = $('#amazonZero-table');
-                    const $headers = $table.find('th');
-                    const newWidth = $headers.eq(columnIndex).outerWidth() || 120;
-
-                    // Only update truncated text for Reason, Action Required, Action Taken columns
-                    // Adjust columnIndex if needed (here: 10, 11, 12)
-                    if ([10, 11, 12].includes(columnIndex)) {
-                        $table.find('tbody tr').each(function() {
-                            const $cell = $(this).find('td').eq(columnIndex);
-                            const $span = $cell.find('.truncated-text');
-                            if ($span.length) {
-                                // Get full text from title attribute
-                                const fullText = $span.attr('title') || $span.text();
-                                // Update truncated text
-                                let minLetters = 10;
-                                let letters = Math.max(minLetters, Math.floor(newWidth / 12));
-                                const truncated = fullText.length > letters ? fullText.substring(0,
-                                    letters) + '...' : fullText;
-                                $span.text(truncated);
-                            }
-                        });
-                    }
-
                 });
             }
 
@@ -3480,7 +3630,7 @@
                         const valB = b[dataField] || '';
 
                         // Numeric comparison for numeric fields
-                        if (dataField === 'sl_no' || dataField === 'INV' || dataField === 'L30' || dataField === 'Views') {
+                        if (dataField === 'sl_no' || dataField === 'INV' || dataField === 'L30') {
                             return (parseFloat(valA) - parseFloat(valB)) * currentSort.direction;
                         }
 
@@ -3756,18 +3906,46 @@
                         rowCount: 0,
                         totalPftSum: 0,
                         totalSalesL30Sum: 0,
-                        totalCogsSum: 0
+                        totalCogsSum: 0,
+                        listedCount: 0,
+                        liveCount: 0
+
                     };
 
                     filteredData.forEach(item => {
-                        if(item.NR === 'NR'){
+                        if (item.NR === 'NR') {
                             return;
                         }
+
+                        let rawData = {};
+                        if (typeof item.raw_data === 'string') {
+                            try {
+                                rawData = JSON.parse(item.raw_data || '{}');
+                            } catch (e) {
+                                console.error(`Invalid JSON in raw_data for SKU ${item['(Child) sku']}`, e);
+                            }
+                        } else if (typeof item.raw_data === 'object' && item.raw_data !== null) {
+                            rawData = item.raw_data;
+
+                        }
+
+                        // Count listed checkboxes
+                        if (rawData.Listed === true || rawData.Listed === 'true' || rawData.Listed === 1 ||
+                            rawData.Listed === '1') {
+                            metrics.listedCount++;
+                        }
+
+                        // Count Live checkboxes
+                        if (rawData.Live === true || rawData.Live === 'true' || rawData.Live === 1 ||
+                            rawData.Live === '1') {
+                            metrics.liveCount++;
+                        }
+
                         metrics.invTotal += parseFloat(item.INV) || 0;
                         metrics.ovL30Total += parseFloat(item.L30) || 0;
                         metrics.el30Total += parseFloat(item['A L30']) || 0;
                         metrics.eDilTotal += parseFloat(item['A Dil%']) || 0;
-                        metrics.viewsTotal += parseFloat(item.Views) || 0;
+                        metrics.viewsTotal += parseFloat(item.Sess30) || 0;
                         metrics.tacosTotal += parseFloat(item.Tacos30) || 0;
                         metrics.pftSum += parseFloat(item['PFT %']) || 0;
                         metrics.roiSum += parseFloat(item.Roi) || 0;
@@ -3809,6 +3987,9 @@
                     $('#al30-total').text(metrics.el30Total.toLocaleString());
                     $('#lDil-total').text(Math.round(metrics.eDilTotal / divisor * 100) + '%');
                     $('#views-total').text(metrics.viewsTotal.toLocaleString());
+                    $('#listed-total').text(metrics.listedCount.toLocaleString());
+                    $('#live-total').text(metrics.liveCount.toLocaleString());
+
 
                     // --- Custom PFT TOTAL calculation ---
                     let pftTotalDisplay = '0%';
@@ -3844,6 +4025,9 @@
                 $('#roi-total').text('0%');
                 $('#tacos-total').text('0%');
                 $('#cvr-total').text('0%');
+                $('#listed-total').text('0');
+                $('#live-total').text('0');
+
             }
 
             // Initialize enhanced dropdowns
@@ -4225,69 +4409,6 @@
             function hideLoader() {
                 $('#data-loader').fadeOut();
             }
-
-            // Handle plus icon click to open modal
-            $(document).on('click', '.reason-action-plus', function() {
-                const slNo = $(this).data('slno');
-                const row = filteredData.find(item => item['SL No.'] == slNo || item['sl_no'] == slNo);
-
-                // Fill modal fields with current values using the correct keys
-                $('#modalReason').val(row.A_Z_Reason || '');
-                $('#modalActionRequired').val(row.A_Z_ActionRequired || '');
-                $('#modalActionTaken').val(row.A_Z_ActionTaken || '');
-                $('#modalSlNo').val(slNo);
-
-                // Show modal
-                $('#reasonActionModal').modal('show');
-            });
-
-            // Save button in modal
-            $('#saveReasonActionBtn').on('click', function() {
-                const slNo = $('#modalSlNo').val();
-                const reason = $('#modalReason').val();
-                const actionRequired = $('#modalActionRequired').val();
-                const actionTaken = $('#modalActionTaken').val();
-
-                // Find the SKU for this row
-                const row = filteredData.find(item => item['SL No.'] == slNo);
-                const sku = row ? row['Sku'] : null;
-
-                // Update data in filteredData and tableData
-                [filteredData, tableData].forEach(arr => {
-                    const row = arr.find(item => item['SL No.'] == slNo || item['sl_no'] == slNo);
-                    if (row) {
-                        row.A_Z_Reason = reason;
-                        row.A_Z_ActionRequired = actionRequired;
-                        row.A_Z_ActionTaken = actionTaken;
-                    }
-                });
-
-                // Save to backend via AJAX
-                if (sku) {
-                    $.ajax({
-                        url: '/temu-zero/reason-action/update',
-                        method: 'POST',
-                        data: {
-                            sku: sku,
-                            reason: reason,
-                            action_required: actionRequired,
-                            action_taken: actionTaken,
-                            _token: $('meta[name="csrf-token"]').attr('content')
-                        },
-                        success: function(response) {
-                            showNotification('success', 'Reason/Action updated successfully!');
-                            renderTable();
-                            $('#reasonActionModal').modal('hide');
-                        },
-                        error: function(xhr) {
-                            showNotification('danger', 'Failed to update Reason/Action.');
-                        }
-                    });
-                } else {
-                    renderTable();
-                    $('#reasonActionModal').modal('hide');
-                }
-            });
 
             // Initialize everything
             initTable();

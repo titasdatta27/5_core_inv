@@ -21,8 +21,7 @@ class TemuZeroController extends Controller
     {
         $this->apiController = $apiController;
     }
-
-    public function temuZeroView(Request $request)
+public function temuZeroView(Request $request)
     {
         $mode = $request->query('mode');
         $demo = $request->query('demo');
@@ -39,7 +38,6 @@ class TemuZeroController extends Controller
             'percentage' => $percentage
         ]);
     }
-
     /**
      * ✅ Get only SKUs where temu_metric.product_clicks_l30 = 0 and shopify_sku.inv > 0
      */
@@ -78,20 +76,29 @@ class TemuZeroController extends Controller
 
             // Get inventory from ShopifySku
             $inv = $shopifyData[$sku]->inv ?? 0;
+            $quantity = $shopifyData[$sku]->quantity ?? 0;
 
-            // Get product_clicks_l30 from TemuMetric
-            $views = null;
+            // Skip items with no inventory
+            if ($inv <= 0) {
+                continue;
+            }
+
+            // Get product_clicks_l30 and product_impressions_l30 from TemuMetric
+            $clicks = null;
+            $impressions = null;
             $metric = $temuMetrics[$sku] ?? null;
             if ($metric) {
-                $views = $metric->product_clicks_l30 ?? null;
-                if ($views === null && !empty($metric->value)) {
+                $clicks = $metric->product_clicks_l30 ?? null;
+                $impressions = $metric->product_impressions_l30 ?? null;
+                if ($clicks === null && !empty($metric->value)) {
                     $metricValue = json_decode($metric->value, true);
-                    $views = $metricValue['product_clicks_l30'] ?? null;
+                    $clicks = $metricValue['product_clicks_l30'] ?? null;
+                    $impressions = $metricValue['product_impressions_l30'] ?? null;
                 }
             }
 
-            // ✅ Only include SKUs where views = 0 and inv > 0
-            if ($inv <= 0 || $views !== 0) {
+            // Skip items with clicks > 0 (only show zero-view items)
+            if (!is_null($clicks) && $clicks > 0) {
                 continue;
             }
 
@@ -104,10 +111,13 @@ class TemuZeroController extends Controller
             $values = $productMaster->Values ?? [];
 
             $processedItem = [
+                'Parent' => $productMaster->parent ?? null,
                 'SL No.' => $slNo++,
                 'Sku' => $sku,
                 'INV' => $inv,
-                'product_clicks_l30' => $views,
+                'L30' => $quantity, // Use Shopify quantity for L30
+                'product_clicks_l30' => $clicks ?? 0,
+                'product_impressions_l30' => $impressions ?? 0,
                 'LP' => $values['lp'] ?? 0,
                 'Ship' => $values['ship'] ?? 0,
                 'COGS' => $values['cogs'] ?? 0,
@@ -159,33 +169,107 @@ class TemuZeroController extends Controller
     /**
      * Optional: Quick summary counts for dashboard
      */
-    public function getLivePendingAndZeroViewCounts()
+   public function getLivePendingAndZeroViewCounts()
     {
         $productMasters = ProductMaster::whereNull('deleted_at')->get();
+
+        // Normalize SKUs (avoid case/space mismatch)
         $skus = $productMasters->pluck('sku')->map(fn($s) => strtoupper(trim($s)))->unique()->toArray();
 
         $shopifyData = ShopifySku::whereIn('sku', $skus)->get()
             ->keyBy(fn($s) => strtoupper(trim($s->sku)));
 
+        $temuListingStatus = TemuListingStatus::whereIn('sku', $skus)->get()
+            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
+
+        $temuDataViews = TemuDataView::whereIn('sku', $skus)->get()
+            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
+
         $temuMetrics = TemuMetric::whereIn('sku', $skus)->get()
             ->keyBy(fn($s) => strtoupper(trim($s->sku)));
 
+        $listedCount = 0;
+        $zeroInvOfListed = 0;
+        $liveCount = 0; 
         $zeroViewCount = 0;
 
         foreach ($productMasters as $item) {
             $sku = strtoupper(trim($item->sku));
+            $inv = $shopifyData[$sku]->inv ?? 0;
+
+            // Skip parent SKUs
             if (stripos($sku, 'PARENT') !== false) continue;
 
-            $inv = floatval($shopifyData[$sku]->inv ?? 0);
-            $views = (int)($temuMetrics[$sku]->product_clicks_l30 ?? 0);
+            // --- Amazon Listing Status ---
+            $status = $temuListingStatus[$sku]->value ?? null;
+            if (is_string($status)) {
+                $status = json_decode($status, true);
+            }
 
-            if ($inv > 0 && $views === 0) {
+            // $listed = $status['listed'] ?? (floatval($inv) > 0 ? 'Pending' : 'Listed');
+            $listed = $status['listed'] ?? null;
+
+            // --- Amazon Live Status ---
+            $dataView = $temuDataViews[$sku]->value ?? null;
+            if (is_string($dataView)) {
+                $dataView = json_decode($dataView, true);
+            }
+            // $live = ($dataView['Live'] ?? false) === true ? 'Live' : null;
+            $live = (!empty($dataView['Live']) && $dataView['Live'] === true) ? 'Live' : null;
+
+
+            // --- Listed count ---
+            if ($listed === 'Listed') {
+                $listedCount++;
+                if (floatval($inv) <= 0) {
+                    $zeroInvOfListed++;
+                }
+            }
+
+            // --- Live count ---
+            if ($live === 'Live') {
+                $liveCount++;
+            }
+
+
+            // --- Views / Zero-View logic ---
+            $metricRecord = $temuMetrics[$sku] ?? null;
+            $views = null;
+
+
+            if ($metricRecord) {
+                // Direct field
+                if (!empty($metricRecord->product_clicks_l30) || $metricRecord->product_clicks_l30 === "0" || $metricRecord->product_clicks_l30 === 0) {
+                    $views = (int)$metricRecord->product_clicks_l30;
+                }
+                // Or inside JSON column value
+                elseif (!empty($metricRecord->value)) {
+                    $metricData = json_decode($metricRecord->value, true);
+                    if (isset($metricData['product_clicks_l30'])) {
+                        $views = (int)$metricData['product_clicks_l30'];
+                    }
+                }
+            }
+
+            // Normalize $inv to numeric
+            $inv = floatval($inv);
+
+            // Count as zero-view if views are exactly 0 or null (no data) and inv > 0
+            if ($inv > 0 && ($views === 0 || $views === null)) {
                 $zeroViewCount++;
             }
+
         }
 
+        $livePending = $listedCount - $liveCount;
+
         return [
+            'live_pending' => $livePending,
             'zero_view' => $zeroViewCount,
         ];
     }
+
+
+
+    
 }
