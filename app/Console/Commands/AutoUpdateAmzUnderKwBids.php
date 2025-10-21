@@ -88,11 +88,15 @@ class AutoUpdateAmzUnderKwBids extends Command
             $shopify = $shopifyData[$pm->sku] ?? null;
 
             $matchedCampaignL7 = $amazonSpCampaignReportsL7->first(function ($item) use ($sku) {
-                return strcasecmp(trim($item->campaignName), $sku) === 0;
+                $campaignName = strtoupper(trim(rtrim($item->campaignName, '.')));
+                $cleanSku = strtoupper(trim(rtrim($sku, '.')));
+                return $campaignName === $cleanSku;
             });
 
             $matchedCampaignL1 = $amazonSpCampaignReportsL1->first(function ($item) use ($sku) {
-                return strcasecmp(trim($item->campaignName), $sku) === 0;
+                $campaignName = strtoupper(trim(rtrim($item->campaignName, '.')));
+                $cleanSku = strtoupper(trim(rtrim($sku, '.')));
+                return $campaignName === $cleanSku;
             });
 
             if (!$matchedCampaignL7 && !$matchedCampaignL1) {
