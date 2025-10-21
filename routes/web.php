@@ -200,6 +200,7 @@ use App\Http\Controllers\Channels\ReviewMaster\ReviewDashboardController;
 use App\Http\Controllers\Channels\SetupAccountChannelController;
 use App\Http\Controllers\Channels\ShippingMasterController;
 use App\Http\Controllers\Channels\TrafficMasterController;
+use App\Http\Controllers\EbayMissingAdsController;
 use App\Http\Controllers\FbaDataController;
 use App\Http\Controllers\InventoryManagement\AutoStockBalanceController;
 use App\Http\Controllers\InventoryManagement\StockBalanceController;
@@ -1919,6 +1920,11 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::controller(EbayRunningAdsController::class)->group(function () {
         Route::get('/ebay/ad-running/list', 'index')->name('ebay.running.ads');
         Route::get('/ebay/ad-running/data', 'getEbayRunningAdsData');
+    });
+
+    Route::controller(EbayMissingAdsController::class)->group(function () {
+        Route::get('/ebay/ad-missing/list', 'index')->name('ebay.missing.ads');
+        Route::get('/ebay/ad-missing/data', 'getEbayMissingAdsData');
     });
 
     // ebay 3 ads section

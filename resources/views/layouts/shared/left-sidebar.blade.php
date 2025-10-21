@@ -1669,8 +1669,11 @@
                                                 $20</a>
                                     </li>
                                     <li>
-                                        <a href="{{ route('ebay-make-new-campaign-kw') }}">Ebay MAKE CAMP. KW</a>
+                                        <a href="{{ route('ebay.missing.ads') }}">Ebay MISSING ADS</a>
                                     </li>
+                                    {{-- <li>
+                                        <a href="{{ route('ebay-make-new-campaign-kw') }}">Ebay MAKE CAMP. KW</a>
+                                    </li> --}}
                                 </ul>
                             </div>
                         </li>
