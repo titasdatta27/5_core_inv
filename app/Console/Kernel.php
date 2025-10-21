@@ -155,37 +155,37 @@ class Kernel extends ConsoleKernel
             ->timezone('Asia/Kolkata');
         // amazon acos bgt update commands
         $schedule->command('amazon:auto-update-amz-bgt-kw')
-            ->dailyAt('23:30')
+            ->dailyAt('12:00')
             ->timezone('Asia/Kolkata'); 
         $schedule->command('amazon:auto-update-amz-bgt-pt')
-            ->dailyAt('23:30')
+            ->dailyAt('12:00')
             ->timezone('Asia/Kolkata'); 
         $schedule->command('amazon:auto-update-amz-bgt-hl')
-            ->dailyAt('23:30')
+            ->dailyAt('12:00')
             ->timezone('Asia/Kolkata'); 
         // Pink Dil ads update command
         $schedule->command('amazon:auto-update-pink-dil-kw-ads')
-            ->dailyAt('23:30')
+            ->dailyAt('12:00')
             ->timezone('Asia/Kolkata');
         $schedule->command('amazon:auto-update-pink-dil-pt-ads')
-            ->dailyAt('23:30')
+            ->dailyAt('12:00')
             ->timezone('Asia/Kolkata');
         $schedule->command('amazon:auto-update-pink-dil-hl-ads')
-            ->dailyAt('23:30')
+            ->dailyAt('12:00')
             ->timezone('Asia/Kolkata');
         // FBA bids update command
 
         $schedule->command('amazon-fba:auto-update-over-kw-bids')
-            ->dailyAt('23:30')
+            ->dailyAt('12:00')
             ->timezone('Asia/Kolkata');
         $schedule->command('amazon-fba:auto-update-under-kw-bids')
-            ->dailyAt('23:30')
+            ->dailyAt('12:00')
             ->timezone('Asia/Kolkata');
         $schedule->command('amazon-fba:auto-update-over-pt-bids')
-            ->dailyAt('23:30')
+            ->dailyAt('12:00')
             ->timezone('Asia/Kolkata');
         $schedule->command('amazon-fba:auto-update-under-pt-bids')
-            ->dailyAt('23:30')
+            ->dailyAt('12:00')
             ->timezone('Asia/Kolkata');
 
         // Ebay bids update command
@@ -196,6 +196,9 @@ class Kernel extends ConsoleKernel
             ->dailyAt('12:00')
             ->timezone('Asia/Kolkata');
         $schedule->command('ebay:auto-update-price-less-bids')
+            ->dailyAt('12:00')
+            ->timezone('Asia/Kolkata');
+        $schedule->command('ebay:update-suggestedbid')
             ->dailyAt('12:00')
             ->timezone('Asia/Kolkata');
         // end of bids update commands
