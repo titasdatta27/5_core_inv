@@ -38,6 +38,7 @@ class Kernel extends ConsoleKernel
         \App\Console\Commands\AutoUpdateAmazonFbaOverPtBids::class,
         \App\Console\Commands\AutoUpdateAmazonFbaUnderPtBids::class,
         \App\Console\Commands\GenerateMovementAnalysis::class,
+        \App\Console\Commands\UpdateEbaySuggestedBid::class
 
     ];
 
