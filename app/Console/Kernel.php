@@ -137,22 +137,22 @@ class Kernel extends ConsoleKernel
             ->timezone('America/Los_Angeles');
         // Amazon over and under utilized bids update commands
         $schedule->command('amazon:auto-update-over-kw-bids')
-            ->dailyAt('23:30')
+            ->dailyAt('12:00')
             ->timezone('Asia/Kolkata');
         $schedule->command('amazon:auto-update-over-pt-bids')
-            ->dailyAt('23:30')
+            ->dailyAt('12:00')
             ->timezone('Asia/Kolkata'); 
         $schedule->command('amazon:auto-update-over-hl-bids')
-            ->dailyAt('23:30')
+            ->dailyAt('12:00')
             ->timezone('Asia/Kolkata');
         $schedule->command('amazon:auto-update-under-kw-bids')
-            ->dailyAt('23:30')
+            ->dailyAt('12:00')
             ->timezone('Asia/Kolkata');
         $schedule->command('amazon:auto-update-under-pt-bids')
-            ->dailyAt('23:30')
+            ->dailyAt('12:00')
             ->timezone('Asia/Kolkata'); 
         $schedule->command('amazon:auto-update-under-hl-bids')
-            ->dailyAt('23:30')
+            ->dailyAt('12:00')
             ->timezone('Asia/Kolkata');
         // amazon acos bgt update commands
         $schedule->command('amazon:auto-update-amz-bgt-kw')

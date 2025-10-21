@@ -2077,6 +2077,8 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
         
         Route::get('/google/search/data', 'getGoogleSearchAdsData');
         Route::get('/google/search/report/data', 'getGoogleSearchAdsReportData');
+
+        Route::post('/update-google-ads-bid-price', 'updateGoogleAdsCampaignSbid');
     });
 
     Route::controller(FbaDataController::class)->group(function () {
