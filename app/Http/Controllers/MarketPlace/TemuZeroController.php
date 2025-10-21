@@ -231,9 +231,11 @@ public function temuZeroView(Request $request)
                 $liveCount++;
             }
 
+
             // --- Views / Zero-View logic ---
             $metricRecord = $temuMetrics[$sku] ?? null;
             $views = null;
+
 
             if ($metricRecord) {
                 // Direct field
@@ -252,8 +254,8 @@ public function temuZeroView(Request $request)
             // Normalize $inv to numeric
             $inv = floatval($inv);
 
-            // Count as zero-view if views are exactly 0 and inv > 0
-            if ($inv > 0 && $views === 0) {
+            // Count as zero-view if views are exactly 0 or null (no data) and inv > 0
+            if ($inv > 0 && ($views === 0 || $views === null)) {
                 $zeroViewCount++;
             }
 
