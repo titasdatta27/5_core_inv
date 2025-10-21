@@ -2286,8 +2286,8 @@
                             </a>
                             <div class="collapse" id="sidebarFaire">
                                 <ul class="side-nav-third-level">
+                                    <li><a href="{{ url('faireAnalysis') }}">Faire Analytics</a></li>
                                     <li><a href="{{ route('zero.faire') }}">Faire 0 view</a></li>
-
                                     <li><a href="{{ route('listing.faire') }}">Listing Faire</a></li>
                                 </ul>
                             </div>
@@ -2323,6 +2323,8 @@
                             </a>
                             <div class="collapse" id="sidebarMercariWShip">
                                 <ul class="side-nav-third-level">
+                                    <li><a href="{{ url('mercariAnalysis') }}">Mercari w Ship Analytics</a></li>
+
                                     <li>
                                         <a href="{{ route('zero.mercariwship') }}">Mercari w Ship 0 view</a>
                                     </li>
@@ -2379,6 +2381,8 @@
                             </a>
                             <div class="collapse" id="sidebarPLS">
                                 <ul class="side-nav-third-level">
+                                    <li><a href="{{ url('plsAnalysis') }}">PLS Analytics</a></li>
+
                                     <li>
                                         <a href="{{ route('zero.pls') }}">PLS 0 view</a>
                                     </li>
@@ -2398,6 +2402,8 @@
                             </a>
                             <div class="collapse" id="sidebarMercariWoShip">
                                 <ul class="side-nav-third-level">
+                                    <li><a href="{{ url('mercariwoshipAnalysis') }}">Mercari w/o Ship Analytics</a></li>
+
                                     <li>
                                         <a href="{{ route('zero.mercariwoship') }}">Mercari w/o Ship 0
                                             view</a>
