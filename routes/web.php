@@ -237,6 +237,10 @@ use App\Http\Controllers\PurchaseMaster\SourcingController;
 use App\Http\Controllers\MarketingMaster\FacebookAddsManagerController;
 use App\Http\Controllers\MarketingMaster\MovementPricingMaster;
 use App\Http\Controllers\MarketingMaster\OverallCvrLqsController;
+use App\Http\Controllers\MarketPlace\FaireController;
+use App\Http\Controllers\MarketPlace\MercariWoShipController;
+use App\Http\Controllers\MarketPlace\MercariWShipController;
+use App\Http\Controllers\MarketPlace\PlsController;
 use App\Http\Controllers\PurchaseMaster\SupplierRFQController;
 use App\Http\Controllers\StockMappingController;
 use App\Http\Controllers\MissingListingController;
@@ -1471,6 +1475,54 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::post('/shein-analytics/import', [SheinController::class, 'importSheinAnalytics'])->name('shein.analytics.import');
     Route::get('/shein-analytics/export', [SheinController::class, 'exportSheinAnalytics'])->name('shein.analytics.export');
     Route::get('/shein-analytics/sample', [SheinController::class, 'downloadSample'])->name('shein.analytics.sample');
+
+
+    //faire
+    Route::get('faireAnalysis', action: [FaireController::class, 'overallFaire']);
+    Route::get('/faire/view-data', [FaireController::class, 'getViewFaireData']);
+    Route::get('fairePricingCVR', [FaireController::class, 'fairePricingCVR'])->name('faire.pricing.cvr');
+    Route::post('/update-all-faire-skus', [FaireController::class, 'updateAllFaireSkus']);
+    Route::post('/faire/save-nr', [FaireController::class, 'saveNrToDatabase']);
+    Route::post('/faire/update-listed-live', [FaireController::class, 'updateListedLive']);
+    Route::post('/faire-analytics/import', [FaireController::class, 'importFaireAnalytics'])->name('faire.analytics.import');
+    Route::get('/faire-analytics/export', [FaireController::class, 'exportFaireAnalytics'])->name('faire.analytics.export');
+    Route::get('/faire-analytics/sample', [FaireController::class, 'downloadSample'])->name('faire.analytics.sample');
+
+
+     //pls
+    Route::get('plsAnalysis', action: [PlsController::class, 'overallPls']);
+    Route::get('/pls/view-data', [PlsController::class, 'getViewPlsData']);
+    Route::get('plsPricingCVR', [PlsController::class, 'plsPricingCVR'])->name('pls.pricing.cvr');
+    Route::post('/update-all-pls-skus', [PlsController::class, 'updateAllPlsSkus']);
+    Route::post('/pls/save-nr', [PlsController::class, 'saveNrToDatabase']);
+    Route::post('/pls/update-listed-live', [PlsController::class, 'updateListedLive']);
+    Route::post('/pls-analytics/import', [PlsController::class, 'importPlsAnalytics'])->name('pls.analytics.import');
+    Route::get('/pls-analytics/export', [PlsController::class, 'exportPlsAnalytics'])->name('pls.analytics.export');
+    Route::get('/pls-analytics/sample', [PlsController::class, 'downloadSample'])->name('pls.analytics.sample');
+
+
+    //mercari w ship
+    Route::get('mercariAnalysis', action: [MercariWShipController::class, 'overallMercariWship']);
+    Route::get('/mercariwship/view-data', [MercariWShipController::class, 'getViewMercariWshipData']);
+    Route::get('mercariWshipPricingCVR', [MercariWShipController::class, 'mercariWshipPricingCVR'])->name('mercariwship.pricing.cvr');
+    Route::post('/update-all-mercariwship-skus', [MercariWShipController::class, 'updateAllMercariWshipSkus']);
+    Route::post('/mercariwship/save-nr', [MercariWShipController::class, 'saveNrToDatabase']);
+    Route::post('/mercariwship/update-listed-live', [MercariWShipController::class, 'updateListedLive']);
+    Route::post('/mercariwship-analytics/import', [MercariWShipController::class, 'importMercariWshipAnalytics'])->name('mercariwship.analytics.import');
+    Route::get('/mercariwship-analytics/export', [MercariWShipController::class, 'exportMercariWshipAnalytics'])->name('mercariwship.analytics.export');
+    Route::get('/mercariwship-analytics/sample', [MercariWShipController::class, 'downloadSample'])->name('mercariwship.analytics.sample');
+
+
+    //mercari wo ship
+    Route::get('mercariwoshipAnalysis', action: [MercariWoShipController::class, 'overallMercariWoShip']);
+    Route::get('/mercariwoship/view-data', [MercariWoShipController::class, 'getViewMercariWoShipData']);
+    Route::get('mercariwoshipPricingCVR', [MercariWoShipController::class, 'MercariWoShipPricingCVR'])->name('mercariwoship.pricing.cvr');
+    Route::post('/update-all-mercariwoship-skus', [MercariWoShipController::class, 'updateAllMercariWoShipSkus']);
+    Route::post('/mercariwoship/save-nr', [MercariWoShipController::class, 'saveNrToDatabase']);
+    Route::post('/mercariwoship/update-listed-live', [MercariWoShipController::class, 'updateListedLive']);
+    Route::post('/mercariwoship-analytics/import', [MercariWoShipController::class, 'importMercariWoShipAnalytics'])->name('mercariwoship.analytics.import');
+    Route::get('/mercariwoship-analytics/export', [MercariWoShipController::class, 'exportMercariWoShipAnalytics'])->name('mercariwoship.analytics.export');
+    Route::get('/mercariwoship-analytics/sample', [MercariWoShipController::class, 'downloadSample'])->name('mercariwoship.analytics.sample');
 
     //  Spocket
     Route::get('/zero-spocket', [SpocketZeroController::class, 'spocketZeroview'])->name('zero.spocket');
