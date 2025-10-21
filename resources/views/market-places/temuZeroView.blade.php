@@ -2043,11 +2043,12 @@
                 }
             }
 
-            // Update the 0 view count using tableData directly (no Sess30 or views field needed)
+            // Update the 0 view count using Views field (clicks) instead of L30 (quantity)
             function updateZeroViewDiv() {
                 const zeroCount = tableData.filter(item => {
-                    const views = parseFloat(item.Sess30) || 0;
-                    return views === 0 && item.NR !== 'NR';
+                    const clicks = parseFloat(item.Views) || 0;
+                    const inv = parseFloat(item.INV) || 0;
+                    return clicks === 0 && inv > 0 && item.NR !== 'NR';
                 }).length;
 
                 $('#zero-view-div').html(`${zeroCount}`);
@@ -2169,8 +2170,10 @@
                                     'R&A': item['R&A'] !== undefined ? item['R&A'] :
                                     '', // Get R&A value from server data
                                     INV: item.INV || 0,
-                                    L30: item.L30 || 0,
+                                    L30: item.L30 || 0, // Now comes directly from controller as quantity
                                     product_clicks_l30: item.product_clicks_l30 || 0,
+                                    Views: item.product_clicks_l30 || 0,
+                                    product_impressions_l30: item.product_impressions_l30 || 0,
 
                                     is_parent: item.Sku ? item.Sku
                                         .toUpperCase().includes("PARENT") : false,
@@ -2329,11 +2332,9 @@
                         $row.append($raCell);
                     }
 
-                    $row.append($('<td>').text(item.INV));
-                    $row.append($('<td>').text(item.L30));
-                    $row.append($('<td>').text(''));
-
-                    // Truncate function for dynamic column width
+                        $row.append($('<td>').text(item.INV));
+                        $row.append($('<td>').text(item.L30));
+                        $row.append($('<td>').text(item.Views));                    // Truncate function for dynamic column width
                     function truncateWithTooltip(text, cellWidth) {
                         if (!text) return '';
                         let minLetters = 10;
@@ -3479,7 +3480,7 @@
                         const valB = b[dataField] || '';
 
                         // Numeric comparison for numeric fields
-                        if (dataField === 'sl_no' || dataField === 'INV' || dataField === 'L30') {
+                        if (dataField === 'sl_no' || dataField === 'INV' || dataField === 'L30' || dataField === 'Views') {
                             return (parseFloat(valA) - parseFloat(valB)) * currentSort.direction;
                         }
 
@@ -3766,7 +3767,7 @@
                         metrics.ovL30Total += parseFloat(item.L30) || 0;
                         metrics.el30Total += parseFloat(item['A L30']) || 0;
                         metrics.eDilTotal += parseFloat(item['A Dil%']) || 0;
-                        metrics.viewsTotal += parseFloat(item.Sess30) || 0;
+                        metrics.viewsTotal += parseFloat(item.Views) || 0;
                         metrics.tacosTotal += parseFloat(item.Tacos30) || 0;
                         metrics.pftSum += parseFloat(item['PFT %']) || 0;
                         metrics.roiSum += parseFloat(item.Roi) || 0;

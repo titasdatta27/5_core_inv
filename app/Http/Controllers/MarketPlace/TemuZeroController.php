@@ -21,8 +21,7 @@ class TemuZeroController extends Controller
     {
         $this->apiController = $apiController;
     }
-
-    public function temuZeroView(Request $request)
+public function temuZeroView(Request $request)
     {
         $mode = $request->query('mode');
         $demo = $request->query('demo');
@@ -39,7 +38,6 @@ class TemuZeroController extends Controller
             'percentage' => $percentage
         ]);
     }
-
     /**
      * ✅ Get only SKUs where temu_metric.product_clicks_l30 = 0 and shopify_sku.inv > 0
      */
@@ -78,20 +76,29 @@ class TemuZeroController extends Controller
 
             // Get inventory from ShopifySku
             $inv = $shopifyData[$sku]->inv ?? 0;
+            $quantity = $shopifyData[$sku]->quantity ?? 0;
 
-            // Get product_clicks_l30 from TemuMetric
-            $views = null;
+            // Skip items with no inventory
+            if ($inv <= 0) {
+                continue;
+            }
+
+            // Get product_clicks_l30 and product_impressions_l30 from TemuMetric
+            $clicks = null;
+            $impressions = null;
             $metric = $temuMetrics[$sku] ?? null;
             if ($metric) {
-                $views = $metric->product_clicks_l30 ?? null;
-                if ($views === null && !empty($metric->value)) {
+                $clicks = $metric->product_clicks_l30 ?? null;
+                $impressions = $metric->product_impressions_l30 ?? null;
+                if ($clicks === null && !empty($metric->value)) {
                     $metricValue = json_decode($metric->value, true);
-                    $views = $metricValue['product_clicks_l30'] ?? null;
+                    $clicks = $metricValue['product_clicks_l30'] ?? null;
+                    $impressions = $metricValue['product_impressions_l30'] ?? null;
                 }
             }
 
-            // ✅ Only include SKUs where views = 0 and inv > 0
-            if ($inv <= 0 || $views !== 0) {
+            // Skip items with clicks > 0 (only show zero-view items)
+            if (!is_null($clicks) && $clicks > 0) {
                 continue;
             }
 
@@ -104,10 +111,13 @@ class TemuZeroController extends Controller
             $values = $productMaster->Values ?? [];
 
             $processedItem = [
+                'Parent' => $productMaster->parent ?? null,
                 'SL No.' => $slNo++,
                 'Sku' => $sku,
                 'INV' => $inv,
-                'product_clicks_l30' => $views,
+                'L30' => $quantity, // Use Shopify quantity for L30
+                'product_clicks_l30' => $clicks ?? 0,
+                'product_impressions_l30' => $impressions ?? 0,
                 'LP' => $values['lp'] ?? 0,
                 'Ship' => $values['ship'] ?? 0,
                 'COGS' => $values['cogs'] ?? 0,
