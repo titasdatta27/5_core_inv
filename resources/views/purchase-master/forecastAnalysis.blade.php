@@ -704,7 +704,6 @@
                     accessor: row => row["MOQ"],
                    
                 },
-
                 {
                     title: "Appr. QTY",
                     field: "Approved QTY",
@@ -724,66 +723,89 @@
                         data-original="${value ?? ''}" 
                         data-sku='${sku}' 
                         data-parent='${parent}' 
+                        id="approved-qty"
                         style="outline:none; min-width:40px; text-align:center; font-weight:bold;">
                         ${value ?? ''}
                     </div>`;
                     }
                 },
+                {
+                    title: "Stage",
+                    field: "stage",
+                    accessor: row => row?.["stage"] ?? null,
+                    headerSort: false,
+                    formatter: function(cell) {
+                        const value = cell.getValue() ?? '';
+                        const rowData = cell.getRow().getData();
 
-                 
+                        return `
+                        <select class="form-select form-select-sm editable-select"
+                            data-type="Stage"
+                            data-sku='${rowData["SKU"]}'
+                            data-parent='${rowData["Parent"]}'
+                            style="width: auto; min-width: 100px; padding: 4px 24px 4px 8px;
+                                font-size: 0.875rem; border-radius: 4px; border: 1px solid #dee2e6;
+                                background-color: #fff;">
+                            <option value="">Select</option>
+                            <option value="to_order_analysis" ${value === 'to_order_analysis' ? 'selected' : ''}>2 Order</option>
+                            <option value="mip" ${value === 'mip' ? 'selected' : ''}>MIP</option>
+                            <option value="r2s" ${value === 'r2s' ? 'selected' : ''}>R2S</option>
+                        </select>
+                    `;
+                    }
+                },
                 {
                     title: "Supplier",
                     field: "Supplier Tag",
                     accessor: row => row["Supplier Tag"]
                 },
-{
-    title: "NRP",
-    field: "nr",
-    headerSort: false,
-    formatter: function(cell) {
-        const value = cell.getValue() ?? '';
-        const rowData = cell.getRow().getData();
-        const sku = rowData["SKU"] || '';
-        const parent = rowData["Parent"] || '';
+                {
+                    title: "NRP",
+                    field: "nr",
+                    headerSort: false,
+                    formatter: function(cell) {
+                        const value = cell.getValue() ?? '';
+                        const rowData = cell.getRow().getData();
+                        const sku = rowData["SKU"] || '';
+                        const parent = rowData["Parent"] || '';
 
-        // Corrected color logic with proper #
-        let bgColor = '#ffffff'; // default white
-        let textColor = '#000000'; // default black
+                        // Corrected color logic with proper #
+                        let bgColor = '#ffffff'; // default white
+                        let textColor = '#000000'; // default black
 
-        if (value === 'NR') {
-            bgColor = '#dc3545'; // red
-            textColor = '#ffffff';
-        } else if (value === 'REQ') {
-            bgColor = '#28a745'; // green
-            textColor = '#ffffff';
-        } else if (value === 'LATER') {
-            bgColor = '#ffc107'; // yellow
-            textColor = '#000000';
-        }
+                        if (value === 'NR') {
+                            bgColor = '#dc3545'; // red
+                            textColor = '#ffffff';
+                        } else if (value === 'REQ') {
+                            bgColor = '#28a745'; // green
+                            textColor = '#ffffff';
+                        } else if (value === 'LATER') {
+                            bgColor = '#ffc107'; // yellow
+                            textColor = '#000000';
+                        }
 
-        return `
-            <select class="form-select form-select-sm editable-select"
-                data-type="NR"
-                data-sku='${sku}'
-                data-parent='${parent}'
-                style="
-                    width: auto; 
-                    min-width: 85px; 
-                    padding: 4px 8px;
-                    font-size: 0.875rem; 
-                    border-radius: 4px; 
-                    border: 1px solid #dee2e6;
-                    background-color: ${bgColor};
-                    color: ${textColor};
-                ">
-                <option value="REQ" ${value === 'REQ' ? 'selected' : ''}>REQ</option>
-                <option value="NR" ${value === 'NR' ? 'selected' : ''}>2BDC</option>
-                <option value="LATER" ${value === 'LATER' ? 'selected' : ''}>LATER</option>
-            </select>
-        `;
-    }
-}
-,
+                        return `
+                            <select class="form-select form-select-sm editable-select"
+                                data-type="NR"
+                                data-sku='${sku}'
+                                data-parent='${parent}'
+                                style="
+                                    width: auto; 
+                                    min-width: 85px; 
+                                    padding: 4px 8px;
+                                    font-size: 0.875rem; 
+                                    border-radius: 4px; 
+                                    border: 1px solid #dee2e6;
+                                    background-color: ${bgColor};
+                                    color: ${textColor};
+                                ">
+                                <option value="REQ" ${value === 'REQ' ? 'selected' : ''}>REQ</option>
+                                <option value="NR" ${value === 'NR' ? 'selected' : ''}>2BDC</option>
+                                <option value="LATER" ${value === 'LATER' ? 'selected' : ''}>LATER</option>
+                            </select>
+                        `;
+                    }
+                },
                 {
                     title: "Hide",
                     field: "hide",
@@ -809,7 +831,6 @@
                     `;
                     }
                 },
-
                 {
                     title: "MSL SP",
                     field: "MSL_SP",
@@ -882,9 +903,7 @@
                         const lp = parseFloat(item.LP) || 0;
                         return sum + (lp / 4);
                     }
-// lp* msl
-
-
+                        // lp* msl
                     return sum;
                 }, 0);
                 const totalRestockMslElement = document.getElementById('total_restock_msl_value');
@@ -1598,8 +1617,13 @@
 
                     if (field === 'Approved QTY') {
                         const today = new Date();
-                        const currentDate = today.getFullYear() + '-' + String(today.getMonth() + 1)
-                            .padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+                        const currentDate = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+
+                        const row = table.getRows().find(r =>
+                            r.getData().SKU === sku && r.getData().Parent === parent
+                        );
+
+                        if (row) row.update({ "Approved QTY": newValue });
 
                         updateForecastField({
                             sku,
@@ -1609,9 +1633,6 @@
                         }, function() {
                             const row = table.getRows().find(r => r.getData().SKU === sku &&
                                 r.getData().Parent === parent);
-                            // if (row) {
-                            //     row.delete();
-                            // }
                         });
                     }
                     setCombinedFilters();
@@ -1682,6 +1703,17 @@
                     const parent = $el.data('parent');
                     const field = isSelect ? $el.data('type') : $el.data('field');
                     const originalValue = isDate ? $el.data('original') : null;
+
+                    if (field === "Stage") {
+                        const row = table.getRow(sku);
+                        const approvedQty = row ? row.getData()["Approved QTY"] : null;
+                        
+                        if (!approvedQty || approvedQty === "0" || parseInt(approvedQty) === 0) {
+                            alert("Approved QTY cannot be empty or zero.");
+                            $el.val('');
+                            return;
+                        }
+                    }
 
                     // For date input: skip if no change
                     if (isDate && newValue === originalValue) return;
@@ -1959,18 +1991,18 @@
             title.textContent = 'Scouth Products View (Sorted by Lowest Price)';
 
             let html = `
-            <div><strong>Parent:</strong> ${data.Parent || 'N/A'} | <strong>SKU:</strong> ${data['(Child) sku'] || 'N/A'}</div>
-            <div class="table-responsive mt-3">
-                <table class="table table-bordered table-sm align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>ID</th><th>Price</th><th>Category</th><th>Dimensions</th><th>Image</th>
-                            <th>Quality Score</th><th>Parent ASIN</th><th>Product Rank</th>
-                            <th>Rating</th><th>Reviews</th><th>Weight</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-        `;
+                    <div><strong>Parent:</strong> ${data.Parent || 'N/A'} | <strong>SKU:</strong> ${data['(Child) sku'] || 'N/A'}</div>
+                    <div class="table-responsive mt-3">
+                        <table class="table table-bordered table-sm align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th><th>Price</th><th>Category</th><th>Dimensions</th><th>Image</th>
+                                    <th>Quality Score</th><th>Parent ASIN</th><th>Product Rank</th>
+                                    <th>Rating</th><th>Reviews</th><th>Weight</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
 
             sortedProducts.forEach(product => {
                 html += `
