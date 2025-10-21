@@ -293,6 +293,7 @@ class ForecastAnalysisController extends Controller
                         [
                             'approved_qty' => $orderQty,
                             'date_apprvl' => now()->toDateString(),
+                            'stage' => '',
                             'updated_at' => now(),
                             'created_at' => now(),
                         ]
@@ -304,6 +305,7 @@ class ForecastAnalysisController extends Controller
                         ['sku' => $sku, 'parent' => $parent],
                         [
                             'qty' => $orderQty,
+                            'ready_to_ship' => 'No',
                             'updated_at' => now(),
                             'created_at' => now(),
                         ]
@@ -315,6 +317,7 @@ class ForecastAnalysisController extends Controller
                         ['sku' => $sku, 'parent' => $parent],
                         [
                             'qty' => $orderQty,
+                            'transit_inv_status' => 0,
                             'updated_at' => now(),
                             'created_at' => now(),
                         ]
