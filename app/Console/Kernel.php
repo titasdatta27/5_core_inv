@@ -136,56 +136,56 @@ class Kernel extends ConsoleKernel
             ->timezone('America/Los_Angeles');
         // Amazon over and under utilized bids update commands
         $schedule->command('amazon:auto-update-over-kw-bids')
-            ->dailyAt('12:00')
+            ->dailyAt('23:30')
             ->timezone('Asia/Kolkata');
         $schedule->command('amazon:auto-update-over-pt-bids')
-            ->dailyAt('12:00')
+            ->dailyAt('23:30')
             ->timezone('Asia/Kolkata'); 
         $schedule->command('amazon:auto-update-over-hl-bids')
-            ->dailyAt('12:00')
+            ->dailyAt('23:30')
             ->timezone('Asia/Kolkata');
         $schedule->command('amazon:auto-update-under-kw-bids')
-            ->dailyAt('12:00')
+            ->dailyAt('23:30')
             ->timezone('Asia/Kolkata');
         $schedule->command('amazon:auto-update-under-pt-bids')
-            ->dailyAt('12:00')
+            ->dailyAt('23:30')
             ->timezone('Asia/Kolkata'); 
         $schedule->command('amazon:auto-update-under-hl-bids')
-            ->dailyAt('12:00')
+            ->dailyAt('23:30')
             ->timezone('Asia/Kolkata');
         // amazon acos bgt update commands
         $schedule->command('amazon:auto-update-amz-bgt-kw')
-            ->dailyAt('12:00')
+            ->dailyAt('23:30')
             ->timezone('Asia/Kolkata'); 
         $schedule->command('amazon:auto-update-amz-bgt-pt')
-            ->dailyAt('12:00')
+            ->dailyAt('23:30')
             ->timezone('Asia/Kolkata'); 
         $schedule->command('amazon:auto-update-amz-bgt-hl')
-            ->dailyAt('12:00')
+            ->dailyAt('23:30')
             ->timezone('Asia/Kolkata'); 
         // Pink Dil ads update command
         $schedule->command('amazon:auto-update-pink-dil-kw-ads')
-            ->dailyAt('12:00')
+            ->dailyAt('23:30')
             ->timezone('Asia/Kolkata');
         $schedule->command('amazon:auto-update-pink-dil-pt-ads')
-            ->dailyAt('12:00')
+            ->dailyAt('23:30')
             ->timezone('Asia/Kolkata');
         $schedule->command('amazon:auto-update-pink-dil-hl-ads')
-            ->dailyAt('12:00')
+            ->dailyAt('23:30')
             ->timezone('Asia/Kolkata');
         // FBA bids update command
 
         $schedule->command('amazon-fba:auto-update-over-kw-bids')
-            ->dailyAt('12:00')
+            ->dailyAt('23:30')
             ->timezone('Asia/Kolkata');
         $schedule->command('amazon-fba:auto-update-under-kw-bids')
-            ->dailyAt('12:00')
+            ->dailyAt('23:30')
             ->timezone('Asia/Kolkata');
         $schedule->command('amazon-fba:auto-update-over-pt-bids')
-            ->dailyAt('12:00')
+            ->dailyAt('23:30')
             ->timezone('Asia/Kolkata');
         $schedule->command('amazon-fba:auto-update-under-pt-bids')
-            ->dailyAt('12:00')
+            ->dailyAt('23:30')
             ->timezone('Asia/Kolkata');
 
         // Ebay bids update command
