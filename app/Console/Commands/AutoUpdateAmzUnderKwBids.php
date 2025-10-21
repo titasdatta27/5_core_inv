@@ -88,11 +88,15 @@ class AutoUpdateAmzUnderKwBids extends Command
             $shopify = $shopifyData[$pm->sku] ?? null;
 
             $matchedCampaignL7 = $amazonSpCampaignReportsL7->first(function ($item) use ($sku) {
-                return strcasecmp(trim($item->campaignName), $sku) === 0;
+                $campaignName = strtoupper(trim(rtrim($item->campaignName, '.')));
+                $cleanSku = strtoupper(trim(rtrim($sku, '.')));
+                return $campaignName === $cleanSku;
             });
 
             $matchedCampaignL1 = $amazonSpCampaignReportsL1->first(function ($item) use ($sku) {
-                return strcasecmp(trim($item->campaignName), $sku) === 0;
+                $campaignName = strtoupper(trim(rtrim($item->campaignName, '.')));
+                $cleanSku = strtoupper(trim(rtrim($sku, '.')));
+                return $campaignName === $cleanSku;
             });
 
             if (!$matchedCampaignL7 && !$matchedCampaignL1) {
@@ -122,9 +126,9 @@ class AutoUpdateAmzUnderKwBids extends Command
             $l1_cpc = floatval($row['l1_cpc']);
             $l7_cpc = floatval($row['l7_cpc']);
             if ($l1_cpc > $l7_cpc) {
-                $row['sbid'] = floor($l1_cpc * 1.05 * 100) / 100;
+                $row['sbid'] = floor($l1_cpc * 1.1 * 100) / 100;
             } else {
-                $row['sbid'] = floor($l7_cpc * 1.05 * 100) / 100;
+                $row['sbid'] = floor($l7_cpc * 1.1 * 100) / 100;
             }
 
             $budget = floatval($row['campaignBudgetAmount']);

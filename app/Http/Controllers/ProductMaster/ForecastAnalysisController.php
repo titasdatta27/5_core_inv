@@ -133,6 +133,7 @@ class ForecastAnalysisController extends Controller
                 $item->rfq_form_link = $forecast->rfq_form_link ?? '';
                 $item->rfq_report = $forecast->rfq_report ?? '';
                 $item->date_apprvl = $forecast->date_apprvl ?? '';
+                $item->stage = $forecast->stage ?? '';
             }
 
             $readyToShipQty = 0;
@@ -170,8 +171,6 @@ class ForecastAnalysisController extends Controller
                 
                 $msl = $item->{'Total month'} > 0 ? ($item->{'Total'} / $item->{'Total month'}) * 4 : 0;
 
-              
-                
                 $effectiveMsl = (isset($item->{'s-msl'}) && $item->{'s-msl'} > 0) ? $item->{'s-msl'} : $msl;
                 
                 $lp = is_numeric($item->{'LP'}) ? (float)$item->{'LP'} : 0;
@@ -181,8 +180,6 @@ class ForecastAnalysisController extends Controller
 
                 $item->{'MSL_Four'} = round($msl / 4, 2);
 
-                
-                
                 $item->{'MSL_SP'} = floor($shopifyb2c_price * $effectiveMsl / 4);
 
                 $cp = (float)($item->{'CP'} ?? 0);
@@ -209,7 +206,6 @@ class ForecastAnalysisController extends Controller
         try {
             $processedData = $this->buildForecastAnalysisData();
 
-            // Calculate total MSL_C for non-parent items
             $totalMslC = collect($processedData)
                 ->filter(function ($item) {
                     return !$item->is_parent;
@@ -265,6 +261,7 @@ class ForecastAnalysisController extends Controller
             'order_given' => 'order_given',
             'Transit' => 'transit',
             'Date of Appr' => 'date_apprvl',
+            'Stage' => 'stage',
         ];
 
         $columnKey = $columnMap[$column] ?? null;
@@ -288,42 +285,44 @@ class ForecastAnalysisController extends Controller
                     ->update([$columnKey => $value, 'updated_at' => now()]);
             }
 
-            if (strtolower($column) === 'approved qty' && !empty($value) && (float)$value != 0){
-                $orderQty = $existing->order_given ?? null;
-                DB::table('to_order_analysis')->updateOrInsert(
-                    ['sku' => $sku, 'parent' => $parent],
-                    [
-                        'approved_qty' => $value,
-                        'order_qty'    => $orderQty,
-                        'date_apprvl' => now()->toDateString(),
-                        'updated_at' => now(),
-                        'created_at' => now(),
-                    ]
-                );
-            }
-
-            if (strtolower($column) === 'transit' && !empty($value) && (float)$value != 0){
-                $supplierRows = DB::table('suppliers')->where('type', 'Supplier')->get();
-
-                $supplier = null;
-                $upperParent = strtoupper(trim($parent));
-                foreach ($supplierRows as $row) {
-                    $parents = array_map('trim', explode(',', strtoupper($row->parent ?? '')));
-                    if (in_array($upperParent, $parents)) {
-                        $supplier = $row->name;
-                        break;
-                    }
+            if (strtolower($column) === 'stage'){
+                $orderQty = $existing->approved_qty ?? null;
+                if(strtolower($value) === 'to_order_analysis'){
+                    DB::table('to_order_analysis')->updateOrInsert(
+                        ['sku' => $sku, 'parent' => $parent],
+                        [
+                            'approved_qty' => $orderQty,
+                            'date_apprvl' => now()->toDateString(),
+                            'stage' => '',
+                            'updated_at' => now(),
+                            'created_at' => now(),
+                        ]
+                    );
                 }
 
-                DB::table('ready_to_ship')->updateOrInsert(
-                    ['sku' => $sku, 'parent' => $parent],
-                    [
-                        'qty' => $value,
-                        'supplier' => $supplier ?? null,
-                        'updated_at' => now(),
-                        'created_at' => now(),
-                    ]
-                );
+                if(strtolower($value) === 'mip'){
+                    DB::table('mfrg_progress')->updateOrInsert(
+                        ['sku' => $sku, 'parent' => $parent],
+                        [
+                            'qty' => $orderQty,
+                            'ready_to_ship' => 'No',
+                            'updated_at' => now(),
+                            'created_at' => now(),
+                        ]
+                    );
+                }
+
+                if(strtolower($value) === 'r2s'){
+                    DB::table('ready_to_ship')->updateOrInsert(
+                        ['sku' => $sku, 'parent' => $parent],
+                        [
+                            'qty' => $orderQty,
+                            'transit_inv_status' => 0,
+                            'updated_at' => now(),
+                            'created_at' => now(),
+                        ]
+                    );
+                }
             }
 
             return response()->json(['success' => true, 'message' => 'Updated or already up-to-date']);
@@ -336,63 +335,45 @@ class ForecastAnalysisController extends Controller
                 'updated_at' => now(),
             ]);
 
-            if (strtolower($column) === 'approved qty' && !empty($value) && (float)$value != 0) {
+            if (strtolower($column) === 'stage'){
                 $orderQty = DB::table('forecast_analysis')
                     ->whereRaw('TRIM(LOWER(sku)) = ?', [strtolower($sku)])
                     ->whereRaw('TRIM(LOWER(parent)) = ?', [strtolower($parent)])
                     ->value('order_given');
-
-                DB::table('to_order_analysis')->updateOrInsert(
-                    ['sku' => $sku, 'parent' => $parent],
-                    [
-                        'approved_qty' => $value,
-                        'order_qty'    => $orderQty,  
-                        'date_apprvl'  => now()->toDateString(),
-                        'updated_at'   => now(),
-                        'created_at'   => now(),
-                    ]
-                );
-            }
-            if (strtolower($column) === 'order given' && !empty($value)) {
-                $approvedQty = DB::table('forecast_analysis')
-                    ->whereRaw('TRIM(LOWER(sku)) = ?', [strtolower($sku)])
-                    ->whereRaw('TRIM(LOWER(parent)) = ?', [strtolower($parent)])
-                    ->value('approved_qty');
-
-                DB::table('to_order_analysis')->updateOrInsert(
-                    ['sku' => $sku, 'parent' => $parent],
-                    [
-                        'approved_qty' => $approvedQty,
-                        'order_qty'    => $value,
-                        'date_apprvl'  => now()->toDateString(),
-                        'updated_at'   => now(),
-                        'created_at'   => now(),
-                    ]
-                );
-            }
-
-            if (strtolower($column) === 'transit' && !empty($value)) {
-                $supplierRows = DB::table('suppliers')->where('type', 'Supplier')->get();
-
-                $supplier = null;
-                $upperParent = strtoupper(trim($parent));
-                foreach ($supplierRows as $row) {
-                    $parents = array_map('trim', explode(',', strtoupper($row->parent ?? '')));
-                    if (in_array($upperParent, $parents)) {
-                        $supplier = $row->name;
-                        break;
-                    }
+                    
+                if(strtolower($value) === 'to_order_analysis'){
+                    DB::table('to_order_analysis')->updateOrInsert(
+                        ['sku' => $sku, 'parent' => $parent],
+                        [
+                            'approved_qty' => $orderQty,
+                            'date_apprvl' => now()->toDateString(),
+                            'updated_at' => now(),
+                            'created_at' => now(),
+                        ]
+                    );
                 }
 
-                DB::table('ready_to_ship')->updateOrInsert(
-                    ['sku' => $sku, 'parent' => $parent],
-                    [
-                        'qty' => $value,
-                        'supplier' => $supplier ?? null,
-                        'updated_at' => now(),
-                        'created_at' => now(),
-                    ]
-                );
+                if(strtolower($value) === 'mip'){
+                    DB::table('mfrg_progress')->updateOrInsert(
+                        ['sku' => $sku, 'parent' => $parent],
+                        [
+                            'qty' => $orderQty,
+                            'updated_at' => now(),
+                            'created_at' => now(),
+                        ]
+                    );
+                }
+
+                if(strtolower($value) === 'r2s'){
+                    DB::table('ready_to_ship')->updateOrInsert(
+                        ['sku' => $sku, 'parent' => $parent],
+                        [
+                            'qty' => $orderQty,
+                            'updated_at' => now(),
+                            'created_at' => now(),
+                        ]
+                    );
+                }
             }
 
             return response()->json(['success' => true, 'message' => 'Inserted new row']);
