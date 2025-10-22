@@ -6,9 +6,33 @@ use App\Models\ProductMaster;
 use App\Models\ShopifySku;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\AmazonDatasheet;
+use App\Models\EbayMetric;
+use App\Models\Ebay3Metric;
+use App\Models\MacyProduct;
+use App\Models\TiendamiaProduct;
+use App\Models\BestbuyUsaProduct;
+use App\Models\ReverbProduct;
+use App\Models\DobaSheetdata;
+use App\Models\TemuMetric;
+use App\Models\WalmartMetrics;
+use App\Models\PLSProduct;
+use App\Models\WaifairProductSheet;
+use App\Models\FaireProductSheet;
+use App\Models\SheinSheetData;
+use App\Models\TiktokSheet;
+use App\Models\InstagramShopSheetdata;
+use App\Models\AliExpressSheetData;
+use App\Models\MercariWShipSheetdata;
+use App\Models\MercariWoShipSheetdata;
+use App\Models\FbMarketplaceSheetdata;
+use App\Models\FbShopSheetdata;
+use App\Models\BusinessFiveCoreSheetdata;
+use App\Models\TopDawgSheetdata;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 class ApiController extends Controller
 {
@@ -1534,9 +1558,92 @@ class ApiController extends Controller
         }
     }
 
-    // get l30-total sales api count
+    // get l30-total sales api count for task manager
     public function l30totalsales()
     {
-        dd('test-api');
+        $amz_query = AmazonDatasheet::where('sku', 'not like', '%Parent%');
+        $amz_l30Sales  = (clone $amz_query)->selectRaw('SUM(units_ordered_l30 * price) as total')->value('total') ?? 0;
+
+        $ebay_query = EbayMetric::where('sku', 'not like', '%Parent%');
+        $ebay_l30Sales  = (clone $ebay_query)->selectRaw('SUM(ebay_l30 * ebay_price) as total')->value('total') ?? 0;        
+        
+        $ebay_two_channel_query = DB::connection('apicentral')
+            ->table('ebay2_metrics')
+            ->where('sku', 'not like', '%Parent%');
+        $ebay_two_channel_l30Sales  = (clone $ebay_two_channel_query)->selectRaw('SUM(ebay_l30 * ebay_price) as total')->value('total') ?? 0;
+
+        $ebay_3channel_query = Ebay3Metric::where('sku', 'not like', '%Parent%');
+        $ebay_3channel_l30Sales  = (clone $ebay_3channel_query)->selectRaw('SUM(ebay_l30 * ebay_price) as total')->value('total') ?? 0;
+
+        $macy_query = MacyProduct::where('sku', 'not like', '%Parent%');
+        $macy_l30sales = (clone $macy_query)->selectRaw('SUM(m_l30 * price) as total')->value('total') ?? 0;
+
+        $tiend_query = TiendamiaProduct::where('sku', 'not like', '%Parent%');
+        $tiend_l30Sales  = (clone $tiend_query)->selectRaw('SUM(m_l30 * price) as total')->value('total') ?? 0;
+
+        $best_buy_usa_query = BestbuyUsaProduct::where('sku', 'not like', '%Parent%');
+        $best_buy_usa_l30Sales  = (clone $best_buy_usa_query)->selectRaw('SUM(m_l30 * price) as total')->value('total') ?? 0;
+
+        $reverb_product_query = ReverbProduct::where('sku', 'not like', '%Parent%');
+        $reverb_product_l30Sales  = (clone $reverb_product_query)->selectRaw('SUM(r_l30 * price) as total')->value('total') ?? 0;
+
+        $doba_sheetdata_query = DobaSheetdata::where('sku', 'not like', '%Parent%');
+        $doba_sheetdata_l30Sales  = (clone $doba_sheetdata_query)->selectRaw('SUM(l30 * price) as total')->value('total') ?? 0;
+
+        $temu_metric_query = TemuMetric::where('sku', 'not like', '%Parent%');
+        $temu_metric_l30Sales  = (clone $temu_metric_query)->selectRaw('SUM(quantity_purchased_l30 * temu_sheet_price) as total')->value('total') ?? 0;
+
+        $walmart_query = WalmartMetrics::where('sku', 'not like', '%Parent%');
+        $walmart_l30Sales  = (clone $walmart_query)->selectRaw('SUM(l30 * price) as total')->value('total') ?? 0;
+
+        $pls_product_query = PLSProduct::where('sku', 'not like', '%Parent%');
+        $pls_product_l30Sales  = (clone $pls_product_query)->selectRaw('SUM(p_l30 * price) as total')->value('total') ?? 0;
+
+        $waifair_product_query = WaifairProductSheet::where('sku', 'not like', '%Parent%');
+        $waifair_product_l30Sales  = (clone $waifair_product_query)->selectRaw('SUM(l30 * price) as total')->value('total') ?? 0;
+
+        $faire_product_sheet_query = FaireProductSheet::where('sku', 'not like', '%Parent%');
+        $faire_product_sheet_l30Sales  = (clone $faire_product_sheet_query)->selectRaw('SUM(f_l30 * price) as total')->value('total') ?? 0;
+
+        $shein_sheet_query = SheinSheetData::where('sku', 'not like', '%Parent%');
+        $shein_sheet_l30Sales  = (clone $shein_sheet_query)->selectRaw('SUM(shopify_sheinl30 * shopify_price) as total')->value('total') ?? 0;
+
+        $tiktok_sheet_query = TiktokSheet::where('sku', 'not like', '%Parent%');
+        $tiktok_sheet_l30Sales  = (clone $tiktok_sheet_query)->selectRaw('SUM(l30 * price) as total')->value('total') ?? 0;
+
+        $instagram_shop_query = InstagramShopSheetdata::where('sku', 'not like', '%Parent%');
+        $instagram_shop_l30Sales  = (clone $instagram_shop_query)->selectRaw('SUM(i_l30 * price) as total')->value('total') ?? 0;
+
+        $aliexpress_sheet_query = AliExpressSheetData::where('sku', 'not like', '%Parent%');
+        $aliexpress_sheet_l30Sales  = (clone $aliexpress_sheet_query)->selectRaw('SUM(aliexpress_l30 * price) as total')->value('total') ?? 0;
+
+        $mercari_query = MercariWShipSheetdata::where('sku', 'not like', '%Parent%');
+        $mercari_l30Sales  = (clone $mercari_query)->selectRaw('SUM(l30 * price) as total')->value('total') ?? 0;
+
+        $mercariwoship_sheet_query = MercariWoShipSheetdata::where('sku', 'not like', '%Parent%');
+        $mercariwoship_sheet_l30Sales  = (clone $mercariwoship_sheet_query)->selectRaw('SUM(l30 * price) as total')->value('total') ?? 0;
+
+        $fb_marketplace_sheet_query = FbMarketplaceSheetdata::where('sku', 'not like', '%Parent%');
+        $fb_marketplace_sheet_l30Sales  = (clone $fb_marketplace_sheet_query)->selectRaw('SUM(l30 * price) as total')->value('total') ?? 0;
+
+        $fb_shop_sheet_query = FbShopSheetdata::where('sku', 'not like', '%Parent%');
+        $fb_shop_sheet_l30Sales  = (clone $fb_shop_sheet_query)->selectRaw('SUM(l30 * price) as total')->value('total') ?? 0;
+
+        $business_five_coresheet_query = BusinessFiveCoreSheetdata::where('sku', 'not like', '%Parent%');
+        $business_five_coresheet_l30Sales  = (clone $business_five_coresheet_query)->selectRaw('SUM(l30 * price) as total')->value('total') ?? 0;
+
+        $topdawg_sheetdata_query = TopDawgSheetdata::where('sku', 'not like', '%Parent%');
+        $topdawg_sheetdata_l30Sales  = (clone $topdawg_sheetdata_query)->selectRaw('SUM(l30 * price) as total')->value('total') ?? 0;
+     
+        $total_l30_sales = $amz_l30Sales + $ebay_l30Sales + $ebay_two_channel_l30Sales + $ebay_3channel_l30Sales + $macy_l30sales +
+                         $tiend_l30Sales + $best_buy_usa_l30Sales + $reverb_product_l30Sales + $doba_sheetdata_l30Sales + $temu_metric_l30Sales +
+                         $walmart_l30Sales + $pls_product_l30Sales + $waifair_product_l30Sales + $faire_product_sheet_l30Sales + $shein_sheet_l30Sales +
+                         $tiktok_sheet_l30Sales + $instagram_shop_l30Sales + $aliexpress_sheet_l30Sales + $mercari_l30Sales + $mercariwoship_sheet_l30Sales +
+                         $fb_marketplace_sheet_l30Sales + $fb_shop_sheet_l30Sales + $business_five_coresheet_l30Sales + $topdawg_sheetdata_l30Sales;
+                          return response()->json([
+            'status'  => 200,
+            'message' => 'Channel sales data fetched successfully',
+            'data'    => $total_l30_sales,
+        ]);
     }
 }

@@ -454,10 +454,6 @@
                                 updateBid(sbid, rowData.campaign_id);
                             }
                         }
-                    },
-                    {
-                        title: "AD STATUS",
-                        field: "status",
                     }
                 ],
                 initialSort: [
