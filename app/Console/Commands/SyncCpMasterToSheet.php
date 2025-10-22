@@ -6,6 +6,7 @@ use App\Models\ProductMaster;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Carbon\Carbon;
 
 class SyncCpMasterToSheet extends Command
 {
@@ -59,11 +60,13 @@ class SyncCpMasterToSheet extends Command
                 "msrp"       => $values['msrp'] ?? null,
                 "map"       => $values['map'] ?? null,
                 "upc"        => $values['upc'] ?? null,
+
+
             ];
         }
 
         // Send to Google Apps Script
-        $url = "https://script.google.com/macros/s/AKfycbypziPWX3a8_gm7PufLYTT6i_noHnxI9hNjjFBVR-0N2TzKjjIVONFLZzBqQn2uzGll6Q/exec";
+        $url = "https://script.google.com/macros/s/AKfycby0mWJXO0ljHBZoN0CHUgbnhXAs2Hxl4xHNLkPSa-ebDMIOgB_2j-Pg4zd7QGvjf_BSrg/exec";
         $response = Http::post($url, [
             "task" => "sync_cp_master",
             "data" => $formatted
