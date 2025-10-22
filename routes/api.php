@@ -58,5 +58,4 @@ Route::prefix('rfq-form')->group(function() {
 });
 
 // api for task manager
-Route::post('/data', [ApiController::class, 'storeData']);
 Route::get('/l30-total-sales', [ApiController::class, 'l30totalsales']);
