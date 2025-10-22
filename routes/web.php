@@ -1820,6 +1820,18 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
         Route::get('/youtube-shorts-ad', 'youtubeShortsAdView')->name('youtube.shorts.ads.master');
         Route::get('/youtube-shorts-ads', 'getYoutubeShortsAdsData');
         Route::post('/youtube-shorts-ads/save', 'saveYoutubeShortsAds')->name('youtube_shorts_ads.save');
+
+
+        Route::get('/traffic/dropship', 'getTrafficDropship')->name('traffic.dropship');
+        Route::get('/traffic/caraudio', 'getTrafficCaraudio')->name('traffic.caraudio');
+        Route::get('/traffic/musicinst', 'getTrafficMusicInst')->name('traffic.musicinst');
+        Route::get('/traffic/repaire', 'getTrafficRepaire')->name('traffic.repaire');
+        Route::get('/traffic/musicschool', 'getTrafficMusicSchool')->name('traffic.musicschool');
+
+
+
+       
+        
     });
 
     Route::controller(ShoppableVideoController::class)->group(function () {

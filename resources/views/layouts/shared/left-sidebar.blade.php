@@ -769,6 +769,42 @@
                 </a>
                 <div class="collapse" id="sidebarPages2">
                     <ul class="side-nav-second-level">
+
+                        <!--- Start Nikhil Code -->
+                        <li class="side-nav-item">
+                            <a data-bs-toggle="collapse" href="#video-ads-master" aria-expanded="false"
+                                aria-controls="video-ads-master" class="side-nav-link">
+                                <span>Traffic To Webpages</span>
+                                <span class="menu-arrow"></span>
+                            </a>
+                            <div class="collapse" id="video-ads-master">
+                                <ul class="side-nav-second-level">
+                                    <li>
+                                        <a href="{{ route('traffic.dropship') }}">Dropship</a>
+                                    </li>
+                                    <li>
+                                        <a href="{{ route('traffic.caraudio') }}">Car Audio</a>
+                                    </li>
+                                    <li>
+                                        <a href="{{ route('traffic.musicinst') }}">Music Instru Shop</a>
+                                    </li>
+                                    <li>
+                                        <a href="{{ route('traffic.repaire') }}">Repaire Shop</a>
+                                    </li>
+                                    <li>
+                                        <a href="{{ route('traffic.musicschool') }}">Music School</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+
+                        <!-- End Nikhil Code  -->
+
+
+
+
+
+
                         <li>
                             <a href="{{ route('listingMaster') }}">Listing Masters</a>
                         </li>
