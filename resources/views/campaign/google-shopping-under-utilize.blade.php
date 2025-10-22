@@ -457,13 +457,9 @@
                                 } else {
                                     sbid = (cpc_L1 * 1.05).toFixed(2);
                                 }
-                                updateBid(sbid, rowData.campaign_id);
+                                updateBid(sbid, row.campaign_id);
                             }
                         }
-                    },
-                    {
-                        title: "AD STATUS",
-                        field: "status",
                     }
                 ],
                 initialSort: [
@@ -600,90 +596,36 @@
                 }
             });
 
-            // document.getElementById("apr-all-sbid-btn").addEventListener("click", function(){
-            //     const overlay = document.getElementById("progress-overlay");
-            //     overlay.style.display = "flex";
 
-            //     var filteredData = table.getSelectedRows();
-                
-            //     var campaignIds = [];
-            //     var bids = [];
+            
 
-            //     filteredData.forEach(function(row){
-            //         var rowEl = row.getElement();
-            //         if(rowEl && rowEl.offsetParent !== null){
-            //             var rowData = row.getData();
-            //             var l1_cpc = parseFloat(rowData.l1_cpc) || 0;
-            //             var l7_cpc = parseFloat(rowData.l7_cpc) || 0;
-            //             var sbid;
-            //             if(l1_cpc > l7_cpc) {
-            //                 sbid = (l1_cpc * 0.9).toFixed(2);
-            //             }else{
-            //                 sbid = (l7_cpc * 0.9).toFixed(2);
-            //             }
+            function updateBid(aprBid, campaignId) {
+                const overlay = document.getElementById("progress-overlay");
+                overlay.style.display = "flex";
 
-            //             campaignIds.push(rowData.campaign_id);
-            //             bids.push(sbid);
-            //         }
-            //     });
-            //     console.log("Campaign IDs:", campaignIds);
-            //     console.log("Bids:", bids);
-            //     fetch('/update-keywords-bid-price', {
-            //         method: 'PUT',
-            //         headers: {
-            //             'Content-Type': 'application/json',
-            //             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            //         },
-            //         body: JSON.stringify({
-            //             campaign_ids: campaignIds,
-            //             bids: bids
-            //         })
-            //     })
-            //     .then(res => res.json())
-            //     .then(data => {
-            //         console.log("Backend response:", data);
-            //         if(data.status === 200){
-            //             alert("Keywords updated successfully!");
-            //         } else {
-            //             alert("Something went wrong: " + data.message);
-            //         }
-            //     })
-            //     .catch(err => console.error(err))
-            //     .finally(() => {
-            //         overlay.style.display = "none";
-            //     });
-            // });
+                console.log("Updating bid for Campaign ID:", campaignId, "New Bid:", aprBid);
 
-            // function updateBid(aprBid, campaignId) {
-            //     const overlay = document.getElementById("progress-overlay");
-            //     overlay.style.display = "flex";
-
-            //     console.log("Updating bid for Campaign ID:", campaignId, "New Bid:", aprBid);
-            //     fetch('/update-keywords-bid-price', {
-            //         method: 'PUT',
-            //         headers: {
-            //             'Content-Type': 'application/json',
-            //             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            //         },
-            //         body: JSON.stringify({
-            //             campaign_ids: [campaignId],
-            //             bids: [aprBid]
-            //         })
-            //     })
-            //     .then(res => res.json())
-            //     .then(data => {
-            //         console.log("Backend response:", data);
-            //         if(data.status === 200){
-            //             alert("Keywords updated successfully!");
-            //         } else {
-            //             alert("Something went wrong: " + data.message);
-            //         }
-            //     })
-            //     .catch(err => console.error(err))
-            //     .finally(() => {
-            //         overlay.style.display = "none";
-            //     });
-            // }
+                fetch('/update-google-ads-bid-price', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                            'content')
+                    },
+                    body: JSON.stringify({
+                        campaign_ids: [campaignId],
+                        bids: [aprBid]
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    console.log("Backend response:", data);
+                })
+                .catch(err => console.error(err))
+                .finally(() => {
+                    overlay.style.display = "none";
+                });
+            }
 
             // Safe selector function
             function getRowSelectBySkuAndField(sku, field) {
