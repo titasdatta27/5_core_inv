@@ -1079,6 +1079,8 @@
                             </a>
                             <div class="collapse" id="tiktok-web-ads">
                                 <ul class="side-nav-second-level">
+                                    <li><a href="{{ url('tiktokAnalysis') }}">Tiktok Analytics</a></li>
+
                                     <li>
                                         <a href="#">Tiktok Video to Web</a>
                                     </li>
@@ -1669,8 +1671,11 @@
                                                 $20</a>
                                     </li>
                                     <li>
-                                        <a href="{{ route('ebay-make-new-campaign-kw') }}">Ebay MAKE CAMP. KW</a>
+                                        <a href="{{ route('ebay.missing.ads') }}">Ebay MISSING ADS</a>
                                     </li>
+                                    {{-- <li>
+                                        <a href="{{ route('ebay-make-new-campaign-kw') }}">Ebay MAKE CAMP. KW</a>
+                                    </li> --}}
                                 </ul>
                             </div>
                         </li>
@@ -2343,6 +2348,8 @@
                             </a>
                             <div class="collapse" id="sidebarFBMarketplace">
                                 <ul class="side-nav-third-level">
+                                    <li><a href="{{ url('fbmarketplaceAnalysis') }}">FB Marketplace Analytics</a></li>
+
                                     <li>
                                         <a href="{{ route('zero.fbmarketplace') }}">FB Marketplace 0
                                             view</a>
@@ -2425,6 +2432,8 @@
                             </a>
                             <div class="collapse" id="sidebarTiendamia">
                                 <ul class="side-nav-third-level">
+                                    <li><a href="{{ url('tiendamiaAnalysis') }}">Tiendamia Analytics</a></li>
+
                                     <li>
                                         <a href="{{ route('zero.tiendamia') }}">Tiendamia 0 view</a>
                                     </li>
@@ -2463,6 +2472,7 @@
                             </a>
                             <div class="collapse" id="sidebarFBShop">
                                 <ul class="side-nav-third-level">
+                                    <li><a href="{{ url('fbshopAnalysis') }}">FB Shop Analytics</a></li>
                                     <li>
                                         <a href="{{ route('zero.fbshop') }}">FB Shop 0 view</a>
                                     </li>

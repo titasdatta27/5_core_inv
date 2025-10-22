@@ -431,7 +431,7 @@
                                 }else{
                                     sbid = (cpc_L7 * 0.9).toFixed(2);
                                 }
-                                updateBid(sbid, rowData.campaign_id);
+                                updateBid(sbid, row.campaign_id);
                             }
                         }
                     },
@@ -517,7 +517,7 @@
                 if (e.target.classList.contains("toggle-cols-btn")) {
                     let btn = e.target;
 
-                    let colsToToggle = ["INV", "L30", "DIL %", "WA_L30", "NRL"];
+                    let colsToToggle = ["INV", "L30", "DIL %"];
 
                     colsToToggle.forEach(colName => {
                         let col = table.getColumn(colName);
@@ -527,6 +527,39 @@
                     });
                 }
             });
+
+            function updateBid(aprBid, campaignId) {
+                const overlay = document.getElementById("progress-overlay");
+                overlay.style.display = "flex";
+
+                console.log("Updating bid for Campaign ID:", campaignId, "New Bid:", aprBid);
+
+                fetch('/update-google-ads-bid-price', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                            'content')
+                    },
+                    body: JSON.stringify({
+                        campaign_ids: [campaignId],
+                        bids: [aprBid]
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    console.log("Backend response:", data);
+                    // if (data.status === 200) {
+                    //     alert("Keywords updated successfully!");
+                    // } else {
+                    //     alert("Something went wrong: " + data.message);
+                    // }
+                })
+                .catch(err => console.error(err))
+                .finally(() => {
+                    overlay.style.display = "none";
+                });
+            }
 
             // Safe selector function
             function getRowSelectBySkuAndField(sku, field) {

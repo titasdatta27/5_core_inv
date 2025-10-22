@@ -200,6 +200,7 @@ use App\Http\Controllers\Channels\ReviewMaster\ReviewDashboardController;
 use App\Http\Controllers\Channels\SetupAccountChannelController;
 use App\Http\Controllers\Channels\ShippingMasterController;
 use App\Http\Controllers\Channels\TrafficMasterController;
+use App\Http\Controllers\Campaigns\EbayMissingAdsController;
 use App\Http\Controllers\FbaDataController;
 use App\Http\Controllers\InventoryManagement\AutoStockBalanceController;
 use App\Http\Controllers\InventoryManagement\StockBalanceController;
@@ -238,9 +239,13 @@ use App\Http\Controllers\MarketingMaster\FacebookAddsManagerController;
 use App\Http\Controllers\MarketingMaster\MovementPricingMaster;
 use App\Http\Controllers\MarketingMaster\OverallCvrLqsController;
 use App\Http\Controllers\MarketPlace\FaireController;
+use App\Http\Controllers\MarketPlace\FbmarketplaceController;
+use App\Http\Controllers\MarketPlace\FbshopController;
 use App\Http\Controllers\MarketPlace\MercariWoShipController;
 use App\Http\Controllers\MarketPlace\MercariWShipController;
 use App\Http\Controllers\MarketPlace\PlsController;
+use App\Http\Controllers\MarketPlace\TiendamiaController;
+use App\Http\Controllers\MarketPlace\TiktokController;
 use App\Http\Controllers\PurchaseMaster\SupplierRFQController;
 use App\Http\Controllers\StockMappingController;
 use App\Http\Controllers\MissingListingController;
@@ -1501,6 +1506,42 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::get('/pls-analytics/sample', [PlsController::class, 'downloadSample'])->name('pls.analytics.sample');
 
 
+    //tiendamia
+    Route::get('tiendamiaAnalysis', action: [TiendamiaController::class, 'overallTiendamia']);
+    Route::get('/tiendamia/view-data', [TiendamiaController::class, 'getViewTiendamiaData']);
+    Route::get('plsPricingCVR', [TiendamiaController::class, 'tiendamiaPricingCVR'])->name('tiendamia.pricing.cvr');
+    Route::post('/update-all-tiendamia-skus', [TiendamiaController::class, 'updateAllTiendamiaSkus']);
+    Route::post('/tiendamia/save-nr', [TiendamiaController::class, 'saveNrToDatabase']);
+    Route::post('/tiendamia/update-listed-live', [TiendamiaController::class, 'updateListedLive']);
+    Route::post('/tiendamia-analytics/import', [TiendamiaController::class, 'importTiendamiaAnalytics'])->name('tiendamia.analytics.import');
+    Route::get('/tiendamia-analytics/export', [TiendamiaController::class, 'exportTiendamiaAnalytics'])->name('tiendamia.analytics.export');
+    Route::get('/tiendamia-analytics/sample', [TiendamiaController::class, 'downloadSample'])->name('tiendamia.analytics.sample');
+
+
+    //fbshop
+    Route::get('fbshopAnalysis', action: [FbshopController::class, 'overallFbshop']);
+    Route::get('/fbshop/view-data', [FbshopController::class, 'getViewFbshopData']);
+    Route::get('fbshopPricingCVR', [FbshopController::class, 'fbshopPricingCVR'])->name('fbshop.pricing.cvr');
+    Route::post('/update-all-fbshop-skus', [FbshopController::class, 'updateAllFbshopSkus']);
+    Route::post('/fbshop/save-nr', [FbshopController::class, 'saveNrToDatabase']);
+    Route::post('/fbshop/update-listed-live', [FbshopController::class, 'updateListedLive']);
+    Route::post('/fbshop-analytics/import', [FbshopController::class, 'importFbshopAnalytics'])->name('fbshop.analytics.import');
+    Route::get('/fbshop-analytics/export', [FbshopController::class, 'exportFbshopAnalytics'])->name('fbshop.analytics.export');
+    Route::get('/fbshop-analytics/sample', [FbshopController::class, 'downloadSample'])->name('fbshop.analytics.sample');
+
+
+    //fb marketplace
+    Route::get('fbmarketplaceAnalysis', action: [FbmarketplaceController::class, 'overallFbmarketplace']);
+    Route::get('/fbmarketplace/view-data', [FbmarketplaceController::class, 'getViewFbmarketplaceData']);
+    Route::get('fbmarketplacePricingCVR', [FbmarketplaceController::class, 'fbmarketplacePricingCVR'])->name('fbmarketplace.pricing.cvr');
+    Route::post('/update-all-fbmarketplace-skus', [FbmarketplaceController::class, 'updateAllFbmarketplaceSkus']);
+    Route::post('/fbmarketplace/save-nr', [FbmarketplaceController::class, 'saveNrToDatabase']);
+    Route::post('/fbmarketplace/update-listed-live', [FbmarketplaceController::class, 'updateListedLive']);
+    Route::post('/fbmarketplace-analytics/import', [FbmarketplaceController::class, 'importFbmarketplaceAnalytics'])->name('fbmarketplace.analytics.import');
+    Route::get('/fbmarketplace-analytics/export', [FbmarketplaceController::class, 'exportFbmarketplaceAnalytics'])->name('fbmarketplace.analytics.export');
+    Route::get('/fbmarketplace-analytics/sample', [FbmarketplaceController::class, 'downloadSample'])->name('fbmarketplace.analytics.sample');
+
+
     //mercari w ship
     Route::get('mercariAnalysis', action: [MercariWShipController::class, 'overallMercariWship']);
     Route::get('/mercariwship/view-data', [MercariWShipController::class, 'getViewMercariWshipData']);
@@ -1511,6 +1552,18 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::post('/mercariwship-analytics/import', [MercariWShipController::class, 'importMercariWshipAnalytics'])->name('mercariwship.analytics.import');
     Route::get('/mercariwship-analytics/export', [MercariWShipController::class, 'exportMercariWshipAnalytics'])->name('mercariwship.analytics.export');
     Route::get('/mercariwship-analytics/sample', [MercariWShipController::class, 'downloadSample'])->name('mercariwship.analytics.sample');
+
+
+    //tiktok
+    Route::get('tiktokAnalysis', action: [TiktokController::class, 'overallTiktok']);
+    Route::get('/tiktok/view-data', [TiktokController::class, 'getViewTiktokData']);
+    Route::get('fbshopPricingCVR', [TiktokController::class, 'TiktokPricingCVR'])->name('tiktok.pricing.cvr');
+    Route::post('/update-all-tiktok-skus', [TiktokController::class, 'updateAllTiktokSkus']);
+    Route::post('/tiktok/save-nr', [TiktokController::class, 'saveNrToDatabase']);
+    Route::post('/tiktok/update-listed-live', [TiktokController::class, 'updateListedLive']);
+    Route::post('/tiktok-analytics/import', [TiktokController::class, 'importTiktokAnalytics'])->name('tiktok.analytics.import');
+    Route::get('/tiktok-analytics/export', [TiktokController::class, 'exportTiktokAnalytics'])->name('tiktok.analytics.export');
+    Route::get('/tiktok-analytics/sample', [TiktokController::class, 'downloadSample'])->name('tiktok.analytics.sample');
 
 
     //mercari wo ship
@@ -1973,6 +2026,11 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
         Route::get('/ebay/ad-running/data', 'getEbayRunningAdsData');
     });
 
+    Route::controller(EbayMissingAdsController::class)->group(function () {
+        Route::get('/ebay/ad-missing/list', 'index')->name('ebay.missing.ads');
+        Route::get('/ebay/ad-missing/data', 'getEbayMissingAdsData');
+    });
+
     // ebay 3 ads section
     Route::controller(Ebay3AcosController::class)->group(function () {
         Route::get('/ebay-3/over-acos-pink', 'ebay3OverAcosPinkView')->name('ebay3-over-uti-acos-pink');
@@ -2071,6 +2129,8 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
         
         Route::get('/google/search/data', 'getGoogleSearchAdsData');
         Route::get('/google/search/report/data', 'getGoogleSearchAdsReportData');
+
+        Route::post('/update-google-ads-bid-price', 'updateGoogleAdsCampaignSbid');
     });
 
     Route::controller(FbaDataController::class)->group(function () {
