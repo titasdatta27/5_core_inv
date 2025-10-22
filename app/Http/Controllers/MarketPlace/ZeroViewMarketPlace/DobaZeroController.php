@@ -5,6 +5,7 @@ namespace App\Http\Controllers\MarketPlace\ZeroViewMarketPlace;
 use App\Http\Controllers\Controller;
 use App\Models\DobaDataView;
 use App\Models\DobaListingStatus;
+use App\Models\DobaMetric;
 use App\Models\DobaSheetdata;
 use App\Models\ProductMaster;
 use App\Models\ShopifySku;
@@ -27,32 +28,71 @@ class DobaZeroController extends Controller
 
     public function getViewDobaZeroData(Request $request)
     {
-        // 1. Fetch all ProductMaster rows
-        $productMasters = ProductMaster::orderBy('parent', 'asc')
-            ->orderByRaw("CASE WHEN sku LIKE 'PARENT %' THEN 1 ELSE 0 END")
-            ->orderBy('sku', 'asc')
-            ->get();
+                // 1. Fetch all ProductMaster rows
+        $productMasters = ProductMaster::whereNull('deleted_at')->get();
 
-        $skus = $productMasters->pluck('sku')->filter()->unique()->values()->all();
+        // Normalize SKUs (avoid case/space mismatch)
+        $skus = $productMasters->pluck('sku')->map(fn($s) => strtoupper(trim($s)))->unique()->toArray();
 
         // 2. Fetch ShopifySku for those SKUs
-        $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy('sku');
+        $shopifyData = ShopifySku::whereIn('sku', $skus)->get()
+            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
 
-        // 3. Fetch DobaDataView for those SKUs
-        $dobaDataViews = DobaDataView::whereIn('sku', $skus)->get()->keyBy('sku');
+        // 3. Fetch DobaSheetdata for views
+        $dobaSheetData = DobaSheetdata::whereIn('sku', $skus)->get()
+            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
+
+        // 4. Fetch DobaMetric for remaining data
+        $dobaMetrics = DobaMetric::whereIn('sku', $skus)->get()
+            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
+
+        // 5. Fetch DobaDataView for status
+        $dobaDataViews = DobaDataView::whereIn('sku', $skus)->get()
+            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
 
         $result = [];
         foreach ($productMasters as $pm) {
-            $sku = $pm->sku;
+            $sku = strtoupper(trim($pm->sku));
             $parent = $pm->parent;
+
+            // Skip parent SKUs
+            if (stripos($sku, 'PARENT') !== false) continue;
+
             $shopify = $shopifyData[$sku] ?? null;
 
             $inv = $shopify ? $shopify->inv : 0;
+            $inv = floatval($inv);
             $ov_l30 = $shopify ? $shopify->quantity : 0;
             $ov_dil = ($inv > 0) ? round($ov_l30 / $inv, 4) : 0;
 
-            // Only include rows where inv > 0
-            if ($inv > 0) {
+            // Get views from DobaSheetdata
+            $sheet = $dobaSheetData[$sku] ?? null;
+            $views = null;
+
+            if ($sheet) {
+                // Direct field
+                if (!empty($sheet->views) || $sheet->views === "0" || $sheet->views === 0) {
+                    $views = (int)$sheet->views;
+                }
+                // Or inside JSON column `value`
+                elseif (!empty($sheet->value)) {
+                    $sheetData = json_decode($sheet->value, true);
+                    if (isset($sheetData['views'])) {
+                        $views = (int)$sheetData['views'];
+                    }
+                }
+            }
+
+            // Get remaining data from DobaMetric
+            $metric = $dobaMetrics[$sku] ?? null;
+            $quantity_l30 = $metric ? $metric->quantity_l30 : 0;
+            $quantity_l60 = $metric ? $metric->quantity_l60 : 0;
+            $impressions = $metric ? $metric->impressions : 0;
+            $clicks = $metric ? $metric->clicks : 0;
+            $anticipated_income = $metric ? $metric->anticipated_income : 0;
+
+            // Only include rows where inv > 0 and views == 0 (zero view)
+            if ($inv > 0 && $views === 0) {
                 // Fetch DobaDataView values
                 $dobaView = $dobaDataViews[$sku] ?? null;
                 $value = $dobaView ? $dobaView->value : [];
@@ -66,6 +106,12 @@ class DobaZeroController extends Controller
                     'inv' => $inv,
                     'ov_l30' => $ov_l30,
                     'ov_dil' => $ov_dil,
+                    'views' => $views,
+                    'quantity_l30' => $quantity_l30,
+                    'quantity_l60' => $quantity_l60,
+                    'impressions' => $impressions,
+                    'clicks' => $clicks,
+                    'anticipated_income' => $anticipated_income,
                     'NR' => isset($value['NR']) && in_array($value['NR'], ['REQ', 'NR']) ? $value['NR'] : 'REQ',
                     'A_Z_Reason' => $value['A_Z_Reason'] ?? '',
                     'A_Z_ActionRequired' => $value['A_Z_ActionRequired'] ?? '',
