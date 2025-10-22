@@ -63,7 +63,9 @@ class GoogleAdsController extends Controller
                 'range_type',
                 'metrics_cost_micros',
                 'metrics_clicks',
-                'metrics_impressions'
+                'metrics_impressions',
+                'ga4_sold_units',
+                'ga4_ad_sales'
             )
             ->whereIn('range_type', ['L1', 'L7', 'L30']) 
             ->get();
@@ -126,6 +128,8 @@ class GoogleAdsController extends Controller
                 $row["clicks_$range"] = $campaignRange->metrics_clicks ?? 0;
                 $row["impressions_$range"] = $campaignRange->metrics_impressions ?? 0;
                 $row["cpc_$range"] = $row["clicks_$range"] ? $row["spend_$range"] / $row["clicks_$range"] : 0;
+                $row["ad_sales_$range"] = $campaignRange->ga4_ad_sales ?? 0;
+                $row["ad_sold_$range"] = $campaignRange->ga4_sold_units ?? 0;
             }
 
             if($row['campaignName'] != '') {
@@ -163,12 +167,14 @@ class GoogleAdsController extends Controller
                 'range_type',
                 'metrics_cost_micros',
                 'metrics_clicks',
-                'metrics_impressions'
+                'metrics_impressions',
+                'ga4_sold_units',
+                'ga4_ad_sales'
             )
             ->whereIn('range_type', ['L7', 'L15', 'L30', 'L60'])
             ->get();
 
-        $ranges = ['l7', 'l15', 'l30', 'l60'];
+        $ranges = ['L7', 'L15', 'L30', 'L60'];
 
         $result = [];
 
@@ -226,6 +232,8 @@ class GoogleAdsController extends Controller
                 $row["clicks_$range"] = $campaignRange->metrics_clicks ?? 0;
                 $row["impressions_$range"] = $campaignRange->metrics_impressions ?? 0;
                 $row["cpc_$range"] = $row["clicks_$range"] ? $row["spend_$range"] / $row["clicks_$range"] : 0;
+                $row["ad_sales_$range"] = $campaignRange->ga4_ad_sales ?? 0;
+                $row["ad_sold_$range"] = $campaignRange->ga4_sold_units ?? 0;
             }
 
             if($row['campaignName'] != '') {
@@ -263,7 +271,9 @@ class GoogleAdsController extends Controller
                 'range_type',
                 'metrics_cost_micros',
                 'metrics_clicks',
-                'metrics_impressions'
+                'metrics_impressions',
+                'ga4_sold_units',
+                'ga4_ad_sales'
             )
             ->whereIn('range_type', ['L1', 'L7', 'L30']) 
             ->get();
@@ -318,6 +328,8 @@ class GoogleAdsController extends Controller
                 $row["clicks_$range"] = $campaignRange->metrics_clicks ?? 0;
                 $row["impressions_$range"] = $campaignRange->metrics_impressions ?? 0;
                 $row["cpc_$range"] = $row["clicks_$range"] ? $row["spend_$range"] / $row["clicks_$range"] : 0;
+                $row["ad_sales_$range"] = $campaignRange->ga4_ad_sales ?? 0;
+                $row["ad_sold_$range"] = $campaignRange->ga4_sold_units ?? 0;
             }
 
             if($row['campaignName'] != '') {
@@ -355,12 +367,14 @@ class GoogleAdsController extends Controller
                 'range_type',
                 'metrics_cost_micros',
                 'metrics_clicks',
-                'metrics_impressions'
+                'metrics_impressions',
+                'ga4_sold_units',
+                'ga4_ad_sales'
             )
             ->whereIn('range_type', ['L7', 'L15', 'L30', 'L60'])
             ->get();
 
-        $ranges = ['l7', 'l15', 'l30', 'l60'];
+        $ranges = ['L7', 'L15', 'L30', 'L60'];
 
         $result = [];
 
@@ -412,6 +426,8 @@ class GoogleAdsController extends Controller
                 $row["clicks_$range"] = $campaignRange->metrics_clicks ?? 0;
                 $row["impressions_$range"] = $campaignRange->metrics_impressions ?? 0;
                 $row["cpc_$range"] = $row["clicks_$range"] ? $row["spend_$range"] / $row["clicks_$range"] : 0;
+                $row["ad_sales_$range"] = $campaignRange->ga4_ad_sales ?? 0;
+                $row["ad_sold_$range"] = $campaignRange->ga4_sold_units ?? 0;
             }
 
             if($row['campaignName'] != '') {
