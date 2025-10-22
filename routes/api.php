@@ -56,3 +56,7 @@ Route::prefix('rfq-form')->group(function() {
     Route::post('/{slug}/submit', [SupplierRFQController::class, 'submitRfqForm'])->name('rfq-form.submit');
     Route::get('/{slug}', [SupplierRFQController::class, 'showRfqForm'])->name('rfq-form.show');
 });
+
+// api for task manager
+Route::post('/data', [ApiController::class, 'storeData']);
+Route::get('/l30-total-sales', [ApiController::class, 'l30totalsales']);

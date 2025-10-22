@@ -1533,4 +1533,10 @@ class ApiController extends Controller
             ], 500);
         }
     }
+
+    // get l30-total sales api count
+    public function l30totalsales()
+    {
+        dd('test-api');
+    }
 }
