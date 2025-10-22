@@ -6,11 +6,22 @@ use App\Http\Controllers\Controller;
 use App\Models\ProductMaster;
 use App\Models\ShopifySku;
 use Illuminate\Http\Request;
+use App\Services\GoogleAdsSbidService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class GoogleAdsController extends Controller
 {
+    protected $sbidService;
+
+    public function __construct(GoogleAdsSbidService $sbidService)
+    {
+        parent::__construct();
+        $this->sbidService = $sbidService;
+    }
+
+
     public function index(){
         return view('campaign.google-shopping-ads');
     }
@@ -57,6 +68,7 @@ class GoogleAdsController extends Controller
         $googleCampaigns = DB::connection('apicentral')
             ->table('google_ads_campaigns')
             ->select(
+                'campaign_id',
                 'campaign_name',
                 'campaign_status',
                 'budget_amount_micros',
@@ -102,6 +114,7 @@ class GoogleAdsController extends Controller
             $row['INV']    = $shopify->inv ?? 0;
             $row['L30']    = $shopify->quantity ?? 0;
             
+            $row['campaign_id'] = $matchedCampaign->campaign_id ?? null;
             $row['campaignName'] = $matchedCampaign->campaign_name ?? null;
             $row['campaignBudgetAmount'] = $matchedCampaign->budget_amount_micros ?? null;
             $row['campaignBudgetAmount'] = $row['campaignBudgetAmount'] ? $row['campaignBudgetAmount'] / 1000000 : null;
@@ -161,6 +174,7 @@ class GoogleAdsController extends Controller
         $googleCampaigns = DB::connection('apicentral')
             ->table('google_ads_campaigns')
             ->select(
+                'campaign_id',
                 'campaign_name',
                 'campaign_status',
                 'budget_amount_micros',
@@ -206,6 +220,7 @@ class GoogleAdsController extends Controller
             $row['INV']    = $shopify->inv ?? 0;
             $row['L30']    = $shopify->quantity ?? 0;
             
+            $row['campaign_id'] = $matchedCampaign->campaign_id ?? null;
             $row['campaignName'] = $matchedCampaign->campaign_name ?? null;
             $row['campaignBudgetAmount'] = $matchedCampaign->budget_amount_micros ?? null;
             $row['campaignBudgetAmount'] = $row['campaignBudgetAmount'] ? $row['campaignBudgetAmount'] / 1000000 : null;
@@ -265,6 +280,7 @@ class GoogleAdsController extends Controller
         $googleCampaigns = DB::connection('apicentral')
             ->table('google_ads_campaigns')
             ->select(
+                'campaign_id',
                 'campaign_name',
                 'campaign_status',
                 'budget_amount_micros',
@@ -303,6 +319,7 @@ class GoogleAdsController extends Controller
             $row['INV']    = $shopify->inv ?? 0;
             $row['L30']    = $shopify->quantity ?? 0;
             
+            $row['campaign_id'] = $matchedCampaign->campaign_id ?? null;
             $row['campaignName'] = $matchedCampaign->campaign_name ?? null;
             $row['campaignBudgetAmount'] = $matchedCampaign->budget_amount_micros ?? null;
             $row['campaignBudgetAmount'] = $row['campaignBudgetAmount'] ? $row['campaignBudgetAmount'] / 1000000 : null;
@@ -361,6 +378,7 @@ class GoogleAdsController extends Controller
         $googleCampaigns = DB::connection('apicentral')
             ->table('google_ads_campaigns')
             ->select(
+                'campaign_id',
                 'campaign_name',
                 'campaign_status',
                 'budget_amount_micros',
@@ -399,7 +417,7 @@ class GoogleAdsController extends Controller
             $row['sku']    = $pm->sku;
             $row['INV']    = $shopify->inv ?? 0;
             $row['L30']    = $shopify->quantity ?? 0;
-            
+            $row['campaign_id'] = $matchedCampaign->campaign_id ?? null;
             $row['campaignName'] = $matchedCampaign->campaign_name ?? null;
             $row['campaignBudgetAmount'] = $matchedCampaign->budget_amount_micros ?? null;
             $row['campaignBudgetAmount'] = $row['campaignBudgetAmount'] ? $row['campaignBudgetAmount'] / 1000000 : null;
@@ -443,5 +461,131 @@ class GoogleAdsController extends Controller
             'data'    => $uniqueResult,
             'status'  => 200,
         ]);
+    }
+
+    public function updateGoogleAdsCampaignSbid(Request $request){
+
+        try {
+            ini_set('max_execution_time', 300);
+            ini_set('memory_limit', '512M');
+            
+            // Validate input with custom error handling to ensure JSON response
+            try {
+                $validator = Validator::make($request->all(), [
+                    'campaign_ids' => 'required|array|min:1',
+                    'bids' => 'required|array|min:1',
+                    'campaign_ids.*' => 'required|string',
+                    'bids.*' => 'required|numeric|min:0',
+                ]);
+
+                if ($validator->fails()) {
+                    return response()->json([
+                        "status" => 422,
+                        "message" => "Validation failed",
+                        "errors" => $validator->errors(),
+                        "data" => []
+                    ], 422);
+                }
+            } catch (\Exception $e) {
+                Log::error('Validation error in SBID update', [
+                    'error' => $e->getMessage(),
+                    'request_data' => $request->all()
+                ]);
+                
+                return response()->json([
+                    "status" => 400,
+                    "message" => "Invalid request data",
+                    "data" => []
+                ], 400);
+            }
+
+            $campaignIds = $request->input('campaign_ids', []);
+            $newBids = $request->input('bids', []);
+
+            $customerId = env('GOOGLE_ADS_LOGIN_CUSTOMER_ID');
+
+            if (!$customerId) {
+                Log::error('Google Ads Customer ID not configured');
+                return response()->json([
+                    "status" => 500,
+                    "message" => "Google Ads configuration missing",
+                    "data" => []
+                ], 500);
+            }
+
+            // Validate campaign_ids and bids arrays have same length
+            if (count($campaignIds) !== count($newBids)) {
+                return response()->json([
+                    "status" => 422,
+                    "message" => "Campaign IDs and bids arrays must have the same length",
+                    "data" => []
+                ], 422);
+            }
+
+            $results = [];
+            $hasError = false;
+            $successCount = 0;
+            $errorCount = 0;
+
+            foreach ($campaignIds as $index => $campaignId) {
+                $newBid = $newBids[$index] ?? null;
+                
+                try {
+                    $this->sbidService->updateCampaignSbids($customerId, $campaignId, $newBid);
+                    
+                    $results[] = [
+                        'campaign_id' => $campaignId,
+                        'new_bid' => $newBid,
+                        'status' => 'success',
+                        'message' => 'SBID updated successfully'
+                    ];
+                    $successCount++;
+
+                } catch (\Exception $e) {
+                    $hasError = true;
+                    $errorCount++;
+                    
+                    $errorMessage = $e->getMessage();
+                    Log::error("Failed to update SBID for campaign", [
+                        'campaign_id' => $campaignId,
+                        'new_bid' => $newBid,
+                        'error' => $errorMessage
+                    ]);
+
+                    $results[] = [
+                        'campaign_id' => $campaignId,
+                        'new_bid' => $newBid,
+                        'status' => 'error',
+                        'message' => $errorMessage
+                    ];
+                }
+            }
+
+            $statusCode = $hasError ? ($successCount > 0 ? 207 : 400) : 200;
+            $message = "SBID update completed. Success: {$successCount}, Errors: {$errorCount}";
+
+            return response()->json([
+                "status" => $statusCode,
+                "message" => $message,
+                "data" => $results,
+                "summary" => [
+                    "total_campaigns" => count($campaignIds),
+                    "successful_updates" => $successCount,
+                    "failed_updates" => $errorCount
+                ]
+            ], $statusCode);
+
+        } catch (\Exception $e) {
+            Log::error('Unexpected error in SBID update controller', [
+                'error' => $e->getMessage(),
+                'request_data' => $request->all()
+            ]);
+
+            return response()->json([
+                "status" => 500,
+                "message" => "An unexpected error occurred: " . $e->getMessage(),
+                "data" => []
+            ], 500);
+        }
     }
 }
