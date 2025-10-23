@@ -96,9 +96,17 @@ class AutoUpdateAmazonBgtKw extends Command
 
             $row = [];
             $row['campaign_id'] = $matchedCampaignL30->campaign_id ?? '';
-            $row['acos_L30'] = ($matchedCampaignL30 && ($matchedCampaignL30->sales30d ?? 0) > 0)
-                ? round(($matchedCampaignL30->spend / $matchedCampaignL30->sales30d) * 100, 2)
-                : 0;
+
+            $sales = $matchedCampaignL30->sales30d ?? 0;
+            $spend = $matchedCampaignL30->spend ?? 0;
+
+            if ($sales > 0) {
+                $row['acos_L30'] = round(($spend / $sales) * 100, 2);
+            } elseif ($spend > 0) {
+                $row['acos_L30'] = 100;
+            } else {
+                $row['acos_L30'] = 0;
+            }
             
             $tpft = 0;
             if (isset($nrValues[$pm->sku])) {
