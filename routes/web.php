@@ -237,6 +237,9 @@ use App\Http\Controllers\PurchaseMaster\QualityEnhanceController;
 use App\Http\Controllers\PurchaseMaster\RFQController;
 use App\Http\Controllers\PurchaseMaster\SourcingController;
 use App\Http\Controllers\MarketingMaster\FacebookAddsManagerController;
+use App\Http\Controllers\MarketingMaster\InstagramAdsManagerController;
+use App\Http\Controllers\MarketingMaster\YoutubeAdsManagerController;
+use App\Http\Controllers\MarketingMaster\TiktokAdsManagerController;
 use App\Http\Controllers\MarketingMaster\MovementPricingMaster;
 use App\Http\Controllers\MarketingMaster\OverallCvrLqsController;
 use App\Http\Controllers\MarketPlace\FaireController;
@@ -1932,6 +1935,30 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
         Route::get('/facebook-web-to-video-data', 'facebookWebToVideoData')->name('facebook.web.to.video.data');
         Route::get('/fb-img-caraousal-to-web', 'FbImgCaraousalToWeb')->name('fb.img.caraousal.to.web');
         Route::get('/fb-img-caraousal-to-web-data', 'FbImgCaraousalToWebData')->name('fb.img.caraousal.to.web.data');
+    });
+
+    Route::controller(InstagramAdsManagerController::class)->group(function () {
+        Route::get('/instagram-ads-control/data', 'index')->name('instagram.ads.index');
+        Route::get('/instagram-web-to-video', 'instagramWebToVideo')->name('instagram.web.to.video');
+        Route::get('/instagram-web-to-video-data', 'instagramWebToVideoData')->name('instagram.web.to.video.data');
+        Route::get('/insta-img-caraousal-to-web', 'InstaImgCaraousalToWeb')->name('insta.img.caraousal.to.web');
+        Route::get('/insta-img-caraousal-to-web-data', 'InstaImgCaraousalToWebData')->name('insta.img.caraousal.to.web.data');
+    });
+
+    Route::controller(YoutubeAdsManagerController::class)->group(function () {
+        Route::get('/youtube-ads-control/data', 'index')->name('youtube.ads.index');
+        Route::get('/youtube-web-to-video', 'youtubeWebToVideo')->name('youtube.web.to.video');
+        Route::get('/youtube-web-to-video-data', 'youtubeWebToVideoData')->name('youtube.web.to.video.data');
+        Route::get('/yt-img-caraousal-to-web', 'YtImgCaraousalToWeb')->name('yt.img.caraousal.to.web');
+        Route::get('/yt-img-caraousal-to-web-data', 'YtImgCaraousalToWebData')->name('yt.img.caraousal.to.web.data');
+    });
+
+    Route::controller(TiktokAdsManagerController::class)->group(function () {
+        Route::get('/tiktok-ads-control/data', 'index')->name('tiktok.ads.index');
+        Route::get('/tiktok-web-to-video', 'tiktokWebToVideo')->name('tiktok.web.to.video');
+        Route::get('/tiktok-web-to-video-data', 'tiktokWebToVideoData')->name('tiktok.web.to.video.data');
+        Route::get('/tk-img-caraousal-to-web', 'TkImgCaraousalToWeb')->name('tk.img.caraousal.to.web');
+        Route::get('/tk-img-caraousal-to-web-data', 'TkImgCaraousalToWebData')->name('tk.img.caraousal.to.web.data');
     });
 
     Route::controller(AmazonACOSController::class)->group(function () {
