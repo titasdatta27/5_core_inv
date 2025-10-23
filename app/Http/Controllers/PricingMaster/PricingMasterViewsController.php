@@ -338,7 +338,7 @@ class PricingMasterViewsController extends Controller
         $lmpLookup = collect();
         try {
             $lmpLookup = DB::connection('repricer')
-                ->table('lmp_data')
+                ->table('lmpa_data')
                 ->select('sku', DB::raw('MIN(price) as lowest_price'), DB::raw('MAX(link) as link'))
                 ->where('price', '>', 0)
                 ->whereIn('sku', $nonParentSkus)
@@ -349,7 +349,6 @@ class PricingMasterViewsController extends Controller
             Log::warning('Could not fetch LMP data from repricer_5core database: ' . $e->getMessage());
         }
 
-        Log::info('LMP Lookup Data:', $lmpLookup->toArray());
 
         $processedData = [];
 
