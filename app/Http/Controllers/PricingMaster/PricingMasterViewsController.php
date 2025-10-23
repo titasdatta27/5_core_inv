@@ -338,7 +338,7 @@ class PricingMasterViewsController extends Controller
         $lmpLookup = collect();
         try {
             $lmpLookup = DB::connection('repricer')
-                ->table('lmpa_data')
+                ->table('lmp_data')
                 ->select('sku', DB::raw('MIN(price) as lowest_price'), DB::raw('MAX(link) as link'))
                 ->where('price', '>', 0)
                 ->whereIn('sku', $nonParentSkus)
