@@ -349,6 +349,8 @@ class PricingMasterViewsController extends Controller
             Log::warning('Could not fetch LMP data from repricer_5core database: ' . $e->getMessage());
         }
 
+        Log::info('LMP Lookup Data:', $lmpLookup->toArray());
+
         $processedData = [];
 
         foreach ($productData as $product) {

@@ -2050,9 +2050,6 @@
 
 
 
-
-    
-
         let currentParentFilter = null;
 
         function setCombinedFilters() {
@@ -2112,7 +2109,7 @@
 
         // Marketplace table generator
         function buildOVL30Table(data) {
-            console.log('Data LMP:', data.lmp, 'Data Link:', data.link);
+         
           const rows = [
                 { label: "Amazon", prefix: "amz", logo: "{{ asset('uploads/amazon.png') }}" },
                 { label: "eBay", prefix: "ebay", logo:  "{{ asset('uploads/1.png') }}" },
@@ -2324,7 +2321,7 @@
                     </td>
                       <td>
                         <div class="value-indicator">
-                        ${r.prefix === 'amz' ? Math.round(data.amz_req_view) ?? "-" : 
+                            ${r.prefix === 'amz' ? Math.round(data.amz_req_view) ?? "-" : 
                             r.prefix === 'ebay' ? Math.round(data.ebay_req_view) ?? "-" :
                             r.prefix === 'ebay2' ? Math.round(data.ebay2_req_view) ?? "-" :
                             r.prefix === 'ebay3' ? Math.round(data.ebay3_req_view) ?? "-" :
@@ -2358,7 +2355,7 @@
                             class="form-control form-control-sm s-price" 
                             value="${
                                 r.prefix === 'amz' ? (data.amz_sprice || '') 
-                                : r.prefix === 'ebay' ? (data.ebay_sprice || '') 
+                                : r.prefix === 'ebay' ? (data.ebay_sprice || '')
                                 : r.prefix === 'shopifyb2c' ? (data.shopifyb2c_sprice || '') 
                                 : r.prefix === 'ebay2' ? (data.ebay2_sprice || '') 
                                 : r.prefix === 'ebay3' ? (data.ebay3_sprice || '')
