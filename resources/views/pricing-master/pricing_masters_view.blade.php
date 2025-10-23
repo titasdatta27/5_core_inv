@@ -2361,7 +2361,26 @@
                                     : r.prefix === 'tiktok' ? data.link_tiktok 
                                     : r.prefix === 'aliexpress' ? data.link_aliexpress 
                                     : null;
-                                return `${fmtMoney(priceValue)} ${link && priceValue !== '-' ? `<a href="${link}" target="_blank" class="ms-1"><i class="bi bi-link"></i></a>` : ''}`;
+                                
+                                // Debug logging
+                                console.log('LMP Debug for SKU:', data.SKU, 'Prefix:', r.prefix);
+                                console.log('Channel-specific link:', link);
+                                console.log('All LMP links:', {
+                                    link_amz: data.link_amz,
+                                    link_ebay: data.link_ebay,
+                                    link_shein: data.link_shein,
+                                    link_tiktok: data.link_tiktok,
+                                    link_aliexpress: data.link_aliexpress
+                                });
+                                
+                                // If no channel-specific LMP link, try other LMP links that exist
+                                if (!link) {
+                                    link = data.link_amz || data.link_ebay || data.link_shein || data.link_tiktok || data.link_aliexpress || null;
+                                    console.log('Using fallback link:', link);
+                                }
+                                
+                                console.log('Final link for display:', link);
+                                return `${fmtMoney(priceValue)} ${link ? `<a href="${link}" target="_blank" class="ms-1"><i class="bi bi-link"></i></a>` : ''}`;
                             })()}
                         </div>
                     </td>
