@@ -323,7 +323,7 @@ class PricingMasterViewsController extends Controller
         // Fetch LMPA and LMP data
         $lmpaLookup = collect();
         try {
-            $lmpaLookup = DB::connection('repricer')
+            $lmpaLookup = DB::connection('repricer_5core')
                 ->table('lmpa_data')
                 ->select('sku', DB::raw('MIN(price) as lowest_price'))
                 ->where('price', '>', 0)
@@ -332,21 +332,21 @@ class PricingMasterViewsController extends Controller
                 ->get()
                 ->keyBy('sku');
         } catch (Exception $e) {
-            Log::warning('Could not fetch LMPA data from repricer database: ' . $e->getMessage());
+            Log::warning('Could not fetch LMPA data from repricer_5core database: ' . $e->getMessage());
         }
 
         $lmpLookup = collect();
         try {
-            $lmpLookup = DB::connection('repricer')
+            $lmpLookup = DB::connection('repricer_5core')
                 ->table('lmp_data')
-                ->select('sku', DB::raw('MIN(price) as lowest_price'))
+                ->select('sku', DB::raw('MIN(price) as lowest_price'), 'link')
                 ->where('price', '>', 0)
                 ->whereIn('sku', $nonParentSkus)
                 ->groupBy('sku')
                 ->get()
                 ->keyBy('sku');
         } catch (Exception $e) {
-            Log::warning('Could not fetch LMP data from repricer database: ' . $e->getMessage());
+            Log::warning('Could not fetch LMP data from repricer_5core database: ' . $e->getMessage());
         }
 
         $processedData = [];
@@ -668,6 +668,7 @@ class PricingMasterViewsController extends Controller
                 // Direct assignments
                 'views_clicks' => $shein ? ($shein->views_clicks ?? 0) : 0,
                 'lmp' => $shein ? ($shein->lmp ?? 0) : 0,
+                'link' => $lmp ? ($lmp->link ?? null) : null,
                 'shopify_sheinl30' => $shein ? ($shein->shopify_sheinl30 ?? 0) : 0,
                 'total_req_view' => (
                     ($ebay && $ebay->views && $ebay->ebay_l30 ? ($inv * 20) : 0) +

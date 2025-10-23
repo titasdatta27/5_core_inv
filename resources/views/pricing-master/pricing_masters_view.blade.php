@@ -2112,6 +2112,7 @@
 
         // Marketplace table generator
         function buildOVL30Table(data) {
+            console.log('Data LMP:', data.lmp, 'Data Link:', data.link);
           const rows = [
                 { label: "Amazon", prefix: "amz", logo: "{{ asset('uploads/amazon.png') }}" },
                 { label: "eBay", prefix: "ebay", logo:  "{{ asset('uploads/1.png') }}" },

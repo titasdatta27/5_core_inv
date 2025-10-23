@@ -85,14 +85,47 @@
         </div>
     </div>
 </div>
+
+<!-- Monthly Data Modal -->
+<div class="modal fade" id="monthlyModal" tabindex="-1" aria-labelledby="monthlyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="monthlyModalLabel">Monthly Data for SKU: <span id="modalSku"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="nav nav-tabs" id="monthlyTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="graph-tab" data-bs-toggle="tab" data-bs-target="#graph" type="button" role="tab" aria-controls="graph" aria-selected="true">Graph</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="data-tab" data-bs-toggle="tab" data-bs-target="#data" type="button" role="tab" aria-controls="data" aria-selected="false"><i class="fas fa-calendar"></i> Data</button>
+                    </li>
+                </ul>
+                <div class="tab-content" id="monthlyTabContent">
+                    <div class="tab-pane fade show active" id="graph" role="tabpanel" aria-labelledby="graph-tab">
+                        <canvas id="monthlyChart" width="400" height="200"></canvas>
+                    </div>
+                    <div class="tab-pane fade" id="data" role="tabpanel" aria-labelledby="data-tab">
+                        <div id="monthlyDataContainer" class="row">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('script')
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://unpkg.com/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     const groupedSkuData = @json($groupedDataJson);
     let table;
+    let monthlyChart;
 
     function buildTabulator(data) {
         table = new Tabulator("#movement-tabulator", {
@@ -161,6 +194,16 @@
                             _token: '{{ csrf_token() }}'
                         });
                     }
+                },
+                {
+                    title: "Details", 
+                    formatter: function(cell, formatterParams, onRendered) {
+                        return '<button class="btn btn-sm btn-primary">View Monthly</button>';
+                    }, 
+                    cellClick: function(e, cell) {
+                        openModal(cell.getRow().getData());
+                    },
+                    width: 120
                 }
             ],
             rowFormatter: function(row) {
@@ -169,6 +212,62 @@
                 }
             },
         });
+    }
+
+    function openModal(data) {
+        const months = data.months || {};
+        const container = $('#monthlyDataContainer');
+        container.empty();
+        $('#modalSku').text(data.sku || 'N/A');
+        const labels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const values = labels.map(month => months[month] || 0);
+        
+        // Create cards for each month
+        labels.forEach((month, index) => {
+            const value = values[index];
+            const card = `
+                <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-3">
+                    <div class="card text-center shadow-sm">
+                        <div class="card-body">
+                            <h6 class="card-title text-primary">${month}</h6>
+                            <h4 class="card-text font-weight-bold">${value}</h4>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.append(card);
+        });
+        
+        // Destroy previous chart if exists
+        if (monthlyChart) {
+            monthlyChart.destroy();
+        }
+        
+        // Create line chart
+        const ctx = document.getElementById('monthlyChart').getContext('2d');
+        monthlyChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Monthly Values',
+                    data: values,
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 2,
+                    fill: true
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+        
+        $('#monthlyModal').modal('show');
     }
 
     function fetchMovementData() {

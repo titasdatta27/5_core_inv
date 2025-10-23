@@ -1126,6 +1126,7 @@
             });
         });
         
+        
         // Set default view filter to "parent" on page load
         currentViewFilter = "parent";
 
