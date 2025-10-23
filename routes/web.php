@@ -238,6 +238,7 @@ use App\Http\Controllers\PurchaseMaster\SourcingController;
 use App\Http\Controllers\MarketingMaster\FacebookAddsManagerController;
 use App\Http\Controllers\MarketingMaster\MovementPricingMaster;
 use App\Http\Controllers\MarketingMaster\OverallCvrLqsController;
+use App\Http\Controllers\MarketPlace\Business5coreController;
 use App\Http\Controllers\MarketPlace\FaireController;
 use App\Http\Controllers\MarketPlace\FbmarketplaceController;
 use App\Http\Controllers\MarketPlace\FbshopController;
@@ -1504,6 +1505,18 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::post('/pls-analytics/import', [PlsController::class, 'importPlsAnalytics'])->name('pls.analytics.import');
     Route::get('/pls-analytics/export', [PlsController::class, 'exportPlsAnalytics'])->name('pls.analytics.export');
     Route::get('/pls-analytics/sample', [PlsController::class, 'downloadSample'])->name('pls.analytics.sample');
+
+
+    //Business5Core
+    Route::get('business5coreAnalysis', action: [Business5coreController::class, 'overallBusiness5Core']);
+    Route::get('/business5core/view-data', [Business5coreController::class, 'getViewBusiness5CoreData']);
+    Route::get('business5corePricingCVR', [Business5coreController::class, 'business5corePricingCVR'])->name('business5core.pricing.cvr');
+    Route::post('/update-all-business5core-skus', [Business5coreController::class, 'updateAllBusiness5CoreSkus']);
+    Route::post('/business5core/save-nr', [Business5coreController::class, 'saveNrToDatabase']);
+    Route::post('/business5core/update-listed-live', [Business5coreController::class, 'updateListedLive']);
+    Route::post('/business5core-analytics/import', [Business5coreController::class, 'importBusiness5CoreAnalytics'])->name('business5core.analytics.import');
+    Route::get('/business5core-analytics/export', [Business5coreController::class, 'exportBusiness5CoreAnalytics'])->name('business5core.analytics.export');
+    Route::get('/business5core-analytics/sample', [Business5coreController::class, 'downloadSample'])->name('business5core.analytics.sample');
 
 
     //tiendamia

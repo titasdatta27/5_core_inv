@@ -2369,6 +2369,8 @@
                             </a>
                             <div class="collapse" id="sidebarBusiness5Core">
                                 <ul class="side-nav-third-level">
+                                    <li><a href="{{ url('business5coreAnalysis') }}">Business 5Core Analytics</a></li>
+
                                     <li>
                                         <a href="{{ route('zero.business5core') }}">Business 5Core 0
                                             view</a>
