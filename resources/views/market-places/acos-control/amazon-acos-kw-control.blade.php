@@ -465,12 +465,32 @@
                         }
                     },
                     {
+                        title: "SPEND L30",
+                        field: "spend_l30",
+                        hozAlign: "right",
+                        formatter: function(cell) {
+                            return `
+                                <span>${parseFloat(cell.getValue() || 0).toFixed(0)}</span>
+                            `;
+                        }
+                    },
+                    {
+                        title: "SALES L30",
+                        field: "ad_sales_l30",
+                        hozAlign: "right",
+                        formatter: function(cell) {
+                            return `
+                                <span>${parseFloat(cell.getValue() || 0).toFixed(0)}</span>
+                            `;
+                        }
+                    },
+                    {
                         title: "CLK L30",
                         field: "clicks_L30",
                         hozAlign: "right",
                         formatter: function(cell) {
                             return `
-                                <span>${cell.getValue().toFixed(0)}</span>
+                                <span>${parseFloat(cell.getValue() || 0).toFixed(0)}</span>
                             `;
                         }
                     },

@@ -93,11 +93,18 @@ class AutoUpdateAmazonBgtHl extends Command
             $row = [];
             $row['campaign_id'] = $matchedCampaignL30->campaign_id ?? '';
             $row['campaign_name'] = $matchedCampaignL30->campaignName ?? '';
-            $row['acos_L30'] = ($matchedCampaignL30 && ($matchedCampaignL30->sales ?? 0) > 0)
-                ? round(($matchedCampaignL30->cost / $matchedCampaignL30->sales) * 100, 2)
-                : 0;
 
-            $row['spend_l30']       = $matchedCampaignL30->spend ?? 0;
+            $sales = $matchedCampaignL30->sales ?? 0;
+            $cost = $matchedCampaignL30->cost ?? 0;
+            if ($sales > 0) {
+                $row['acos_L30'] = round(($cost / $sales) * 100, 2);
+            } elseif ($cost > 0) {
+                $row['acos_L30'] = 100;
+            } else {
+                $row['acos_L30'] = 0;
+            }
+
+            $row['spend_l30']       = $matchedCampaignL30->cost ?? 0;
             $row['ad_sales_l30']    = $matchedCampaignL30->sales ?? 0;
 
             $acos = (float) ($row['acos_L30'] ?? 0);

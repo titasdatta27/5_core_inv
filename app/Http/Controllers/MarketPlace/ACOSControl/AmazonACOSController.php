@@ -526,12 +526,21 @@ class AmazonACOSController extends Controller
             $row['campaign_id'] = $matchedCampaignL30->campaign_id ??  '';
             $row['campaignName'] = $matchedCampaignL30->campaignName ?? '';
             $row['campaignStatus'] = $matchedCampaignL30->campaignStatus ?? '';
-            $row['campaignBudgetAmount'] = $matchedCampaignL30->campaignBudgetAmount ?? '';
+            $row['campaignBudgetAmount'] = $matchedCampaignL30->campaignBudgetAmount ?? 0;
             $row['l7_cpc'] = $matchedCampaignL7->costPerClick ?? 0;
-            
-            $row['acos_L30'] = ($matchedCampaignL30 && ($matchedCampaignL30->sales30d ?? 0) > 0)
-                ? round(($matchedCampaignL30->spend / $matchedCampaignL30->sales30d) * 100, 2)
-                : null;
+            $row['spend_l30'] = $matchedCampaignL30->spend ?? 0;
+            $row['ad_sales_l30'] = $matchedCampaignL30->sales30d ?? 0;
+
+            $sales = $matchedCampaignL30->sales30d ?? 0;
+            $spend = $matchedCampaignL30->spend ?? 0;
+
+            if ($sales > 0) {
+                $row['acos_L30'] = round(($spend / $sales) * 100, 2);
+            } elseif ($spend > 0) {
+                $row['acos_L30'] = 100;
+            } else {
+                $row['acos_L30'] = 0;
+            }
 
             $row['clicks_L30'] = $matchedCampaignL30->clicks ?? 0;
 
@@ -642,14 +651,26 @@ class AmazonACOSController extends Controller
             $row['campaignName'] = $matchedCampaignL30->campaignName ?? '';
             $row['campaignStatus'] = $matchedCampaignL30->campaignStatus ?? '';
             $row['campaignBudgetAmount'] = $matchedCampaignL30->campaignBudgetAmount ?? '';
-            $row['l7_cpc'] = $matchedCampaignL7->costPerClick ?? 0;
+
+            $costPerClick7 = ($matchedCampaignL7 && $matchedCampaignL7->clicks > 0)
+                ? ($matchedCampaignL7->cost / $matchedCampaignL7->clicks)
+                : 0;
+                
+            $row['l7_cpc'] = $costPerClick7;
+
+            $sales = $matchedCampaignL30->sales ?? 0;
+            $cost = $matchedCampaignL30->cost ?? 0;
             
-            $row['acos_L30'] = ($matchedCampaignL30 && ($matchedCampaignL30->sales ?? 0) > 0)
-                ? round(($matchedCampaignL30->cost / $matchedCampaignL30->sales) * 100, 2)
-                : null;
+            if ($sales > 0) {
+                $row['acos_L30'] = round(($cost / $sales) * 100, 2);
+            } elseif ($cost > 0) {
+                $row['acos_L30'] = 100;
+            } else {
+                $row['acos_L30'] = 0;
+            }
 
             $row['clicks_L30'] = $matchedCampaignL30->clicks ?? 0;
-            $row['spend_l30']       = $matchedCampaignL30->spend ?? 0;
+            $row['spend_l30']       = $matchedCampaignL30->cost ?? 0;
             $row['ad_sales_l30']    = $matchedCampaignL30->sales ?? 0;
 
             $row['NRL']  = '';
@@ -743,10 +764,19 @@ class AmazonACOSController extends Controller
             $row['campaignStatus'] = $matchedCampaignL30->campaignStatus ?? '';
             $row['campaignBudgetAmount'] = $matchedCampaignL30->campaignBudgetAmount ?? '';
             $row['l7_cpc'] = $matchedCampaignL7->costPerClick ?? 0;
+            $row['spend_l30'] = $matchedCampaignL30->spend ?? 0;
+            $row['ad_sales_l30'] = $matchedCampaignL30->sales30d ?? 0;
             
-            $row['acos_L30'] = ($matchedCampaignL30 && ($matchedCampaignL30->sales30d ?? 0) > 0)
-                ? round(($matchedCampaignL30->spend / $matchedCampaignL30->sales30d) * 100, 2)
-                : null;
+            $sales = $matchedCampaignL30->sales30d ?? 0;
+            $spend = $matchedCampaignL30->spend ?? 0;
+
+            if ($sales > 0) {
+                $row['acos_L30'] = round(($spend / $sales) * 100, 2);
+            } elseif ($spend > 0) {
+                $row['acos_L30'] = 100;
+            } else {
+                $row['acos_L30'] = 0;
+            }
 
             $row['clicks_L30'] = $matchedCampaignL30->clicks ?? 0;
 
