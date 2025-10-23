@@ -673,7 +673,7 @@ try {
                 'link' => $lmp ? ($lmp->link ?? null) : null,
                 'link_amz' => $lmpa ? ($lmpa->link ?? null) : null,
                 'link_ebay' => $lmp ? ($lmp->link ?? null) : null,
-                'link_shein' => $lmp ? ($lmp->link ?? null) : null,
+                'link_shein' => $shein ? ($shein->link1 ?? null) : null,
                 'link_tiktok' => $tiktok ? ($tiktok->link ?? null) : null,
                 'link_aliexpress' => $aliexpress ? ($aliexpress->link ?? null) : null,
                 'shopify_sheinl30' => $shein ? ($shein->shopify_sheinl30 ?? 0) : 0,
