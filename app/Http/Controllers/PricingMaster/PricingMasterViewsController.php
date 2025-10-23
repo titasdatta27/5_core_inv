@@ -339,7 +339,7 @@ class PricingMasterViewsController extends Controller
         try {
             $lmpLookup = DB::connection('repricer')
                 ->table('lmp_data')
-                ->select('sku', DB::raw('MIN(price) as lowest_price'))
+                ->select('sku', DB::raw('MIN(price) as lowest_price'), 'link')
                 ->where('price', '>', 0)
                 ->whereIn('sku', $nonParentSkus)
                 ->groupBy('sku')
@@ -668,6 +668,7 @@ class PricingMasterViewsController extends Controller
                 // Direct assignments
                 'views_clicks' => $shein ? ($shein->views_clicks ?? 0) : 0,
                 'lmp' => $shein ? ($shein->lmp ?? 0) : 0,
+                'link' => $lmp ? ($lmp->link ?? null) : null,
                 'shopify_sheinl30' => $shein ? ($shein->shopify_sheinl30 ?? 0) : 0,
                 'total_req_view' => (
                     ($ebay && $ebay->views && $ebay->ebay_l30 ? ($inv * 20) : 0) +
