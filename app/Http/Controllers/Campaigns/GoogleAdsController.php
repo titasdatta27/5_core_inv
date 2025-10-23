@@ -469,7 +469,6 @@ class GoogleAdsController extends Controller
             ini_set('max_execution_time', 300);
             ini_set('memory_limit', '512M');
             
-            // Validate input with custom error handling to ensure JSON response
             try {
                 $validator = Validator::make($request->all(), [
                     'campaign_ids' => 'required|array|min:1',
@@ -487,16 +486,11 @@ class GoogleAdsController extends Controller
                     ], 422);
                 }
             } catch (\Exception $e) {
-                Log::error('Validation error in SBID update', [
-                    'error' => $e->getMessage(),
-                    'request_data' => $request->all()
-                ]);
-                
                 return response()->json([
-                    "status" => 400,
-                    "message" => "Invalid request data",
+                    "status" => 500,
+                    "message" => "Validation error: " . $e->getMessage(),
                     "data" => []
-                ], 400);
+                ], 500);
             }
 
             $campaignIds = $request->input('campaign_ids', []);
@@ -505,7 +499,6 @@ class GoogleAdsController extends Controller
             $customerId = env('GOOGLE_ADS_LOGIN_CUSTOMER_ID');
 
             if (!$customerId) {
-                Log::error('Google Ads Customer ID not configured');
                 return response()->json([
                     "status" => 500,
                     "message" => "Google Ads configuration missing",
@@ -513,7 +506,6 @@ class GoogleAdsController extends Controller
                 ], 500);
             }
 
-            // Validate campaign_ids and bids arrays have same length
             if (count($campaignIds) !== count($newBids)) {
                 return response()->json([
                     "status" => 422,
@@ -529,6 +521,19 @@ class GoogleAdsController extends Controller
 
             foreach ($campaignIds as $index => $campaignId) {
                 $newBid = $newBids[$index] ?? null;
+                
+                if (empty($campaignId) || !is_numeric($newBid) || $newBid <= 0) {
+                    $hasError = true;
+                    $errorCount++;
+                    
+                    $results[] = [
+                        'campaign_id' => $campaignId,
+                        'new_bid' => $newBid,
+                        'status' => 'error',
+                        'message' => 'Invalid campaign ID or bid amount'
+                    ];
+                    continue;
+                }
                 
                 try {
                     $this->sbidService->updateCampaignSbids($customerId, $campaignId, $newBid);
@@ -546,11 +551,6 @@ class GoogleAdsController extends Controller
                     $errorCount++;
                     
                     $errorMessage = $e->getMessage();
-                    Log::error("Failed to update SBID for campaign", [
-                        'campaign_id' => $campaignId,
-                        'new_bid' => $newBid,
-                        'error' => $errorMessage
-                    ]);
 
                     $results[] = [
                         'campaign_id' => $campaignId,
@@ -576,10 +576,6 @@ class GoogleAdsController extends Controller
             ], $statusCode);
 
         } catch (\Exception $e) {
-            Log::error('Unexpected error in SBID update controller', [
-                'error' => $e->getMessage(),
-                'request_data' => $request->all()
-            ]);
 
             return response()->json([
                 "status" => 500,

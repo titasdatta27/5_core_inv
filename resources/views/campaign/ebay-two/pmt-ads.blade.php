@@ -1,6 +1,7 @@
-@extends('layouts.vertical', ['title' => 'Doba Zero View', 'mode' => $mode ?? '', 'demo' => $demo ?? ''])
-
+@extends('layouts.vertical', ['title' => 'Ebay 2 PMT Ads', 'mode' => $mode ?? '', 'demo' => $demo ?? ''])
 <meta name="csrf-token" content="{{ csrf_token() }}">
+<div id="messageArea" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1055;"></div>
+
 
 @section('css')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -101,8 +102,8 @@
         }
 
         .dil-percent-value.red {
-            background-color: #dc3545;
-            color: white;
+            background-color: #fff;
+            color: #dc3545;
         }
 
         .dil-percent-value.blue {
@@ -116,8 +117,8 @@
         }
 
         .dil-percent-value.green {
-            background-color: #28a745;
-            color: white;
+            background-color: #fff;
+            color: #28a745;
         }
 
         .dil-percent-value.pink {
@@ -176,10 +177,8 @@
             position: absolute;
             z-index: 1001;
             top: 100%;
-            /* <-- changed from bottom: 100% */
             left: 50%;
-            transform: translateX(-50%) translateY(8px);
-            /* add a little gap below */
+            transform: translateX(-50%);
             opacity: 0;
             transition: opacity 0.3s;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -424,7 +423,7 @@
         .custom-modal-dialog {
             position: fixed;
             width: auto;
-            min-width: 850px;
+            min-width: 600px;
             max-width: 90vw;
             margin: 1.75rem auto;
             pointer-events: auto;
@@ -898,124 +897,106 @@
             background-color: #ff00ff;
         }
 
-        /*only for scouth view*/
-        /* Add this to your CSS */
-        /* Scouth Products View Specific Styling */
-        div.custom-modal-content h5.custom-modal-title:contains("Scouth products view Details")+.custom-modal-body {
-            padding: 15px;
-            overflow: auto;
-        }
-
-        .scouth-header {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .scouth-header-item {
-            font-weight: bold;
-            padding: 8px 12px;
-            background: #f8f9fa;
-            border-radius: 6px;
-            border: 1px solid #dee2e6;
-        }
-
-        .scouth-table-container {
-            display: flex;
-            flex-direction: column;
-            gap: 0;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-
-        .scouth-table-header {
-            display: flex;
-            background: #f8f9fa;
-            border-bottom: 1px solid #dee2e6;
-        }
-
-        .scouth-table-row {
-            display: flex;
-            border-bottom: 1px solid #dee2e6;
-            background: white;
-        }
-
-        .scouth-table-row:last-child {
-            border-bottom: none;
-        }
-
-        .scouth-table-cell {
-            padding: 10px 12px;
-            min-width: 120px;
-            flex: 1;
-            border-right: 1px solid #dee2e6;
-            word-break: break-word;
-        }
-
-        .scouth-table-cell:last-child {
-            border-right: none;
-        }
-
-        .scouth-table-header .scouth-table-cell {
-            font-weight: bold;
-            color: #495057;
-        }
-
-        .scouth-table-row:hover {
-            background-color: #f1f1f1;
-        }
-
-        .image-thumbnail {
-            max-width: 100px;
-            max-height: 100px;
-            display: block;
-            margin-top: 5px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-
-        .scouth-product-value a {
-            color: #0d6efd;
-            text-decoration: none;
-        }
-
-        .scouth-product-value a:hover {
-            text-decoration: underline;
-        }
-
-        /* Custom Resizable Table */
-        .custom-resizable-table th,
-        .custom-resizable-table td {
-            transition: width 0.2s, min-width 0.2s, max-width 0.2s;
-        }
-
-        .truncated-text {
-            transition: all 0.2s;
-            display: inline-block;
-            max-width: 100%;
-            white-space: nowrap;
-            overflow: hidden;
-            vertical-align: middle;
-        }
-
         .nr-hide {
             display: none !important;
         }
-
+        .inv_col, 
+        .ov_l30_col, 
+        .ov_dil_col, 
+        .el_30_col{
+            display: none !important;
+        }
+        .pft_col,
+        .roi_col,
+        .tpft_col,
+        .troi_col{
+            display: none !important;
+        }
         /*popup modal style end */
     </style>
 @endsection
 
 @section('content')
-    @include('layouts.shared/page-title', ['page_title' => 'Doba Zero View', 'sub_title' => 'Doba'])
+    @include('layouts.shared/page-title', ['page_title' => 'Ebay 2 PMT Ads', 'sub_title' => 'Ebay 2 PMT Ads'])
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body d-flex align-items-center" style="gap: 12px;">
+                    <div id="percent-edit-div" class="d-flex align-items-center">
+                        <div class="input-group" style="width: 150px;">
+                            <input type="number" id="updateAllSkusPercent" class="form-control" min="0"
+                                max="100" value="{{ $ebayPercentage }}" step="0.01" title="Percent" disabled />
+                            <span class="input-group-text">%</span>
+                        </div>
+                        <button id="editPercentBtn" class="btn btn-outline-primary ms-2">
+                            <i class="fa fa-pen"></i>
+                        </button>
+                    </div>
+                    <div id="adupdates-edit-div" class="d-flex align-items-center">
+                        <div class="input-group" style="width: 150px;">
+                            <input type="number" id="updateAdUpdatesPercent" class="form-control" min="0" value="{{ $ebayAdPercentage }}"  step="any" placeholder="Ad Per" disabled />
+                            <span class="input-group-text">%</span>
+                        </div>
+                        <button id="editAdUpdatesBtn" class="btn btn-outline-primary ms-2">
+                            <i class="fa fa-pen"></i>
+                        </button>
+                    </div>
+                    <div class="d-inline-flex align-items-center ms-2">
+                        <div class="badge bg-danger text-white px-3 py-2 me-2" style="font-size: 1rem; border-radius: 8px;">
+                            0 SOLD - <span id="zero-sold-count">0</span>
+                        </div>
+                        <div class="badge bg-primary text-white px-3 py-2 me-2"
+                            style="font-size: 1rem; border-radius: 8px;">
+                            SOLD - <span id="sold-count">0</span>
+                        </div>
+                        <div class="badge bg-danger text-white px-3 py-2" style="font-size: 1rem; border-radius: 8px;">
+                            RED MARGIN - <span id="red-margin-count">0</span>
+                        </div>
+                    </div>
+                    <div id="" class="d-flex align-items-right">
+                        <button id="hideSkuBtn" class="btn btn-outline-danger ms-2">
+                            <i class="fa fa-eye-slash"></i> Hide SKU
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hide SKU Modal -->
+    <!-- Hide SKU Modal -->
+    <div id="customHideSkuModal" class="custom-modal" style="display:none;">
+        <div class="custom-modal-dialog" style="min-width:600px;">
+            <div class="custom-modal-content">
+                <div class="custom-modal-header">
+                    <h5 class="custom-modal-title">Hide/Unhide SKUs</h5>
+                    <button id="updateSelectedHideBtn" class="btn btn-primary mt-2">Update Selected</button>
+                    <button type="button" class="custom-modal-close" id="closeHideSkuModal">&times;</button>
+                </div>
+                <div class="custom-modal-body">
+                    <table class="table table-bordered" id="hideSkuTable">
+                        <thead>
+                            <tr>
+                                <th>Parent</th>
+                                <th>SKU</th>
+                                <th>Hide</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Rows will be populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="row">
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
-                    <h4 class="header-title">Doba Zero View</h4>
+                    <h4 class="header-title">Ebay 2 PMT Ads</h4>
 
                     <!-- Custom Dropdown Filters Row -->
                     <div class="d-flex flex-wrap gap-2 mb-3">
@@ -1045,25 +1026,148 @@
 
                         <!-- A Dil% Filter -->
                         <div class="dropdown manual-dropdown-container ">
-                            <button class="btn btn-light dropdown-toggle" type="button" id="aDilFilterDropdown">
-                                <span class="status-circle default"></span> A Dil%
+                            <button class="btn btn-light dropdown-toggle" type="button" id="eDilFilterDropdown">
+                                <span class="status-circle default"></span> E Dil%
                             </button>
-                            <ul class="dropdown-menu" aria-labelledby="aDilFilterDropdown">
+                            <ul class="dropdown-menu" aria-labelledby="eDilFilterDropdown">
                                 <li><a class="dropdown-item column-filter" href="#" data-column="A Dil%"
                                         data-color="all">
-                                        <span class="status-circle default"></span> All A Dil</a></li>
-                                <li><a class="dropdown-item column-filter" href="#" data-column="A Dil%"
+                                        <span class="status-circle default"></span> All E Dil</a></li>
+                                <li><a class="dropdown-item column-filter" href="#" data-column="E Dil%"
                                         data-color="red">
                                         <span class="status-circle red"></span> Red</a></li>
-                                <li><a class="dropdown-item column-filter" href="#" data-column="A Dil%"
+                                <li><a class="dropdown-item column-filter" href="#" data-column="E Dil%"
                                         data-color="yellow">
                                         <span class="status-circle yellow"></span> Yellow</a></li>
-                                <li><a class="dropdown-item column-filter" href="#" data-column="A Dil%"
+                                <li><a class="dropdown-item column-filter" href="#" data-column="E Dil%"
                                         data-color="green">
                                         <span class="status-circle green"></span> Green</a></li>
-                                <li><a class="dropdown-item column-filter" href="#" data-column="A Dil%"
+                                <li><a class="dropdown-item column-filter" href="#" data-column="E Dil%"
                                         data-color="pink">
                                         <span class="status-circle pink"></span> Pink</a></li>
+                            </ul>
+                        </div>
+
+                        <!-- A Dil% Filter -->
+                        <div class="dropdown manual-dropdown-container ">
+                            <button class="btn btn-light dropdown-toggle" type="button" id="ovClicksFilterDropdown">
+                                <span class="status-circle default"></span> PmtClkL30
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="ovClicksFilterDropdown">
+                                <li><a class="dropdown-item column-filter" href="#" data-column="PmtClkL30"
+                                        data-color="all">
+                                        <span class="status-circle default"></span> All OV CLICKS</a></li>
+                                <li><a class="dropdown-item column-filter" href="#" data-column="PmtClkL30"
+                                        data-color="red">
+                                        <span class="status-circle red"></span> Red</a></li>
+                                <li><a class="dropdown-item column-filter" href="#" data-column="PmtClkL30"
+                                        data-color="green">
+                                        <span class="status-circle green"></span> Green </a></li>
+                            </ul>
+                        </div>
+
+                        <!-- PFT % Filter -->
+                        <div class="dropdown manual-dropdown-container">
+                            <button class="btn btn-light dropdown-toggle" type="button" id="pftFilterDropdown">
+                                <span class="status-circle default"></span> PFT%
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="pftFilterDropdown">
+                                <li><a class="dropdown-item column-filter" href="#" data-column="PFT %"
+                                        data-color="all">
+                                        <span class="status-circle default"></span> All PFT</a></li>
+                                <li><a class="dropdown-item column-filter" href="#" data-column="PFT %"
+                                        data-color="red">
+                                        <span class="status-circle red"></span> Red</a></li>
+                                <li><a class="dropdown-item column-filter" href="#" data-column="PFT %"
+                                        data-color="yellow">
+                                        <span class="status-circle yellow"></span> Yellow</a></li>
+                                <li><a class="dropdown-item column-filter" href="#" data-column="PFT %"
+                                        data-color="blue">
+                                        <span class="status-circle blue"></span> Blue</a></li>
+                                <li><a class="dropdown-item column-filter" href="#" data-column="PFT %"
+                                        data-color="green">
+                                        <span class="status-circle green"></span> Green</a></li>
+                                <li><a class="dropdown-item column-filter" href="#" data-column="PFT %"
+                                        data-color="pink">
+                                        <span class="status-circle pink"></span> Pink</a></li>
+                            </ul>
+                        </div>
+
+                        <!-- ROI Filter -->
+                        <div class="dropdown manual-dropdown-container">
+                            <button class="btn btn-light dropdown-toggle" type="button" id="roiFilterDropdown">
+                                <span class="status-circle default"></span> ROI
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="roiFilterDropdown">
+                                <li><a class="dropdown-item column-filter" href="#" data-column="Roi"
+                                        data-color="all">
+                                        <span class="status-circle default"></span> All ROI</a></li>
+                                <li><a class="dropdown-item column-filter" href="#" data-column="Roi"
+                                        data-color="red">
+                                        <span class="status-circle red"></span> Red</a></li>
+                                <li><a class="dropdown-item column-filter" href="#" data-column="Roi"
+                                        data-color="yellow">
+                                        <span class="status-circle yellow"></span> Yellow</a></li>
+                                <li><a class="dropdown-item column-filter" href="#" data-column="Roi"
+                                        data-color="green">
+                                        <span class="status-circle green"></span> Green</a></li>
+                                <li><a class="dropdown-item column-filter" href="#" data-column="Roi"
+                                        data-color="pink">
+                                        <span class="status-circle pink"></span> Pink</a></li>
+                            </ul>
+                        </div>
+
+                        <!-- Tacos Filter -->
+                        <div class="dropdown manual-dropdown-container">
+                            <button class="btn btn-light dropdown-toggle" type="button" id="tacosFilterDropdown">
+                                <span class="status-circle default"></span> TACOS
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="tacosFilterDropdown">
+                                <li><a class="dropdown-item column-filter" href="#" data-column="Tacos30"
+                                        data-color="all">
+                                        <span class="status-circle default"></span> All TACOS</a></li>
+                                <li><a class="dropdown-item column-filter" href="#" data-column="Tacos30"
+                                        data-color="pink">
+                                        <span class="status-circle pink"></span> Pink</a></li>
+                                <li><a class="dropdown-item column-filter" href="#" data-column="Tacos30"
+                                        data-color="green">
+                                        <span class="status-circle green"></span> Green</a></li>
+                                <li><a class="dropdown-item column-filter" href="#" data-column="Tacos30"
+                                        data-color="blue">
+                                        <span class="status-circle blue"></span> Blue</a></li>
+                                <li><a class="dropdown-item column-filter" href="#" data-column="Tacos30"
+                                        data-color="yellow">
+                                        <span class="status-circle yellow"></span> Yellow</a></li>
+                                <li><a class="dropdown-item column-filter" href="#" data-column="Tacos30"
+                                        data-color="red">
+                                        <span class="status-circle red"></span> Red</a></li>
+                            </ul>
+                        </div>
+
+                        <!-- CVR Filter -->
+                        <div class="dropdown manual-dropdown-container">
+                            <button class="btn btn-light dropdown-toggle" type="button" id="scvrFilterDropdown">
+                                <span class="status-circle default"></span> SCVR
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="scvrFilterDropdown">
+                                <li><a class="dropdown-item column-filter" href="#" data-column="SCVR"
+                                        data-color="all">
+                                        <span class="status-circle default"></span> All CVR</a></li>
+                                <li><a class="dropdown-item column-filter" href="#" data-column="SCVR"
+                                        data-color="red">
+                                        <span class="status-circle red"></span> Red</a></li>
+                                <li><a class="dropdown-item column-filter" href="#" data-column="SCVR"
+                                        data-color="yellow">
+                                        <span class="status-circle yellow"></span> Yellow</a></li>
+                                <li><a class="dropdown-item column-filter" href="#" data-column="SCVR"
+                                        data-color="green">
+                                        <span class="status-circle green"></span> Green</a></li>
+                                <li><a class="dropdown-item column-filter" href="#" data-column="SCVR"
+                                        data-color="pink">
+                                        <span class="status-circle pink"></span> Pink</a></li>
+                                <li><a class="dropdown-item column-filter" href="#" data-column="SCVR"
+                                        data-color="blue">
+                                        <span class="status-circle blue"></span> Low SCVR</a></li>
                             </ul>
                         </div>
 
@@ -1074,8 +1178,8 @@
                         </button>
 
                         <!-- for popup modal start Modal -->
-                        <div class="modal fade" id="createTaskModal" tabindex="-1" aria-labelledby="createTaskModalLabel"
-                            aria-hidden="true">
+                        <div class="modal fade" id="createTaskModal" tabindex="-1"
+                            aria-labelledby="createTaskModalLabel" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered modal-lg">
                                 <div class="modal-content">
                                     <div class="modal-header">
@@ -1211,7 +1315,7 @@
                     </div>
 
                     <!-- play backward forwad  -->
-                    {{-- <div class="btn-group time-navigation-group" role="group" aria-label="Parent navigation">
+                    <div class="btn-group time-navigation-group" role="group" aria-label="Parent navigation">
                         <button id="play-backward" class="btn btn-light rounded-circle" title="Previous parent">
                             <i class="fas fa-step-backward"></i>
                         </button>
@@ -1225,42 +1329,84 @@
                         <button id="play-forward" class="btn btn-light rounded-circle" title="Next parent">
                             <i class="fas fa-step-forward"></i>
                         </button>
-                    </div> --}}
+                    </div>
 
                     <!-- Controls row -->
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <!-- Left side controls -->
-                        <div class="form-inline">
-                            <div class="form-group mr-2">
-                                <label for="row-data-type" class="mr-2">Data Type:</label>
-                                <select id="row-data-type" class="form-control form-control-sm">
-                                    <option value="all">All</option>
-                                    <option value="sku">SKU (Child)</option>
-                                    <option value="parent">Parent</option>
-                                </select>
+                        <div class="d-flex flex-column" style="gap: 8px;">
+                            <div class="d-flex" style="gap: 16px;">
+                                <div class="form-group mb-2">
+                                    <label for="row-data-type" class="mr-2">Data Type:</label>
+                                    <select id="row-data-type" class="form-control form-control-sm">
+                                        <option value="all">All</option>
+                                        <option value="sku">SKU (Child)</option>
+                                        <option value="parent">Parent</option>
+                                    </select>
+                                </div>
+                                <div class="form-group mb-2">
+                                    <label for="ovl30-filter" class="mr-2">OV L30:</label>
+                                    <select id="ovl30-filter" class="form-control form-control-sm">
+                                        <option value="all">All</option>
+                                        <option value="0">0</option>
+                                        <option value="1-100+">1-100+</option>
+                                    </select>
+                                </div>
+                                <div class="form-group mb-2">
+                                    <label for="ovl30-filter" class="d-block mb-1">TOTAL ITEMS:</label>
+                                    <div class="badge bg-info text-white px-3 py-1" style="font-size: 1rem; border-radius: 8px;">
+                                        <span id="total-items-count">0</span>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="form-group ml-2">
-                                <label for="inv-filter" class="mr-2">INV:</label>
-                                <select id="inv-filter" class="form-control form-control-sm">
-                                    <option value="all">All</option>
-                                    <option value="0">0</option>
-                                    <option value="1-100+">1-100+</option>
-                                </select>
+                            <div class="d-flex" style="gap: 16px;">
+                                <div class="form-group mb-2">
+                                    <label for="inv-filter" class="mr-2">INV:</label>
+                                    <select id="inv-filter" class="form-control form-control-sm">
+                                        <option value="all">All</option>
+                                        <option value="0">0</option>
+                                        <option value="1-100+" selected>1-100+</option>
+                                    </select>
+                                </div>
+                                <div class="form-group mb-2">
+                                    <label for="el30-filter" class="mr-2">EL 30:</label>
+                                    <select id="el30-filter" class="form-control form-control-sm">
+                                        <option value="all">All</option>
+                                        <option value="0">0</option>
+                                        <option value="1-100+">1-100+</option>
+                                    </select>
+                                </div>
+                                <div class="form-group mb-2">
+                                    <label for="nra-filter" class="mr-2">NRL:</label>
+                                    <select id="nra-filter" class="form-control form-control-sm">
+                                        <option value="all">All</option>
+                                        <option value="RL">RL</option>
+                                        <option value="NRL">NRL</option>
+                                        <option value="LATER">LATER</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                         <div>
-                            <div class="form-group mr-2 custom-dropdown">
-                                <button id="hideColumnsBtn" class="btn btn-sm btn-outline-secondary">
-                                    Hide Columns
-                                </button>
-                                <div class="custom-dropdown-menu" id="columnToggleMenu">
-                                    <!-- Will be populated by JavaScript -->
+                            <div class="d-flex justify-content-between">
+                                <div class="form-group mr-2 custom-dropdown">
+                                    <button id="hideColumnsBtn" class="btn btn-sm btn-outline-secondary">
+                                        Hide Columns
+                                    </button>
+                                    <div class="custom-dropdown-menu" id="columnToggleMenu">
+                                        <!-- Will be populated by JavaScript -->
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="form-group">
-                                <button id="showAllColumns" class="btn btn-sm btn-outline-secondary">
-                                    Show All
-                                </button>
+                                <div class="form-group ms-2">
+                                    <button id="showAllColumns" class="btn btn-sm btn-outline-secondary">
+                                        Show All
+                                    </button>
+                                </div>
+                                <div class="form-group ms-2">
+                                    <a id="export-btn" class="btn btn-sm btn-success d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-file-export me-1"></i> Export Excel/CSV
+                                    </a>
+                                </div>
                             </div>
                         </div>
 
@@ -1275,10 +1421,10 @@
                     </div>
 
                     <div class="table-container">
-                        <table class="custom-resizable-table" id="amazonZero-table">
+                        <table class="custom-resizable-table" id="ebay-table">
                             <thead>
                                 <tr>
-                                    <th data-field="sl_no">SL No. <span class="sort-arrow">↓</span></th>
+                                    {{-- <th data-field="sl_no">SL No. <span class="sort-arrow">↓</span></th> --}}
                                     <th data-field="parent" style="vertical-align: middle; white-space: nowrap;">
                                         <div class="d-flex flex-column align-items-center">
                                             <div class="d-flex align-items-center sortable-header">
@@ -1303,15 +1449,7 @@
                                             </div>
                                         </div>
                                     </th>
-                                    <th data-field="r&a" class="hide-column"
-                                        style="vertical-align: middle; white-space: nowrap; padding-right: 4px;">
-                                        <div class="d-flex flex-column align-items-center">
-                                            <div class="d-flex align-items-center">
-                                                R&A <span class="sort-arrow">↓</span>
-                                            </div>
-                                        </div>
-                                    </th>
-                                    <th data-field="inv" style="vertical-align: middle; white-space: nowrap;">
+                                    <th data-field="inv" class="inv_col" style="vertical-align: middle; white-space: nowrap;">
                                         <div class="d-flex flex-column align-items-center" style="gap: 4px">
                                             <div class="d-flex align-items-center">
                                                 INV <span class="sort-arrow">↓</span>
@@ -1320,7 +1458,7 @@
                                             <div class="metric-total" id="inv-total">0</div>
                                         </div>
                                     </th>
-                                    <th data-field="ov_l30" style="vertical-align: middle; white-space: nowrap;">
+                                    <th data-field="ov_l30" class="ov_l30_col" style="vertical-align: middle; white-space: nowrap;">
                                         <div class="d-flex flex-column align-items-center" style="gap: 4px">
                                             <div class="d-flex align-items-center">
                                                 OV L30 <span class="sort-arrow">↓</span>
@@ -1329,7 +1467,7 @@
                                             <div class="metric-total" id="ovl30-total">0</div>
                                         </div>
                                     </th>
-                                    <th data-field="ov_dil" style="vertical-align: middle; white-space: nowrap;">
+                                    <th data-field="ov_dil" class="ov_dil_col" style="vertical-align: middle; white-space: nowrap;">
                                         <div class="d-flex flex-column align-items-center" style="gap: 4px">
                                             <div class="d-flex align-items-center">
                                                 OV DIL <span class="sort-arrow">↓</span>
@@ -1338,47 +1476,125 @@
                                             <div class="metric-total" id="ovdil-total">0%</div>
                                         </div>
                                     </th>
-                                    <th data-field="al_30" style="vertical-align: middle; white-space: nowrap;">
+                                    <th data-field="el_30" class="el_30_col" style="vertical-align: middle; white-space: nowrap;">
                                         <div class="d-flex flex-column align-items-center" style="gap: 4px">
                                             <div class="d-flex align-items-center">
-                                                Doba L30 <span class="sort-arrow">↓</span>
+                                                E L30 <span class="sort-arrow">↓</span>
                                             </div>
                                             <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
-                                            <div class="metric-total" id="al30-total">0</div>
+                                            <div class="metric-total" id="el30-total">0</div>
                                         </div>
                                     </th>
-                                    <th data-field="a_dil" style="vertical-align: middle; white-space: nowrap;">
+                                    <th data-field="c_bid" style="vertical-align: middle; white-space: nowrap;">
                                         <div class="d-flex flex-column align-items-center" style="gap: 4px">
                                             <div class="d-flex align-items-center">
-                                                A DIL <span class="sort-arrow">↓</span>
+                                                C BID <span class="sort-arrow">↓</span>
                                             </div>
                                             <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
-                                            <div class="metric-total" id="lDil-total">0%</div>
+                                            {{-- <div class="metric-total" id="ovdil-total">0%</div> --}}
                                         </div>
                                     </th>
-                                    <th data-field="nr" style="vertical-align: middle; white-space: nowrap;">
-                                        NRL
+                                    <th data-field="s_bid">ES BID</th>
+                                    <th data-field="s_bid">S BID</th>
+
+                                    <th data-field="total_views" style="vertical-align: middle; white-space: nowrap;">
+                                        <div class="d-flex flex-column align-items-center" style="gap: 4px">
+                                            <div class="d-flex align-items-center">
+                                                T VIEWS <span class="sort-arrow">↓</span>
+                                            </div>
+                                        </div>
+                                    </th>
+                                    <th data-field="req_views" style="vertical-align: middle; white-space: nowrap;">
+                                        <div class="d-flex flex-column align-items-center" style="gap: 4px">
+                                            <div class="d-flex align-items-center">
+                                                REQ VIEWS <span class="sort-arrow">↓</span>
+                                            </div>
+                                        </div>
+                                    </th>
+                                    <th data-field="cvr" style="vertical-align: middle; white-space: nowrap;">
+                                        <div class="d-flex flex-column align-items-center" style="gap: 4px">
+                                            <div class="d-flex align-items-center">
+                                                SCVR <span class="sort-arrow">↓</span>
+                                            </div>
+                                            <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
+                                            <div class="metric-total" id="cvr-total">0%</div>
+                                        </div>
                                     </th>
                                     <th data-field="views" style="vertical-align: middle; white-space: nowrap;">
                                         <div class="d-flex flex-column align-items-center" style="gap: 4px">
                                             <div class="d-flex align-items-center">
-                                                VIEWS <span class="sort-arrow">↓</span>
+                                                PmtClkL30 <span class="sort-arrow">↓</span>
                                             </div>
                                             <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
-                                            <!-- 0 view div after create task -->
-                                            <div id="zero-view-div"
-                                                style="display:inline-block; background:#dc3545; color:white; border-radius:8px; padding:8px 18px; font-weight:600; font-size:15px;">
-                                                0
-                                            </div>
-                                            {{-- <div class="metric-total" id="views-total">0</div> --}}
+                                            <div class="metric-total" id="views-total">0</div>
                                         </div>
                                     </th>
-                                    <th data-field="reason" style="vertical-align: middle; white-space: nowrap;">Reason
+                                    <th data-field="price"
+                                        style="vertical-align: middle; white-space: nowrap; padding-right: 4px;">
+                                        <div class="d-flex flex-column align-items-center">
+                                            <div class="d-flex align-items-center">
+                                                PRICE <span class="sort-arrow">↓</span>
+                                            </div>
+                                        </div>
                                     </th>
-                                    <th data-field="action_required" style="vertical-align: middle; white-space: nowrap;">
-                                        Action Required</th>
-                                    <th data-field="action_taken" style="vertical-align: middle; white-space: nowrap;">
-                                        Action Taken</th>
+                                    <th data-field="pft" class="pft_col" style="vertical-align: middle; white-space: nowrap;">
+                                        <div class="d-flex flex-column align-items-center" style="gap: 4px">
+                                            <div class="d-flex align-items-center">
+                                                PFT <span class="sort-arrow">↓</span>
+                                            </div>
+                                            <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
+                                            <div class="metric-total" id="pft-total">0%</div>
+                                        </div>
+                                    </th>
+                                    <th data-field="roi" class="roi_col" style="vertical-align: middle; white-space: nowrap;">
+                                        <div class="d-flex flex-column align-items-center" style="gap: 4px">
+                                            <div class="d-flex align-items-center">
+                                                ROI <span class="sort-arrow">↓</span>
+                                            </div>
+                                            <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
+                                            <div class="metric-total" id="roi-total">0%</div>
+                                        </div>
+                                    </th>
+                                    <th data-field="tpft" class="tpft_col">TPFT %</th>
+                                    <th data-field="troi" class="troi_col">TROI %</th>
+                                    <th data-field="tacos" style="vertical-align: middle; white-space: nowrap;">
+                                        <div class="d-flex flex-column align-items-center" style="gap: 4px">
+                                            <div class="d-flex align-items-center">
+                                                TACOS <span class="sort-arrow">↓</span>
+                                            </div>
+                                            <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
+                                            <div class="metric-total" id="tacos-total">0%</div>
+                                        </div>
+                                    </th>
+
+                                    <th data-field="sprice" style="vertical-align: middle; white-space: nowrap;">
+                                        <div class="d-flex flex-column align-items-center" style="gap: 4px">
+                                            <div class="d-flex align-items-center">
+                                                SPRICE <span class="sort-arrow">↓</span>
+                                            </div>
+                                            <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
+                                            <div class="metric-total" id="pft-total">0%</div>
+                                        </div>
+                                    </th>
+                                    <th data-field="sprofit" style="vertical-align: middle; white-space: nowrap;">
+                                        <div class="d-flex flex-column align-items-center" style="gap: 4px">
+                                            <div class="d-flex align-items-center">
+                                                SPROFIT <span class="sort-arrow">↓</span>
+                                            </div>
+                                            <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
+                                            <div class="metric-total" id="pft-total">0%</div>
+                                        </div>
+                                    </th>
+                                    <th data-field="sroi" style="vertical-align: middle; white-space: nowrap;">
+                                        <div class="d-flex flex-column align-items-center" style="gap: 4px">
+                                            <div class="d-flex align-items-center">
+                                                SROI <span class="sort-arrow">↓</span>
+                                            </div>
+                                            <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
+                                            <div class="metric-total" id="pft-total">0%</div>
+                                        </div>
+                                    </th>
+                                    <th data-field="NRL">NRL</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -1405,42 +1621,9 @@
                             <div class="spinner-border text-primary" role="status">
                                 <span class="visually-hidden">Loading...</span>
                             </div>
-                            <div class="loader-text">Loading Doba Zero...</div>
+                            <div class="loader-text">Loading eBay data...</div>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Reason/Action Modal -->
-    <div id="reasonActionModal" class="modal fade" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Update Reason / Action</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="reasonActionForm">
-                        <div class="mb-3">
-                            <label for="modalReason" class="form-label">Reason</label>
-                            <input type="text" class="form-control" id="modalReason" name="reason">
-                        </div>
-                        <div class="mb-3">
-                            <label for="modalActionRequired" class="form-label">Action Required</label>
-                            <input type="text" class="form-control" id="modalActionRequired" name="action_required">
-                        </div>
-                        <div class="mb-3">
-                            <label for="modalActionTaken" class="form-label">Action Taken</label>
-                            <input type="text" class="form-control" id="modalActionTaken" name="action_taken">
-                        </div>
-                        <input type="hidden" id="modalSlNo" name="sl_no">
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="saveReasonActionBtn">Save</button>
                 </div>
             </div>
         </div>
@@ -1449,7 +1632,47 @@
 
 @section('script')
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!--for popup modal script-->
+    <!-- SheetJS for Excel Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $(document).on('dblclick', '.sPriceText', function() {
+                const $text = $(this);
+                const $input = $text.siblings('.sPriceInput');
+
+                $text.hide();
+                $input.show().focus();
+            });
+
+            $(document).on('blur', '.sPriceInput', function() {
+                const $input = $(this);
+                const newValue = $input.val();
+                const $text = $input.siblings('.sPriceText');
+
+                $text.text(newValue).show();
+                $input.hide();
+            });
+            $(document).on("change", ".sPriceInput", function() {
+                var sku = $(this).data('sku');
+                var val = $(this).val();
+
+
+                $.ajax({
+                    url: "/update-ebay-2-pmt-sprice",
+                    type: "POST",
+                    data: {
+                        "_token": "{{ csrf_token() }}",
+                        "sku": sku,
+                        "price": val,
+                    },
+                    success: function(info) {
+                        alert("Request Sent to Ebay, Pls Wait to Reflect Everywhere");
+                    }
+                });
+
+            });
+        });
+    </script>
     <script>
         flatpickr("#duration", {
             enableTime: true,
@@ -1480,8 +1703,129 @@
     <script>
         document.body.style.zoom = "80%";
         $(document).ready(function() {
+            $('#editPercentBtn').on('click', function() {
+                var $input = $('#updateAllSkusPercent');
+                var $icon = $(this).find('i');
+                var originalValue = $input.val(); // Store original value
+
+                if ($icon.hasClass('fa-pen')) {
+                    // Enable editing
+                    $input.prop('disabled', false).focus();
+                    $icon.removeClass('fa-pen').addClass('fa-check');
+                } else {
+                    // Submit and disable editing
+                    var percent = parseFloat($input.val());
+
+                    // Validate input
+                    if (isNaN(percent) || percent < 0 || percent > 100) {
+                        showNotification('danger', 'Invalid percentage value. Must be between 0 and 100.');
+                        $input.val(originalValue); // Restore original value
+                        return;
+                    }
+                    
+                    $.ajax({
+                        url: '/update-ebay-2-pmt-percentage',
+                        type: 'POST',
+                        data: {
+                            type: 'percentage',
+                            value: percent,
+                            _token: $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: function(response) {
+                            showNotification('success', 'Percentage updated successfully!');
+                            $input.prop('disabled', true);
+                            $icon.removeClass('fa-check').addClass('fa-pen');
+                            initTable();
+                        },
+                        error: function(xhr) {
+                            showNotification('danger', 'Error updating percentage.');
+                            $input.val(originalValue); // Restore original value
+                            $input.prop('disabled', true);
+                            $icon.removeClass('fa-check').addClass('fa-pen');
+                        }
+                    });
+                }
+            });
+
+            $(document).on("click", ".info-icon", function () {
+                const $cols = $(".inv_col, .ov_l30_col, .ov_dil_col, .el_30_col");
+
+                if ($cols.first().css("display") === "none") {
+                    $cols.each(function () {
+                        this.style.setProperty("display", "table-cell", "important");
+                    });
+                } else {
+                    $cols.each(function () {
+                        this.style.setProperty("display", "none", "important");
+                    });
+                }
+            });
+
+            $(document).on("click", ".price-view", function () {
+                const $cols = $(".pft_col, .roi_col, .tpft_col, .troi_col");
+
+                if ($cols.first().css("display") === "none") {
+                    $cols.each(function () {
+                        this.style.setProperty("display", "table-cell", "important");
+                    });
+                } else {
+                    $cols.each(function () {
+                        this.style.setProperty("display", "none", "important");
+                    });
+                }
+            });
+
+            $('#editAdUpdatesBtn').on('click', function() {
+                var $input = $('#updateAdUpdatesPercent');
+                var $icon = $(this).find('i');
+                var originalValue = $input.val();
+
+                if ($icon.hasClass('fa-pen')) {
+                    // Enable editing
+                    $input.prop('disabled', false).focus();
+                    $icon.removeClass('fa-pen').addClass('fa-check');
+                } else {
+                    // Submit and disable editing
+                    var percent = parseFloat($input.val());
+
+                    // Validate input
+                    if (isNaN(percent) || percent < 0 || percent > 100) {
+                        showNotification('danger', 'Invalid percentage value. Must be between 0 and 100.');
+                        $input.val(originalValue); // Restore original value
+                        return;
+                    }
+                    
+                    $.ajax({
+                        url: '/update-ebay-2-pmt-percentage',
+                        type: 'POST',
+                        data: {
+                            type: 'ad_updates',
+                            value: percent,
+                            _token: $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: function(response) {
+                            showNotification('success', 'Percentage updated successfully!');
+                            $input.prop('disabled', true);
+                            $icon.removeClass('fa-check').addClass('fa-pen');
+                            initTable();
+                        },
+                        error: function(xhr) {
+                            showNotification('danger', 'Error updating percentage.');
+                            $input.val(originalValue); // Restore original value
+                            $input.prop('disabled', true);
+                            $icon.removeClass('fa-check').addClass('fa-pen');
+                        }
+                    });
+                }
+            });
+
+            $(document).on("click", "#export-btn", function () {
+                exportData();
+            });
+
+
             // Cache system
-            const amazonZeroDataCache = {
+            const ebayViewDataCache = {
                 cache: {},
 
                 set: function(id, data) {
@@ -1505,7 +1849,7 @@
 
             // Clear cache on page load
             window.addEventListener('load', function() {
-                amazonZeroDataCache.clear();
+                ebayViewDataCache.clear();
             });
 
             // Current state
@@ -1530,26 +1874,30 @@
 
             // Define status indicator fields for different modal types
             const statusIndicatorFields = {
-                'price view': ['PFT_percentage', 'TPFT', 'ROI_percentage', 'Spft%'],
-                'advertisement view': ['KwAcos60', 'KwAcos30', 'KwCvr60', 'KwCvr30',
-                    'PtAcos60', 'PtAcos30', 'PtCvr60', 'PtCvr30',
-                    'DspAcos60', 'DspAcos30', 'DspCvr60', 'DspCvr30',
-                    'HdAcos60', 'HdAcos30', 'HdCvr60', 'HdCvr30',
-                    'TAcos60', 'TAcos30', 'TCvr60', 'TCvr30'
+                'price view': ['PFT %', 'TPFT', 'ROI%', 'Spft%', 'a+spft', 'a+ROI'],
+                'advertisement view': [
+                    'KwCtrL60', 'KwCtrL30', 'KwCtrL7',
+                    'KwAcosL60', 'KwAcosL30', 'KwAcosL7',
+                    'KwCvrL30', 'KwCvrL7',
+                    'Ub 7', 'Ub yes',
+                    'PmtCtrL30', 'PmtCtrL7',
+                    'PmtAcosL30', 'PmtAcosL7',
+                    'PmtCvrL30', 'PmtCvrL7',
+                    'Pmt%',
+                    'TacosL30'
                 ],
-                'conversion view': ['SCVR', 'KwCvr60', 'KwCvr30', 'PtCvr60', 'PtCvr30',
-                    'DspCvr60', 'DspCvr30', 'HdCvr60', 'HdCvr30',
-                    'TCvr60', 'TCvr30'
-                ]
+                'conversion view': ['SCVR', 'KwCvrL60', 'KwCvrL30', 'KwCvrL7', 'PmtCvrL30', 'PmtCvrL7'],
+                'visibility view': ['KwCtrL60', 'KwCtrL30', 'KwCtrL7', 'PmtCtrL30', 'PmtCtrL7']
             };
 
             // Filter state
             const state = {
                 filters: {
                     'ov_dil': 'all',
-                    'A Dil%': 'all',
-                    'PFT_percentage': 'all',
-                    'ROI_percentage': 'all',
+                    'E Dil%': 'all',
+                    'PmtClkL30': 'all',
+                    'PFT %': 'all',
+                    'Roi': 'all',
                     'Tacos30': 'all',
                     'SCVR': 'all',
                     'entryType': 'all'
@@ -1801,9 +2149,6 @@
                 isNavigationActive = true;
                 currentParentIndex = 0;
 
-                // Show R&A column
-                $('th[data-field="r&a"], td:nth-child(4)').removeClass('hide-column');
-
                 showCurrentParent();
 
                 // Update button visibility
@@ -1819,8 +2164,6 @@
                 isNavigationActive = false;
                 currentParentIndex = -1;
 
-                // Hide R&A column
-                $('th[data-field="r&a"], td:nth-child(4)').addClass('hide-column');
 
                 // Update button visibility and reset color
                 $('#play-pause').hide();
@@ -1833,6 +2176,9 @@
                 currentPage = 1;
                 renderTable();
                 calculateTotals();
+
+                // Reapply column visibility
+                applyColumnVisibility();
             }
 
             function nextParent() {
@@ -1861,6 +2207,8 @@
                 currentPage = 1;
                 renderTable();
                 calculateTotals();
+                // Reapply column visibility
+                applyColumnVisibility();
                 updateButtonStates();
                 checkParentRAStatus(); // Add this line
             }
@@ -1928,20 +2276,9 @@
                 }
             }
 
-            // Update the 0 view count using tableData directly (no Sess30 or views field needed)
-            function updateZeroViewDiv() {
-                const nrCount = tableData.filter(item => item.NR === 'NR').length;
-                const finalCount = tableData.length - nrCount;
-                $('#zero-view-div').html(`${finalCount}`);
-            }
-
-
-
             // Initialize everything
             function initTable() {
                 loadData().then(() => {
-                    // Hide R&A column initially
-                    $('th[data-field="r&a"], td:nth-child(4)').addClass('hide-column');
                     renderTable();
                     initResizableColumns();
                     initSorting();
@@ -1955,8 +2292,10 @@
                     initModalTriggers();
                     initPlaybackControls();
                     initRAEditHandlers(); // Add this line
-                    initNREditHandlers();
-                    updateZeroViewDiv();
+                    initCheckBoxEditHandlers();
+                    initNRSelectChangeHandler();
+                    applyColumnFilters();
+
                 });
             }
 
@@ -1971,17 +2310,6 @@
                         openModal(rawData, 'WMPNM view');
                     } else {
                         console.error("No data found for WMPNM view");
-                    }
-                });
-                $(document).on('click', '.scouth-products-view-trigger', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-
-                    const rawData = $(this).data('item');
-                    if (rawData) {
-                        openModal(rawData, 'scouth products view');
-                    } else {
-                        console.error("No data found for Scouth Products View");
                     }
                 });
 
@@ -2038,56 +2366,73 @@
             function loadData() {
                 showLoader();
                 return $.ajax({
-                    url: '/zero_doba/view-data',
+                    url: '/ebay-2/pmp/ads/data',
                     type: 'GET',
                     dataType: 'json',
                     success: function(response) {
                         if (response && response.data) {
                             tableData = response.data.map((item, index) => {
-                                // Calculate A Dil% as (A L30 / INV), handle division by zero
-                                const inv = Number(item.inv) || 0;
-                                const aL30 = Number(item['A_L30']) || 0;
-                                const l30 = Number(item.ov_l30) || 0;
+                                const inv = Number(item.INV) || 0;
+                                const l30 = Number(item.L30) || 0;
                                 const ovDil = inv > 0 ? l30 / inv : 0;
-                                const aDil = inv > 0 ? aL30 / inv : 0;
+                                const valueJson = item.value ? JSON.parse(item.value) : {};
+                                const listedVal = valueJson.Listed !== undefined ? parseInt(
+                                    valueJson.Listed) : 0;
+                                const liveVal = valueJson.Live !== undefined ? parseInt(
+                                    valueJson.Live) : 0;
 
+
+                                // Calculate SCVR as eBay L30 / PmtClkL30
+                                let scvr = 0;
+                                if (Number(item['PmtClkL30']) > 0) {
+                                    scvr = Number(item['eBay L30']) / Number(item[
+                                        'PmtClkL30']);
+                                }
                                 return {
                                     sl_no: index + 1,
-                                    'SL No.': item['SL No.'] || index + 1,
+                                    'Sl': item['Sl'] || index + 1,
                                     Parent: item.Parent || item.parent || item.parent_asin ||
                                         item.Parent_ASIN || '(No Parent)',
-                                    'sku': item['sku'] || '',
+                                    '(Child) sku': item['(Child) sku'] || '',
                                     'R&A': item['R&A'] !== undefined ? item['R&A'] : '',
-                                    INV: inv,
-                                    L30: item.ov_l30 || 0,
+                                    INV: item.INV || 0,
+                                    L30: item.L30 || 0,
                                     ov_dil: ovDil,
-                                    'A L30': aL30,
-                                    units_ordered_l60: item.units_ordered_l60 || 0,
-                                    'A Dil%': aDil,
-                                    Sess30: item.Sess30 || 0,
-                                    price: Number(item.price) || 0,
-                                    COMP: item.COMP || 0,
-                                    min_price: item.scout_data ? item.scout_data.min_price : 0,
-                                    all_products: item.scout_data ? item.scout_data.all_data :
-                                        0,
-                                    'PFT_percentage': item['PFT_percentage'] || 0,
-                                    TPFT: item.TPFT || 0,
-                                    ROI_percentage: item.ROI_percentage || 0,
-                                    Tacos30: item.Tacos30 || 0,
-                                    SCVR: item.SCVR || 0,
-                                    LP: item.LP_productmaster || 0,
-                                    SHIP: item.Ship_productmaster || 0,
-                                    A_Z_Reason: item.A_Z_Reason || '',
-                                    A_Z_ActionRequired: item.A_Z_ActionRequired || '',
-                                    A_Z_ActionTaken: item.A_Z_ActionTaken || '',
-                                    is_parent: item['sku'] ? item['sku']
+                                    'eBay L30': item['eBay L30'] || 0,
+                                    'E Dil%': item['E Dil%'] || 0,
+                                    'PmtClkL30': item['PmtClkL30'] || 0,
+                                    'eBay Price': item['eBay Price'] || 0,
+                                    'PFT %': item['PFT %'] || 0,
+                                    Profit: item.Profit || item['Profit'] || item['profit'] ||
+                                        item['PFT'] || 0,
+                                    'Sales L30': item['Sales L30'] || item['sales_l30'] || item[
+                                        'L30'] || 0,
+                                    Roi: item['ROI%'] || 0,
+                                    Tacos30: item.TacosL30 || 0,
+                                    SCVR: scvr, // <-- use calculated value
+                                    is_parent: item['(Child) sku'] ? item['(Child) sku']
                                         .toUpperCase().includes("PARENT") : false,
                                     raw_data: item || {},
-                                    NR: item.NR || '',
+                                    NRL: item.NRL || '',
+                                    listed: listedVal,
+                                    live: liveVal,
+                                    Hide: item.Hide !== undefined ? item.Hide : '',
+                                    SPRICE: (item.SPRICE !== null && !isNaN(parseFloat(item
+                                        .SPRICE))) ? parseFloat(item.SPRICE) : 0,
+                                    SPFT: (item.SPFT !== null && !isNaN(parseFloat(item
+                                        .SPFT))) ? parseFloat(item.SPFT) : 0,
+                                    SROI: (item.SROI !== null && !isNaN(parseFloat(item
+                                        .SROI))) ? parseFloat(item.SROI) : 0,
+                                    LP: item.LP_productmaster || 0,
+                                    SHIP: item.Ship_productmaster || 0,
+                                    VIEWS: item.ebay_views || 0,
+                                    CBID: item.bid_percentage || 0,
+                                    ESBID: item.suggested_bid || 0,
+                                    TPFT: item.TPFT || 0,
                                 };
                             });
 
-                            console.log('Data loaded successfully:', tableData);
+
                             filteredData = [...tableData];
 
                         }
@@ -2102,12 +2447,60 @@
                 });
             }
 
+            // Add this function to update 0 SOLD and SOLD counts
+            function updateSoldCounts() {
+                let zeroSold = 0;
+                let totalSku = 0;
+                let lowProfitCount = 0;
+
+                filteredData.forEach(item => {
+                    if (!item.is_parent) {
+                        const l30 = parseFloat(item['eBay L30']) || 0;
+                        const inv = parseFloat(item.INV) || 0;
+                        const pftDecimal = parseFloat(item['PFT %']) || 0;
+                        const pftPercentage = pftDecimal * 100;
+
+
+                        if (l30 === 0 && inv > 0) zeroSold++;
+
+                        totalSku++;
+
+                        if (pftPercentage < 10) {
+                            lowProfitCount++;
+                        }
+                    }
+                });
+
+                $('#zero-sold-count').text(zeroSold);
+                $('#sold-count').text(totalSku - zeroSold);
+                $('#red-margin-count').text(lowProfitCount);
+
+                updateRedMarginDataToChannelMaster(lowProfitCount);
+            }
+
+            function updateRedMarginDataToChannelMaster(lowProfitCount) {
+                fetch('/ebay/saveLowProfit', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            count: lowProfitCount
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Saved low profit count:', data);
+                    })
+                    .catch(error => {
+                        console.error('Error saving low profit count:', error);
+                    });
+            }
+
             // Render table with current data
             function renderTable() {
-                const $tbody = $('#amazonZero-table tbody');
-                const $tableContainer = $('.table-container');
-                const prevScrollTop = $tableContainer.scrollTop();
-
+                const $tbody = $('#ebay-table tbody');
                 $tbody.empty();
 
                 if (isLoading) {
@@ -2120,20 +2513,23 @@
                     return;
                 }
 
-                // Get current column widths from header
-                const $headers = $('#amazonZero-table thead th');
-                const reasonCellWidth = $headers.eq(10).outerWidth() || 120;
-                const actionRequiredCellWidth = $headers.eq(11).outerWidth() || 120;
-                const actionTakenCellWidth = $headers.eq(12).outerWidth() || 120;
-
                 filteredData.forEach(item => {
                     const $row = $('<tr>');
                     if (item.is_parent) {
                         $row.addClass('parent-row');
                     }
-                    if (item.NR === 'NR') {
-                        $row.addClass('nr-hide');
+
+                    let rawData = {};
+                    if (typeof item.raw_data === 'string') {
+                        try {
+                            rawData = JSON.parse(item.raw_data || '{}');
+                        } catch (e) {
+                            console.error('Invalid JSON in raw_data for SKU', item['(Child) sku'], e);
+                        }
+                    } else if (typeof item.raw_data === 'object' && item.raw_data !== null) {
+                        rawData = item.raw_data;
                     }
+
                     // Helper functions for color coding
                     const getDilColor = (value) => {
                         const percent = parseFloat(value) * 100;
@@ -2143,218 +2539,372 @@
                         return 'pink'; // 50 and above
                     };
 
-                    $row.append($('<td>').text(item['SL No.']));
+                    const getEDilColor = (value) => {
+                        const percent = parseFloat(value) * 100;
+                        if (percent < 12.5) return 'red';
+                        if (percent >= 12.5 && percent < 16.66) return 'yellow';
+                        if (percent >= 16.66 && percent < 25) return 'blue';
+                        if (percent >= 25 && percent < 50) return 'green';
+                        return 'pink'; // 50 and above
+                    };
+
+                    const getViewColor = (value) => {
+                        const percent = parseFloat(value);
+
+                        if (percent >= 30) return 'green';
+                        return 'red';
+                    };
+
+                    const getPftColor = (value) => {
+                        const percent = parseFloat(value) * 100;
+                        if (percent < 10) return 'red';
+                        if (percent >= 10 && percent < 15) return 'yellow';
+                        if (percent >= 15 && percent < 20) return 'blue';
+                        if (percent >= 20 && percent <= 40) return 'green';
+                        return 'pink';
+                    };
+
+                    const getRoiColor = (value) => {
+                        const percent = parseFloat(value) * 100;
+                        if (percent < 50) return 'red';
+                        if (percent >= 50 && percent < 75) return 'yellow';
+                        if (percent >= 75 && percent <= 125) return 'green';
+                        return 'pink';
+                    };
+
+                    const getTacosColor = (value) => {
+                        const percent = parseFloat(value) * 100;
+                        if (percent <= 7) return 'pink';
+                        if (percent > 7 && percent <= 14) return 'green';
+                        if (percent > 14 && percent <= 21) return 'yellow';
+                        return 'red';
+                    };
+
+                    const getCvrColor = (value) => {
+                        const percent = parseFloat(value) * 100;
+                        if (percent <= 4) return 'red';
+                        if (percent > 4 && percent <= 7) return 'yellow';
+                        if (percent > 7 && percent <= 10) return 'green';
+                        return '#E83E8C';
+                    };
+
+                    // $row.append($('<td>').text(item['Sl']));
                     $row.append($('<td>').text(item.Parent));
 
                     // SKU with hover content for links
                     const $skuCell = $('<td>').addClass('skuColumn').css('position', 'static');
                     if (item.is_parent) {
-                        $skuCell.html(`<strong>${item['sku']}</strong>`);
+                        $skuCell.html(`<strong>${item['(Child) sku']}</strong>`);
                     } else {
-                        const imageUrl = item.raw_data.image_path || '';
-                        const buyerLink = item.raw_data['AMZ LINK BL'];
-                        const sellerLink = item.raw_data['AMZ LINK SL'];
-
-                        function isValidUrl(url) {
-                            try {
-                                return Boolean(url && new URL(url));
-                            } catch (e) {
-                                return false;
-                            }
-                        }
+                        const imageUrl = item.raw_data.image || '';
+                        const buyerLink = item.raw_data['B Link'] || '';
+                        const sellerLink = item.raw_data['S Link'] || '';
 
                         if (buyerLink || sellerLink || imageUrl) {
                             $skuCell.html(`
-                                <div class="sku-tooltip-container" style="position:relative;display:inline-block;">
-                                    <span class="sku-text">${item['sku']}</span>
-                                    <div class="sku-tooltip" style="display:none;">
+                                <div class="sku-tooltip-container">
+                                    <span class="sku-text">${item['(Child) sku']}</span>
+                                    <div class="sku-tooltip">
                                         ${imageUrl ? `<img src="${imageUrl}" alt="SKU Image" style="max-width:120px;max-height:120px;border-radius:6px;display:block;margin:0 auto 6px auto;">` : ''}
-                                        <div class="sku-link">
-                                            ${buyerLink !== undefined
-                                                ? (isValidUrl(buyerLink)
-                                                    ? `<a href="${buyerLink}" target="_blank" rel="noopener noreferrer">Buyer link</a>`
-                                                    : 'link invalid')
-                                                : ''}
-                                        </div>
-                                        <div class="sku-link">
-                                            ${sellerLink !== undefined
-                                                ? (isValidUrl(sellerLink)
-                                                    ? `<a href="${sellerLink}" target="_blank" rel="noopener noreferrer">Seller link</a>`
-                                                    : 'link invalid')
-                                                : ''}
-                                        </div>
+                                        ${buyerLink ? `<div class="sku-link"><a href="${buyerLink}" target="_blank" rel="noopener noreferrer">Buyer link</a></div>` : ''}
+                                        ${sellerLink ? `<div class="sku-link"><a href="${sellerLink}" target="_blank" rel="noopener noreferrer">Seller link</a></div>` : ''}
                                     </div>
                                 </div>
                             `);
-
-                            // Tooltip show/hide with delay
-                            setTimeout(() => {
-                                const $container = $skuCell.find('.sku-tooltip-container');
-                                let hideTimeout = null;
-
-                                $container.on('mouseenter', function() {
-                                    clearTimeout(hideTimeout);
-                                    $(this).find('.sku-tooltip').stop(true, true).fadeIn(
-                                        120);
-                                }).on('mouseleave', function() {
-                                    const $tooltip = $(this).find('.sku-tooltip');
-                                    hideTimeout = setTimeout(() => {
-                                        $tooltip.fadeOut(120);
-                                    }, 250); // 250ms delay before hiding
-                                });
-
-                                // If mouse enters tooltip itself, cancel hide
-                                $container.find('.sku-tooltip').on('mouseenter', function() {
-                                    clearTimeout(hideTimeout);
-                                }).on('mouseleave', function() {
-                                    const $tooltip = $(this);
-                                    hideTimeout = setTimeout(() => {
-                                        $tooltip.fadeOut(120);
-                                    }, 250);
-                                });
-                            }, 0);
-
                         } else {
-                            $skuCell.text(item['sku']);
+                            $skuCell.text(item['(Child) sku']);
                         }
                     }
+                    if (!item.is_parent) {
+                        $skuCell.append(`
+                            <i class="fas fa-info-circle info-icon" 
+                            style="margin-left:8px; cursor:pointer; color:#007bff;"
+                            title="Show details"></i>
+                        `);
+                    }
+
                     $row.append($skuCell);
 
-                    // Only create the checkbox cell if navigation is active
-                    if (isNavigationActive) {
-                        const $raCell = $('<td>').addClass('ra-cell');
+                    $row.append($('<td class="inv_col">').text(item.INV));
+                    $row.append($('<td class="ov_l30_col">').text(item.L30));
 
-                        if (item['R&A'] !== undefined && item['R&A'] !== null && item['R&A'] !== '') {
-                            const $container = $('<div>').addClass(
-                                'ra-edit-container d-flex align-items-center');
+                    $row.append($(`<td class="ov_dil_col" data-field="ov_dil" data-value="${Math.round(item.ov_dil * 100)}">`).html(
+                        `<span class="dil-percent-value ${getDilColor(item.ov_dil)}">${Math.round(item.ov_dil * 100)}%</span>
+                         <span class="text-info tooltip-icon wmpnm-view-trigger" 
+                               data-bs-toggle="tooltip" 
+                               data-bs-placement="left" 
+                               title="WMPNM View"
+                               data-item='${JSON.stringify(item.raw_data)}'>W</span>`
+                    ));
 
-                            // Checkbox with proper boolean value
-                            const $checkbox = $('<input>', {
-                                type: 'checkbox',
-                                checked: item['R&A'] === true || item['R&A'] === 'true' || item[
-                                    'R&A'] === '1',
-                                class: 'ra-checkbox',
-                                disabled: true
-                            }).data('original-value', item['R&A']); // Store original value
+                    $row.append($('<td class="el_30_col">').text(item['eBay L30']));
+                    
+                    $row.append($('<td>').text(item.CBID));
 
-                            // Edit/Save icon
-                            const $editIcon = $('<i>').addClass('fas fa-pen edit-icon ml-2 text-primary')
-                                .css('cursor', 'pointer')
-                                .attr('title', 'Edit R&A');
+                    $row.append($('<td>').text(item.ESBID));
+                    
+                    let sbid = 0;
+                    let sbidColor = "";
+                    const percent = Math.round(item.ov_dil * 100);
 
-                            $container.append($checkbox, $editIcon);
-                            $raCell.append($container);
-                        } else {
-                            $raCell.html('&nbsp;');
-                        }
-
-                        $row.append($raCell);
+                    if (percent < 16.66) {
+                        sbid = 8;      
+                        sbidColor = "red";
+                    } else if (percent >= 16.66 && percent < 25) {
+                        sbid = 6;     
+                        sbidColor = "yellow";
+                    } else if (percent >= 25 && percent < 50) {
+                        sbid = 4;       
+                        sbidColor = "green";
+                    } else {
+                        sbid = 2;     
+                        sbidColor = "pink";
                     }
 
-                    $row.append($('<td>').text(item.INV));
-                    $row.append($('<td>').text(item.L30));
+                    // Special override: pink dilution but sold = 0
+                    if (sbidColor === "pink" && item['eBay L30'] === 0) {
+                        sbid = 6;  // override
+                    }
 
-                    // OV DIL with color coding and WMPNM tooltip
-                    $row.append($('<td>').html(
-                        `<span class="dil-percent-value ${getDilColor(item.ov_dil)}">${Math.round(item.ov_dil * 100)}%</span>
-                            <span class="text-info tooltip-icon wmpnm-view-trigger" 
-                            data-bs-toggle="tooltip" 
-                                data-bs-placement="left" 
-                                title="WMPNM View"
-                                data-item='${JSON.stringify(item.raw_data)}'>W</span>`
+                    let reqViews = item.INV * 10;
+                    let reqViewsColor = "";
+
+                    if (reqViews > item.VIEWS) {
+                        reqViewsColor = "red";
+                        sbid = sbid + 2;       
+                    } else {
+                        reqViewsColor = "green";
+                    }
+
+                    $row.append($('<td data-field="sbid">').html(
+                        `<span class="dil-percent-value ${sbidColor}">
+                           ${sbid}
+                        </span>`
                     ));
 
-                    $row.append($('<td>').html(`
-                        <div class="sku-tooltip-container">
-                            <span class="sku-text">${item['A L30']}</span>
-                            <div class="sku-tooltip">
-                                <div class="sku-link"><strong>L60:</strong> ${item['units_ordered_l60']}</div>
-                                <div class="sku-link"><strong>L7:</strong></div>
+                    $row.append($('<td>').text(item.VIEWS));
+
+                    $row.append($('<td>').html(
+                        `<span class="dil-percent-value ${reqViewsColor}">
+                           ${reqViews}
+                        </span>`
+                    ));
+
+
+                    // CVR with color coding and tooltip
+                    
+                    let ebayL30 = Number(item['eBay L30']) || 0;
+                    let views = Number(item.VIEWS) || 0;
+
+                    let scvr = (ebayL30 / views ) * 100 ;
+
+                    $row.append($('<td>').html(
+                        `<span class="dil-percent-value" style="color: ${getCvrColor(scvr)}">
+                           ${scvr.toFixed(0)}%
+                        </span>`
+                    ));
+
+                    // PmtClkL30 with tooltip icon (no color coding)
+                    $row.append($('<td>').html(
+                        `<span class="dil-percent-value ${getViewColor(item['PmtClkL30'])}">${Math.round(item['PmtClkL30'])}</span>
+                         <span class="text-info tooltip-icon ad-view-trigger" 
+                               data-bs-toggle="tooltip" 
+                               data-bs-placement="left" 
+                               title="visibility View"
+                               data-item='${JSON.stringify(item.raw_data)}'>V</span>`
+                    ));
+
+                    //price with tooltip
+                    // Replace the existing price section with this:
+                    $row.append($('<td>').html(
+                        `$${(parseFloat(item['eBay Price']) || 0).toFixed(2)}
+                            <span class="tooltip-container" style="margin-left:8px">
+                                <i class="fas fa-info-circle price-view" 
+                                style="margin-left:8px; cursor:pointer; color:#007bff;"
+                                data-bs-toggle="tooltip" 
+                                data-bs-placement="top-end"></i>
+                            </span>`
+                    ));
+
+                    // $row.append($('<td>').html(
+                    //     `<div style="display:flex;align-items:center">
+                    //         <span class="sPriceText" data-sku="${item.raw_data['Item ID']}" style="min-width:100px; display:inline-block;">
+                    //             ` + item['eBay Price'] + `
+                    //         </span>
+                    //         <input 
+                    //             value="` + item['eBay Price'] + `" 
+                    //             data-sku="` + item.raw_data['Item ID'] + `" 
+                    //             style="min-width:100px; display:none;" 
+                    //             type="number" 
+                    //             class="sPriceInput form-control"
+                    //         >
+                    //         <span class="tooltip-container" style="margin-left:8px">
+                    //             <i class="fas fa-tag text-warning price-view-trigger" 
+                    //                style="transform:translateY(1px)"
+                    //                data-bs-toggle="tooltip" 
+                    //                data-bs-placement="top-end" 
+                    //                title="Pricing view"
+                    //                data-item='${JSON.stringify(item.raw_data)}'></i>
+                    //         </span>
+                    //     </div>`
+                    // ));
+
+
+                    // PFT with color coding
+                    $row.append($('<td class="pft_col">').html(
+                        typeof item['PFT %'] === 'number' && !isNaN(item['PFT %']) ?
+                        `<span class="dil-percent-value ${getPftColor(item['PFT %'])}">${Math.round(item['PFT %'] * 100)}%</span>` :
+                        ''
+                    ));
+
+                    // ROI with color coding
+                    $row.append($('<td class="roi_col">').html(
+                        typeof item.Roi === 'number' && !isNaN(item.Roi) ?
+                        `<span class="dil-percent-value ${getRoiColor(item.Roi)}">${Math.round(item.Roi * 100)}%</span>` :
+                        ''
+                    ));
+
+                    $row.append($('<td class="tpft_col">').text(item.TPFT.toFixed(2)));
+                    $row.append($('<td class="troi_col">').text(""));
+                        
+                    // TACOS with color coding and tooltip
+                    $row.append($('<td>').html(
+                        `<span class="dil-percent-value ${getTacosColor(item.Tacos30)}">${(item.Tacos30 * 100).toFixed(0)}%</span>
+                         <i class="fas fa-a text-info tooltip-icon advertisement-view-trigger" 
+                            data-bs-toggle="tooltip" data-bs-placement="bottom" title="Advertisement view"
+                            data-item='${JSON.stringify(item.raw_data)}'></i>`
+                    ));
+
+
+
+                    // SPRICE + Edit Button (no decimals)
+                    $row.append($('<td>').html(
+                        item.SPRICE !== null && !isNaN(parseFloat(item.SPRICE)) ?
+                        `
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-primary s_price" 
+                                style="font-size:16px; padding:8px 14px; border-radius:8px;">
+                                $${Math.round(parseFloat(item.SPRICE))}
+                            </span>
+                            <div class="btn-group" role="group">
+                                <!-- Edit Button -->
+                                <button class="btn btn-outline-primary openPricingBtn"
+                                    style="font-size:15px; padding:6px 12px; border-radius:8px;"
+                                    title="Edit SPRICE"
+                                    data-lp="${item.LP}"
+                                    data-ship="${item.SHIP}"
+                                    data-sku="${item["(Child) sku"]}">
+                                    <i class="fa fa-edit"></i>
+                                </button>
                             </div>
                         </div>
-                    `));
-
-                    // A DIL with color coding
-                    $row.append($('<td>').html(
-                        `<span class="dil-percent-value ${getDilColor(item['A Dil%'])}">${(item['A Dil%'] * 100).toFixed(2)}%</span>`
+                        ` : ''
                     ));
 
-                    // --- NR column ---
+
+                    // ✅ SPFT (with coloring logic + inline style)
+                    $row.append($('<td>').attr('id', `spft-${item["(Child) sku"]}`).html(
+                        item.SPFT !== null && !isNaN(parseFloat(item.SPFT)) ?
+                        `<span style="
+                        font-size:16px; 
+                        font-weight:bold;
+                        padding:6px 12px; 
+                        border-radius:8px; 
+                        color:${
+                            parseFloat(item.SPFT) <= 10 
+                                ? '#dc3545'   // 🔴 red
+                                : parseFloat(item.SPFT) <= 15 
+                                    ? '#ffc107'   // 🟡 yellow
+                                    : parseFloat(item.SPFT) <= 20 
+                                        ? '#0d6efd'   // 🔵 blue
+                                        : '#28a745'   // 🟢 green
+                        };
+                        background-color:${
+                            parseFloat(item.SPFT) <= 10 
+                                ? '#fff'   // 🔴 red
+                                : parseFloat(item.SPFT) <= 15 
+                                    ? '#fff'   // 🟡 yellow
+                                    : parseFloat(item.SPFT) <= 20 
+                                        ? '#fff'   // 🔵 blue
+                                        : '#fff'   // 🟢 green
+                        };">
+                        ${(parseFloat(item.SPFT) - Math.floor(parseFloat(item.SPFT)) >= 0.5 
+                            ? Math.ceil(parseFloat(item.SPFT)) 
+                            : Math.floor(parseFloat(item.SPFT)))}%
+                    </span>` :
+                                        ''
+                                    ));
+
+                                    // ✅ SROI (with coloring logic + inline style)
+                                    $row.append($('<td>').attr('id', `sroi-${item["(Child) sku"]}`).html(
+                                        item.SROI !== null && !isNaN(parseFloat(item.SROI)) ?
+                                        `<span style="
+                        font-size:16px; 
+                        font-weight:bold;
+                        padding:6px 12px; 
+                        border-radius:8px; 
+                        color:${
+                            parseFloat(item.SROI) <= 10 
+                                ? '#dc3545'   // 🔴 red
+                                : parseFloat(item.SROI) <= 15 
+                                    ? '#ffc107'   // 🟡 yellow
+                                    : parseFloat(item.SROI) <= 20 
+                                        ? '#0d6efd'   // 🔵 blue
+                                        : '#28a745'   // 🟢 green
+                        };
+                        background-color:${
+                            parseFloat(item.SROI) <= 10 
+                                ? '#fff'   // 🔴 red
+                                : parseFloat(item.SROI) <= 15 
+                                    ? '#fff'   // 🟡 yellow
+                                    : parseFloat(item.SROI) <= 20 
+                                        ? '#fff'   // 🔵 blue
+                                        : '#fff'   // 🟢 green
+                        };">
+                        ${(parseFloat(item.SROI) - Math.floor(parseFloat(item.SROI)) >= 0.5 
+                            ? Math.ceil(parseFloat(item.SROI)) 
+                            : Math.floor(parseFloat(item.SROI)))}%
+                    </span>` :
+                                        ''
+                                    ));
+
+
                     if (item.is_parent) {
                         $row.append($('<td>')); // Empty cell for parent
                     } else {
-                        const currentNR = item.NR === 'REQ' || item.NR === 'NR' ? item.NR :
-                        'REQ'; // default to REQ
+                        let currentNR = (item.NRL === 'RL' || item.NRL === 'NRL' || item.NRL === 'LATER') ? item.NRL : 'RL';
+
                         const $select = $(`
                             <select class="form-select form-select-sm nr-select" style="min-width: 100px;">
-                                <option value="NR" ${currentNR === 'NR' ? 'selected' : ''}>NR</option>
-                                <option value="REQ" ${currentNR === 'REQ' ? 'selected' : ''}>REQ</option>
+                                <option value="RL" ${currentNR === 'RL' ? 'selected' : ''}>RL</option>
+                                <option value="NRL" ${currentNR === 'NRL' ? 'selected' : ''}>NRL</option>
+                                <option value="LATER" ${currentNR === 'LATER' ? 'selected' : ''}>LATER</option>
                             </select>
                         `);
 
                         // Set background color based on value
-                        if (currentNR === 'NR') {
+                        if (currentNR === 'NRL') {
                             $select.css('background-color', '#dc3545');
                             $select.css('color', '#ffffff');
-                        } else if (currentNR === 'REQ') {
+                        } else if (currentNR === 'RL') {
                             $select.css('background-color', '#28a745');
                             $select.css('color', '#ffffff');
                         }
-                        $select.data('sku', item['sku']);
+
+                        $select.data('sku', item['(Child) sku']);
                         $row.append($('<td>').append($select));
                     }
 
-                    // Sess30 with tooltip icon (no color coding)
-                    $row.append($('<td>').html(
-                        `<span>${Math.round(item.Sess30)}</span>
-                            <span class="text-info tooltip-icon ad-view-trigger" 
-                                data-bs-toggle="tooltip" 
-                                data-bs-placement="left" 
-                                title="visibility View"
-                                data-item='${JSON.stringify(item.raw_data)}'>V</span>`
-                    ));
 
-                    // Truncate function for dynamic column width
-                    function truncateWithTooltip(text, cellWidth) {
-                        if (!text) return '';
-                        let minLetters = 10;
-                        let letters = Math.max(minLetters, Math.floor(cellWidth / 12));
-                        const truncated = text.length > letters ? text.substring(0, letters) + '...' : text;
-                        return `<span class="truncated-text" title="${text.replace(/"/g, '&quot;')}">${truncated}</span>`;
-                    }
-
-                    // Reason column with plus icon and tooltip
-                    $row.append($('<td>').html(`
-                        ${truncateWithTooltip(item.A_Z_Reason, reasonCellWidth)}
-                        <i class="fas fa-plus reason-action-plus" style="cursor:pointer; color:#007bff; margin-left:8px;" 
-                        data-slno="${item['SL No.']}" data-type="reason"></i>
-                    `));
-
-                    // Action Required column
-                    $row.append($('<td>').html(`
-                        ${truncateWithTooltip(item.A_Z_ActionRequired, actionRequiredCellWidth)}
-                        <i class="fas fa-plus reason-action-plus" style="cursor:pointer; color:#007bff; margin-left:8px;" 
-                        data-slno="${item['SL No.']}" data-type="action_required"></i>
-                    `));
-
-                    // Action Taken column
-                    $row.append($('<td>').html(`
-                        ${truncateWithTooltip(item.A_Z_ActionTaken, actionTakenCellWidth)}
-                        <i class="fas fa-plus reason-action-plus" style="cursor:pointer; color:#007bff; margin-left:8px;" 
-                        data-slno="${item['SL No.']}" data-type="action_taken"></i>
-                    `));
 
                     $tbody.append($row);
                 });
 
                 updatePaginationInfo();
                 $('#visible-rows').text(`Showing all ${filteredData.length} rows`);
+                // Initialize tooltips
                 initTooltips();
-
-                // Restore scroll position
-                setTimeout(() => {
-                    $tableContainer.scrollTop(prevScrollTop);
-                }, 0);
+                updateSoldCounts();
             }
 
             function initRAEditHandlers() {
@@ -2363,7 +2913,7 @@
                     const $icon = $(this);
                     const $checkbox = $icon.siblings('.ra-checkbox');
                     const $row = $checkbox.closest('tr');
-                    const rowData = filteredData.find(item => item['SL No.'] == $row.find('td:eq(0)')
+                    const rowData = filteredData.find(item => item['Sl'] == $row.find('td:eq(0)')
                         .text());
 
                     if ($icon.hasClass('fa-pen')) {
@@ -2406,54 +2956,181 @@
                 });
             }
 
+            function initCheckBoxEditHandlers() {
+                // Handles both NR and Hide columns
+                $(document).off('click',
+                    '.nr-edit-container .nr-edit-icon, .nr-edit-container .fa-save, .hide-edit-container .hide-edit-icon, .hide-edit-container .fa-save'
+                );
+                $(document).on('click',
+                    '.nr-edit-container .nr-edit-icon, .nr-edit-container .fa-save, .hide-edit-container .hide-edit-icon, .hide-edit-container .fa-save',
+                    function(e) {
+                        e.stopPropagation();
+                        const $icon = $(this);
+                        const $container = $icon.closest('.nr-edit-container, .hide-edit-container');
+                        const isNR = $container.hasClass('nr-edit-container');
+                        const $checkbox = isNR ? $container.find('.nr-checkbox') : $container.find(
+                            '.hide-checkbox');
+                        const $row = $checkbox.closest('tr');
+                        const slNo = $row.find('td:eq(0)').text();
+                        const rowData = filteredData.find(item => item['Sl'] == slNo || item['SL No.'] == slNo);
+                        const sku = rowData ? rowData['(Child) sku'] : null;
 
-            function initNREditHandlers() {
+                        if ($icon.hasClass('fa-pen')) {
+                            $checkbox.prop('disabled', false)
+                                .data('original-value', $checkbox.is(':checked'));
+                            $icon.removeClass('fa-pen text-primary')
+                                .addClass('fa-save text-success')
+                                .attr('title', 'Save Changes');
+                        } else if ($icon.hasClass('fa-save')) {
+                            // Save
+                            const updatedValue = $checkbox.is(':checked');
+                            $icon.removeClass('fa-save text-success')
+                                .addClass('fa-spinner fa-spin text-primary')
+                                .attr('title', 'Saving...');
+
+                            // --- Save to database via AJAX ---
+                            let data = {
+                                sku: sku,
+                                _token: $('meta[name="csrf-token"]').attr('content')
+                            };
+                            if (isNR) {
+                                data.nr = updatedValue;
+                            } else {
+                                data.hide = updatedValue;
+                            }
+
+                            $.ajax({
+                                url: '/ebay/save-nr',
+                                type: 'POST',
+                                data: data,
+                                success: function(response) {
+                                    showNotification('success', (isNR ? 'NR' : 'Hide') +
+                                        ' updated successfully!');
+                                    $checkbox.prop('disabled', true);
+                                    $icon.removeClass('fa-spinner fa-spin text-primary')
+                                        .addClass('fa-pen text-primary')
+                                        .attr('title', isNR ? 'Edit NR' : 'Edit Hide');
+
+                                    // --- ADD THIS: update tableData and filteredData ---
+                                    if (sku) {
+                                        tableData.forEach(item => {
+                                            if (item['(Child) sku'] === sku) {
+                                                if (isNR) {
+                                                    item.NR = updatedValue;
+                                                } else {
+                                                    item.Hide = updatedValue;
+                                                }
+                                            }
+                                        });
+                                        filteredData.forEach(item => {
+                                            if (item['(Child) sku'] === sku) {
+                                                if (isNR) {
+                                                    item.NR = updatedValue;
+                                                } else {
+                                                    item.Hide = updatedValue;
+                                                }
+                                            }
+                                        });
+                                    }
+                                },
+                                error: function(xhr) {
+                                    showNotification('danger', 'Failed to update ' + (isNR ? 'NR' :
+                                        'Hide') + '.');
+                                    $checkbox.prop('checked', $checkbox.data('original-value'))
+                                        .prop('disabled', true);
+                                    $icon.removeClass('fa-spinner fa-spin text-primary')
+                                        .addClass('fa-pen text-primary')
+                                        .attr('title', isNR ? 'Edit NR' : 'Edit Hide');
+                                }
+                            });
+                        }
+                    });
+
+                // Allow clicking the checkbox directly to enter edit mode (like R&A)
+                $(document).off('click', '.nr-checkbox:disabled, .hide-checkbox:disabled');
+                $(document).on('click', '.nr-checkbox:disabled', function(e) {
+                    e.stopPropagation();
+                    $(this).closest('.nr-edit-container').find('.nr-edit-icon').trigger('click');
+                });
+                $(document).on('click', '.hide-checkbox:disabled', function(e) {
+                    e.stopPropagation();
+                    $(this).closest('.hide-edit-container').find('.hide-edit-icon').trigger('click');
+                });
+            }
+
+            function initNRSelectChangeHandler() {
                 $(document).on('change', '.nr-select', function() {
                     const $select = $(this);
-                    const sku = $(this).data('sku');
-                    const nrValue = $(this).val();
+                    const newValue = $select.val();
+                    const sku = $select.data('sku');
 
-                    if (nrValue === 'NR') {
+                    // Change background color based on selected value
+                    if (newValue === 'NRL') {
                         $select.css('background-color', '#dc3545').css('color', '#ffffff');
                     } else {
                         $select.css('background-color', '#28a745').css('color', '#ffffff');
                     }
 
+                    // Send AJAX
                     $.ajax({
-                        url: '/amazon/save-nr',
+                        url: '/ebay/save-nr',
                         type: 'POST',
                         data: {
                             sku: sku,
-                            nr: JSON.stringify({
-                                NR: nrValue
-                            }),
-                            _token: $('meta[name="csrf-token"]').attr('content') // CSRF protection
+                            nrl: newValue,
+                            _token: $('meta[name="csrf-token"]').attr('content')
                         },
-                        success: function(res) {
-                            showNotification('success', 'NR updated successfully');
-                            // ✅ Update tableData and filteredData correctly
+                        success: function(response) {
+                            showNotification('success', 'updated successfully!');
+
+                            // Update tableData and filteredData
                             tableData.forEach(item => {
-                                if (item['sku'] === sku) {
-                                    item.NR = nrValue;
+                                if (item['(Child) sku'] === sku) {
+                                    item.NRL = newValue;
                                 }
                             });
                             filteredData.forEach(item => {
-                                if (item['sku'] === sku) {
-                                    item.NR = nrValue;
+                                if (item['(Child) sku'] === sku) {
+                                    item.NRL = newValue;
                                 }
                             });
-                            // ✅ Recalculate & re-render
-                            updateZeroViewDiv();
                             calculateTotals();
                             renderTable();
                         },
-                        error: function(err) {
-                            console.error('Error saving NR:', err);
-                            showNotification('danger', 'Failed to update NR');
+                        error: function(xhr) {
+                            showNotification('danger', 'Failed to update.');
                         }
                     });
                 });
             }
+
+
+            $(document).on('change', '.listed-checkbox, .live-checkbox', function() {
+                const $cb = $(this);
+                const sku = $cb.data('sku');
+                const field = $cb.hasClass('listed-checkbox') ? 'Listed' : 'Live';
+                const value = $cb.is(':checked') ? 1 : 0;
+
+                $.ajax({
+                    url: '/ebay/update-listed-live',
+                    method: 'POST',
+                    data: {
+                        sku: sku,
+                        field: field,
+                        value: value,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(res) {
+                        console.log(`${field} updated for SKU ${sku}`);
+                    },
+                    error: function(err) {
+                        console.error('Update failed', err);
+                        alert('Failed to update. Try again.');
+                        $cb.prop('checked', !value); // revert on error
+                    }
+                });
+            });
+
 
             window.openModal = function(selectedItem, type) {
                 try {
@@ -2475,23 +3152,22 @@
                         itemData = selectedItem;
                     }
 
-
                     if (!itemData || typeof itemData !== 'object') {
                         console.error("Invalid item data:", itemData);
                         showNotification('danger', 'Failed to open details view. Invalid data.');
                         return;
                     }
 
-                    const itemId = itemData['SL No.'] || `row-${Math.random().toString(36).substr(2, 9)}`;
+                    const itemId = itemData['Sl'] || `row-${Math.random().toString(36).substr(2, 9)}`;
                     const modalId = `modal-${itemId}-${type.replace(/\s+/g, '-').toLowerCase()}`;
 
                     // Check cache first - use the cached data if available
-                    const cachedData = amazonZeroDataCache.get(itemId);
+                    const cachedData = ebayViewDataCache.get(itemId);
                     const dataToUse = cachedData || itemData;
 
                     // Store the data in cache if it wasn't already
                     if (!cachedData) {
-                        amazonZeroDataCache.set(itemId, itemData);
+                        ebayViewDataCache.set(itemId, itemData);
                     }
 
                     // Check if this modal already exists
@@ -2500,11 +3176,6 @@
                         // Just bring it to front if it exists
                         ModalSystem.bringToFront(existingModal);
                         return;
-                    }
-
-                    // Special handling for Scouth products view
-                    if (type.toLowerCase() === 'scouth products view') {
-                        return openScouthProductsView(selectedItem, modalId);
                     }
 
                     // Create modal content based on type
@@ -2518,142 +3189,416 @@
                         },
                         {
                             title: 'SKU',
-                            content: dataToUse['sku']
+                            content: dataToUse['(Child) sku']
                         }
                     ];
 
                     // Fields specific to each modal type
                     let fieldsToDisplay = [];
                     switch (type.toLowerCase()) {
+                        case 'conversion view':
+                            fieldsToDisplay = [{
+                                    title: 'PmtClkL30',
+                                    content: selectedItem['PmtClkL30']
+                                },
+                                {
+                                    title: 'SCVR',
+                                    content: (Number(selectedItem['PmtClkL30']) > 0) ?
+                                        ((Number(selectedItem['eBay L30']) / Number(selectedItem[
+                                            'PmtClkL30'])) * 100).toFixed(2) + '%' : '0%'
+                                },
+                                {
+                                    title: 'KwClkL60',
+                                    content: selectedItem['KwClkL60']
+                                },
+                                {
+                                    title: 'KwClkL30',
+                                    content: selectedItem['KwClkL30']
+                                },
+                                {
+                                    title: 'KwClkL7',
+                                    content: selectedItem['KwClkL7']
+                                },
+                                {
+                                    title: 'KwSldL60',
+                                    content: selectedItem['KwSldL60']
+                                },
+                                {
+                                    title: 'KwSldL30',
+                                    content: selectedItem['KwSldL30']
+                                },
+                                {
+                                    title: 'KwSldL7',
+                                    content: selectedItem['KwSldL7']
+                                },
+                                {
+                                    title: 'KwCvrL60',
+                                    content: selectedItem['KwCvrL60']
+                                },
+                                {
+                                    title: 'KwCvrL30',
+                                    content: selectedItem['KwCvrL30']
+                                },
+                                {
+                                    title: 'KwCvrL7',
+                                    content: selectedItem['KwCvrL7']
+                                },
+                                {
+                                    title: 'PmtClkL30',
+                                    content: selectedItem['PmtClkL30']
+                                },
+                                {
+                                    title: 'PmtClkL7',
+                                    content: selectedItem['PmtClkL7']
+                                },
+                                {
+                                    title: 'PmtSldL30',
+                                    content: selectedItem['PmtSldL30']
+                                },
+                                {
+                                    title: 'PmtSldL7',
+                                    content: selectedItem['PmtSldL7']
+                                },
+                                {
+                                    title: 'PmtCvrL30',
+                                    content: selectedItem['PmtCvrL30']
+                                },
+                                {
+                                    title: 'PmtCvrL7',
+                                    content: selectedItem['PmtCvrL7']
+                                }
+                            ];
+                            break;
                         case 'visibility view':
                             fieldsToDisplay = [{
-                                    title: 'Sess30',
-                                    content: selectedItem['Sess30']
+                                    title: 'PmtClkL30',
+                                    content: selectedItem['PmtClkL30']
                                 },
                                 {
-                                    title: 'Sessl60',
-                                    content: selectedItem['sessions_l60']
+                                    title: 'KwImpL60',
+                                    content: selectedItem['KwImpL60']
                                 },
                                 {
-                                    title: 'KwImp60',
-                                    content: selectedItem['KwImp60']
+                                    title: 'KwImpL30',
+                                    content: selectedItem['KwImpL30']
                                 },
                                 {
-                                    title: 'KwImp30',
-                                    content: selectedItem['KwImp30']
+                                    title: 'KwImpL7',
+                                    content: selectedItem['KwImpL7']
                                 },
                                 {
-                                    title: 'KwClks60',
-                                    content: selectedItem['KwClks60']
+                                    title: 'KwClkL60',
+                                    content: selectedItem['KwClkL60']
                                 },
                                 {
-                                    title: 'KwClks30',
-                                    content: selectedItem['KwClks30']
+                                    title: 'KwClkL30',
+                                    content: selectedItem['KwClkL30']
                                 },
                                 {
-                                    title: 'KwCtr60',
-                                    content: selectedItem['KwCtr60']
+                                    title: 'KwClkL7',
+                                    content: selectedItem['KwClkL7']
                                 },
                                 {
-                                    title: 'KwCtr30',
-                                    content: selectedItem['KwCtr30']
+                                    title: 'KwCtrL60',
+                                    content: selectedItem['KwCtrL60']
                                 },
                                 {
-                                    title: 'PtImp60',
-                                    content: selectedItem['PtImp60']
+                                    title: 'KwCtrL30',
+                                    content: selectedItem['KwCtrL30']
                                 },
                                 {
-                                    title: 'PtImp30',
-                                    content: selectedItem['PtImp30']
+                                    title: 'KwCtrL7',
+                                    content: selectedItem['KwCtrL7']
                                 },
                                 {
-                                    title: 'PtClks60',
-                                    content: selectedItem['PtClks60']
+                                    title: 'PmtImpL30',
+                                    content: selectedItem['PmtImpL30']
                                 },
                                 {
-                                    title: 'PtClks30',
-                                    content: selectedItem['PtClks30']
+                                    title: 'PmtImpL7',
+                                    content: selectedItem['PmtImpL7']
                                 },
                                 {
-                                    title: 'PtCtr60',
-                                    content: selectedItem['PtCtr60']
+                                    title: 'PmtClkL30',
+                                    content: selectedItem['PmtClkL30']
                                 },
                                 {
-                                    title: 'PtCtr30',
-                                    content: selectedItem['PtCtr30']
+                                    title: 'PmtClkL7',
+                                    content: selectedItem['PmtClkL7']
                                 },
                                 {
-                                    title: 'DspImp60',
-                                    content: selectedItem['DspImp60']
+                                    title: 'PmtCtrL30',
+                                    content: selectedItem['PmtCtrL30']
                                 },
                                 {
-                                    title: 'DspImp30',
-                                    content: selectedItem['DspImp30']
-                                },
-                                {
-                                    title: 'DspClks60',
-                                    content: selectedItem['DspClks60']
-                                },
-                                {
-                                    title: 'DspClks30',
-                                    content: selectedItem['DspClks30']
-                                },
-                                {
-                                    title: 'DspCtr60',
-                                    content: selectedItem['DspCtr60']
-                                },
-                                {
-                                    title: 'DspCtr30',
-                                    content: selectedItem['DspCtr30']
-                                },
-                                {
-                                    title: 'HdImp60',
-                                    content: selectedItem['HdImp60']
-                                },
-                                {
-                                    title: 'HdImp30',
-                                    content: selectedItem['HdImp30']
-                                },
-                                {
-                                    title: 'HdClks60',
-                                    content: selectedItem['HdClks60']
-                                },
-                                {
-                                    title: 'HdClks30',
-                                    content: selectedItem['HdClks30']
-                                },
-                                {
-                                    title: 'HdCtr60',
-                                    content: selectedItem['HdCtr60']
-                                },
-                                {
-                                    title: 'HdCtr30',
-                                    content: selectedItem['HdCtr30']
-                                },
-                                {
-                                    title: 'TImp60',
-                                    content: selectedItem['TImp60']
-                                },
-                                {
-                                    title: 'TImp30',
-                                    content: selectedItem['TImp30']
-                                },
-                                {
-                                    title: 'TClks60',
-                                    content: selectedItem['TClks60']
-                                },
-                                {
-                                    title: 'TClks30',
-                                    content: selectedItem['TClks30']
-                                },
-                                {
-                                    title: 'TCtr60',
-                                    content: selectedItem['TCtr60']
-                                },
-                                {
-                                    title: 'TCtr30',
-                                    content: selectedItem['TCtr30']
+                                    title: 'PmtCtrL7',
+                                    content: selectedItem['PmtCtrL7']
                                 }
+                            ];
+                            break;
+                        case 'price view':
+                            fieldsToDisplay = [{
+                                    title: 'eBay LIVE Price',
+                                    content: selectedItem['eBay LIVE Price']
+                                },
+                                {
+                                    title: 'eBay Price',
+                                    content: selectedItem['eBay Price']
+                                },
+                                {
+                                    title: 'PFT %',
+                                    content: selectedItem['PFT %']
+                                },
+                                {
+                                    title: 'ROI%',
+                                    content: selectedItem['ROI%']
+                                },
+                                {
+                                    title: 'sprice',
+                                    content: dataToUse['sprice']
+                                },
+                                {
+                                    title: 'Spft%',
+                                    content: dataToUse['Spft%'] !== 0 ?
+                                        Math.round(dataToUse['Spft%'] * 100) : 0
+                                },
+                                {
+                                    title: 'ad cost',
+                                    content: selectedItem['ad cost']
+                                },
+                                {
+                                    title: 'a+spft',
+                                    content: selectedItem['a+spft']
+                                },
+                                {
+                                    title: 'a+ROI',
+                                    content: selectedItem['a+ROI']
+                                },
+                                {
+                                    title: 'LMP 1',
+                                    content: selectedItem['LMP 1']
+                                },
+                                {
+                                    title: 'link 1',
+                                    content: dataToUse['link 1']
+                                },
+                                {
+                                    title: 'lmp 2',
+                                    content: dataToUse['lmp 2']
+                                },
+                                {
+                                    title: 'link 2',
+                                    content: dataToUse['link 2']
+                                },
+                                {
+                                    title: 'lmp 3',
+                                    content: dataToUse['lmp 3']
+                                },
+                                {
+                                    title: 'link 3',
+                                    content: dataToUse['link 3']
+                                }
+                            ];
+                            break;
+                        case 'advertisement view':
+                            fieldsToDisplay = [
+                                // Core TACOS Metrics
+                                {
+                                    title: 'KwImpL60',
+                                    content: selectedItem['KwImpL60']
+                                },
+                                {
+                                    title: 'KwImpL30',
+                                    content: selectedItem['KwImpL30']
+                                },
+                                {
+                                    title: 'KwImpL7',
+                                    content: selectedItem['KwImpL7']
+                                },
+                                {
+                                    title: 'KwClkL60',
+                                    content: selectedItem['KwClkL60']
+                                },
+                                {
+                                    title: 'KwClkL30',
+                                    content: selectedItem['KwClkL30']
+                                },
+                                {
+                                    title: 'KwClkL7',
+                                    content: selectedItem['KwClkL7']
+                                },
+                                {
+                                    title: 'KwCtrL60',
+                                    content: selectedItem['KwCtrL60']
+                                },
+                                {
+                                    title: 'KwCtrL30',
+                                    content: selectedItem['KwCtrL30']
+                                },
+                                {
+                                    title: 'KwCtrL7',
+                                    content: selectedItem['KwCtrL7']
+                                },
+                                {
+                                    title: 'KwSpndL60',
+                                    content: selectedItem['KwSpndL60']
+                                },
+                                {
+                                    title: 'KwSpndL30',
+                                    content: selectedItem['KwSpndL30']
+                                },
+                                {
+                                    title: 'KwSpndL7',
+                                    content: selectedItem['KwSpndL7']
+                                },
+                                {
+                                    title: 'KwSpndL1',
+                                    content: selectedItem['KwSpndL1']
+                                },
+                                {
+                                    title: 'KwSldL60',
+                                    content: selectedItem['KwSldL60']
+                                },
+                                {
+                                    title: 'KwSldL30',
+                                    content: selectedItem['KwSldL30']
+                                },
+                                {
+                                    title: 'KwSldL7',
+                                    content: selectedItem['KwSldL7']
+                                },
+                                {
+                                    title: 'KwSlsL60',
+                                    content: selectedItem['KwSlsL60']
+                                },
+                                {
+                                    title: 'KwSlsL30',
+                                    content: selectedItem['KwSlsL30']
+                                },
+                                {
+                                    title: 'KwSlsL7',
+                                    content: selectedItem['KwSlsL7']
+                                },
+                                {
+                                    title: 'KwCpcL60',
+                                    content: selectedItem['KwCpcL60']
+                                },
+                                {
+                                    title: 'KwCpcL30',
+                                    content: selectedItem['KwCpcL30']
+                                },
+                                {
+                                    title: 'KwCpcL7',
+                                    content: selectedItem['KwCpcL7']
+                                },
+                                {
+                                    title: 'KwCpcL1',
+                                    content: selectedItem['KwCpcL1']
+                                },
+                                {
+                                    title: 'KwAcosL60',
+                                    content: selectedItem['KwAcosL60']
+                                },
+                                {
+                                    title: 'KwAcosL30',
+                                    content: selectedItem['KwAcosL30']
+                                },
+                                {
+                                    title: 'KwAcosL7',
+                                    content: selectedItem['KwAcosL7']
+                                },
+                                {
+                                    title: 'KwCvrL30',
+                                    content: selectedItem['KwCvrL30']
+                                },
+                                {
+                                    title: 'KwCvrL7',
+                                    content: selectedItem['KwCvrL7']
+                                },
+                                {
+                                    title: 'Ub 7',
+                                    content: selectedItem['Ub 7']
+                                },
+                                {
+                                    title: 'Ub yes',
+                                    content: selectedItem['Ub yes']
+                                },
+                                {
+                                    title: 'PmtImpL30',
+                                    content: selectedItem['PmtImpL30']
+                                },
+                                {
+                                    title: 'PmtImpL7',
+                                    content: selectedItem['PmtImpL7']
+                                },
+                                {
+                                    title: 'PmtClkL30',
+                                    content: selectedItem['PmtClkL30']
+                                },
+                                {
+                                    title: 'PmtClkL7',
+                                    content: selectedItem['PmtClkL7']
+                                },
+                                {
+                                    title: 'PmtCtrL30',
+                                    content: selectedItem['PmtCtrL30']
+                                },
+                                {
+                                    title: 'PmtCtrL7',
+                                    content: selectedItem['PmtCtrL7']
+                                },
+                                {
+                                    title: 'PmtSpndL30',
+                                    content: selectedItem['PmtSpndL30']
+                                },
+                                {
+                                    title: 'PmtSpndL7',
+                                    content: selectedItem['PmtSpndL7']
+                                },
+                                {
+                                    title: 'PmtSldL30',
+                                    content: selectedItem['PmtSldL30']
+                                },
+                                {
+                                    title: 'PmtSldL7',
+                                    content: selectedItem['PmtSldL7']
+                                },
+                                {
+                                    title: 'PmtSlsL30',
+                                    content: selectedItem['PmtSlsL30']
+                                },
+                                {
+                                    title: 'PmtSlsL7',
+                                    content: selectedItem['PmtSlsL7']
+                                },
+                                {
+                                    title: 'PmtAcosL30',
+                                    content: selectedItem['PmtAcosL30']
+                                },
+                                {
+                                    title: 'PmtAcosL7',
+                                    content: selectedItem['PmtAcosL7']
+                                },
+                                {
+                                    title: 'PmtCvrL30',
+                                    content: selectedItem['PmtCvrL30']
+                                },
+                                {
+                                    title: 'PmtCvrL7',
+                                    content: selectedItem['PmtCvrL7']
+                                },
+                                {
+                                    title: 'Pmt%',
+                                    content: selectedItem['Pmt%']
+                                },
+                                {
+                                    title: 'TSpendL30',
+                                    content: selectedItem['TSpendL30']
+                                },
+                                {
+                                    title: 'TacosL30',
+                                    content: selectedItem['TacosL30']
+                                },
                             ];
                             break;
                         case 'wmpnm view':
@@ -2708,8 +3653,8 @@
                                             content: dataToUse['SEO  (KW RICH) ISSUE'],
                                             isCheckbox: true
                                         }, {
-                                            title: 'TITLE ISSUEAD ISSUE',
-                                            content: dataToUse['TITLE ISSUEAD ISSUE'],
+                                            title: 'TITLE ISSUE',
+                                            content: dataToUse['TITLE ISSUE'],
                                             isCheckbox: true
                                         },
                                         {
@@ -2931,252 +3876,153 @@
                 }
             };
 
-            // New function to handle Scouth products view specifically
-            function openScouthProductsView(data, modalId) {
-                if (!data.scout_data || !data.scout_data.all_data) {
-                    const modal = ModalSystem.createModal(
-                        modalId,
-                        'Scouth Products View Details',
-                        '<div class="alert alert-warning">No scout data available</div>'
-                    );
-                    ModalSystem.showModal(modalId);
-                    return;
-                }
+            if (!document.getElementById('pricingModal')) {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-                // Sort products by price (lowest first)
-                const sortedProducts = [...data.scout_data.all_data].sort((a, b) => {
-                    const priceA = parseFloat(a.price) || Infinity;
-                    const priceB = parseFloat(b.price) || Infinity;
-                    return priceA - priceB;
-                });
+                $('body').append(`
+                <div class="modal fade" id="pricingModal" tabindex="-1" aria-labelledby="pricingModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content p-3">
+                            <div class="modal-header">
+                                <h5 class="modal-title">SPRICE Calculator</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="pricingForm" method="POST" >
+                                    @csrf
+                                    <input type="hidden" id="skuInput" name="sku">
 
-                // Create header with Parent and SKU
-                const header = document.createElement('div');
-                header.className = 'scouth-header';
-                header.innerHTML = `
-                    <div class="scouth-header-item">
-                        <div class="scouth-product-label">Parent</div>
-                        <div class="scouth-product-value">${data.Parent || 'N/A'}</div>
+                                    <div class="mb-2">
+                                        <label>SPRICE ($)</label>
+                                        <input type="number" step="0.01" class="form-control" id="sprPriceInput" name="sprice">
+                                    </div>
+                                    <div class="mb-2">
+                                        <label>SPFT%</label>
+                                        <input type="text" class="form-control" id="spftPercentInput" name="spft_percent" readonly>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label>SROI%</label>
+                                        <input type="text" class="form-control" id="sroiPercentInput" name="sroi_percent" readonly>
+                                    </div>
+<button type="button" id="savePricingBtn" class="btn btn-primary">Save</button>
+                                </form>
+
+                            </div>
+                        </div>
                     </div>
-                    <div class="scouth-header-item">
-                        <div class="scouth-product-label">SKU</div>
-                        <div class="scouth-product-value">${data['sku'] || 'N/A'}</div>
-                    </div>
-                `;
-
-                // Create table wrapper
-                const tableWrapper = document.createElement('div');
-                tableWrapper.className = 'scouth-table-wrapper';
-                tableWrapper.style.height = '425px';
-                tableWrapper.style.overflowY = 'auto';
-
-                // Create table header
-                const tableHeader = document.createElement('div');
-                tableHeader.className = 'scouth-table-header';
-                tableHeader.style.position = 'sticky';
-                tableHeader.style.top = '0';
-                tableHeader.style.backgroundColor = '#fff';
-                tableHeader.style.zIndex = '10';
-                tableHeader.innerHTML = `
-                    <div class="scouth-table-cell">ID</div>
-                    <div class="scouth-table-cell">Price</div>
-                    <div class="scouth-table-cell">Category</div>
-                    <div class="scouth-table-cell">Dimensions</div>
-                    <div class="scouth-table-cell">Image</div>
-                    <div class="scouth-table-cell">Quality Score</div>
-                    <div class="scouth-table-cell">Parent ASIN</div>
-                    <div class="scouth-table-cell">Product Rank</div>
-                    <div class="scouth-table-cell">Rating</div>
-                    <div class="scouth-table-cell">Reviews</div>
-                    <div class="scouth-table-cell">Weight</div>
-                `;
-
-                // Create table body
-                const tableBody = document.createElement('div');
-                tableBody.className = 'scouth-table-body';
-
-                // Add CSS for image thumbnails
-                const style = document.createElement('style');
-                style.textContent = `
-                    .scouth-image-link {
-                        display: inline-block;
-                    }
-                    .scouth-image-thumbnail {
-                        width: 60px;
-                        height: 60px;
-                        border-radius: 50%;
-                        object-fit: cover;
-                        cursor: pointer;
-                        border: 2px solid #ddd;
-                        transition: transform 0.2s;
-                    }
-                    .scouth-image-thumbnail:hover {
-                        transform: scale(1.1);
-                        border-color: #aaa;
-                    }
-                `;
-                document.head.appendChild(style);
-
-                // Add product rows
-                sortedProducts.forEach(product => {
-                    const row = document.createElement('div');
-                    row.className = 'scouth-table-row';
-
-                    let imageCellContent = 'N/A';
-                    if (product.image_url) {
-                        const link = document.createElement('a');
-                        link.className = 'scouth-image-link';
-                        link.href = product.image_url;
-                        link.target = '_blank';
-                        link.rel = 'noopener noreferrer';
-
-                        const thumbnail = document.createElement('img');
-                        thumbnail.className = 'scouth-image-thumbnail';
-                        thumbnail.src = product.image_url;
-                        thumbnail.alt = 'Product image';
-
-                        link.appendChild(thumbnail);
-                        imageCellContent = link.outerHTML;
-                    }
-
-                    row.innerHTML = `
-                        <div class="scouth-table-cell">${product.id || 'N/A'}</div>
-                        <div class="scouth-table-cell">${product.price ? '$' + parseFloat(product.price).toFixed(2) : 'N/A'}</div>
-                        <div class="scouth-table-cell">${product.category || 'N/A'}</div>
-                        <div class="scouth-table-cell">${product.dimensions || 'N/A'}</div>
-                        <div class="scouth-table-cell">${imageCellContent}</div>
-                        <div class="scouth-table-cell">${product.listing_quality_score || 'N/A'}</div>
-                        <div class="scouth-table-cell">${product.parent_asin || 'N/A'}</div>
-                        <div class="scouth-table-cell">${product.product_rank || 'N/A'}</div>
-                        <div class="scouth-table-cell">${product.rating || 'N/A'}</div>
-                        <div class="scouth-table-cell">${product.reviews || 'N/A'}</div>
-                        <div class="scouth-table-cell">${product.weight || 'N/A'}</div>
-                    `;
-                    tableBody.appendChild(row);
-                });
-
-                // Assemble table
-                tableWrapper.appendChild(tableHeader);
-                tableWrapper.appendChild(tableBody);
-
-                // Create main container
-                const mainContainer = document.createElement('div');
-                mainContainer.appendChild(header);
-                mainContainer.appendChild(tableWrapper);
-
-                // Create modal
-                const modal = ModalSystem.createModal(
-                    modalId,
-                    'Scouth Products View Details (Sorted by Lowest Price)',
-                    mainContainer.outerHTML
-                );
-
-                // Show the modal
-                ModalSystem.showModal(modalId);
+                </div>
+    `);
             }
 
             // Helper function to create a field card
             function createFieldCard(field, data, type, itemId) {
-                const hyperlinkFields = ['LINK 1', 'LINK 2', 'LINK 3', 'LINK 4', 'LINK 5'];
+                const hyperlinkFields = ['link 1', 'link 2', 'link 3'];
 
-                const editableFields = [
-                    'SPRICE', 'Tannishtha done', 'LMP 1', 'LINK 1', 'LMP 2', 'LINK 2',
-                    'LMP3', 'LINK 3', 'LMP 4', 'LINK 4', 'LMP 5', 'LINK 5',
-                    'HIDE', 'LISTED', 'LIVE / ACTIVE', 'VISIBILITY ISSUE', 'INV SYNCED',
-                    'RIGHT CATEGORY', 'INCOMPLETE LISTING', 'BUYBOX ISSUE', 'SEO  (KW RICH) ISSUE',
-                    'TITLE ISSUEAD ISSUE', 'AD ISSUE', 'BP ISSUE', 'DESCR ISSUE', 'SPECS ISSUE',
-                    'IMG ISSUE', 'CATEGORY ISSUE', 'MAIN IMAGE ISSUE', 'PRICE ISSUE',
-                    'REVIEW ISSUE', 'WRONG KW IN LISTING', 'CVR ISSUE', 'REV ISSUE',
-                    'IMAGE ISSUE', 'VID ISSUE', 'USP HIGHLIGHT ISSUE', 'SPECS ISSUES',
-                    'MISMATCH ISSUE', 'NOTES', 'ACTION', 'TITLE ISSUE'
-                ];
-
-                const percentageFields = ['KwCtr60', 'KwCtr30', 'PtCtr60', 'PtCtr30', 'DspCtr60',
-                    'DspCtr30',
-                    'HdCtr60', 'HdCtr30', 'SCVR', 'KwCvr60', 'KwCvr30', 'PtCvr60', 'PtCvr30',
-                    'DspCvr60', 'DspCvr30', 'HdCvr60', 'HdCvr30', 'TCvr60', 'TCvr30',
-                    'KwAcos60', 'KwAcos30', 'PtAcos60', 'PtAcos30', 'DspAcos60', 'DspAcos30',
-                    'HdAcos60', 'HdAcos30', 'TCtr60', 'TCtr30', 'TAcos60', 'TAcos30',
-                    'Tacos60', 'Tacos30', 'PFT_percentage', 'TPFT', 'ROI_percentage'
+                const percentageFields = ['KwCtrL60', 'KwCtrL30', 'KwCtrL7', 'PFT %', 'ROI%',
+                    'a+spft', 'a+ROI', 'SCVR', 'KwCvrL60', 'KwCvrL30', 'KwCvrL7',
+                    'PmtCvrL30', 'PmtCvrL7', 'KwCtrL60', 'KwCtrL30', 'KwCtrL7', 'PmtCtrL30',
+                    'PmtCtrL7', 'KwAcosL60', 'KwAcosL30', 'KwAcosL7', 'KwCvrL30', 'KwCvrL7',
+                    'Ub 7',
+                    'Ub yes',
+                    'PmtCtrL30', 'PmtCtrL7', 'PmtAcosL30', 'PmtAcosL7', 'PmtCvrL30',
+                    'PmtCvrL7',
+                    'Pmt%', 'TacosL30'
                 ];
 
                 const getIndicatorColor = (fieldTitle, fieldValue) => {
-                    // Handle both string percentages (like "15%") and raw numbers
-                    let value;
-                    if (typeof fieldValue === 'string' && fieldValue.includes('%')) {
-                        value = parseFloat(fieldValue.replace('%', ''));
-                    } else {
-                        value = parseFloat(fieldValue);
-                    }
+                    const value = (fieldValue * 100).toFixed(2) || 0;
 
-                    // Handle NaN cases (invalid numbers)
-                    if (isNaN(value)) {
-                        return 'gray';
-                    }
-
-                    // Price view specific colors
-                    if (type.toLowerCase() === 'price view') {
-                        if (['PFT_percentage', 'TPFT'].includes(fieldTitle)) {
+                    if (type === 'price view') {
+                        if (['PFT %', 'Spft%'].includes(fieldTitle)) {
                             if (value < 10) return 'red';
                             if (value >= 10 && value < 15) return 'yellow';
                             if (value >= 15 && value < 20) return 'blue';
                             if (value >= 20 && value < 40) return 'green';
-                            return 'pink'; // 40 and above
+                            if (value >= 40) return 'pink';
                         }
-                        if (fieldTitle === 'ROI_percentage') {
-                            if (value <= 50) return 'red';
-                            if (value > 50 && value <= 75) return 'yellow';
-                            if (value > 75 && value <= 100) return 'green';
-                            return 'pink'; // Above 100
+
+                        if (fieldTitle === 'ROI%') {
+                            if (value < 50) return 'red';
+                            if (value >= 50 && value < 75) return 'yellow';
+                            if (value >= 75 && value < 125) return 'green';
+                            if (value >= 125) return 'pink';
                         }
-                        if (fieldTitle === 'Spft%') {
-                            // Convert to percentage for easier comparison
-                            const percentValue = Math.abs(value) < 100 ? value * 100 : value;
-                            if (percentValue < 0) return 'red'; // Negative values (loss)
-                            if (percentValue < 10) return 'red'; // Less than 10%
-                            if (percentValue < 15) return 'yellow'; // 10-14.99%
-                            if (percentValue < 20) return 'blue'; // 15-19.99%
-                            if (percentValue < 40) return 'green'; // 20-39.99%
-                            return 'pink'; // 40% and above
+
+                        if (['a+spft', 'a+ROI'].includes(fieldTitle)) {
+                            return 'gray'; // Missing in sheet
                         }
+
+                        return 'gray';
                     }
 
-                    // Advertisement view specific colors
-                    if (type.toLowerCase() === 'advertisement view') {
-                        if (['KwAcos60', 'KwAcos30', 'PtAcos60', 'PtAcos30', 'DspAcos60',
-                                'DspAcos30', 'TAcos60', 'TAcos30'
-                            ].includes(fieldTitle)) {
-                            if (value === 0) return 'red';
-                            if (value > 0.01 && value <= 7) return 'pink';
+                    if (type === 'visibility view') {
+                        if (['KwCtrL60', 'KwCtrL30', 'KwCtrL7', 'PmtCtrL30', 'PmtCtrL7'].includes(fieldTitle)) {
+                            return 'gray'; // Marked as missing
+                        }
+
+                        return 'gray';
+                    }
+
+                    if (type === 'advertisement view') {
+                        if (['KwAcosL60', 'KwAcosL30', 'KwAcosL7', 'TacosL30'].includes(fieldTitle)) {
+                            if (value == 0 || value == 100) return 'red';
+                            if (value > 0 && value <= 7) return 'pink';
                             if (value > 7 && value <= 14) return 'green';
-                            if (value > 14 && value <= 21) return 'blue';
-                            if (value > 21 && value <= 28) return 'yellow';
-                            if (value > 28) return 'red';
+                            if (value > 14 && value <= 21) return 'yellow';
+                            if (value > 21) return 'red';
                         }
-                        if (['KwCvr60', 'KwCvr30', 'PtCvr60', 'DspCvr60', 'PtCvr30',
-                                'DspCvr30', 'HdAcos60', 'HdAcos30', 'HdCvr60', 'HdCvr30',
-                                'TCvr60', 'TCvr30'
+
+                        if (['KwCvrL30', 'KwCvrL7'].includes(fieldTitle)) {
+                            if (value < 7) return 'red';
+                            if (value > 7 && value <= 13) return 'green';
+                            if (value > 13) return 'pink';
+                        }
+
+                        if (['Ub 7', 'Ub yes'].includes(fieldTitle)) {
+                            if (value < 50) return 'red';
+                            if (value >= 50 && value <= 90) return 'green';
+                            if (value > 90) return 'pink';
+                        }
+
+                        if (['PmtAcosL30', 'PmtAcosL7'].includes(fieldTitle)) {
+                            if (value == 0) return 'red';
+                            if (value > 0 && value <= 10) return 'pink';
+                            if (value > 10 && value <= 20) return 'green';
+                            if (value > 20) return 'red';
+                        }
+
+                        if (fieldTitle === 'PmtCvrL30') {
+                            if (value < 7) return 'red';
+                            if (value > 7 && value < 13) return 'green';
+                            if (value >= 13) return 'pink';
+                        }
+
+                        if (fieldTitle === 'PmtCvrL7') {
+                            if (value < 7) return 'red';
+                            if (value > 7 && value < 14) return 'green';
+                            if (value >= 14) return 'pink';
+                        }
+
+                        if (['KwCtrL60', 'KwCtrL30', 'KwCtrL7', 'PmtCtrL30', 'PmtCtrL7', 'Pmt%'].includes(
+                                fieldTitle)) {
+                            return 'gray'; // Missing in sheet
+                        }
+
+                        return 'gray';
+                    }
+
+                    if (type === 'conversion view') {
+                        if (['Scvr', 'KwCvr60', 'KwCvr30', 'PtCvr60', 'PtCvr30', 'DspCvr60', 'DspCvr30',
+                                'HdCvr60',
+                                'HdCvr30', 'TCvr60', 'TCvr30'
                             ].includes(fieldTitle)) {
                             if (value <= 7) return 'red';
                             if (value > 7 && value <= 13) return 'green';
-                            return fieldTitle.includes('PtCvr') || fieldTitle.includes('DspCvr') ||
-                                fieldTitle.includes('HdCvr') || fieldTitle.includes('TCvr') ? 'pink' : 'gray';
+                            if (value > 13) return 'pink';
                         }
+                        return 'gray';
                     }
 
-                    // Conversion view specific colors
-                    if (type.toLowerCase() === 'conversion view') {
-                        if (['Scvr', 'KwCvr60', 'KwCvr30', 'PtCvr60', 'PtCvr30',
-                                'DspCvr60', 'DspCvr30', 'HdCvr60', 'HdCvr30',
-                                'TCvr60', 'TCvr30'
-                            ].includes(fieldTitle)) {
-                            if (value <= 7) return 'red';
-                            if (value > 7 && value <= 13) return 'green';
-                            return 'pink';
-                        }
-                    }
-
-                    // Default color for all other cases
                     return 'gray';
                 };
 
@@ -3214,23 +4060,19 @@
                 fieldInput.value = field.title;
                 card.appendChild(fieldInput);
 
-                if (percentageFields.includes(field.title) && typeof content === 'number') {
-                    // Skip multiplication for PFT_percentage and ROI_percentage
-                    if (!['PFT_percentage', 'ROI_percentage'].includes(field.title)) {
-                        content = `${(content * 100).toFixed(2)}%`;
-                    } else {
-                        content = `${content.toFixed(2)}%`;
-                    }
+                if (percentageFields.includes(field.title) && typeof content ===
+                    'number') {
+                    content = `${(content * 100).toFixed(2)}%`;
                 }
 
                 // Add edit icon if field is editable
-                if (editableFields.includes(field.title)) {
-                    const editIcon = document.createElement('div');
-                    editIcon.className = 'position-absolute top-0 end-0 p-2 edit-icon';
-                    editIcon.style.cssText = 'cursor:pointer; z-index: 1;';
-                    editIcon.innerHTML = '<i class="fas fa-pen text-primary"></i>';
-                    card.appendChild(editIcon);
-                }
+                // if (editableFields.includes(field.title)) {
+                //     const editIcon = document.createElement('div');
+                //     editIcon.className = 'position-absolute top-0 end-0 p-2 edit-icon';
+                //     editIcon.style.cssText = 'cursor:pointer; z-index: 1;';
+                //     editIcon.innerHTML = '<i class="fas fa-pen text-primary"></i>';
+                //     card.appendChild(editIcon);
+                // }
 
                 const cardBody = document.createElement('div');
                 cardBody.className = 'card-body';
@@ -3293,81 +4135,76 @@
                 const modalElement = document.getElementById(modalId);
                 if (!modalElement) return;
 
-                $(modalElement).off('click', '.edit-icon, .save-icon');
+                // Get editable fields from the same array used in createFieldCard
+                const editableFields = ['eBay Price', 'sprice', 'LMP 1', 'link 1', 'lmp 2', 'link 2', 'lmp 3',
+                    'link 3',
+                    'HIDE', 'LISTED', 'LIVE / ACTIVE', 'VISIBILITY ISSUE', 'INV SYNCED',
+                    'RIGHT CATEGORY', 'INCOMPLETE LISTING', 'BUYBOX ISSUE', 'SEO  (KW RICH) ISSUE',
+                    'TITLE ISSUEAD ISSUE', 'AD ISSUE', 'BP ISSUE', 'DESCR ISSUE', 'SPECS ISSUE',
+                    'IMG ISSUE', 'CATEGORY ISSUE', 'MAIN IMAGE ISSUE', 'PRICE ISSUE',
+                    'REVIEW ISSUE', 'WRONG KW IN LISTING', 'CVR ISSUE', 'REV ISSUE',
+                    'IMAGE ISSUE', 'VID ISSUE', 'USP HIGHLIGHT ISSUE', 'SPECS ISSUES',
+                    'MISMATCH ISSUE', 'NOTES', 'ACTION', 'TITLE ISSUE'
+                ];
 
-                $(modalElement).on('click', '.edit-icon', function(e) {
-                    e.stopPropagation();
+                // Remove all edit/save icons
+                $(modalElement).find('.edit-icon, .save-icon').remove();
 
-                    const icon = $(this);
-                    const card = icon.closest('.card');
-                    const contentElement = card.find('.editable-content');
-                    const checkbox = contentElement.find('.form-check-input');
-                    const title = card.find('.card-title').text().trim();
+                // Enable only editable fields
+                $(modalElement).find('.card').each(function() {
+                    const $card = $(this);
+                    const title = $card.find('.card-title').text().trim();
+                    if (!editableFields.includes(title)) return;
 
-                    // If it's a checkbox field, enable it and change to save icon
-                    if (checkbox.length > 0) {
-                        checkbox.prop('disabled', false);
-                        icon.html('<i class="fas fa-check text-success"></i>')
-                            .removeClass('edit-icon')
-                            .addClass('save-icon');
-                        return;
+                    const $content = $card.find('.editable-content');
+                    const $checkbox = $content.find('.form-check-input');
+                    const isHyperlink = $content.data('is-hyperlink');
+
+                    if ($checkbox.length) {
+                        $checkbox.prop('disabled', false);
+                    } else {
+                        let originalContent = $content.text().trim();
+                        if (isHyperlink && $content.find('a').length) {
+                            originalContent = $content.find('a').attr('href');
+                            $content.html(originalContent);
+                        }
+                        $content
+                            .attr('contenteditable', 'true')
+                            .addClass('border border-primary')
+                            .data('original-content', originalContent);
                     }
-
-                    const isHyperlink = contentElement.data('is-hyperlink');
-                    const slNo = card.find('.hidden-sl-no').val();
-
-                    if (currentEditingElement && currentEditingElement.is(contentElement)) {
-                        return;
-                    }
-
-                    if (isEditMode && currentEditingElement) {
-                        exitEditMode(currentEditingElement);
-                    }
-
-                    let originalContent = contentElement.text().trim();
-                    if (isHyperlink && contentElement.find('a').length) {
-                        originalContent = contentElement.find('a').attr('href');
-                    }
-
-                    contentElement.data('original-content', originalContent)
-                        .html(originalContent)
-                        .attr('contenteditable', 'true')
-                        .addClass('border border-primary')
-                        .focus();
-
-                    isEditMode = true;
-                    currentEditingElement = contentElement;
-
-                    icon.html('<i class="fas fa-check text-success"></i>')
-                        .removeClass('edit-icon')
-                        .addClass('save-icon');
                 });
 
-                // Save handler
-                $(modalElement).on('click', '.save-icon', function(e) {
-                    e.stopPropagation();
-                    const icon = $(this);
-                    const card = icon.closest('.card');
-                    const contentElement = card.find('.editable-content');
-                    const checkbox = contentElement.find('.form-check-input');
-                    const title = card.find('.card-title').text().trim();
-                    const slNo = card.find('.hidden-sl-no').val();
-                    const isHyperlink = contentElement.data('is-hyperlink');
-
-                    // Get the updated value
-                    let updatedValue;
-                    if (checkbox.length > 0) {
-                        updatedValue = checkbox.prop('checked') ? "true" : "false";
-                        checkbox.prop('disabled', true);
-                    } else {
-                        updatedValue = contentElement.text().trim();
-                        if (isHyperlink && contentElement.find('a').length) {
-                            updatedValue = contentElement.find('a').attr('href');
-                        }
+                // Save on Enter for text fields
+                $(modalElement).off('keydown', '.editable-content[contenteditable="true"]');
+                $(modalElement).on('keydown', '.editable-content[contenteditable="true"]', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const $content = $(this);
+                        const $card = $content.closest('.card');
+                        const title = $card.find('.card-title').text().trim();
+                        const slNo = $card.find('.hidden-sl-no').val();
+                        const isHyperlink = $content.data('is-hyperlink');
+                        let updatedValue = $content.text().trim();
+                        if (isHyperlink) updatedValue = updatedValue;
+                        saveChanges($content, title, slNo, isHyperlink, updatedValue, false);
                     }
+                });
 
-                    saveChanges(contentElement, title, slNo, isHyperlink, updatedValue, checkbox.length >
-                        0);
+                // Save on Enter for checkboxes
+                $(modalElement).off('keydown', '.form-check-input');
+                $(modalElement).on('keydown', '.form-check-input', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const $checkbox = $(this);
+                        const $card = $checkbox.closest('.card');
+                        const $content = $card.find('.editable-content');
+                        const title = $card.find('.card-title').text().trim();
+                        const slNo = $card.find('.hidden-sl-no').val();
+                        const isHyperlink = $content.data('is-hyperlink');
+                        let updatedValue = $checkbox.prop('checked') ? "true" : "false";
+                        saveChanges($content, title, slNo, isHyperlink, updatedValue, true);
+                    }
                 });
             }
 
@@ -3411,7 +4248,7 @@
                 const itemId = card.find('.hidden-sl-no').val() || slNo;
                 const saveIcon = card.find('.save-icon') || card.find('.edit-icon');
 
-                // Prepare data for API call (only for the original field)
+                // Prepare data for API call
                 const data = {
                     slNo: parseInt(itemId),
                     updates: {
@@ -3426,30 +4263,29 @@
 
                 // 1. First update the cache immediately
                 const cacheUpdateValue = isCheckbox ? (updatedValue === "true") : updatedValue;
-                amazonZeroDataCache.updateField(itemId, title, cacheUpdateValue);
+                ebayViewDataCache.updateField(itemId, title, cacheUpdateValue);
 
                 // 2. Update the filteredData array to reflect the change
-                const index = filteredData.findIndex(item => item['SL No.'] == itemId);
+                const index = filteredData.findIndex(item => item['Sl'] == itemId);
                 if (index !== -1) {
                     filteredData[index][title] = cacheUpdateValue;
 
-                    // If this is an SPRICE update, calculate and update Spft% in cache using new formula
-                    if (title === 'SPRICE' && filteredData[index].raw_data) {
+                    // If this is an SPRICE update, calculate and update Spft% in cache
+                    if (title === 'sprice' && filteredData[index].raw_data) {
                         const item = filteredData[index];
-                        const price = parseFloat(item.price) || 0;
-                        const SHIP = parseFloat(item.raw_data.SHIP) || 0;
+                        const AMZ = parseFloat(item.AMZ) || 0;
+                        const SH = parseFloat(item.raw_data.SH) || 0;
                         const LP = parseFloat(item.raw_data.LP) || 0;
                         const SPRICE = parseFloat(updatedValue) || 0;
 
-                        // Calculate Spft% using new formula: (SPRICE * price - SHIP - LP) / SPRICE
+                        // Calculate Spft% using formula: (SPRICE * 0.77 - LP - SH) / SPRICE
                         let Spft = 0;
                         if (SPRICE !== 0) {
-                            Spft = (SPRICE * 0.71 - SHIP - LP) / SPRICE;
-
+                            Spft = (SPRICE * 0.74 - LP - SH) / SPRICE;
                         }
 
                         // Update Spft% in cache and local data
-                        amazonZeroDataCache.updateField(itemId, 'Spft%', Spft);
+                        ebayViewDataCache.updateField(itemId, 'Spft%', Spft);
                         filteredData[index]['Spft%'] = Spft;
                         filteredData[index].raw_data['Spft%'] = Spft;
                     }
@@ -3484,7 +4320,7 @@
                 }
 
                 // 4. If we updated SPRICE, update the Spft% card in the modal if it's open
-                if (title === 'SPRICE') {
+                if (title === 'sprice') {
                     const modalId = `modal-${itemId}-price-view`;
                     const modalElement = document.getElementById(modalId);
                     if (modalElement) {
@@ -3514,25 +4350,58 @@
                     }
                 }
 
-                // 5. Send the update to the server ONLY for the original field
+                // 5. Send the update to the server
+                // If eBay Price, use a separate route
+                let ajaxUrl = '/api/update-ebay-column';
+                let ajaxData = JSON.stringify(data);
+                let ajaxContentType = 'application/json';
+
+                if (title === 'eBay Price') {
+                    // Find eBay_item_id from filteredData or cache
+                    let ebayItemId = null;
+                    const found = filteredData.find(item => String(item['Sl']) == String(itemId));
+                    if (found && found['eBay_item_id']) {
+                        ebayItemId = found['eBay_item_id'];
+                    }
+                    if (!ebayItemId && ebayViewDataCache.get(itemId) && ebayViewDataCache.get(itemId)[
+                            'eBay_item_id']) {
+                        ebayItemId = ebayViewDataCache.get(itemId)['eBay_item_id'];
+                    }
+
+                    if (!ebayItemId) {
+                        showNotification('danger', 'eBay Item ID is not available for this SKU.');
+                        if (saveIcon) {
+                            saveIcon.html('<i class="fas fa-pen text-primary"></i>')
+                                .removeClass('save-icon')
+                                .addClass('edit-icon');
+                        }
+                        return; // Do not proceed with AJAX
+                    }
+
+                    // Direct POST to the correct route
+                    ajaxUrl = '/ebay-product-price-update';
+                    ajaxData = JSON.stringify({
+                        item_id: ebayItemId,
+                        price: updatedValue
+                    });
+                    ajaxContentType = 'application/json';
+                }
+
                 $.ajax({
                     method: 'POST',
-                    // url: window.location.origin + (window.location.pathname.includes('/public') ?
-                    //     '/public' : '') + '/api/update-amazon-column',
-                    data: JSON.stringify(data),
-                    contentType: 'application/json',
+                    url: ajaxUrl,
+                    data: ajaxData,
+                    contentType: ajaxContentType,
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
                     success: function(response) {
-                        // Update was already done in cache, just show success
                         if (saveIcon) {
                             saveIcon.html('<i class="fas fa-pen text-primary"></i>')
                                 .removeClass('save-icon')
                                 .addClass('edit-icon');
                         }
 
-                        // Make the field uneditable again
                         if (!rowElement) {
                             if (isCheckbox) {
                                 contentElement.find('.form-check-input').prop('disabled', true);
@@ -3544,10 +4413,19 @@
 
                         showNotification('success', `${title} Updated Successfully`);
 
-                        // If this was an R&A update from the table, ensure UI is consistent
                         if (rowElement) {
                             checkParentRAStatus();
                             renderTable();
+                        }
+
+                        // --- Update eBay Price in all data and re-render table ---
+                        if (title === 'eBay Price') {
+                            // After successful update, reload the table data
+                            loadData().then(() => {
+                                renderTable();
+                                showNotification('success', `${title} Updated Successfully`);
+                            });
+                            return; // Prevent further UI updates in this handler
                         }
                     },
                     error: function(xhr, status, error) {
@@ -3561,31 +4439,31 @@
                         const originalValue = contentElement.data('original-value');
 
                         // Revert cache
-                        amazonZeroDataCache.updateField(itemId, title, originalValue);
+                        ebayViewDataCache.updateField(itemId, title, originalValue);
 
                         // Revert filteredData
                         if (index !== -1) {
                             filteredData[index][title] = originalValue;
-                            if (title === 'R&A' && filteredData[index].raw_data) {
-                                filteredData[index].raw_data[title] = originalValue;
-                            }
 
                             // If this was an SPRICE update, revert Spft% as well
-                            if (title === 'SPRICE') {
-                                // We don't have original Spft% value, so we'll need to recalculate it
+                            if (title === 'sprice') {
                                 const item = filteredData[index];
-                                const SHIP = parseFloat(item.raw_data.SHIP) || 0;
+                                const SH = parseFloat(item.raw_data.SH) || 0;
                                 const LP = parseFloat(item.raw_data.LP) || 0;
                                 const SPRICE = parseFloat(originalValue) || 0;
 
                                 let Spft = 0;
                                 if (SPRICE !== 0) {
-                                    Spft = (SPRICE * price - SHIP - LP) / SPRICE;
+                                    Spft = (SPRICE * 0.74 - LP - SH) / SPRICE;
                                 }
 
-                                amazonZeroDataCache.updateField(itemId, 'Spft%', Spft);
+                                ebayViewDataCache.updateField(itemId, 'Spft%', Spft);
                                 filteredData[index]['Spft%'] = Spft;
                                 filteredData[index].raw_data['Spft%'] = Spft;
+                            }
+
+                            if (title === 'R&A' && filteredData[index].raw_data) {
+                                filteredData[index].raw_data[title] = originalValue;
                             }
                         }
 
@@ -3619,7 +4497,6 @@
                                 .addClass('edit-icon');
                         }
 
-                        // Make sure field is uneditable after error
                         if (!rowElement && !isCheckbox) {
                             contentElement.attr('contenteditable', 'false')
                                 .removeClass('border border-primary');
@@ -3651,7 +4528,7 @@
 
             // Make columns resizable
             function initResizableColumns() {
-                const $table = $('#amazonZero-table');
+                const $table = $('#ebay-table');
                 const $headers = $table.find('th');
                 let startX, startWidth, columnIndex;
 
@@ -3673,42 +4550,16 @@
                     $('body').css('user-select', 'none');
                 });
 
-                let resizeDebounceTimer = null;
-
                 $(document).on('mousemove', function(e) {
                     if (!isResizing) return;
 
                     const $resizer = $('.resize-handle.resizing');
                     if ($resizer.length) {
                         const $th = $resizer.parent();
-                        const columnIndex = $th.index();
                         const newWidth = startWidth + (e.pageX - startX);
                         $th.css('width', newWidth + 'px');
                         $th.css('min-width', newWidth + 'px');
                         $th.css('max-width', newWidth + 'px');
-
-                        // Debounced update for truncated text
-                        if ([10, 11, 12].includes(columnIndex)) {
-                            clearTimeout(resizeDebounceTimer);
-                            resizeDebounceTimer = setTimeout(() => {
-                                const $table = $('#amazonZero-table');
-                                $table.find('tbody tr').each(function() {
-                                    const $cell = $(this).find('td').eq(columnIndex);
-                                    const $span = $cell.find('.truncated-text');
-                                    if ($span.length) {
-                                        const fullText = $span.attr('title') || $span
-                                            .text();
-                                        let minLetters = 10;
-                                        let letters = Math.max(minLetters, Math.floor(
-                                            newWidth / 12));
-                                        const truncated = fullText.length > letters ?
-                                            fullText.substring(0, letters) + '...' :
-                                            fullText;
-                                        $span.text(truncated);
-                                    }
-                                });
-                            }, 50); // 50ms debounce
-                        }
                     }
                 });
 
@@ -3719,30 +4570,6 @@
                     $('.resize-handle').removeClass('resizing');
                     $('body').css('user-select', '');
                     isResizing = false;
-
-                    // Get the new width of the resized column
-                    const $table = $('#amazonZero-table');
-                    const $headers = $table.find('th');
-                    const newWidth = $headers.eq(columnIndex).outerWidth() || 120;
-
-                    // Only update truncated text for Reason, Action Required, Action Taken columns
-                    // Adjust columnIndex if needed (here: 10, 11, 12)
-                    if ([10, 11, 12].includes(columnIndex)) {
-                        $table.find('tbody tr').each(function() {
-                            const $cell = $(this).find('td').eq(columnIndex);
-                            const $span = $cell.find('.truncated-text');
-                            if ($span.length) {
-                                // Get full text from title attribute
-                                const fullText = $span.attr('title') || $span.text();
-                                // Update truncated text
-                                let minLetters = 10;
-                                let letters = Math.max(minLetters, Math.floor(newWidth / 12));
-                                const truncated = fullText.length > letters ? fullText.substring(0,
-                                    letters) + '...' : fullText;
-                                $span.text(truncated);
-                            }
-                        });
-                    }
                 });
             }
 
@@ -3762,6 +4589,7 @@
                     const th = $(this).closest('th');
                     const thField = th.data('field');
                     const dataField = thField === 'parent' ? 'Parent' : thField;
+
 
                     // Toggle direction if clicking same column, otherwise reset to ascending
                     if (currentSort.field === dataField) {
@@ -3842,9 +4670,32 @@
                 });
             }
 
-            // Initialize column toggle functionality
+            // Load hidden columns from localStorage
+            function loadHiddenColumns() {
+                const stored = localStorage.getItem('hiddenColumns');
+                return stored ? new Set(JSON.parse(stored)) : new Set();
+            }
+
+            let hiddenColumns = loadHiddenColumns();
+
+            function applyColumnVisibility() {
+                const $table = $('#ebay-table');
+                const $headers = $table.find('th[data-field]');
+
+                $headers.each(function(index) {
+                    const field = $(this).data('field');
+                    const isHidden = hiddenColumns.has(field);
+                    $table.find('tr').each(function() {
+                        $(this).find('td, th').eq(index).toggle(!isHidden);
+                    });
+
+                    // Update checkbox state in menu
+                    $(`#toggle-${field}`).prop('checked', !isHidden);
+                });
+            }
+
             function initColumnToggle() {
-                const $table = $('#amazonZero-table');
+                const $table = $('#ebay-table');
                 const $headers = $table.find('th[data-field]');
                 const $menu = $('#columnToggleMenu');
                 const $dropdownBtn = $('#hideColumnsBtn');
@@ -3859,21 +4710,24 @@
                     const $item = $(`
                         <div class="column-toggle-item">
                             <input type="checkbox" class="column-toggle-checkbox" 
-                                   id="toggle-${field}" data-field="${field}" checked>
+                                id="toggle-${field}" data-field="${field}">
                             <label for="toggle-${field}">${title}</label>
                         </div>
                     `);
-
                     $menu.append($item);
                 });
 
-                $dropdownBtn.on('click', function(e) {
+                // Apply hidden columns after table is rendered
+                applyColumnVisibility();
+
+                // Dropdown toggle
+                $dropdownBtn.off('click').on('click', function(e) {
                     e.stopPropagation();
                     $menu.toggleClass('show');
                 });
 
-
-                $(document).on('click', function(e) {
+                // Close menu if clicked outside
+                $(document).off('click.columnToggle').on('click.columnToggle', function(e) {
                     if (!$(e.target).closest('.custom-dropdown').length) {
                         $menu.removeClass('show');
                     }
@@ -3887,13 +4741,33 @@
                     $table.find('tr').each(function() {
                         $(this).find('td, th').eq(colIndex).toggle(isVisible);
                     });
+
+                    // Save hidden columns
+                    if (!isVisible) hiddenColumns.add(field);
+                    else hiddenColumns.delete(field);
+
+                    localStorage.setItem('hiddenColumns', JSON.stringify([...hiddenColumns]));
                 });
 
                 $('#showAllColumns').on('click', function() {
-                    $menu.find('.column-toggle-checkbox').prop('checked', true).trigger('change');
-                    $menu.removeClass('show');
+                    $headers.each(function(index) {
+                        $(this).show(); // show TH
+                    });
+                    $('#ebay-table tr').each(function() {
+                        $(this).find('td').each(function() {
+                            $(this).show(); // show all TDs
+                        });
+                    });
+                    // Update checkboxes
+                    $menu.find('.column-toggle-checkbox').prop('checked', true);
+                    // Clear hiddenColumns and save
+                    hiddenColumns.clear();
+                    localStorage.setItem('hiddenColumns', JSON.stringify([...hiddenColumns]));
                 });
+
             }
+
+
 
             // Initialize filters
             function initFilters() {
@@ -3927,11 +4801,11 @@
             }
 
             // Add this script after your other filter initializations:
-            $('#inv-filter').on('change', function() {
+            $('#inv-filter, #ovl30-filter, #el30-filter, #nra-filter').on('change', function() {
                 applyColumnFilters();
             });
 
-
+            // Apply column filters
             function applyColumnFilters() {
                 // Default: show all rows
                 filteredData = [...tableData];
@@ -3945,12 +4819,45 @@
                 }
 
                 // Apply INV filter
-                const invFilter = $('#inv-filter').val();
-                if (invFilter && invFilter !== 'all') {
+                let invFilter = $('#inv-filter').val() || '1-100+'; 
+                filteredData = filteredData.filter(item => {
+                    const inv = Number(item.INV) || 0;
+
+                    if (invFilter === '0') return inv === 0;
+                    if (invFilter === '1-100+') return inv >= 1;
+                    if (invFilter === 'all') return true; 
+                    return true;
+                });
+
+
+                // Apply OV L30 filter
+                const ovl30Filter = $('#ovl30-filter').val();
+                if (ovl30Filter && ovl30Filter !== 'all') {
                     filteredData = filteredData.filter(item => {
-                        const inv = Number(item.INV) || 0;
-                        if (invFilter === '0') return inv === 0;
-                        if (invFilter === '1-100+') return inv >= 1;
+                        const ovl30 = Number(item.L30) || 0;
+                        if (ovl30Filter === '0') return ovl30 === 0;
+                        if (ovl30Filter === '1-100+') return ovl30 >= 1;
+                        return true;
+                    });
+                }
+                // Apply EL 30 filter
+                const el30Filter = $('#el30-filter').val();
+                if (el30Filter && el30Filter !== 'all') {
+                    filteredData = filteredData.filter(item => {
+                        const el30 = Number(item['eBay L30']) || 0;
+                        if (el30Filter === '0') return el30 === 0;
+                        if (el30Filter === '1-100+') return el30 >= 1;
+                        return true;
+                    });
+                }
+
+                const nraFilter = $('#nra-filter').val();
+                if (nraFilter && nraFilter !== 'all') {
+                    filteredData = filteredData.filter(item => {
+                        const nra = (item.NRL || '').toUpperCase();
+                        if (nraFilter === 'RL') return nra === 'RL';
+                        if (nraFilter === 'NRL') return nra === 'NRL';
+                        if (nraFilter === 'LATER') return nra === 'LATER';
                         return true;
                     });
                 }
@@ -3975,6 +4882,40 @@
                 renderTable();
                 calculateTotals();
             }
+            //export data
+
+            function exportData() {
+                if (!filteredData || filteredData.length === 0) {
+                    alert("No filtered data to export!");
+                    return;
+                }
+
+                let exportData = [];
+
+                // Table ke rows loop karke sbid lete hain
+                $("#ebay-table tbody tr").each(function (index) {
+                    let sbid = $(this).find('td[data-field="sbid"]').text().trim();
+                    let ovDil = $(this).find('td[data-field="ov_dil"]').data("value");
+
+                    if (filteredData[index]) {
+                        exportData.push({
+                            SKU: filteredData[index]['(Child) sku'] || "",
+                            SBID: sbid || "",
+                            'Dil%': ovDil || ""
+                        });
+                    }
+                });
+
+                console.log("Final Export Data:", exportData);
+
+                // ---- Excel Export (xlsx.js) ----
+                let wb = XLSX.utils.book_new();
+                let ws = XLSX.utils.json_to_sheet(exportData);
+
+                XLSX.utils.book_append_sheet(wb, ws, "Export");
+                XLSX.writeFile(wb, "ebay_export_pmp_ads.xlsx");
+            }
+
 
 
             // Get color for column based on value
@@ -3984,42 +4925,58 @@
                     return '';
                 }
 
-                // Only multiply by 100 for columns that are stored as decimals
-                let value = parseFloat(rowData[column]);
-                if (['ov_dil', 'A Dil%', 'Tacos30', 'SCVR'].includes(column)) {
-                    value = value * 100;
+                // For PmtClkL30, use the raw value (not percentage)
+                if (column === 'PmtClkL30') {
+                    const value = parseInt(rowData[column]) || 0;
+                    return value >= 30 ? 'green' : 'red';
                 }
 
+                // For SCVR, always use the calculated value
+                if (column === 'SCVR') {
+                    let scvr = 0;
+                    if (Number(rowData['PmtClkL30']) > 0) {
+                        scvr = Number(rowData['eBay L30']) / Number(rowData['PmtClkL30']);
+                    }
+                    const value = scvr * 100;
+                    if (value <= 4) return 'red';
+                    if (value > 4 && value <= 7) return 'yellow';
+                    if (value > 7 && value <= 10) return 'green';
+                    return 'pink';
+                }
+
+                const value = parseFloat(rowData[column]) * 100;
+
                 // Special cases for numeric columns that must be valid numbers
-                const numericColumns = ['PFT_percentage', 'ROI_percentage', 'Tacos30', 'SCVR'];
+                const numericColumns = ['PFT %', 'Roi', 'Tacos30', 'SCVR']; // Add other numeric columns as needed
                 if (numericColumns.includes(column) && isNaN(value)) {
                     return '';
                 }
 
+
                 const colorRules = {
                     'ov_dil': {
-                        ranges: [16.66, 25, 50], // Key change here
-                        colors: ['red', 'yellow', 'green', 'pink']
-                    },
-                    'A Dil%': {
                         ranges: [16.66, 25, 50],
                         colors: ['red', 'yellow', 'green', 'pink']
                     },
-                    'PFT_percentage': {
+                    'E Dil%': {
+                        ranges: [12.5, 16.66, 25, 50],
+                        colors: ['red', 'yellow', 'blue', 'green', 'pink']
+                    },
+                    'PFT %': {
                         ranges: [10, 15, 20, 40],
                         colors: ['red', 'yellow', 'blue', 'green', 'pink']
                     },
-                    'ROI_percentage': {
-                        ranges: [50, 75, 100],
+                    'Roi': {
+                        ranges: [50, 75, 125],
                         colors: ['red', 'yellow', 'green', 'pink']
                     },
                     'Tacos30': {
-                        ranges: [5, 10, 15, 20],
-                        colors: ['pink', 'green', 'blue', 'yellow', 'red']
+                        ranges: [7, 14, 21],
+                        colors: ['pink', 'green', 'yellow', 'red']
                     },
                     'SCVR': {
-                        ranges: [7, 13],
-                        colors: ['red', 'green', 'pink']
+                        ranges: [4, 7, 10],
+                        colors: ['red', 'yellow', 'green', 'pink']
                     }
                 };
 
@@ -4052,85 +5009,91 @@
                         el30Total: 0,
                         eDilTotal: 0,
                         viewsTotal: 0,
-                        pftSum: 0,
+                        profitSum: 0, // <-- new
+                        salesL30Sum: 0, // <-- new
                         roiSum: 0,
                         tacosTotal: 0,
                         scvrSum: 0,
                         rowCount: 0,
-                        totalPftSum: 0,
-                        totalSalesL30Sum: 0,
-                        totalCogsSum: 0
+                        listedCount: 0,
+                        liveCount: 0
                     };
 
                     filteredData.forEach(item => {
-                        if(item.NR === 'NR'){
-                            return;
+
+                        let rawData = {};
+                        if (typeof item.raw_data === 'string') {
+                            try {
+                                rawData = JSON.parse(item.raw_data || '{}');
+                            } catch (e) {
+                                console.error(`Invalid JSON in raw_data for SKU ${item['(Child) sku']}`, e);
+                            }
+                        } else if (typeof item.raw_data === 'object' && item.raw_data !== null) {
+                            rawData = item.raw_data;
+                        }
+
+                        // Count listed checkboxes
+                        if (rawData.Listed === true || rawData.Listed === 'true' || rawData.Listed === 1 ||
+                            rawData.Listed === '1') {
+                            metrics.listedCount++;
+                        }
+
+                        // Count Live checkboxes
+                        if (rawData.Live === true || rawData.Live === 'true' || rawData.Live === 1 ||
+                            rawData.Live === '1') {
+                            metrics.liveCount++;
+                        }
+
+                        const profit = parseFloat(item.Profit) || 0;
+                        const salesL30 = parseFloat(item['Sales L30']) || 0;
+                        // Only add if both values are > 0
+                        if (profit > 0 && salesL30 > 0) {
+                            metrics.profitSum += profit;
+                            metrics.salesL30Sum += salesL30;
                         }
                         metrics.invTotal += parseFloat(item.INV) || 0;
                         metrics.ovL30Total += parseFloat(item.L30) || 0;
-                        metrics.el30Total += parseFloat(item['A L30']) || 0;
-                        metrics.eDilTotal += parseFloat(item['A Dil%']) || 0;
-                        let views = parseFloat(item.Sess30) || 0;
-                        if (item.NR !== 'NR') {
+                        metrics.el30Total += parseFloat(item['eBay L30']) || 0;
+                        metrics.viewsTotal += parseFloat(item['PmtClkL30']) || 0;
+                        let views = parseFloat(item['PmtClkL30']) || 0;
+                        if (item.NR !== 'NRA') {
                             metrics.viewsTotal += views;
                         }
+                        metrics.roiSum += parseFloat(item.Roi) || 0;
                         metrics.tacosTotal += parseFloat(item.Tacos30) || 0;
-                        metrics.pftSum += parseFloat(item['PFT_percentage']) || 0;
-                        metrics.roiSum += parseFloat(item.ROI_percentage) || 0;
-                        metrics.scvrSum += parseFloat(item.SCVR) || 0;
+                        metrics.scvrSum += (Number(item['PmtClkL30']) > 0) ?
+                            (Number(item['eBay L30']) / Number(item['PmtClkL30'])) :
+                            0;
                         metrics.rowCount++;
-
-                        // Only sum for child rows (not parent rows)
-                        if (
-                            item['sku'] &&
-                            typeof item['sku'] === 'string' &&
-                            !item['sku'].toUpperCase().includes('PARENT')
-                        ) {
-                            const totalPft = parseFloat(item.raw_data['Total_pft']) || 0;
-                            const t_sale_l30 = parseFloat(item.raw_data['T_Sale_l30']) || 0;
-                            const cogs = parseFloat(item.raw_data['T_COGS']) || 0;
-
-                            metrics.totalPftSum += totalPft;
-                            metrics.totalSalesL30Sum += t_sale_l30;
-                            metrics.totalCogsSum += cogs;
-                        }
                     });
 
+                    // Calculate percentages
                     metrics.ovDilTotal = metrics.invTotal > 0 ?
                         (metrics.ovL30Total / metrics.invTotal) * 100 : 0;
-
-                    // --- A Dil% metric: (sum of A L30) / (sum of INV) * 100 ---
-                    let aDilTotalDisplay = '0%';
-                    if (metrics.invTotal > 0) {
-                        aDilTotalDisplay = Math.round((metrics.el30Total / metrics.invTotal) * 100) + '%';
-                    }
+                    metrics.eDilTotal = metrics.ovL30Total > 0 ? (metrics.el30Total / metrics.ovL30Total) * 100 : 0;
 
                     const divisor = metrics.rowCount || 1;
 
-                    // Update metric displays
+                    // Update metric displays with correct calculations
                     $('#inv-total').text(metrics.invTotal.toLocaleString());
                     $('#ovl30-total').text(metrics.ovL30Total.toLocaleString());
                     $('#ovdil-total').text(Math.round(metrics.ovDilTotal) + '%');
-                    $('#al30-total').text(metrics.el30Total.toLocaleString());
-                    $('#lDil-total').text(aDilTotalDisplay);
+                    $('#el30-total').text(metrics.el30Total.toLocaleString());
+                    $('#eDil-total').text(Math.round(metrics.eDilTotal) + '%');
                     $('#views-total').text(metrics.viewsTotal.toLocaleString());
-
-                    // --- Custom PFT TOTAL calculation ---
-                    let pftTotalDisplay = '0%';
-                    if (metrics.totalSalesL30Sum > 0) {
-                        pftTotalDisplay = Math.round(metrics.totalPftSum / metrics.totalSalesL30Sum * 100) + '%';
+                    $('#listed-total').text(metrics.listedCount.toLocaleString());
+                    $('#live-total').text(metrics.liveCount.toLocaleString());
+                    $('#total-items-count').text(metrics.rowCount.toLocaleString());
+                    // Calculate and display averages
+                    let pftTotal = 0;
+                    if (metrics.salesL30Sum > 0) {
+                        pftTotal = (metrics.profitSum / metrics.salesL30Sum) * 100;
                     }
-                    $('#pft-total').text(pftTotalDisplay);
 
-                    // --- ROI TOTAL calculation ---
-                    let roiTotalDisplay = '0%';
-                    if (metrics.totalCogsSum > 0) {
-                        roiTotalDisplay = Math.round(metrics.totalPftSum / metrics.totalCogsSum * 100) + '%';
-                    }
-                    $('#roi-total').text(roiTotalDisplay);
-
-                    $('#tacos-total').text(Math.round(metrics.tacosTotal / divisor * 100) + '%');
-                    $('#cvr-total').text(Math.round(metrics.scvrSum / divisor * 100) + '%');
+                    $('#pft-total').text(pftTotal.toFixed(2) + '%');
+                    $('#roi-total').text(Math.round((metrics.roiSum / divisor) * 100) + '%');
+                    $('#tacos-total').text(Math.round((metrics.tacosTotal / divisor) * 100) + '%');
+                    $('#cvr-total').text(Math.round((metrics.scvrSum / divisor) * 100) + '%');
 
                 } catch (error) {
                     console.error('Error in calculateTotals:', error);
@@ -4142,13 +5105,15 @@
                 $('#inv-total').text('0');
                 $('#ovl30-total').text('0');
                 $('#ovdil-total').text('0%');
-                $('#al30-total').text('0');
-                $('#lDil-total').text('0%');
+                $('#el30-total').text('0');
+                $('#eDil-total').text('0%');
                 $('#views-total').text('0');
                 $('#pft-total').text('0%');
                 $('#roi-total').text('0%');
                 $('#tacos-total').text('0%');
                 $('#cvr-total').text('0%');
+                $('#listed-total').text('0');
+                $('#live-total').text('0');
             }
 
             // Initialize enhanced dropdowns
@@ -4166,7 +5131,7 @@
 
                 // Initialize both dropdowns
                 initEnhancedDropdown($parentSearch, $parentResults, 'Parent');
-                initEnhancedDropdown($skuSearch, $skuResults, 'sku');
+                initEnhancedDropdown($skuSearch, $skuResults, '(Child) sku');
 
                 // Close dropdowns when clicking outside
                 $(document).on('click', function(e) {
@@ -4505,6 +5470,285 @@
             }
 
             // Show notification
+
+
+            // Loader functions
+            function showLoader() {
+                $('#data-loader').fadeIn();
+            }
+
+            function hideLoader() {
+                $('#data-loader').fadeOut();
+            }
+
+
+
+
+
+            // Show the custom modal
+            function showHideSkuModal() {
+                const $dialog = $('#customHideSkuModal .custom-modal-dialog');
+                $dialog.css({
+                    left: '',
+                    top: '',
+                    position: ''
+                }); // Reset position
+                $('#customHideSkuModal').fadeIn(150);
+                $('body').addClass('custom-modal-open');
+            }
+
+            // Hide the custom modal
+            function hideHideSkuModal() {
+                $('#customHideSkuModal').fadeOut(150);
+                $('body').removeClass('custom-modal-open');
+            }
+
+            // Open modal on button click
+            $(document).on('click', '#hideSkuBtn', function() {
+                // Populate the modal table
+                const $tbody = $('#hideSkuTable tbody');
+                $tbody.empty();
+                tableData.forEach(item => {
+                    if (!item.is_parent) {
+                        $tbody.append(`
+                <tr>
+                    <td>${item.Parent}</td>
+                    <td>${item['(Child) sku']}</td>
+                    <td>
+                        <input type="checkbox" class="hide-sku-checkbox" data-sku="${item['(Child) sku']}" ${item.Hide === true || item.Hide === 'true' || item.Hide === '1' ? 'checked' : ''}>
+                    </td>
+                </tr>
+            `);
+                    }
+                });
+                if ($('#hideSkuParentSearch').length === 0) {
+                    $('#hideSkuTable').before(`
+                        <div class="d-flex gap-2 mb-2">
+                            <input type="text" id="hideSkuParentSearch" class="form-control form-control-sm" style="max-width:180px" placeholder="Search parent...">
+                            <input type="text" id="hideSkuSkuSearch" class="form-control form-control-sm" style="max-width:180px" placeholder="Search SKU...">
+                            <select id="hideSkuStatusFilter" class="form-control form-control-sm" style="max-width:140px">
+                                <option value="all">All</option>
+                                <option value="checked">Hide Checked</option>
+                                <option value="unchecked">Hide Unchecked</option>
+                            </select>
+                        </div>
+                    `);
+                }
+                $('#hideSkuParentSearch, #hideSkuSkuSearch').val('');
+                $('#hideSkuStatusFilter').val('checked'); // <-- Checked by default
+                showHideSkuModal();
+                filterHideSkuModalTable(); // Apply filter immediately
+            });
+
+            // Filtering logic for modal table
+            function filterHideSkuModalTable() {
+                const parentTerm = $('#hideSkuParentSearch').val().toLowerCase();
+                const skuTerm = $('#hideSkuSkuSearch').val().toLowerCase();
+                const hideStatus = $('#hideSkuStatusFilter').val();
+
+                $('#hideSkuTable tbody tr').each(function() {
+                    const parentText = $(this).find('td').eq(0).text().toLowerCase();
+                    const skuText = $(this).find('td').eq(1).text().toLowerCase();
+                    const $checkbox = $(this).find('.hide-sku-checkbox');
+                    const isChecked = $checkbox.prop('checked');
+
+                    let show = (!parentTerm || parentText.includes(parentTerm)) &&
+                        (!skuTerm || skuText.includes(skuTerm));
+
+                    if (hideStatus === 'checked' && !isChecked) show = false;
+                    if (hideStatus === 'unchecked' && isChecked) show = false;
+
+                    $(this).toggle(show);
+                });
+            }
+            $(document).on('input change', '#hideSkuParentSearch, #hideSkuSkuSearch, #hideSkuStatusFilter',
+                filterHideSkuModalTable);
+
+            // Close modal on close button or clicking outside dialog
+            $(document).on('click', '#closeHideSkuModal', hideHideSkuModal);
+            $(document).on('mousedown', function(e) {
+                const $modal = $('#customHideSkuModal');
+                if ($modal.is(':visible') && !$(e.target).closest('.custom-modal-dialog').length && !$(e
+                        .target).is('#hideSkuBtn')) {
+                    hideHideSkuModal();
+                }
+            });
+
+            // Prevent modal click from closing when clicking inside dialog
+            $(document).on('mousedown', '.custom-modal-dialog', function(e) {
+                e.stopPropagation();
+            });
+
+            // Enable/disable update button based on changes
+            function updateHideBtnState() {
+                let changed = false;
+                $('#hideSkuTable .hide-sku-checkbox').each(function() {
+                    const sku = $(this).data('sku');
+                    const checked = $(this).prop('checked');
+                    const original = tableData.find(item => item['(Child) sku'] === sku)?.Hide;
+                    if ((checked && !original) || (!checked && original)) {
+                        changed = true;
+                        return false;
+                    }
+                });
+                $('#updateSelectedHideBtn').prop('disabled', !changed);
+            }
+
+            // After populating modal table
+            updateHideBtnState();
+            $(document).on('change', '#hideSkuTable .hide-sku-checkbox', updateHideBtnState);
+
+            // Update selected handler
+            $(document).on('click', '#updateSelectedHideBtn', function() {
+                const skusToUpdate = [];
+                const hideValues = {};
+                $('#hideSkuTable .hide-sku-checkbox').each(function() {
+                    const sku = $(this).data('sku');
+                    const checked = $(this).prop('checked');
+                    skusToUpdate.push(sku);
+                    hideValues[sku] = checked;
+                });
+                if (skusToUpdate.length === 0) {
+                    showNotification('warning', 'No SKUs found.');
+                    return;
+                }
+
+                // Change button to loader
+                const $btn = $(this);
+                $btn.prop('disabled', true)
+                    .html(
+                        '<span class="spinner-border spinner-border-sm me-2"></span>Updating Selected...');
+
+                $.ajax({
+                    url: '/ebay/save-nr',
+                    type: 'POST',
+                    data: {
+                        skus: skusToUpdate,
+                        hideValues: JSON.stringify(hideValues),
+                        _token: $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(response) {
+                        showNotification('success', 'Selected SKUs updated!');
+                        hideHideSkuModal();
+                        // Update tableData and filteredData for Hide values
+                        $('#hideSkuTable .hide-sku-checkbox').each(function() {
+                            const sku = $(this).data('sku');
+                            const checked = $(this).prop('checked');
+                            tableData.forEach(item => {
+                                if (item['(Child) sku'] === sku) {
+                                    item.Hide = checked;
+                                }
+                            });
+                            filteredData.forEach(item => {
+                                if (item['(Child) sku'] === sku) {
+                                    item.Hide = checked;
+                                }
+                            });
+                        });
+                        renderTable();
+                        // Restore button state
+                        $btn.prop('disabled', false).html('Update Selected');
+                    },
+                    error: function() {
+                        showNotification('danger', 'Failed to update SKUs.');
+                        // Restore button state
+                        $btn.prop('disabled', false).html('Update Selected');
+                    }
+                });
+            });
+
+            $(document).on('click', '.openPricingBtn', function() {
+                const LP = parseFloat($(this).data('lp')) || 0;
+                const SHIP = parseFloat($(this).data('ship')) || 0;
+                const SKU = $(this).data('sku') || '';
+
+                $('#skuInput').val(SKU);
+
+                const $sprInput = $('#sprPriceInput');
+                const $spftInput = $('#spftPercentInput');
+                const $sroiInput = $('#sroiPercentInput');
+
+                // Reset values
+                $sprInput.val('');
+                $spftInput.val('');
+                $sroiInput.val('');
+
+                $sprInput.off('input').on('input', function() {
+                    const SPRICE = parseFloat(this.value) || 0;
+
+                    if (SPRICE > 0) {
+                        const SPFT = ((SPRICE * 0.74) - LP - SHIP) / SPRICE;
+                        const SROI = ((SPRICE * 0.74) - LP - SHIP) / LP;
+
+                        $spftInput.val((SPFT * 100).toFixed(2) + '%');
+                        $sroiInput.val(isFinite(SROI) ? (SROI * 100).toFixed(2) + '%' : '∞');
+                    } else {
+                        $spftInput.val('');
+                        $sroiInput.val('');
+                    }
+                });
+
+                $('#pricingModal').modal('show');
+            });
+
+            $(document).on('click', '#savePricingBtn', function() {
+                const sku = $('#skuInput').val()?.trim();
+                const spriceVal = $('#sprPriceInput').val();
+                const spft = parseFloat($('#spftPercentInput').val()?.replace('%', '')) || 0;
+                const sroi = parseFloat($('#sroiPercentInput').val()?.replace('%', '')) || 0;
+
+                const sprice = spriceVal !== '' ? parseFloat(spriceVal) : null;
+
+                if (!sku || !sprice) {
+                    alert('SKU and SPRICE are required.');
+                    return;
+                }
+
+                $.ajax({
+                    url: '/update-ebay-2-pmt-sprice',
+                    type: 'POST',
+                    data: {
+                        _token: $('meta[name="csrf-token"]').attr('content'),
+                        sku: sku,
+                        sprice: sprice,
+                        spft_percent: spft,
+                        sroi_percent: sroi
+                    },
+                    dataType: 'json',
+                    beforeSend: function() {
+                        $('#savePricingBtn').html(
+                            '<i class="fa fa-spinner fa-spin"></i> Saving...');
+                    },
+                    success: function(response) {
+                        showNotification('success', 'Data updated successfully...');
+                        $('#pricingModal').modal('hide');
+                        tableData.forEach(item => {
+                            if (item['(Child) sku'] === sku) {
+                                item.SPRICE = sprice;
+                                item.SPFT = spft;
+                                item.SROI = sroi;
+                            }
+                        });
+
+                        filteredData.forEach(item => {
+                            if (item['(Child) sku'] === sku) {
+                                item.SPRICE = sprice;
+                                item.SPFT = spft;
+                                item.SROI = sroi;
+                            }
+                        });
+                        renderTable();
+                    },
+                    error: function(xhr) {
+                        alert('Error saving SPRICE.');
+                        console.error(xhr.responseText);
+                    },
+                    complete: function() {
+                        $('#savePricingBtn').html('Save');
+                    }
+                });
+            });
+
             function showNotification(type, message) {
                 const notification = $(`
                     <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
@@ -4521,81 +5765,11 @@
                     notification.find('.alert').alert('close');
                 }, 3000);
             }
-
-            // Loader functions
-            function showLoader() {
-                $('#data-loader').fadeIn();
-            }
-
-            function hideLoader() {
-                $('#data-loader').fadeOut();
-            }
-
-            // Handle plus icon click to open modal
-            $(document).on('click', '.reason-action-plus', function() {
-                const slNo = $(this).data('slno');
-                const row = filteredData.find(item => item['SL No.'] == slNo);
-
-                // Fill modal fields with current values using the correct keys
-                $('#modalReason').val(row.A_Z_Reason || '');
-                $('#modalActionRequired').val(row.A_Z_ActionRequired || '');
-                $('#modalActionTaken').val(row.A_Z_ActionTaken || '');
-                $('#modalSlNo').val(slNo);
-
-                // Show modal
-                $('#reasonActionModal').modal('show');
-            });
-
-            // Save button in modal
-            $('#saveReasonActionBtn').on('click', function() {
-                const slNo = $('#modalSlNo').val();
-                const reason = $('#modalReason').val();
-                const actionRequired = $('#modalActionRequired').val();
-                const actionTaken = $('#modalActionTaken').val();
-
-                // Find the SKU for this row
-                const row = filteredData.find(item => item['SL No.'] == slNo);
-                const sku = row ? row['sku'] : null;
-
-                // Update data in filteredData and tableData
-                [filteredData, tableData].forEach(arr => {
-                    const row = arr.find(item => item['SL No.'] == slNo);
-                    if (row) {
-                        row.A_Z_Reason = reason;
-                        row.A_Z_ActionRequired = actionRequired;
-                        row.A_Z_ActionTaken = actionTaken;
-                    }
-                });
-
-                // Save to backend via AJAX
-                if (sku) {
-                    $.ajax({
-                        url: '/zero_doba/reason-action/update-data',
-                        method: 'POST',
-                        data: {
-                            sku: sku,
-                            reason: reason,
-                            action_required: actionRequired,
-                            action_taken: actionTaken,
-                            _token: $('meta[name="csrf-token"]').attr('content')
-                        },
-                        success: function(response) {
-                            showNotification('success', 'Reason/Action updated successfully!');
-                            renderTable();
-                            $('#reasonActionModal').modal('hide');
-                        },
-                        error: function(xhr) {
-                            showNotification('danger', 'Failed to update Reason/Action.');
-                        }
-                    });
-                } else {
-                    renderTable();
-                    $('#reasonActionModal').modal('hide');
-                }
-            });
-
             // Initialize everything
             initTable();
+            // Make the static Hide SKU modal draggable using the existing logic
+            ModalSystem.makeDraggable(document.getElementById('customHideSkuModal'));
+            
         });
     </script>
 @endsection

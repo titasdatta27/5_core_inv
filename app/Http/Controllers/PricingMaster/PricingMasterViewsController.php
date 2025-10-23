@@ -325,29 +325,30 @@ class PricingMasterViewsController extends Controller
         try {
             $lmpaLookup = DB::connection('repricer')
                 ->table('lmpa_data')
-                ->select('sku', DB::raw('MIN(price) as lowest_price'))
+                ->select('sku', DB::raw('MIN(price) as lowest_price'), DB::raw('MAX(link) as link'))
                 ->where('price', '>', 0)
                 ->whereIn('sku', $nonParentSkus)
                 ->groupBy('sku')
                 ->get()
                 ->keyBy('sku');
         } catch (Exception $e) {
-            Log::warning('Could not fetch LMPA data from repricer database: ' . $e->getMessage());
+            Log::warning('Could not fetch LMPA data from repricer_5core database: ' . $e->getMessage());
         }
 
         $lmpLookup = collect();
         try {
             $lmpLookup = DB::connection('repricer')
                 ->table('lmp_data')
-                ->select('sku', DB::raw('MIN(price) as lowest_price'))
+                ->select('sku', DB::raw('MIN(price) as lowest_price'), DB::raw('MAX(link) as link'))
                 ->where('price', '>', 0)
                 ->whereIn('sku', $nonParentSkus)
                 ->groupBy('sku')
                 ->get()
                 ->keyBy('sku');
         } catch (Exception $e) {
-            Log::warning('Could not fetch LMP data from repricer database: ' . $e->getMessage());
+            Log::warning('Could not fetch LMP data from repricer_5core database: ' . $e->getMessage());
         }
+
 
         $processedData = [];
 
@@ -668,6 +669,12 @@ class PricingMasterViewsController extends Controller
                 // Direct assignments
                 'views_clicks' => $shein ? ($shein->views_clicks ?? 0) : 0,
                 'lmp' => $shein ? ($shein->lmp ?? 0) : 0,
+                'link' => $lmp ? ($lmp->link ?? null) : null,
+                'link_amz' => $lmpa ? ($lmpa->link ?? null) : null,
+                'link_ebay' => $lmp ? ($lmp->link ?? null) : null,
+                'link_shein' => $lmp ? ($lmp->link ?? null) : null,
+                'link_tiktok' => $tiktok ? ($tiktok->link ?? null) : null,
+                'link_aliexpress' => $aliexpress ? ($aliexpress->link ?? null) : null,
                 'shopify_sheinl30' => $shein ? ($shein->shopify_sheinl30 ?? 0) : 0,
                 'total_req_view' => (
                     ($ebay && $ebay->views && $ebay->ebay_l30 ? ($inv * 20) : 0) +

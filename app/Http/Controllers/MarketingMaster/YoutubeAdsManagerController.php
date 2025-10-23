@@ -8,14 +8,14 @@ use App\Models\ShopifySku;
 use Illuminate\Http\Request;
 use App\Models\AmazonDataView;
 
-class FacebookAddsManagerController extends Controller
+class YoutubeAdsManagerController extends Controller
 {
     public function index()
     {
-        return view('marketing-masters.facebook_ads_manager.index');
+        return view('marketing-masters.youtube_ads_manager.index');
     }
 
-    public function getFacebookAdsData()
+    public function getYoutubeAdsData()
     {
         $data = [
             ['id' => 1, 'campaign_name' => 'Campaign 1', 'status' => 'Active', 'budget' => 100],
@@ -25,12 +25,54 @@ class FacebookAddsManagerController extends Controller
         return response()->json($data);
     }
 
-    public function facebookWebToVideo()
+    public function youtubeWebToVideo()
     {
-        return view('marketing-masters.facebook_web_ads.facebook-video-to-web');
+        return view('marketing-masters.youtube_web_ads.youtube-video-to-web');
     }
 
-    public function facebookWebToVideoData()
+    public function youtubeWebToVideoData()
+    {
+        $productMasters = ProductMaster::orderBy('parent', 'asc')
+            ->orderByRaw("CASE WHEN sku LIKE 'PARENT %' THEN 1 ELSE 0 END")
+            ->orderBy('sku', 'asc')
+            ->get();
+
+        $skus = $productMasters->pluck('sku')->filter()->unique()->values()->all();
+
+        $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy('sku');
+
+        $result = [];
+
+        foreach ($productMasters as $pm) {
+            $sku = strtoupper($pm->sku);
+            $parent = $pm->parent;
+
+            $shopify = $shopifyData[$pm->sku] ?? null;
+
+            $row = [];
+            $row['parent'] = $parent;
+            $row['sku']    = $pm->sku;
+            $row['INV']    = $shopify->inv ?? 0;
+            $row['L30']    = $shopify->quantity ?? 0;
+            $row['fba']    = $pm->fba ?? null;
+
+            $result[] = (object) $row;
+        }
+
+        return response()->json([
+            'message' => 'Data fetched successfully',
+            'data'    => $result,
+            'status'  => 200,
+        ]);
+    }
+
+
+    public function YtImgCaraousalToWeb()
+    {
+        return view('marketing-masters.youtube_web_ads.yt-img-caraousal-to-web');
+    }
+
+    public function YtImgCaraousalToWebData()
     {
         $productMasters = ProductMaster::orderBy('parent', 'asc')
             ->orderByRaw("CASE WHEN sku LIKE 'PARENT %' THEN 1 ELSE 0 END")
@@ -58,6 +100,10 @@ class FacebookAddsManagerController extends Controller
             $row['L30']    = $shopify->quantity ?? 0;
             $row['fba']    = $pm->fba ?? null;
 
+            $row['NRL']  = '';
+            $row['NRA'] = '';
+            $row['FBA'] = '';
+
             if (isset($nrValues[$pm->sku])) {
                 $raw = $nrValues[$pm->sku];
                 if (!is_array($raw)) {
@@ -70,48 +116,6 @@ class FacebookAddsManagerController extends Controller
                     $row['TPFT'] = $raw['TPFT'] ?? null;
                 }
             }
-
-            $result[] = (object) $row;
-        }
-
-        return response()->json([
-            'message' => 'Data fetched successfully',
-            'data'    => $result,
-            'status'  => 200,
-        ]);
-    }
-
-
-    public function FbImgCaraousalToWeb()
-    {
-        return view('marketing-masters.facebook_web_ads.fb-img-caraousal-to-web');
-    }
-
-    public function FbImgCaraousalToWebData()
-    {
-        $productMasters = ProductMaster::orderBy('parent', 'asc')
-            ->orderByRaw("CASE WHEN sku LIKE 'PARENT %' THEN 1 ELSE 0 END")
-            ->orderBy('sku', 'asc')
-            ->get();
-
-        $skus = $productMasters->pluck('sku')->filter()->unique()->values()->all();
-
-        $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy('sku');
-
-        $result = [];
-
-        foreach ($productMasters as $pm) {
-            $sku = strtoupper($pm->sku);
-            $parent = $pm->parent;
-
-            $shopify = $shopifyData[$pm->sku] ?? null;
-
-            $row = [];
-            $row['parent'] = $parent;
-            $row['sku']    = $pm->sku;
-            $row['INV']    = $shopify->inv ?? 0;
-            $row['L30']    = $shopify->quantity ?? 0;
-            $row['fba']    = $pm->fba ?? null;
 
             $result[] = (object) $row;
         }

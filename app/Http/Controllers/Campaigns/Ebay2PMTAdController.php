@@ -3,29 +3,28 @@
 namespace App\Http\Controllers\Campaigns;
 
 use App\Http\Controllers\Controller;
-use App\Models\Ebay3GeneralReport;
-use App\Models\Ebay3Metric;
+use App\Models\Ebay2GeneralReport;
+use App\Models\Ebay2Metric;
 use App\Models\Ebay3PriorityReport;
-use App\Models\EbayGeneralReport;
-use App\Models\EbayThreeDataView;
+use App\Models\EbayTwoDataView;
 use App\Models\MarketplacePercentage;
 use App\Models\ProductMaster;
 use App\Models\ShopifySku;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class Ebay3PmtAdsController extends Controller
+class Ebay2PMTAdController extends Controller
 {
     public function index()
     {
-        $marketplaceData = MarketplacePercentage::where("marketplace", "Ebay3" )->first();
+        $marketplaceData = MarketplacePercentage::where("marketplace", "Ebay2" )->first();
         $ebayPercentage = $marketplaceData ? $marketplaceData->percentage : 100;
         $ebayAdPercentage = $marketplaceData ? $marketplaceData->ad_updates : 100;
 
-        return view('campaign.ebay-three.pmt-ads', compact('ebayPercentage','ebayAdPercentage'));
+        return view('campaign.ebay-two.pmt-ads', compact('ebayPercentage','ebayAdPercentage'));
     }
 
-    public function getEbay3PmtAdsData()
+    public function getEbay2PmtAdsData()
     {
         $productMasters = ProductMaster::orderBy("parent", "asc")
             ->orderByRaw("CASE WHEN sku LIKE 'PARENT %' THEN 1 ELSE 0 END")
@@ -35,18 +34,18 @@ class Ebay3PmtAdsController extends Controller
         $skus = $productMasters->pluck("sku")->filter()->unique()->values()->all();
 
         $shopifyData = ShopifySku::whereIn("sku", $skus)->get()->keyBy("sku");
-        $ebayMetrics = Ebay3Metric::whereIn("sku", $skus)->get()->keyBy("sku");
-        $nrValues = EbayThreeDataView::whereIn("sku", $skus)->pluck("value", "sku");
+        $ebayMetrics = DB::connection('apicentral')->table('ebay2_metrics')->whereIn("sku", $skus)->get()->keyBy("sku");
+        $nrValues = EbayTwoDataView::whereIn("sku", $skus)->pluck("value", "sku");
 
         $itemIdToSku = $ebayMetrics->pluck('sku', 'item_id')->toArray();
         $campaignIdToSku = $ebayMetrics->pluck('sku', 'campaign_id')->toArray();
 
-        $extraClicksData = Ebay3GeneralReport::whereIn('listing_id', array_keys($itemIdToSku))
+        $extraClicksData = Ebay2GeneralReport::whereIn('listing_id', array_keys($itemIdToSku))
             ->where('report_range', 'L30')
             ->pluck('clicks', 'listing_id')
             ->toArray();
 
-        $generalReports = Ebay3GeneralReport::whereIn('listing_id', array_keys($itemIdToSku))
+        $generalReports = Ebay2GeneralReport::whereIn('listing_id', array_keys($itemIdToSku))
             ->whereIn('report_range', ['L60', 'L30', 'L7'])
             ->get();
 
@@ -54,7 +53,7 @@ class Ebay3PmtAdsController extends Controller
             ->whereIn('report_range', ['L60', 'L30', 'L7'])
             ->get();
 
-        $campaignListings = DB::connection('apicentral')->table('ebay3_campaign_ads_listings')->select('listing_id', 'bid_percentage', 'suggested_bid')->get()->keyBy('listing_id')->toArray();
+        $campaignListings = DB::connection('apicentral')->table('ebay2_campaign_ads_listings')->select('listing_id', 'bid_percentage', 'suggested_bid')->get()->keyBy('listing_id')->toArray();
 
         $adMetricsBySku = [];
 
@@ -90,7 +89,7 @@ class Ebay3PmtAdsController extends Controller
                 ($adMetricsBySku[$sku][$range]['PRIORITY_SPENT'] ?? 0) + $this->extractNumber($report->cpc_ad_fees_payout_currency);
         }
 
-        $marketplaceData = MarketplacePercentage::where("marketplace", "Ebay3" )->first();
+        $marketplaceData = MarketplacePercentage::where("marketplace", "Ebay2" )->first();
         $percentage = $marketplaceData ? ($marketplaceData->percentage / 100) : 1;
         $adPercentage = $marketplaceData ? ($marketplaceData->ad_updates / 100) : 1;
 
@@ -226,7 +225,7 @@ class Ebay3PmtAdsController extends Controller
         return (float) preg_replace('/[^\d.]/', '', $value);
     }
 
-    public function saveEbay3PMTSpriceToDatabase(Request $request)
+    public function saveEbay2PMTSpriceToDatabase(Request $request)
     {
         $sku = $request->input('sku');
         $spriceData = $request->only(['sprice', 'spft_percent', 'sroi_percent']);
@@ -236,7 +235,7 @@ class Ebay3PmtAdsController extends Controller
         }
 
 
-        $ebayDataView = EbayThreeDataView::firstOrNew(['sku' => $sku]);
+        $ebayDataView = EbayTwoDataView::firstOrNew(['sku' => $sku]);
 
         $existing = is_array($ebayDataView->value)
             ? $ebayDataView->value
@@ -254,13 +253,13 @@ class Ebay3PmtAdsController extends Controller
         return response()->json(['message' => 'Data saved successfully.']);
     }
 
-    public function updateEbay3Percentage(Request $request)
+    public function updateEbay2Percentage(Request $request)
     {
         try {
             $type = $request->input('type');
             $value = $request->input('value');
 
-            $marketplace = MarketplacePercentage::where('marketplace', 'Ebay3')->first();
+            $marketplace = MarketplacePercentage::where('marketplace', 'Ebay2')->first();
 
             $percent = $marketplace->percentage ?? 0;
             $adUpdates = $marketplace->ad_updates ?? 0;
@@ -280,7 +279,7 @@ class Ebay3PmtAdsController extends Controller
             }
 
             $marketplace = MarketplacePercentage::updateOrCreate(
-                ['marketplace' => 'Ebay3'],
+                ['marketplace' => 'Ebay2'],
                 [
                     'percentage' => $percent,
                     'ad_updates' => $adUpdates,

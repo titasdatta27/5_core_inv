@@ -8,14 +8,14 @@ use App\Models\ShopifySku;
 use Illuminate\Http\Request;
 use App\Models\AmazonDataView;
 
-class FacebookAddsManagerController extends Controller
+class TiktokAdsManagerController extends Controller
 {
     public function index()
     {
-        return view('marketing-masters.facebook_ads_manager.index');
+        return view('marketing-masters.tiktok_ads_manager.index');
     }
 
-    public function getFacebookAdsData()
+    public function getTiktokAdsData()
     {
         $data = [
             ['id' => 1, 'campaign_name' => 'Campaign 1', 'status' => 'Active', 'budget' => 100],
@@ -25,12 +25,12 @@ class FacebookAddsManagerController extends Controller
         return response()->json($data);
     }
 
-    public function facebookWebToVideo()
+    public function tiktokWebToVideo()
     {
-        return view('marketing-masters.facebook_web_ads.facebook-video-to-web');
+        return view('marketing-masters.tiktok_web_ads.tiktok-video-to-web');
     }
 
-    public function facebookWebToVideoData()
+    public function tiktokWebToVideoData()
     {
         $productMasters = ProductMaster::orderBy('parent', 'asc')
             ->orderByRaw("CASE WHEN sku LIKE 'PARENT %' THEN 1 ELSE 0 END")
@@ -41,8 +41,6 @@ class FacebookAddsManagerController extends Controller
 
         $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy('sku');
 
-        $nrValues = AmazonDataView::whereIn('sku', $skus)->pluck('value', 'sku');
-
         $result = [];
 
         foreach ($productMasters as $pm) {
@@ -51,12 +49,18 @@ class FacebookAddsManagerController extends Controller
 
             $shopify = $shopifyData[$pm->sku] ?? null;
 
+            $nrValues = AmazonDataView::whereIn('sku', $skus)->pluck('value', 'sku');
+
             $row = [];
             $row['parent'] = $parent;
             $row['sku']    = $pm->sku;
             $row['INV']    = $shopify->inv ?? 0;
             $row['L30']    = $shopify->quantity ?? 0;
             $row['fba']    = $pm->fba ?? null;
+
+            $row['NRL']  = '';
+            $row['NRA'] = '';
+            $row['FBA'] = '';
 
             if (isset($nrValues[$pm->sku])) {
                 $raw = $nrValues[$pm->sku];
@@ -82,12 +86,12 @@ class FacebookAddsManagerController extends Controller
     }
 
 
-    public function FbImgCaraousalToWeb()
+    public function TkImgCaraousalToWeb()
     {
-        return view('marketing-masters.facebook_web_ads.fb-img-caraousal-to-web');
+        return view('marketing-masters.tiktok_web_ads.tk-img-caraousal-to-web');
     }
 
-    public function FbImgCaraousalToWebData()
+    public function TkImgCaraousalToWebData()
     {
         $productMasters = ProductMaster::orderBy('parent', 'asc')
             ->orderByRaw("CASE WHEN sku LIKE 'PARENT %' THEN 1 ELSE 0 END")

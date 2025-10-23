@@ -171,6 +171,7 @@ use App\Http\Controllers\Campaigns\AmazonSpBudgetController;
 use App\Http\Controllers\Campaigns\AmzCorrectlyUtilizedController;
 use App\Http\Controllers\Campaigns\AmzUnderUtilizedBgtController;
 use App\Http\Controllers\Campaigns\CampaignImportController;
+use App\Http\Controllers\Campaigns\Ebay2PMTAdController;
 use App\Http\Controllers\Campaigns\Ebay3AcosController;
 use App\Http\Controllers\Campaigns\Ebay3KeywordAdsController;
 use App\Http\Controllers\Campaigns\Ebay3PinkDilAdController;
@@ -220,7 +221,7 @@ use App\Http\Controllers\MarketPlace\WalmartControllerMarket;
 use App\Http\Controllers\MarketingMaster\CarouselSalesController;
 use App\Http\Controllers\MarketingMaster\EbayCvrLqsController;
 use App\Http\Controllers\MarketingMaster\ShoppableVideoController;
-use App\Http\Controllers\MarketPlace\ACOSControl\AmazonACOSController;
+use App\Http\Controllers\MarketPlace\ACOSControl\AmazonACOSController; 
 use App\Http\Controllers\MarketPlace\ACOSControl\EbayACOSController;
 use App\Http\Controllers\MarketPlace\AliexpressController;
 use App\Http\Controllers\MarketPlace\Ebay2LowVisibilityController;
@@ -236,6 +237,9 @@ use App\Http\Controllers\PurchaseMaster\QualityEnhanceController;
 use App\Http\Controllers\PurchaseMaster\RFQController;
 use App\Http\Controllers\PurchaseMaster\SourcingController;
 use App\Http\Controllers\MarketingMaster\FacebookAddsManagerController;
+use App\Http\Controllers\MarketingMaster\InstagramAdsManagerController;
+use App\Http\Controllers\MarketingMaster\YoutubeAdsManagerController;
+use App\Http\Controllers\MarketingMaster\TiktokAdsManagerController;
 use App\Http\Controllers\MarketingMaster\MovementPricingMaster;
 use App\Http\Controllers\MarketingMaster\OverallCvrLqsController;
 use App\Http\Controllers\MarketPlace\Business5coreController;
@@ -1833,6 +1837,18 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
         Route::get('/youtube-shorts-ad', 'youtubeShortsAdView')->name('youtube.shorts.ads.master');
         Route::get('/youtube-shorts-ads', 'getYoutubeShortsAdsData');
         Route::post('/youtube-shorts-ads/save', 'saveYoutubeShortsAds')->name('youtube_shorts_ads.save');
+
+
+        Route::get('/traffic/dropship', 'getTrafficDropship')->name('traffic.dropship');
+        Route::get('/traffic/caraudio', 'getTrafficCaraudio')->name('traffic.caraudio');
+        Route::get('/traffic/musicinst', 'getTrafficMusicInst')->name('traffic.musicinst');
+        Route::get('/traffic/repaire', 'getTrafficRepaire')->name('traffic.repaire');
+        Route::get('/traffic/musicschool', 'getTrafficMusicSchool')->name('traffic.musicschool');
+
+
+
+       
+        
     });
 
     Route::controller(ShoppableVideoController::class)->group(function () {
@@ -1932,6 +1948,30 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
         Route::get('/facebook-web-to-video-data', 'facebookWebToVideoData')->name('facebook.web.to.video.data');
         Route::get('/fb-img-caraousal-to-web', 'FbImgCaraousalToWeb')->name('fb.img.caraousal.to.web');
         Route::get('/fb-img-caraousal-to-web-data', 'FbImgCaraousalToWebData')->name('fb.img.caraousal.to.web.data');
+    });
+
+    Route::controller(InstagramAdsManagerController::class)->group(function () {
+        Route::get('/instagram-ads-control/data', 'index')->name('instagram.ads.index');
+        Route::get('/instagram-web-to-video', 'instagramWebToVideo')->name('instagram.web.to.video');
+        Route::get('/instagram-web-to-video-data', 'instagramWebToVideoData')->name('instagram.web.to.video.data');
+        Route::get('/insta-img-caraousal-to-web', 'InstaImgCaraousalToWeb')->name('insta.img.caraousal.to.web');
+        Route::get('/insta-img-caraousal-to-web-data', 'InstaImgCaraousalToWebData')->name('insta.img.caraousal.to.web.data');
+    });
+
+    Route::controller(YoutubeAdsManagerController::class)->group(function () {
+        Route::get('/youtube-ads-control/data', 'index')->name('youtube.ads.index');
+        Route::get('/youtube-web-to-video', 'youtubeWebToVideo')->name('youtube.web.to.video');
+        Route::get('/youtube-web-to-video-data', 'youtubeWebToVideoData')->name('youtube.web.to.video.data');
+        Route::get('/yt-img-caraousal-to-web', 'YtImgCaraousalToWeb')->name('yt.img.caraousal.to.web');
+        Route::get('/yt-img-caraousal-to-web-data', 'YtImgCaraousalToWebData')->name('yt.img.caraousal.to.web.data');
+    });
+
+    Route::controller(TiktokAdsManagerController::class)->group(function () {
+        Route::get('/tiktok-ads-control/data', 'index')->name('tiktok.ads.index');
+        Route::get('/tiktok-web-to-video', 'tiktokWebToVideo')->name('tiktok.web.to.video');
+        Route::get('/tiktok-web-to-video-data', 'tiktokWebToVideoData')->name('tiktok.web.to.video.data');
+        Route::get('/tk-img-caraousal-to-web', 'TkImgCaraousalToWeb')->name('tk.img.caraousal.to.web');
+        Route::get('/tk-img-caraousal-to-web-data', 'TkImgCaraousalToWebData')->name('tk.img.caraousal.to.web.data');
     });
 
     Route::controller(AmazonACOSController::class)->group(function () {
@@ -2042,6 +2082,14 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::controller(EbayMissingAdsController::class)->group(function () {
         Route::get('/ebay/ad-missing/list', 'index')->name('ebay.missing.ads');
         Route::get('/ebay/ad-missing/data', 'getEbayMissingAdsData');
+    });
+
+    // ebay 2 ads section
+    Route::controller(Ebay2PMTAdController::class)->group(function () {
+        Route::get('/ebay-2/pmt/ads', 'index')->name('ebay2.pmt.ads');
+        Route::get('/ebay-2/pmp/ads/data', 'getEbay2PmtAdsData');
+        Route::post('/update-ebay-2-pmt-percentage', 'updateEbay2Percentage');
+        Route::post('/update-ebay-2-pmt-sprice', 'saveEbay2PMTSpriceToDatabase');
     });
 
     // ebay 3 ads section

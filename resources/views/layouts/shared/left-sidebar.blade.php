@@ -769,6 +769,42 @@
                 </a>
                 <div class="collapse" id="sidebarPages2">
                     <ul class="side-nav-second-level">
+
+                        <!--- Start Nikhil Code -->
+                        <li class="side-nav-item">
+                            <a data-bs-toggle="collapse" href="#video-ads-master" aria-expanded="false"
+                                aria-controls="video-ads-master" class="side-nav-link">
+                                <span>Traffic To Webpages</span>
+                                <span class="menu-arrow"></span>
+                            </a>
+                            <div class="collapse" id="video-ads-master">
+                                <ul class="side-nav-second-level">
+                                    <li>
+                                        <a href="{{ route('traffic.dropship') }}">Dropship</a>
+                                    </li>
+                                    <li>
+                                        <a href="{{ route('traffic.caraudio') }}">Car Audio</a>
+                                    </li>
+                                    <li>
+                                        <a href="{{ route('traffic.musicinst') }}">Music Instru Shop</a>
+                                    </li>
+                                    <li>
+                                        <a href="{{ route('traffic.repaire') }}">Repaire Shop</a>
+                                    </li>
+                                    <li>
+                                        <a href="{{ route('traffic.musicschool') }}">Music School</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+
+                        <!-- End Nikhil Code  -->
+
+
+
+
+
+
                         <li>
                             <a href="{{ route('listingMaster') }}">Listing Masters</a>
                         </li>
@@ -1043,10 +1079,10 @@
                             <div class="collapse" id="instagram-web-ads">
                                 <ul class="side-nav-second-level">
                                     <li>
-                                        <a href="#">Insta Video to Web</a>
+                                        <a href="{{ route('instagram.web.to.video') }}">Insta Video to Web</a>
                                     </li>
                                     <li>
-                                        <a href="#">Insta Img Caraousal to Web</a>
+                                        <a href="{{ route('insta.img.caraousal.to.web') }}">Insta Img Caraousal to Web</a>
                                     </li>
                                 </ul>
                             </div>
@@ -1061,10 +1097,10 @@
                             <div class="collapse" id="youtube-web-ads">
                                 <ul class="side-nav-second-level">
                                     <li>
-                                        <a href="#">YouTube Video to Web</a>
+                                        <a href="{{ route('youtube.web.to.video') }}">YouTube Video to Web</a>
                                     </li>
                                     <li>
-                                        <a href="#">YouTube Img Caraousal to Web</a>
+                                        <a href="{{ route('yt.img.caraousal.to.web') }}">YouTube Img Caraousal to Web</a>
                                     </li>
                                 </ul>
                             </div>
@@ -1082,10 +1118,10 @@
                                     <li><a href="{{ url('tiktokAnalysis') }}">Tiktok Analytics</a></li>
 
                                     <li>
-                                        <a href="#">Tiktok Video to Web</a>
+                                        <a href="{{ route('tiktok.web.to.video') }}">Tiktok Video to Web</a>
                                     </li>
                                     <li>
-                                        <a href="#">Tiktok Img Caraousal to Web</a>
+                                        <a href="{{ route('tk.img.caraousal.to.web') }}">Tiktok Img Caraousal to Web</a>
                                     </li>
                                 </ul>
                             </div>
@@ -2036,6 +2072,10 @@
 
                                     <li>
                                         <a href="{{ url('ebayTwoPricingCVR') }}">Ebay 2 Pricing - CVR</a>
+                                    </li>
+
+                                    <li>
+                                        <a href="{{ route('ebay2.pmt.ads') }}">PMT Ads</a>
                                     </li>
                                 </ul>
                             </div>

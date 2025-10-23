@@ -1,6 +1,7 @@
 @extends('layouts.vertical', ['title' => 'Channel Master', 'mode' => $mode ?? '', 'demo' => $demo ?? ''])
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
+
 @section('css')
     @vite(['node_modules/admin-resources/rwd-table/rwd-table.min.css'])
     <link href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" rel="stylesheet">
@@ -29,6 +30,15 @@
             background-color: #f5f7fa !important;
             color: var(--dark-color) !important;
         }
+        /* bar chart css */
+        canvas { width: 100% !important; height: 60% !important; }
+         .controls { margin-bottom:12px; display:flex; gap:8px; align-items:center; }
+         .btn {
+           padding:8px 12px; border-radius:6px; border:1px solid #ccc; cursor:pointer; background:#fff;
+         }
+         .btn.off { opacity:0.45; text-decoration:line-through; }
+         .status { margin-top:8px; color:#666; font-size:0.95rem; }
+        /* bar chart css end */
 
         .container {
             max-width: 1200px !important;
@@ -498,6 +508,56 @@
             </div>
         </div>
 
+         <div id="chartWrap">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="controls">
+                         <button id="toggleL30" class="btn" style="background-color: #53afed;">L30</button>
+                         <button id="toggleL60" class="btn" style="background-color: #feac5b;">L60</button>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <input type="date" class="form-control" name="from_date">
+                </div>
+                <div class="col-md-3">
+                    <input type="date" class="form-control" name="to_date">
+                </div>
+                <div class="col-md-2">
+                    <button class="badge bg-primary text-white px-3 py-2" style="font-size: 1rem; border-radius: 8px;">Sales Graph</button>
+                </div>
+            </div>
+            <!-- top chart summary calculation -->
+             <div class="row text-center">
+                            <div class="col">
+                                <p class="text-muted mt-3">Sales</p>
+                                <h3 class=" mb-0">
+                                    <span id="total_sales">0</span>
+                                </h3>
+                            </div>
+                            <div class="col">
+                                <p class="text-muted mt-3">Profit Margin</p>
+                                <h3 class=" mb-0">
+                                    <span id="profit_margin">0% </span>
+                                </h3>
+                            </div>
+                            <div class="col">
+                                <p class="text-muted mt-3">ROI</p>
+                                <h3 class=" mb-0">
+                                    <span id="sales_roi">0%</span>
+                                </h3>
+                            </div>
+                            <!-- <div class="col">
+                                <p class="text-muted mt-3">Customers</p>
+                                <h3 class=" mb-0">
+                                    <span>3k</span>
+                                </h3>
+                            </div> -->
+                        </div>
+                        <br>
+         <canvas id="barChart"></canvas>
+        <div id="status" class="status">Loading data…</div>
+        </div>
+
         <!-- Add Channel Modal (Left to Right Slide-in) -->
         <div class="modal fade right-to-left" id="addChannelModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-side">
@@ -880,7 +940,7 @@
             if (l30SalesTotal !== 0) {
                 growthTotal = ((l30SalesTotal - l60SalesTotal) / l60SalesTotal) * 100;
             }
-
+            
             // Update the cards with formatted values
             const l60Badge = document.getElementById('l60SalesCountBadge');
             const l30Badge = document.getElementById('l30SalesCountBadge');
@@ -919,6 +979,7 @@
 
                 totalPft += profitAmount;
                 totalL30Sales += l30Sales;
+                $("#total_sales").html('$'+Number(totalL30Sales).toLocaleString('en-US'));
             });
             let gProfit = totalL30Sales !== 0 ? (totalPft / totalL30Sales)* 100 : null;
             let gRoi = totalCogs !== 0 ? (totalPft / totalCogs)* 100 : null;
@@ -927,6 +988,9 @@
             }
             // if (gprofitBadge) gprofitBadge.textContent = gProfit !== null ? gProfit.toFixed(1) + '%' : 'N/A';
             if (groiBadge) groiBadge.textContent = gRoi !== null ? gRoi.toFixed(1) + '%' : 'N/A';
+
+            $("#profit_margin").html(gProfit.toFixed(1)+'%');
+            $("#sales_roi").html(gRoi.toFixed(1)+'%');
         }
 
         // Initialize DataTable
@@ -2714,5 +2778,169 @@
             }
         });
     </script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+(async function(){
+  const fetchUrl = '/sales-trend-data';
+  const statusEl = document.getElementById('status');
+  const ctx = document.getElementById('barChart').getContext('2d');
+  const btnL30 = document.getElementById('toggleL30');
+  const btnL60 = document.getElementById('toggleL60');
+
+  let enabled = { l30: true, l60: false };
+  let rawChartData = [];
+  let chart = null;
+
+  function setStatus(msg, isError = false) {
+    statusEl.textContent = msg;
+    statusEl.style.color = isError ? '#b00020' : '#666';
+  }
+
+  function updateButtons() {
+    btnL30.classList.toggle('off', !enabled.l30);
+    btnL60.classList.toggle('off', !enabled.l60);
+  }
+
+  function renderChart() {
+    // Filter to show only rows where at least one enabled series has data
+    const filtered = rawChartData.filter(row => {
+      const hasL30 = enabled.l30 && Number(row.l30_sales) > 0;
+      const hasL60 = enabled.l60 && Number(row.l60_sales) > 0;
+      return hasL30 || hasL60;
+    });
+
+    if (filtered.length === 0) {
+      if (chart) chart.destroy();
+      setStatus('No data to display with current filters.');
+      return;
+    }
+
+    const labels = filtered.map(r => r.date);
+    const l30Data = filtered.map(r => Number(r.l30_sales ?? 0));
+    const l60Data = filtered.map(r => Number(r.l60_sales ?? 0));
+
+    const datasets = [];
+    
+    if (enabled.l30) {
+      datasets.push({
+        label: 'L30',
+        data: l30Data,
+        backgroundColor: 'rgba(54, 162, 235, 0.85)',
+        borderColor: 'rgba(54, 162, 235, 1)',
+        borderWidth: 1,
+        borderRadius: 4
+      });
+    }
+    
+    if (enabled.l60) {
+      datasets.push({
+        label: 'L60',
+        data: l60Data,
+        backgroundColor: 'rgba(255, 159, 64, 0.85)',
+        borderColor: 'rgba(255, 159, 64, 1)',
+        borderWidth: 1,
+        borderRadius: 4
+      });
+    }
+
+    if (chart) chart.destroy();
+
+    chart = new Chart(ctx, {
+      type: 'bar',
+      data: { labels, datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { 
+          mode: 'index', 
+          intersect: false 
+        },
+        plugins: {
+          legend: { 
+            position: 'top',
+            labels: {
+              padding: 15,
+              font: { size: 12 }
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: (context) => {
+                const value = context.parsed.y ?? context.parsed;
+                return context.dataset.label + ': $' + Number(value).toLocaleString('en-US', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2
+                });
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            title: { 
+              display: true, 
+              text: 'Date',
+              font: { size: 12, weight: 'bold' }
+            },
+            grid: { display: false },
+            ticks: { 
+              maxRotation: 45,
+              minRotation: 45,
+              autoSkip: true, 
+              maxTicksLimit: 30,
+              font: { size: 10 }
+            }
+          },
+          y: {
+            title: { 
+              display: true, 
+              text: 'Sales ($)',
+              font: { size: 12, weight: 'bold' }
+            },
+            beginAtZero: true,
+            grid: { color: 'rgba(0, 0, 0, 0.05)' },
+            ticks: { 
+              callback: (value) => '$' + Number(value).toLocaleString()
+            }
+          }
+        }
+      }
+    });
+
+    setStatus(`Showing ${filtered.length} dates — L30: ${enabled.l30 ? 'ON' : 'OFF'}, L60: ${enabled.l60 ? 'ON' : 'OFF'}`);
+  }
+
+  try {
+    const res = await fetch(fetchUrl, { credentials: 'same-origin' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const payload = await res.json();
+    rawChartData = Array.isArray(payload.chartData) ? payload.chartData : [];
+
+    if (rawChartData.length === 0) {
+      setStatus('No data available for the selected period.');
+      return;
+    }
+
+    updateButtons();
+    renderChart();
+  } catch (err) {
+    console.error(err);
+    setStatus('Failed to load chart data — check console and API route.', true);
+    return;
+  }
+
+  btnL30.addEventListener('click', () => {
+    enabled.l30 = !enabled.l30;
+    updateButtons();
+    renderChart();
+  });
+
+  btnL60.addEventListener('click', () => {
+    enabled.l60 = !enabled.l60;
+    updateButtons();
+    renderChart();
+  });
+})();
+</script>
 
 @endsection
