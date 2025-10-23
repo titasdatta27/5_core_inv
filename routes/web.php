@@ -321,7 +321,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     //Channel Ads Master
     Route::get('/channel/ads/master', [ChannelAdsMasterController::class, 'channelAdsMaster'])->name('channel.ads.master');
     Route::get('/channel/ads/data', [ChannelAdsMasterController::class, 'getAdsMasterData'])->name('channel.ads.data');
-
+    Route::get('/channel/adv/master', [ChannelAdsMasterController::class, 'channelAdvMaster'])->name('channel.adv.master');
 
 
     //Zero Visibility Master
@@ -1830,12 +1830,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
         Route::get('/traffic/caraudio', 'getTrafficCaraudio')->name('traffic.caraudio');
         Route::get('/traffic/musicinst', 'getTrafficMusicInst')->name('traffic.musicinst');
         Route::get('/traffic/repaire', 'getTrafficRepaire')->name('traffic.repaire');
-        Route::get('/traffic/musicschool', 'getTrafficMusicSchool')->name('traffic.musicschool');
-
-
-
-       
-        
+        Route::get('/traffic/musicschool', 'getTrafficMusicSchool')->name('traffic.musicschool');       
     });
 
     Route::controller(ShoppableVideoController::class)->group(function () {

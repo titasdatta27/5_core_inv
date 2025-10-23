@@ -3423,4 +3423,9 @@ class AdsMasterController extends Controller
             'demo' => $demo,
         ]);
     }
+
+    public function channelAdvMaster(Request $request)
+    {
+        return view('channels.adv-masters');
+    }
 }
