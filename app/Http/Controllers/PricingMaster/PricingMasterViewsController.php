@@ -323,9 +323,9 @@ class PricingMasterViewsController extends Controller
         // Fetch LMPA and LMP data
         $lmpaLookup = collect();
         try {
-            $lmpaLookup = DB::connection('repricer_5core')
+            $lmpaLookup = DB::connection('repricer')
                 ->table('lmpa_data')
-                ->select('sku', DB::raw('MIN(price) as lowest_price'))
+                ->select('sku', DB::raw('MIN(price) as lowest_price'), DB::raw('MAX(link) as link'))
                 ->where('price', '>', 0)
                 ->whereIn('sku', $nonParentSkus)
                 ->groupBy('sku')
@@ -337,9 +337,9 @@ class PricingMasterViewsController extends Controller
 
         $lmpLookup = collect();
         try {
-            $lmpLookup = DB::connection('repricer_5core')
+            $lmpLookup = DB::connection('repricer')
                 ->table('lmp_data')
-                ->select('sku', DB::raw('MIN(price) as lowest_price'), 'link')
+                ->select('sku', DB::raw('MIN(price) as lowest_price'), DB::raw('MAX(link) as link'))
                 ->where('price', '>', 0)
                 ->whereIn('sku', $nonParentSkus)
                 ->groupBy('sku')
@@ -669,6 +669,11 @@ class PricingMasterViewsController extends Controller
                 'views_clicks' => $shein ? ($shein->views_clicks ?? 0) : 0,
                 'lmp' => $shein ? ($shein->lmp ?? 0) : 0,
                 'link' => $lmp ? ($lmp->link ?? null) : null,
+                'link_amz' => $lmpa ? ($lmpa->link ?? null) : null,
+                'link_ebay' => $lmp ? ($lmp->link ?? null) : null,
+                'link_shein' => $lmp ? ($lmp->link ?? null) : null,
+                'link_tiktok' => $tiktok ? ($tiktok->link ?? null) : null,
+                'link_aliexpress' => $aliexpress ? ($aliexpress->link ?? null) : null,
                 'shopify_sheinl30' => $shein ? ($shein->shopify_sheinl30 ?? 0) : 0,
                 'total_req_view' => (
                     ($ebay && $ebay->views && $ebay->ebay_l30 ? ($inv * 20) : 0) +
