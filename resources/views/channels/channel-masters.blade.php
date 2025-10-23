@@ -509,10 +509,51 @@
         </div>
 
          <div id="chartWrap">
-             <div class="controls">
-                  <button id="toggleL30" class="btn" style="background-color: #53afed;">L30</button>
-                  <button id="toggleL60" class="btn" style="background-color: #feac5b;">L60</button>
-             </div>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="controls">
+                         <button id="toggleL30" class="btn" style="background-color: #53afed;">L30</button>
+                         <button id="toggleL60" class="btn" style="background-color: #feac5b;">L60</button>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <input type="date" class="form-control" name="from_date">
+                </div>
+                <div class="col-md-3">
+                    <input type="date" class="form-control" name="to_date">
+                </div>
+                <div class="col-md-2">
+                    <button class="badge bg-primary text-white px-3 py-2" style="font-size: 1rem; border-radius: 8px;">Sales Graph</button>
+                </div>
+            </div>
+            <!-- top chart summary calculation -->
+             <div class="row text-center">
+                            <div class="col">
+                                <p class="text-muted mt-3">Sales</p>
+                                <h3 class=" mb-0">
+                                    <span id="total_sales">0</span>
+                                </h3>
+                            </div>
+                            <div class="col">
+                                <p class="text-muted mt-3">Profit Margin</p>
+                                <h3 class=" mb-0">
+                                    <span id="profit_margin">0% </span>
+                                </h3>
+                            </div>
+                            <div class="col">
+                                <p class="text-muted mt-3">ROI</p>
+                                <h3 class=" mb-0">
+                                    <span id="sales_roi">0%</span>
+                                </h3>
+                            </div>
+                            <!-- <div class="col">
+                                <p class="text-muted mt-3">Customers</p>
+                                <h3 class=" mb-0">
+                                    <span>3k</span>
+                                </h3>
+                            </div> -->
+                        </div>
+                        <br>
          <canvas id="barChart"></canvas>
         <div id="status" class="status">Loading data…</div>
         </div>
@@ -899,7 +940,7 @@
             if (l30SalesTotal !== 0) {
                 growthTotal = ((l30SalesTotal - l60SalesTotal) / l60SalesTotal) * 100;
             }
-
+            
             // Update the cards with formatted values
             const l60Badge = document.getElementById('l60SalesCountBadge');
             const l30Badge = document.getElementById('l30SalesCountBadge');
@@ -938,6 +979,7 @@
 
                 totalPft += profitAmount;
                 totalL30Sales += l30Sales;
+                $("#total_sales").html('$'+Number(totalL30Sales).toLocaleString('en-US'));
             });
             let gProfit = totalL30Sales !== 0 ? (totalPft / totalL30Sales)* 100 : null;
             let gRoi = totalCogs !== 0 ? (totalPft / totalCogs)* 100 : null;
@@ -946,6 +988,9 @@
             }
             // if (gprofitBadge) gprofitBadge.textContent = gProfit !== null ? gProfit.toFixed(1) + '%' : 'N/A';
             if (groiBadge) groiBadge.textContent = gRoi !== null ? gRoi.toFixed(1) + '%' : 'N/A';
+
+            $("#profit_margin").html(gProfit.toFixed(1)+'%');
+            $("#sales_roi").html(gRoi.toFixed(1)+'%');
         }
 
         // Initialize DataTable
@@ -2742,7 +2787,7 @@
   const btnL30 = document.getElementById('toggleL30');
   const btnL60 = document.getElementById('toggleL60');
 
-  let enabled = { l30: true, l60: true };
+  let enabled = { l30: true, l60: false };
   let rawChartData = [];
   let chart = null;
 
