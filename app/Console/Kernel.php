@@ -219,6 +219,8 @@ class Kernel extends ConsoleKernel
             ->dailyAt('00:01') 
             ->timezone('Asia/Kolkata');
 
+        $schedule->command('app:sync-cp-master-to-sheet')->hourly();
+                
         // FBA Commands - Daily Updates
         $schedule->command('app:fetch-fba-reports')
             ->dailyAt('01:00')
