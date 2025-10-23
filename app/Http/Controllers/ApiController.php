@@ -1634,12 +1634,14 @@ class ApiController extends Controller
 
         $topdawg_sheetdata_query = TopDawgSheetdata::where('sku', 'not like', '%Parent%');
         $topdawg_sheetdata_l30Sales  = (clone $topdawg_sheetdata_query)->selectRaw('SUM(l30 * price) as total')->value('total') ?? 0;
+        
      
-        $total_l30_sales = $amz_l30Sales + $ebay_l30Sales + $ebay_two_channel_l30Sales + $ebay_3channel_l30Sales + $macy_l30sales +
-                         $tiend_l30Sales + $best_buy_usa_l30Sales + $reverb_product_l30Sales + $doba_sheetdata_l30Sales + $temu_metric_l30Sales +
-                         $walmart_l30Sales + $pls_product_l30Sales + $waifair_product_l30Sales + $faire_product_sheet_l30Sales + $shein_sheet_l30Sales +
-                         $tiktok_sheet_l30Sales + $instagram_shop_l30Sales + $aliexpress_sheet_l30Sales + $mercari_l30Sales + $mercariwoship_sheet_l30Sales +
-                         $fb_marketplace_sheet_l30Sales + $fb_shop_sheet_l30Sales + $business_five_coresheet_l30Sales + $topdawg_sheetdata_l30Sales;
+        $total_l30_sales = intval($amz_l30Sales) + intval($ebay_l30Sales) + intval($ebay_two_channel_l30Sales) + intval($ebay_3channel_l30Sales) + intval($macy_l30sales) +
+                         intval($tiend_l30Sales) + intval($best_buy_usa_l30Sales) + intval($reverb_product_l30Sales) + intval($doba_sheetdata_l30Sales) + intval($temu_metric_l30Sales) +
+                         intval($walmart_l30Sales) + intval($pls_product_l30Sales) + intval($waifair_product_l30Sales) + intval($faire_product_sheet_l30Sales) + intval($shein_sheet_l30Sales) +
+                         intval($tiktok_sheet_l30Sales) + intval($instagram_shop_l30Sales) + intval($aliexpress_sheet_l30Sales) + intval($mercari_l30Sales) + intval($mercariwoship_sheet_l30Sales) +
+                         intval($fb_marketplace_sheet_l30Sales) + intval($fb_shop_sheet_l30Sales) + intval($business_five_coresheet_l30Sales) + intval($topdawg_sheetdata_l30Sales);
+                        //  dd($fb_marketplace_sheet_l30Sales);
                           return response()->json([
             'status'  => 200,
             'message' => 'Channel sales data fetched successfully',
