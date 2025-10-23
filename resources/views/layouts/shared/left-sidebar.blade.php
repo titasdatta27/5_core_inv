@@ -2037,6 +2037,10 @@
                                     <li>
                                         <a href="{{ url('ebayTwoPricingCVR') }}">Ebay 2 Pricing - CVR</a>
                                     </li>
+
+                                    <li>
+                                        <a href="{{ route('ebay2.pmt.ads') }}">PMT Ads</a>
+                                    </li>
                                 </ul>
                             </div>
                         </li>

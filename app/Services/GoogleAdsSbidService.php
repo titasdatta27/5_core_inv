@@ -89,14 +89,6 @@ class GoogleAdsSbidService
             if ($bidMicros < $billableUnit) {
                 $bidMicros = $billableUnit;
             }
-            
-            Log::info("Updating AdGroup SBID", [
-                'customer_id' => $customerId,
-                'ad_group' => $adGroupResourceName,
-                'new_sbid' => $newSbid,
-                'bid_micros' => $bidMicros,
-                'bid_rounded' => $bidMicros / 1_000_000
-            ]);
 
             $adGroup = new AdGroup([
                 'resource_name' => $adGroupResourceName,
@@ -123,15 +115,6 @@ class GoogleAdsSbidService
             if (count($results) === 0) {
                 throw new \Exception("No results returned from ad group update operation");
             }
-
-            Log::info("AdGroup SBID updated successfully", [
-                'customer_id' => $customerId,
-                'ad_group' => $adGroupResourceName,
-                'new_sbid' => $newSbid,
-                'final_bid_micros' => $bidMicros,
-                'final_bid_dollars' => $bidMicros / 1_000_000,
-                'response_count' => count($results)
-            ]);
             
             return $response;
             
@@ -169,14 +152,6 @@ class GoogleAdsSbidService
             if ($bidMicros < $billableUnit) {
                 $bidMicros = $billableUnit;
             }
-            
-            Log::info("Updating Product Group SBID", [
-                'customer_id' => $customerId,
-                'product_group' => $productGroupResourceName,
-                'new_sbid' => $newSbid,
-                'bid_micros' => $bidMicros,
-                'bid_rounded' => $bidMicros / 1_000_000
-            ]);
 
             $criterion = new AdGroupCriterion([
                 'resource_name' => $productGroupResourceName,
@@ -205,15 +180,6 @@ class GoogleAdsSbidService
                 throw new \Exception("No results returned from product group update operation");
             }
 
-            Log::info("Product Group SBID updated successfully", [
-                'customer_id' => $customerId,
-                'product_group' => $productGroupResourceName,
-                'new_sbid' => $newSbid,
-                'final_bid_micros' => $bidMicros,
-                'final_bid_dollars' => $bidMicros / 1_000_000,
-                'response_count' => count($results)
-            ]);
-
             return $response;
             
         } catch (\Exception $e) {
@@ -231,11 +197,6 @@ class GoogleAdsSbidService
     public function updateCampaignSbids($customerId, $campaignId, $sbidFactor)
     {
         try {
-            Log::info("Starting SBID update for campaign", [
-                'customer_id' => $customerId,
-                'campaign_id' => $campaignId,
-                'sbid_factor' => $sbidFactor
-            ]);
 
             $adGroupQuery = "
                 SELECT ad_group.resource_name, metrics.clicks, metrics.cost_micros
@@ -244,12 +205,6 @@ class GoogleAdsSbidService
             ";
 
             $adGroups = $this->runQuery($customerId, $adGroupQuery);
-            
-            Log::info("Found ad groups for campaign", [
-                'campaign_id' => $campaignId,
-                'ad_groups_count' => count($adGroups),
-                'ad_groups_data' => $adGroups
-            ]);
 
             if (empty($adGroups)) {
                 Log::warning("No ad groups found for campaign", ['campaign_id' => $campaignId]);
@@ -316,12 +271,6 @@ class GoogleAdsSbidService
                     Log::warning("No resource name found for ad group", ['row' => $row]);
                 }
             }
-
-            Log::info("Completed SBID update for campaign", [
-                'campaign_id' => $campaignId,
-                'processed_ad_groups' => $processedAdGroups,
-                'processed_product_groups' => $processedProductGroups
-            ]);
 
             // If no ad groups were processed, throw an exception
             if ($processedAdGroups === 0) {
