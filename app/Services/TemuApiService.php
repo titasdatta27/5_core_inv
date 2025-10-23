@@ -137,9 +137,9 @@ private function generateSignValue($requestBody)
 
         Log::info("======================= Ended Inventory Sync =======================");
         Log::info("Total Temu inventory items collected: " . count($this->allItems));
-        foreach($this->allItems as $titem){            
+        foreach($this->allItems as $titem){    
             ProductStockMapping::updateOrCreate(
-                ['sku' => $titem['outGoodsSn']],
+                ['sku' => $titem['outSkuSnList'][0]],
                 ['inventory_temu' => $titem['quantity']]
             );
         }
