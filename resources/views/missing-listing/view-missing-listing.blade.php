@@ -1032,6 +1032,9 @@
                             <h5 class="text-uppercase mt-0" title="Customers">Ebay1: <span id="ebay1notlisted"></span></h5>
                             <h5 class="text-uppercase mt-0" title="Customers">Ebay2: <span id="ebay2notlisted"></span></h5>
                             <h5 class="text-uppercase mt-0" title="Customers">Ebay3: <span id="ebay3notlisted"></span></h5>
+                            <h5 class="text-uppercase mt-0" title="Customers">BestBuyUSA: <span id="bestbuynotlisted"></span></h5>
+                            <h5 class="text-uppercase mt-0" title="Customers">Tiendamia: <span id="tiendamianotlisted"></span></h5>
+                            {{-- <h5 class="text-uppercase mt-0" title="Customers">Ebay3: <span id="ebay3notlisted"></span></h5> --}}
                         </div>
                     </div>
                     
@@ -1123,7 +1126,7 @@
                     <!-- Controls row -->
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <!-- Left side controls -->
-                        <div class="form-inline">
+                        {{-- <div class="form-inline">
                             <div class="form-group mr-2">
                                 <label for="row-data-type" class="mr-2">Filter Type:</label>
                                 <select id="row-data-type" class="form-control form-control-sm">
@@ -1132,7 +1135,7 @@
                                     <option value="notmatching">Mismatch</option>                                  
                                 </select>
                             </div>
-                        </div>
+                        </div> --}}
                        
 
                     <!-- Search on right -->
@@ -1144,8 +1147,8 @@
                             </div>
                         </div>
                         <div class="form-inline">
-                            <button id="updatenotrequired" class="btn btn-primary btn-sm">Update Not Required</button>
-                            <button id="reFetchliveData" class="btn btn-primary btn-sm">Refech ALL Live Data</button>
+                            {{-- <button id="updatenotrequired" class="btn btn-primary btn-sm">Update Not Required</button> --}}
+                            {{-- <button id="reFetchliveData" class="btn btn-primary btn-sm">Refech ALL Live Data</button> --}}
 
                             <div class="row">
                                 <div class="col">
@@ -1163,6 +1166,8 @@
                                         <option value="ebay1">🔸Ebay1</option>
                                         <option value="ebay2">🔹Ebay2</option>
                                         <option value="ebay3">🔸Ebay3</option>
+                                        <option value="bestbuy">🔹BestBuyUSA</option>
+                                        <option value="tiendamia">🔸Tiendamia</option>
                                     </select>
                                 </div>
                                 <div class="col">
@@ -1190,7 +1195,7 @@
                             <div class="table-container">
                         <table class="custom-resizable-table" id="inventory-table">
                             <thead>
-                                <tr><th colspan="15" class="text-center text-bg-success"><b>Inventory</b></th></tr>                                
+                                <tr><th colspan="17" class="text-center text-bg-success"><b>Inventory</b></th></tr>                                
                                 <tr>
                                      <th style="max-width: 30px;">Not Required</th>
                                     <th style="max-width: 30px;">Image</th>
@@ -1304,6 +1309,24 @@
                                                 Ebay3 <span class="sort-arrow">↓</span>
                                             </div>                                            
                                             <a href="{{ route('listing.ebayThree') }}" target="_blank"><span class="text-danger text-center mx-auto d-block" id="hEbay3nl"></span></a>
+                                        </div>
+                                    </th>
+
+                                    <th style="vertical-align: middle; white-space: nowrap;">
+                                        <div data-field="INV_bestbuy" class="d-flex flex-column align-items-center">
+                                            <div class="d-flex align-items-center">
+                                                BestBuyUSA <span class="sort-arrow">↓</span>
+                                            </div>                                            
+                                            <a href="{{ route('listing.bestbuyusa') }}" target="_blank"><span class="text-danger text-center mx-auto d-block" id="hbestbuynl"></span></a>
+                                        </div>
+                                    </th>
+
+                                    <th style="vertical-align: middle; white-space: nowrap;">
+                                        <div data-field="INV_tiendamia" class="d-flex flex-column align-items-center">
+                                            <div class="d-flex align-items-center">
+                                                Tiendamia <span class="sort-arrow">↓</span>
+                                            </div>                                            
+                                            <a href="{{ route('listing.tiendamia') }}" target="_blank"><span class="text-danger text-center mx-auto d-block" id="htiendamianl"></span></a>
                                         </div>
                                     </th>
                                 </tr>
@@ -1421,6 +1444,26 @@
                                                 </select>
                                             </div>
                                         <span class="text-danger text-center mx-auto d-block" id="filter-ebay3-count"></span>
+                                        </th>
+                                          <th><div class="d-flex align-items-center">
+                                                <select id="filter-bestbuy" class="form-control form-control-sm">
+                                                    <option value="all">All</option>
+                                                    <option value="listed">Listed</option>
+                                                    <option value="notlisted">Not Listed</option>
+                                                    <option value="nrl">NRL</option>
+                                                </select>
+                                            </div>
+                                        <span class="text-danger text-center mx-auto d-block" id="filter-bestbuy-count"></span>
+                                        </th>
+                                          <th><div class="d-flex align-items-center">
+                                                <select id="filter-tiendamia" class="form-control form-control-sm">
+                                                    <option value="all">All</option>
+                                                    <option value="listed">Listed</option>
+                                                    <option value="notlisted">Not Listed</option>
+                                                    <option value="nrl">NRL</option>
+                                                </select>
+                                            </div>
+                                        <span class="text-danger text-center mx-auto d-block" id="filter-tiendamia-count"></span>
                                         </th>
                                 </tr>
                             </thead>
@@ -1622,6 +1665,20 @@
                     $('#hEbay3nl').text(`(${datainfo.ebay3.notlisted})`);
                 }
 
+                  $('#bestbuylisted').text(datainfo.bestbuy.notlisted);
+                if(datainfo.bestbuy.notlisted==0){
+                    $('#hbestbuynl').text(`(${datainfo.bestbuy.notlisted})`).removeClass('text-danger').css('color', 'green');
+                }else{
+                    $('#hbestbuynl').text(`(${datainfo.bestbuy.notlisted})`);
+                }
+
+                  $('#tiendamialisted').text(datainfo.tiendamia.notlisted);
+                if(datainfo.tiendamia.notlisted==0){
+                    $('#htiendamianl').text(`(${datainfo.tiendamia.notlisted})`).removeClass('text-danger').css('color', 'green');
+                }else{
+                    $('#htiendamianl').text(`(${datainfo.tiendamia.notlisted})`);
+                }
+
 
                 // $('#shopifynotmatching').text(datainfo.shopify.mismatching);
                 // $('#amazonnotmatching').text(datainfo.amazon.mismatching);
@@ -1646,6 +1703,8 @@
                 $('#ebay1listed').text(datainfo.ebay1.listed);
                 $('#ebay2listed').text(datainfo.ebay2.listed);
                 $('#ebay3listed').text(datainfo.ebay3.listed);
+                $('#bestbuylisted').text(datainfo.bestbuy.listed);
+                $('#tiendamialisted').text(datainfo.tiendamia.listed);
 
                 // $('#shopifymatching').text(datainfo.shopify.matching);
                 // $('#amazonmatching').text(datainfo.amazon.matching);
@@ -1677,6 +1736,8 @@
                     const INV_ebay1 = parseFloat(item.inventory_ebay1) || item.inventory_ebay1;
                     const INV_ebay2 = parseFloat(item.inventory_ebay2) || item.inventory_ebay2;
                     const INV_ebay3 = parseFloat(item.inventory_ebay3) || item.inventory_ebay3;
+                    const INV_bestbuy = parseFloat(item.inventory_bestbuy) || item.inventory_bestbuy;
+                    const INV_tiendamia = parseFloat(item.inventory_tiendamia) || item.inventory_tiendamia;
                     const notrequired=item.not_required;
 
                         if(INV_amazon=='Not Listed'){notlisted +=1;}
@@ -1700,6 +1761,8 @@
                         INV_ebay1: INV_ebay1,
                         INV_ebay2: INV_ebay2,
                         INV_ebay3: INV_ebay3,
+                        INV_bestbuy: INV_bestbuy,
+                        INV_tiendamia: INV_tiendamia,
                         notrequired:notrequired,
 
                        is_notlisted_shopify: (() => {
@@ -1766,6 +1829,16 @@
                         })(),
                         is_nrl_ebay3: INV_ebay3 === 'NRL' ? 'nrl' : '',
 
+                         is_notlisted_bestbuy: (() => {
+                            return INV_bestbuy=='Not Listed'?'notlisted':'listed';
+                        })(),
+                        is_nrl_bestbuy: INV_bestbuy === 'NRL' ? 'nrl' : '',
+
+                         is_notlisted_tiendamia: (() => {
+                            return INV_tiendamia=='Not Listed'?'notlisted':'listed';
+                        })(),
+                        is_nrl_tiendamia: INV_tiendamia === 'NRL' ? 'nrl' : '',
+
 
                                                 matching: (() => {
                             return INV_shopify == INV_amazon ? 'matching' : 'notmatching';
@@ -1808,6 +1881,8 @@
                const isMismatchEbay1 = item.INV_ebay1 !== 'Not Listed' && parseFloat(item.INV_shopify) === parseFloat(item.INV_ebay1) ? true:false;
                const isMismatchEbay2 = item.INV_ebay2 !== 'Not Listed' && parseFloat(item.INV_shopify) === parseFloat(item.INV_ebay2) ? true:false;
                const isMismatchEbay3 = item.INV_ebay3 !== 'Not Listed' && parseFloat(item.INV_shopify) === parseFloat(item.INV_ebay3) ? true:false;
+               const isMismatchBestbuy = item.INV_bestbuy !== 'Not Listed' && parseFloat(item.INV_shopify) === parseFloat(item.INV_bestbuy) ? true:false;
+               const isMismatchTiendamia = item.INV_tiendamia !== 'Not Listed' && parseFloat(item.INV_shopify) === parseFloat(item.INV_tiendamia) ? true:false;
 
 
 
@@ -1849,6 +1924,8 @@
         <td style="${item.INV_ebay1 === 'Not Listed' ? 'color:red;' : isMismatchEbay1==true?'color:green':'color:red'}">${item.INV_ebay1!='Not Listed'?item.INV_ebay1:'N/L'}</td>
         <td style="${item.INV_ebay2 === 'Not Listed' ? 'color:red;' : isMismatchEbay2==true?'color:green':'color:red'}">${item.INV_ebay2!='Not Listed'?item.INV_ebay2:'N/L'}</td>
         <td style="${item.INV_ebay3 === 'Not Listed' ? 'color:red;' : isMismatchEbay3==true?'color:green':'color:red'}">${item.INV_ebay3!='Not Listed'?item.INV_ebay3:'N/L'}</td>
+        <td style="${item.INV_bestbuy === 'Not Listed' ? 'color:red;' : isMismatchBestbuy==true?'color:green':'color:red'}">${item.INV_bestbuy!='Not Listed'?item.INV_bestbuy:'N/L'}</td>
+        <td style="${item.INV_tiendamia === 'Not Listed' ? 'color:red;' : isMismatchTiendamia==true?'color:green':'color:red'}">${item.INV_tiendamia!='Not Listed'?item.INV_tiendamia:'N/L'}</td>
     </tr>
     </tr>
     </tr>
@@ -2143,7 +2220,7 @@ function applyRowTypeFilterA(platform, filterType) {
 
 
 // Generic event binding for all filters
-['shopify', 'walmart', 'amazon','reverb','shein','doba','temu','macy','ebay1','ebay2','ebay3'].forEach(platform => {
+['shopify', 'walmart', 'amazon','reverb','shein','doba','temu','macy','ebay1','ebay2','ebay3','bestbuy','tiendamia'].forEach(platform => {
     $(`#filter-${platform}`).on('change', function(e) {
         e.preventDefault();
         const filterType = $(this).val();
@@ -2287,6 +2364,8 @@ function buildStockTable(data, showShopify = false) {
         { key: 'INV_ebay1', name: 'Ebay1', img: '1.png' },
         { key: 'INV_ebay2', name: 'Ebay2', img: '2.png' },
         { key: 'INV_ebay3', name: 'Ebay3', img: '3.png' },
+        { key: 'INV_bestbuy', name: 'BestBuyUSA', img: 'bestbuy.jpeg' },
+        { key: 'INV_tiendamia', name: 'Tiendamia', img: 'ten.jpg' },
     ];
 
     channels.forEach(channel => {
@@ -2346,6 +2425,8 @@ function buildStockTable1(data, showShopify = true) {
         { key: 'INV_ebay1', name: 'Ebay1', img: '1.png' },
         { key: 'INV_ebay2', name: 'Ebay2', img: '2.png' },
         { key: 'INV_ebay3', name: 'Ebay3', img: '3.png' },
+         { key: 'INV_bestbuy', name: 'BestBuyUSA', img: 'bestbuy.jpeg' },
+        { key: 'INV_tiendamia', name: 'Tiendamia', img: 'ten.jpg' },
     ];
 
     channels.forEach(channel => {

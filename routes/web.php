@@ -2013,6 +2013,19 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::get('', [RoutingController::class, 'index'])->name('root');
     Route::get('{firstShop}/{secondShop}', [ShopifyController::class, 'shopifyView'])->name('shopify');
     Route::get('{first}/{second}', [RoutingController::class, 'secondLevel'])->name('second');
+    Route::get('/.well-known/{file}', function ($file) {
+    $allowedFiles = ['assetlinks.json', 'apple-app-site-association', 'com.chrome.devtools.json'];
+    if (!in_array($file, $allowedFiles)) {
+        abort(404);
+    }
+
+    $path = public_path(".well-known/{$file}");
+    if (!file_exists($path)) {
+        abort(404);
+    }
+
+    return response()->file($path);
+})->where('file', '.*');
     Route::get('{first}/{second}/{third}', [RoutingController::class, 'thirdLevel'])->name('third');
     Route::post('/ebay-product-price-update', [EbayDataUpdateController::class, 'updatePrice'])->name('ebay_product_price_update');
 
