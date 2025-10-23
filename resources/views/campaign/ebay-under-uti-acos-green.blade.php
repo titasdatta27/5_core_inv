@@ -247,7 +247,7 @@
 
             var table = new Tabulator("#budget-under-table", {
                 index: "Sku",
-                ajaxURL: "/ebay3",
+                ajaxURL: "/ebay-uti-acos/data",
                 layout: "fitData",
                 movableColumns: true,
                 resizableColumns: true,
