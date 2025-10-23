@@ -1,4 +1,4 @@
-@extends('layouts.vertical', ['title' => 'Ebay 2 PMT Ads', 'mode' => $mode ?? '', 'demo' => $demo ?? ''])
+@extends('layouts.vertical', ['title' => 'Ebay PMT Ads', 'mode' => $mode ?? '', 'demo' => $demo ?? ''])
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <div id="messageArea" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1055;"></div>
 
@@ -917,7 +917,7 @@
 @endsection
 
 @section('content')
-    @include('layouts.shared/page-title', ['page_title' => 'Ebay 2 PMT Ads', 'sub_title' => 'Ebay 2 PMT Ads'])
+    @include('layouts.shared/page-title', ['page_title' => 'Ebay PMT Ads', 'sub_title' => 'Ebay PMT Ads'])
 
     <div class="row">
         <div class="col-12">
@@ -996,7 +996,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
-                    <h4 class="header-title">Ebay 2 PMT Ads</h4>
+                    <h4 class="header-title">Ebay PMT Ads</h4>
 
                     <!-- Custom Dropdown Filters Row -->
                     <div class="d-flex flex-wrap gap-2 mb-3">
@@ -1658,7 +1658,7 @@
 
 
                 $.ajax({
-                    url: "/update-ebay-2-pmt-sprice",
+                    url: "/update-ebay-sku-pricing",
                     type: "POST",
                     data: {
                         "_token": "{{ csrf_token() }}",
@@ -1724,7 +1724,7 @@
                     }
                     
                     $.ajax({
-                        url: '/update-ebay-2-pmt-percentage',
+                        url: '/update-ebay-pmt-percenatge',
                         type: 'POST',
                         data: {
                             type: 'percentage',
@@ -1796,7 +1796,7 @@
                     }
                     
                     $.ajax({
-                        url: '/update-ebay-2-pmt-percentage',
+                        url: '/update-ebay-pmt-percenatge',
                         type: 'POST',
                         data: {
                             type: 'ad_updates',
@@ -2661,9 +2661,32 @@
                         sbidColor = "pink";
                     }
 
-                    // Special override: pink dilution but sold = 0
-                    if (sbidColor === "pink" && item['eBay L30'] === 0) {
-                        sbid = 6;  // override
+                    if(sbidColor === "pink" && item['eBay L30'] === 0){
+                        sbid = 10;
+                    }
+
+                    if(sbidColor === "green" && item['eBay L30'] != 0){
+                        sbid = 5;
+                    }
+
+                    if(sbidColor === "green" && item['eBay L30'] === 0){
+                        sbid = 10;
+                    }
+
+                    if(sbidColor === "yellow" && item['eBay L30'] != 0){
+                        sbid = 8;
+                    }
+
+                    if(sbidColor === "yellow" && item['eBay L30'] === 0){
+                        sbid = 10;
+                    }
+
+                    if(sbidColor === "red" && item['eBay L30'] != 0){
+                        sbid = 8;
+                    }
+
+                    if(sbidColor === "red" && item['eBay L30'] === 0){
+                        sbid = 10;
                     }
 
                     let reqViews = item.INV * 10;
@@ -2671,7 +2694,6 @@
 
                     if (reqViews > item.VIEWS) {
                         reqViewsColor = "red";
-                        sbid = sbid + 2;       
                     } else {
                         reqViewsColor = "green";
                     }
@@ -2697,6 +2719,10 @@
                     let views = Number(item.VIEWS) || 0;
 
                     let scvr = (ebayL30 / views ) * 100 ;
+
+                    if(isNaN(scvr)){
+                        scvr = 0;
+                    }
 
                     $row.append($('<td>').html(
                         `<span class="dil-percent-value" style="color: ${getCvrColor(scvr)}">
@@ -5705,7 +5731,7 @@
                 }
 
                 $.ajax({
-                    url: '/update-ebay-2-pmt-sprice',
+                    url: '/update-ebay-pmt-sprice',
                     type: 'POST',
                     data: {
                         _token: $('meta[name="csrf-token"]').attr('content'),

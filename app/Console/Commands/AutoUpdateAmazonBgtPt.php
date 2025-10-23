@@ -156,6 +156,21 @@ class AutoUpdateAmazonBgtPt extends Command
         return $result;
     }
 
+    private function getDilColor($value)
+    {
+        $percent = floatval($value) * 100;
+
+        if ($percent < 16.66) {
+            return 'red';
+        } elseif ($percent >= 16.66 && $percent < 25) {
+            return 'yellow';
+        } elseif ($percent >= 25 && $percent < 50) {
+            return 'green';
+        } else {
+            return 'pink';
+        }
+    }
+
     function matchCampaign($sku, $campaignReports) {
         $skuClean = preg_replace('/\s+/', ' ', strtoupper(trim($sku)));
 
