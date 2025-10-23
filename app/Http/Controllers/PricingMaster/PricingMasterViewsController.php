@@ -746,6 +746,7 @@ try {
             $item->shopifyb2c_l30 = $shopify ? $shopify->quantity : 0;
             $item->shopifyb2c_l30_data = $shopify ? $shopify->shopify_l30 : 0;
             $item->shopifyb2c_image = $shopify ? $shopify->image_src : null;
+            $item->image_url = $product->image_url;
             $item->shopifyb2c_pft = $item->shopifyb2c_price > 0 ? (($item->shopifyb2c_price * 0.75 - $lp - $ship) / $item->shopifyb2c_price) : 0;
             $item->shopifyb2c_roi = ($lp > 0 && $item->shopifyb2c_price > 0) ? (($item->shopifyb2c_price * 0.75 - $lp - $ship) / $lp) : 0;
 
@@ -1613,5 +1614,34 @@ try {
     {
 
         return view('pricing-master.pricing_master_copy', []);
+    }
+
+    public function saveImageUrl(Request $request)
+    {
+        $data = $request->validate([
+            'sku' => 'required|string',
+            'image_url' => 'required|url',
+        ]);
+
+        $product = ProductMaster::where('sku', $data['sku'])->first();
+
+        if (!$product) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Product not found',
+            ], 404);
+        }
+
+        $product->image_url = $data['image_url'];
+        $product->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Image URL saved successfully',
+            'data' => [
+                'sku' => $product->sku,
+                'image_url' => $product->image_url,
+            ]
+        ]);
     }
 }

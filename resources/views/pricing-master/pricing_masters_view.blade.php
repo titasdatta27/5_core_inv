@@ -1137,8 +1137,23 @@
                     field: "shopifyb2c_image",
                     formatter: function(cell) {
                         const value = cell.getValue();
-                        if (!value) return "";
-                        return `<img src="${value}" width="40" height="40" class="product-thumb" onmouseover="showImagePreview(this)" onmouseout="hideImagePreview()" style="cursor: pointer">`;
+                        const rowData = cell.getRow().getData();
+                        const sku = rowData.SKU;
+                        const imageUrl = rowData.image_url;
+
+                        // Priority: 1) Shopify image, 2) Product Master image_url, 3) Input field
+                        if (value) {
+                            // Show Shopify image
+                            return `<img src="${value}" width="40" height="40" class="product-thumb" onmouseover="showImagePreview(this)" onmouseout="hideImagePreview()" style="cursor: pointer">`;
+                        } else if (imageUrl) {
+                            // Show Product Master image_url
+                            return `<img src="${imageUrl}" width="40" height="40" class="product-thumb" onmouseover="showImagePreview(this)" onmouseout="hideImagePreview()" style="cursor: pointer">`;
+                        } else {
+                            // Show input field for URL when no image exists
+                            return `<input type="text" class="form-control form-control-sm image-url-input"
+                                placeholder="Enter image URL" data-sku="${sku}"
+                                style="width: 120px; font-size: 11px;">`;
+                        }
                     },
                     headerSort: false,
                     width: 70,
@@ -3357,5 +3372,41 @@ function hideTooltip(img) {
         tooltip.style.visibility = 'hidden';
     }
 }
+
+// Handle image URL input blur event
+$(document).on('blur', '.image-url-input', function() {
+    const $input = $(this);
+    const imageUrl = $input.val().trim();
+    const sku = $input.data('sku');
+
+    if (!sku) return;
+
+    // If URL is empty, do nothing
+    if (!imageUrl) return;
+
+    // Save the image URL via AJAX
+    $.ajax({
+        url: '/pricing-master/save-image-url',
+        type: 'POST',
+        data: {
+            _token: $('meta[name="csrf-token"]').attr('content'),
+            sku: sku,
+            image_url: imageUrl
+        },
+        success: function(response) {
+            if (response.success) {
+                // Replace input field with image
+                const imageHtml = `<img src="${imageUrl}" width="40" height="40" class="product-thumb" onmouseover="showImagePreview(this)" onmouseout="hideImagePreview()" style="cursor: pointer">`;
+                $input.replaceWith(imageHtml);
+            } else {
+                alert('Failed to save image URL: ' + (response.message || 'Unknown error'));
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error saving image URL:', error);
+            alert('Error saving image URL. Please try again.');
+        }
+    });
+});
 </script>
 @endsection

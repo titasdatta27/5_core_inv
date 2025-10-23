@@ -1200,6 +1200,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::get('/pricing-master-data-views', [PricingMasterViewsController::class, 'getViewPricingAnalysisData']);
     Route::get('/pricing-master/roi-dashboard', [PricingMasterViewsController::class, 'getViewPricingAnalysisROIDashboardData']);
     Route::post('/pricing-master/save', [PricingMasterViewsController::class, 'save']);
+    Route::post('/pricing-master/save-image-url', [PricingMasterViewsController::class, 'saveImageUrl']);
     Route::get('/parent.pricing-masters', [PricingMasterViewsController::class, 'pricingMasterCopy']);
     Route::get('/calculate-cvr-masters', [PricingMasterViewsController::class, 'calculateCVRMasters']);
     Route::get('/calculate-wmp-masters', [PricingMasterViewsController::class, 'calculateWMPMasters']);
