@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\MarketPlace;
 
 use App\Http\Controllers\Controller;
-use App\Models\FBMarketplaceDataView;
 use Illuminate\Http\Request;
 use App\Http\Controllers\ApiController;
 use App\Models\ChannelMaster;
 use App\Models\MarketplacePercentage;
+use App\Models\Business5CoreDataView;
 use Illuminate\Support\Facades\Cache;
 use App\Models\ProductMaster;
 use App\Models\ShopifySku;
@@ -15,8 +15,7 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
-class FbmarketplaceController extends Controller
-
+class Business5coreController extends Controller
 {
     protected $apiController;
 
@@ -25,24 +24,24 @@ class FbmarketplaceController extends Controller
         $this->apiController = $apiController;
     }
 
-     public function overallFbmarketplace(Request $request)
+     public function overallBusiness5Core(Request $request)
     {
         $mode = $request->query('mode');
         $demo = $request->query('demo');
 
-        $marketplaceData = ChannelMaster::where('channel', 'FB Marketplace')->first();
+        $marketplaceData = ChannelMaster::where('channel', 'PLS')->first();
 
         $percentage = $marketplaceData ? $marketplaceData->channel_percentage : 100;
         $adUpdates = $marketplaceData ? $marketplaceData->ad_updates : 0;
 
-        return view('market-places.fbmarketplaceAnalysis', [
+        return view('market-places.business5coreAnalysis', [
             'mode' => $mode,
             'demo' => $demo,
             'percentage' => $percentage
         ]);
     }
 
-    public function fbmarketplacePricingCVR(Request $request)
+    public function business5corePricingCVR(Request $request)
     {
         $mode = $request->query('mode');
         $demo = $request->query('demo');
@@ -59,11 +58,11 @@ class FbmarketplaceController extends Controller
         ]);
     }
 
-    public function getViewFbmarketplaceData(Request $request)
+    public function getViewBusiness5CoreData(Request $request)
     {
         // Get percentage from cache or database
-        $percentage = Cache::remember('FBMarketplace', now()->addDays(30), function () {
-            $marketplaceData = MarketplacePercentage::where('marketplace', 'FBMarketplace')->first();
+        $percentage = Cache::remember('Business5Core', now()->addDays(30), function () {
+            $marketplaceData = MarketplacePercentage::where('marketplace', 'Business5Core')->first();
             return $marketplaceData ? $marketplaceData->percentage : 100;
         });
         $percentageValue = $percentage / 100;
@@ -78,7 +77,7 @@ class FbmarketplaceController extends Controller
         $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy('sku');
 
         // Fetch NR values for these SKUs from walmartDataView
-        $walmartDataViews = FBMarketplaceDataView::whereIn('sku', $skus)->get()->keyBy('sku');
+        $walmartDataViews = Business5CoreDataView::whereIn('sku', $skus)->get()->keyBy('sku');
         $nrValues = [];
         $listedValues = [];
         $liveValues = [];
@@ -153,7 +152,7 @@ class FbmarketplaceController extends Controller
         ]);
     }
 
-    public function updateAllFbmarketplaceSkus(Request $request)
+    public function updateAllBusiness5CoreSkus(Request $request)
     {
         try {
             $percent = $request->input('percent');
@@ -167,18 +166,18 @@ class FbmarketplaceController extends Controller
 
             // Update database
             MarketplacePercentage::updateOrCreate(
-                ['marketplace' => 'FBMarketplace'],
+                ['marketplace' => 'Business5Core'],
                 ['percentage' => $percent]
             );
 
             // Store in cache
-            Cache::put('FBMarketplace', $percent, now()->addDays(30));
+            Cache::put('Business5Core', $percent, now()->addDays(30));
 
             return response()->json([
                 'status' => 200,
                 'message' => 'Percentage updated successfully',
                 'data' => [
-                    'marketplace' => 'FBMarketplace',
+                    'marketplace' => 'Business5Core',
                     'percentage' => $percent
                 ]
             ]);
@@ -201,7 +200,7 @@ class FbmarketplaceController extends Controller
             return response()->json(['error' => 'SKU and nr are required.'], 400);
         }
 
-        $dataView = FBMarketplaceDataView::firstOrNew(['sku' => $sku]);
+        $dataView = Business5CoreDataView::firstOrNew(['sku' => $sku]);
         $value = is_array($dataView->value) ? $dataView->value : (json_decode($dataView->value, true) ?: []);
         $value['NR'] = filter_var($nr, FILTER_VALIDATE_BOOLEAN);
         $dataView->value = $value;
@@ -219,7 +218,7 @@ class FbmarketplaceController extends Controller
         ]);
 
         // Find or create the product without overwriting existing value
-        $product = FBMarketplaceDataView::firstOrCreate(
+        $product = Business5CoreDataView::firstOrCreate(
             ['sku' => $request->sku],
             ['value' => []]
         );
@@ -239,7 +238,7 @@ class FbmarketplaceController extends Controller
         return response()->json(['success' => true]);
     }
 
-    public function importFbmarketplaceAnalytics(Request $request)
+    public function importBusiness5CoreAnalytics(Request $request)
     {
         $request->validate([
             'excel_file' => 'required|file|mimes:xlsx,xls,csv'
@@ -303,7 +302,7 @@ class FbmarketplaceController extends Controller
                 }
 
                 // Update or create record
-                FBMarketplaceDataView::updateOrCreate(
+                Business5CoreDataView::updateOrCreate(
                     ['sku' => $data['sku']],
                     ['value' => $values]
                 );
@@ -317,9 +316,9 @@ class FbmarketplaceController extends Controller
         }
     }
 
-    public function exportFbmarketplaceAnalytics()
+    public function exportBusiness5CoreAnalytics()
     {
-        $fbmarketplaceData = FBMarketplaceDataView::all();
+        $business5CoreData = Business5CoreDataView::all();
 
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -330,7 +329,7 @@ class FbmarketplaceController extends Controller
 
         // Data Rows
         $rowIndex = 2;
-        foreach ($fbmarketplaceData as $data) {
+        foreach ($business5CoreData as $data) {
             $values = is_array($data->value)
                 ? $data->value
                 : (json_decode($data->value, true) ?? []);
@@ -350,7 +349,7 @@ class FbmarketplaceController extends Controller
         $sheet->getColumnDimension('C')->setWidth(10);
 
         // Output Download
-        $fileName = 'FBMarketplace_Analytics_Export_' . date('Y-m-d') . '.xlsx';
+        $fileName = 'Business5Core_Analytics_Export_' . date('Y-m-d') . '.xlsx';
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment;filename="' . $fileName . '"');
@@ -385,7 +384,7 @@ class FbmarketplaceController extends Controller
         $sheet->getColumnDimension('C')->setWidth(10);
 
         // Output Download
-        $fileName = 'FBMarketplace_Analytics_Sample.xlsx';
+        $fileName = 'Business5Core_Analytics_Sample.xlsx';
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment;filename="' . $fileName . '"');
