@@ -20,8 +20,14 @@
                         <h4>FBA Data </h4>
 
                     </div>
-                    <div class="card-body">
-                        <div id="fba-table"></div>
+                    <div class="card-body" style="padding: 0;">
+                        <div id="fba-table-wrapper"
+                         style="height: calc(100vh - 200px); display: flex; flex-direction: column;">
+
+                            <!--Table body (scrollable section) -->
+                            <div id="fba-table" style="flex: 1;"></div>
+
+                        </div>
                     </div>
                 </div>
             </div>
@@ -79,7 +85,7 @@
                         title: "FBA Price",
                         field: "FBA_Price",
                         hozAlign: "center",
-                        formatter: "dollar"
+                        // formatter: "dollar"
                     },
                     {
                         title: "L30 Units",
@@ -208,7 +214,7 @@
                     {
                         title: "L x W x H",
                         field: "Dimensions",
-                        placeholder: "Length x Width x Height",
+                        // placeholder: "Length x Width x Height",
                         hozAlign: "center",
                         editor: "input"
                     },

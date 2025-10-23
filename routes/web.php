@@ -242,6 +242,7 @@ use App\Http\Controllers\MarketingMaster\YoutubeAdsManagerController;
 use App\Http\Controllers\MarketingMaster\TiktokAdsManagerController;
 use App\Http\Controllers\MarketingMaster\MovementPricingMaster;
 use App\Http\Controllers\MarketingMaster\OverallCvrLqsController;
+use App\Http\Controllers\MarketPlace\Business5coreController;
 use App\Http\Controllers\MarketPlace\FaireController;
 use App\Http\Controllers\MarketPlace\FbmarketplaceController;
 use App\Http\Controllers\MarketPlace\FbshopController;
@@ -321,7 +322,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     //Channel Ads Master
     Route::get('/channel/ads/master', [ChannelAdsMasterController::class, 'channelAdsMaster'])->name('channel.ads.master');
     Route::get('/channel/ads/data', [ChannelAdsMasterController::class, 'getAdsMasterData'])->name('channel.ads.data');
-
+    Route::get('/channel/adv/master', [ChannelAdsMasterController::class, 'channelAdvMaster'])->name('channel.adv.master');
 
 
     //Zero Visibility Master
@@ -1199,6 +1200,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::get('/pricing-master-data-views', [PricingMasterViewsController::class, 'getViewPricingAnalysisData']);
     Route::get('/pricing-master/roi-dashboard', [PricingMasterViewsController::class, 'getViewPricingAnalysisROIDashboardData']);
     Route::post('/pricing-master/save', [PricingMasterViewsController::class, 'save']);
+    Route::post('/pricing-master/save-image-url', [PricingMasterViewsController::class, 'saveImageUrl']);
     Route::get('/parent.pricing-masters', [PricingMasterViewsController::class, 'pricingMasterCopy']);
     Route::get('/calculate-cvr-masters', [PricingMasterViewsController::class, 'calculateCVRMasters']);
     Route::get('/calculate-wmp-masters', [PricingMasterViewsController::class, 'calculateWMPMasters']);
@@ -1508,6 +1510,18 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::post('/pls-analytics/import', [PlsController::class, 'importPlsAnalytics'])->name('pls.analytics.import');
     Route::get('/pls-analytics/export', [PlsController::class, 'exportPlsAnalytics'])->name('pls.analytics.export');
     Route::get('/pls-analytics/sample', [PlsController::class, 'downloadSample'])->name('pls.analytics.sample');
+
+
+    //Business5Core
+    Route::get('business5coreAnalysis', action: [Business5coreController::class, 'overallBusiness5Core']);
+    Route::get('/business5core/view-data', [Business5coreController::class, 'getViewBusiness5CoreData']);
+    Route::get('business5corePricingCVR', [Business5coreController::class, 'business5corePricingCVR'])->name('business5core.pricing.cvr');
+    Route::post('/update-all-business5core-skus', [Business5coreController::class, 'updateAllBusiness5CoreSkus']);
+    Route::post('/business5core/save-nr', [Business5coreController::class, 'saveNrToDatabase']);
+    Route::post('/business5core/update-listed-live', [Business5coreController::class, 'updateListedLive']);
+    Route::post('/business5core-analytics/import', [Business5coreController::class, 'importBusiness5CoreAnalytics'])->name('business5core.analytics.import');
+    Route::get('/business5core-analytics/export', [Business5coreController::class, 'exportBusiness5CoreAnalytics'])->name('business5core.analytics.export');
+    Route::get('/business5core-analytics/sample', [Business5coreController::class, 'downloadSample'])->name('business5core.analytics.sample');
 
 
     //tiendamia
@@ -1830,12 +1844,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
         Route::get('/traffic/caraudio', 'getTrafficCaraudio')->name('traffic.caraudio');
         Route::get('/traffic/musicinst', 'getTrafficMusicInst')->name('traffic.musicinst');
         Route::get('/traffic/repaire', 'getTrafficRepaire')->name('traffic.repaire');
-        Route::get('/traffic/musicschool', 'getTrafficMusicSchool')->name('traffic.musicschool');
-
-
-
-       
-        
+        Route::get('/traffic/musicschool', 'getTrafficMusicSchool')->name('traffic.musicschool');       
     });
 
     Route::controller(ShoppableVideoController::class)->group(function () {

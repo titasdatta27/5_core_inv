@@ -1,6 +1,8 @@
 @extends('layouts.vertical', ['title' => 'Repair Shops'])
 
 @section('css')
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <style>
         .stats-card {
             background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
@@ -116,7 +118,7 @@
         <!-- Table Container -->
         <div class="table-container">
             <div class="table-responsive">
-                <table class="table">
+                <table class="table table-bordered table-responsive">
                     <thead>
                         <tr>
                             <th>SOURCE</th>
@@ -131,7 +133,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr style="background-color:#cfe2f3;">
+                        <tr style="background-color:#cfe2f3;" class="accordion-header">
                             <td><b>tiktok</b></td>
                             <td></td>
                             <td></td>
@@ -143,7 +145,7 @@
                             <td></td>
                         </tr>
 
-                         <tr>
+                         <tr class="accordion-body">
                             <td>AD1</td>
                             <td></td>
                             <td></td>
@@ -155,7 +157,7 @@
                             <td></td>
                         </tr>
 
-                         <tr>
+                         <tr class="accordion-body">
                             <td>AD2</td>
                             <td></td>
                             <td></td>
@@ -167,7 +169,7 @@
                             <td></td>
                         </tr>
 
-                        <tr>
+                        <tr class="accordion-body">
                             <td>AD3</td>
                             <td></td>
                             <td></td>
@@ -179,7 +181,7 @@
                             <td></td>
                         </tr>
 
-                        <tr style="background-color:#cfe2f3;">
+                        <tr style="background-color:#cfe2f3;" class="accordion-header">
                             <td><b>google serp</b></td>
                             <td></td>
                             <td></td>
@@ -191,7 +193,7 @@
                             <td></td>
                         </tr>
 
-                        <tr>
+                        <tr class="accordion-body">
                             <td>AD1</td>
                             <td></td>
                             <td></td>
@@ -203,7 +205,7 @@
                             <td></td>
                         </tr>
 
-                        <tr>
+                        <tr class="accordion-body">
                             <td>AD2</td>
                             <td></td>
                             <td></td>
@@ -215,7 +217,7 @@
                             <td></td>
                         </tr>
 
-                        <tr>
+                        <tr class="accordion-body">
                             <td>AD3</td>
                             <td></td>
                             <td></td>
@@ -227,7 +229,7 @@
                             <td></td>
                         </tr>
 
-                        <tr style="background-color:#cfe2f3;">
+                        <tr style="background-color:#cfe2f3;" class="accordion-header">
                             <td><b>fb</b></td>
                             <td></td>
                             <td></td>
@@ -239,7 +241,7 @@
                             <td></td>
                         </tr>
 
-                         <tr>
+                         <tr class="accordion-body">
                             <td>AD1</td>
                             <td></td>
                             <td></td>
@@ -251,7 +253,7 @@
                             <td></td>
                         </tr>
 
-                         <tr>
+                         <tr class="accordion-body">
                             <td>AD2</td>
                             <td></td>
                             <td></td>
@@ -263,7 +265,7 @@
                             <td></td>
                         </tr>
 
-                         <tr>
+                         <tr class="accordion-body">
                             <td>AD3</td>
                             <td></td>
                             <td></td>
@@ -275,7 +277,7 @@
                             <td></td>
                         </tr>
 
-                        <tr style="background-color:#cfe2f3;">
+                        <tr style="background-color:#cfe2f3;" class="accordion-header">
                             <td><b>insta</b></td>
                             <td></td>
                             <td></td>
@@ -287,7 +289,7 @@
                             <td></td>
                         </tr>
 
-                          <tr>
+                        <tr class="accordion-body">
                             <td>AD1</td>
                             <td></td>
                             <td></td>
@@ -299,7 +301,7 @@
                             <td></td>
                         </tr>
 
-                          <tr>
+                        <tr class="accordion-body">
                             <td>AD2</td>
                             <td></td>
                             <td></td>
@@ -311,7 +313,7 @@
                             <td></td>
                         </tr>
 
-                          <tr>
+                        <tr class="accordion-body">
                             <td>AD3</td>
                             <td></td>
                             <td></td>
@@ -323,7 +325,7 @@
                             <td></td>
                         </tr>
 
-                        <tr style="background-color:#cfe2f3;">
+                        <tr style="background-color:#cfe2f3;" class="accordion-header">
                             <td><b>youtube</b></td>
                             <td></td>
                             <td></td>
@@ -335,7 +337,7 @@
                             <td></td>
                         </tr>
 
-                         <tr>
+                        <tr class="accordion-body">
                             <td>AD1</td>
                             <td></td>
                             <td></td>
@@ -347,7 +349,7 @@
                             <td></td>
                         </tr>
 
-                         <tr>
+                        <tr class="accordion-body">
                             <td>AD2</td>
                             <td></td>
                             <td></td>
@@ -359,7 +361,7 @@
                             <td></td>
                         </tr>
 
-                         <tr>
+                        <tr class="accordion-body">
                             <td>AD3</td>
                             <td></td>
                             <td></td>
@@ -371,7 +373,7 @@
                             <td></td>
                         </tr>
 
-                         <tr style="background-color:#cfe2f3;">
+                        <tr style="background-color:#cfe2f3;" class="accordion-header">
                             <td><b>other</b></td>
                             <td></td>
                             <td></td>
@@ -383,7 +385,7 @@
                             <td></td>
                         </tr>
 
-                         <tr>
+                         <tr class="accordion-body">
                             <td>AD1</td>
                             <td></td>
                             <td></td>
@@ -395,7 +397,7 @@
                             <td></td>
                         </tr>
 
-                         <tr>
+                         <tr class="accordion-body">
                             <td>AD2</td>
                             <td></td>
                             <td></td>
@@ -407,7 +409,7 @@
                             <td></td>
                         </tr>
 
-                         <tr>
+                        <tr class="accordion-body">
                             <td>AD3</td>
                             <td></td>
                             <td></td>
@@ -428,5 +430,16 @@
 @endsection
 
 @section('script')
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script>
+$(document).ready(function() {
+    $(".accordion-body").hide();
+    $(".accordion-header").click(function() {
+      const nextRows = $(this).nextUntil(".accordion-header");
+      nextRows.slideToggle(200);
+    });
+
+});
+</script>
    
 @endsection

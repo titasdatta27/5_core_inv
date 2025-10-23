@@ -1,4 +1,4 @@
-@extends('layouts.vertical', ['title' => 'Dropship'])
+@extends('layouts.vertical', ['title' => 'ADV Masters'])
 
 @section('css')
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -110,7 +110,7 @@
         <!-- Stats Card -->
         <div class="stats-card">
             <div class="d-flex justify-content-between align-items-center">
-                <h4 class="m-0">Dropship</h4>
+                <h4 class="m-0">ADV Masters</h4>
             </div>
             {{-- <p class="text-white-50 mb-0">Total sessions under 100</p> --}}
         </div>
@@ -121,20 +121,20 @@
                 <table class="table table-bordered table-responsive">
                     <thead>
                         <tr>
-                            <th>SOURCE</th>
-                            <th>LINK TO AD</th>
-                            <th>LINK TO LP</th>
-                            <th>BGT</th>
+                            <th>CHANNEL</th>
+                            <th>L30 SALES</th>
+                            <th>GPFT</th>
+                            <th>TPFT</th>
                             <th>SPENT</th>
                             <th>CLICKS</th>
-                            <th>SIGN UPS</th>
-                            <th>CVR</th>
-                            <th>CPA</th>
+                            <th>AD SALES</th>
+                            <th>ACOS</th>
+                            <th>TACOS</th>                       
                         </tr>
                     </thead>
                     <tbody>
                         <tr style="background-color:#cfe2f3;" class="accordion-header">
-                            <td><b>tiktok</b></td>
+                            <td><b>AMAZON</b></td>
                             <td></td>
                             <td></td>
                             <td></td>
@@ -146,7 +146,7 @@
                         </tr>
 
                          <tr class="accordion-body">
-                            <td>AD1</td>
+                            <td>AMZ KW</td>
                             <td></td>
                             <td></td>
                             <td></td>
@@ -158,7 +158,7 @@
                         </tr>
 
                          <tr class="accordion-body">
-                            <td>AD2</td>
+                            <td>AMZ PT</td>
                             <td></td>
                             <td></td>
                             <td></td>
@@ -170,7 +170,7 @@
                         </tr>
 
                         <tr class="accordion-body">
-                            <td>AD3</td>
+                            <td>AMZ HL</td>
                             <td></td>
                             <td></td>
                             <td></td>
@@ -182,7 +182,7 @@
                         </tr>
 
                         <tr style="background-color:#cfe2f3;" class="accordion-header">
-                            <td><b>google serp</b></td>
+                            <td><b>EBAY</b></td>
                             <td></td>
                             <td></td>
                             <td></td>
@@ -194,7 +194,7 @@
                         </tr>
 
                         <tr class="accordion-body">
-                            <td>AD1</td>
+                            <td>EB KW</td>
                             <td></td>
                             <td></td>
                             <td></td>
@@ -206,19 +206,7 @@
                         </tr>
 
                         <tr class="accordion-body">
-                            <td>AD2</td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-
-                        <tr class="accordion-body">
-                            <td>AD3</td>
+                            <td>EB PMT</td>
                             <td></td>
                             <td></td>
                             <td></td>
@@ -230,43 +218,7 @@
                         </tr>
 
                         <tr style="background-color:#cfe2f3;" class="accordion-header">
-                            <td><b>fb</b></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-
-                         <tr class="accordion-body">
-                            <td>AD1</td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-
-                         <tr class="accordion-body">
-                            <td>AD2</td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-
-                         <tr class="accordion-body">
-                            <td>AD3</td>
+                            <td><b>WALMART</b></td>
                             <td></td>
                             <td></td>
                             <td></td>
@@ -278,103 +230,7 @@
                         </tr>
 
                         <tr style="background-color:#cfe2f3;" class="accordion-header">
-                            <td><b>insta</b></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-
-                        <tr class="accordion-body">
-                            <td>AD1</td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-
-                        <tr class="accordion-body">
-                            <td>AD2</td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-
-                        <tr class="accordion-body">
-                            <td>AD3</td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-
-                        <tr style="background-color:#cfe2f3;" class="accordion-header">
-                            <td><b>youtube</b></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-
-                        <tr class="accordion-body">
-                            <td>AD1</td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-
-                        <tr class="accordion-body">
-                            <td>AD2</td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-
-                        <tr class="accordion-body">
-                            <td>AD3</td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-
-                        <tr style="background-color:#cfe2f3;" class="accordion-header">
-                            <td><b>other</b></td>
+                            <td><b>SHOPIFY</b></td>
                             <td></td>
                             <td></td>
                             <td></td>
@@ -386,7 +242,7 @@
                         </tr>
 
                          <tr class="accordion-body">
-                            <td>AD1</td>
+                            <td>G SHOPPING</td>
                             <td></td>
                             <td></td>
                             <td></td>
@@ -398,7 +254,7 @@
                         </tr>
 
                          <tr class="accordion-body">
-                            <td>AD2</td>
+                            <td>G SERP</td>
                             <td></td>
                             <td></td>
                             <td></td>
@@ -410,7 +266,7 @@
                         </tr>
 
                         <tr class="accordion-body">
-                            <td>AD3</td>
+                            <td>FB CARAOUSAL</td>
                             <td></td>
                             <td></td>
                             <td></td>
@@ -420,8 +276,67 @@
                             <td></td>
                             <td></td>
                         </tr>
-                            
-                       
+
+                        <tr class="accordion-body">
+                            <td>FB VIDEO</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+
+                        <tr class="accordion-body">
+                            <td>INSTA CARAOUSAL</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+
+                        <tr class="accordion-body">
+                            <td>INSTA VIDEO</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+
+                        <tr class="accordion-body">
+                            <td>YOUTUBE</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+
+                        <tr style="background-color:#cfe2f3;" class="accordion-header">
+                            <td><b>TIKTOK</b></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    
                     </tbody>
                 </table>
             </div>
