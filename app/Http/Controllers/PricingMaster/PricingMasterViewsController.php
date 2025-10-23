@@ -321,33 +321,34 @@ class PricingMasterViewsController extends Controller
         $dobaProductSheetLookup = DB::table('doba_sheet_data')->whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
 
         // Fetch LMPA and LMP data
-        $lmpaLookup = collect();
-        try {
-            $lmpaLookup = DB::connection('repricer')
-                ->table('lmpa_data')
-                ->select('sku', DB::raw('MIN(price) as lowest_price'), DB::raw('MAX(link) as link'))
-                ->where('price', '>', 0)
-                ->whereIn('sku', $nonParentSkus)
-                ->groupBy('sku')
-                ->get()
-                ->keyBy('sku');
-        } catch (Exception $e) {
-            Log::warning('Could not fetch LMPA data from repricer_5core database: ' . $e->getMessage());
-        }
-
         $lmpLookup = collect();
-        try {
-            $lmpLookup = DB::connection('repricer')
-                ->table('lmp_data')
-                ->select('sku', DB::raw('MIN(price) as lowest_price'), DB::raw('MAX(link) as link'))
-                ->where('price', '>', 0)
-                ->whereIn('sku', $nonParentSkus)
-                ->groupBy('sku')
-                ->get()
-                ->keyBy('sku');
-        } catch (Exception $e) {
-            Log::warning('Could not fetch LMP data from repricer_5core database: ' . $e->getMessage());
-        }
+try {
+    $lmpLookup = DB::connection('repricer')
+        ->table('lmp_data as l1')
+        ->select('l1.sku', 'l1.price as lowest_price', 'l1.link')
+        ->where('l1.price', '>', 0)
+        ->whereIn('l1.sku', $nonParentSkus)
+        ->whereRaw('l1.price = (SELECT MIN(l2.price) FROM lmp_data l2 WHERE l2.sku = l1.sku AND l2.price > 0)')
+        ->get()
+        ->keyBy('sku');
+} catch (Exception $e) {
+    Log::warning('Could not fetch LMP data: ' . $e->getMessage());
+}
+
+$lmpaLookup = collect();
+try {
+    $lmpaLookup = DB::connection('repricer')
+        ->table('lmpa_data as l1')
+        ->select('l1.sku', 'l1.price as lowest_price', 'l1.link')
+        ->where('l1.price', '>', 0)
+        ->whereIn('l1.sku', $nonParentSkus)
+        ->whereRaw('l1.price = (SELECT MIN(l2.price) FROM lmpa_data l2 WHERE l2.sku = l1.sku AND l2.price > 0)')
+        ->get()
+        ->keyBy('sku');
+} catch (Exception $e) {
+    Log::warning('Could not fetch LMPA data: ' . $e->getMessage());
+}
+
 
 
         $processedData = [];
