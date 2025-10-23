@@ -650,7 +650,7 @@ class AmazonACOSController extends Controller
 
             $row['clicks_L30'] = $matchedCampaignL30->clicks ?? 0;
             $row['spend_l30']       = $matchedCampaignL30->spend ?? 0;
-            $row['ad_sales_l30']    = $matchedCampaignL30->sales30d ?? 0;
+            $row['ad_sales_l30']    = $matchedCampaignL30->sales ?? 0;
 
             $row['NRL']  = '';
             $row['NRA'] = '';
