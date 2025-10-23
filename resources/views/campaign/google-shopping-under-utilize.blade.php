@@ -425,10 +425,10 @@
                             var cpc_L1 = parseFloat(row.cpc_L1) || 0;
                             var cpc_L7 = parseFloat(row.cpc_L7) || 0;
                             var sbid;
-                            if (cpc_L7 > cpc_L1) {
-                                sbid = (cpc_L7 * 1.05).toFixed(2);
+                            if (cpc_L1 > cpc_L7) {
+                                sbid = Math.floor(cpc_L1 * 1.05 * 100) / 100;
                             } else {
-                                sbid = (cpc_L1 * 1.05).toFixed(2);
+                                sbid = Math.floor(cpc_L7 * 1.05 * 100) / 100;
                             }
 
                             return sbid;
@@ -452,10 +452,10 @@
                                 var cpc_L1 = parseFloat(row.cpc_L1) || 0;
                                 var cpc_L7 = parseFloat(row.cpc_L7) || 0;
                                 var sbid;
-                                if (cpc_L7 > cpc_L1) {
-                                    sbid = (cpc_L7 * 1.05).toFixed(2);
+                                if (cpc_L1 > cpc_L7) {
+                                    sbid = Math.floor(cpc_L1 * 1.05 * 100) / 100;
                                 } else {
-                                    sbid = (cpc_L1 * 1.05).toFixed(2);
+                                    sbid = Math.floor(cpc_L7 * 1.05 * 100) / 100;
                                 }
                                 updateBid(sbid, row.campaign_id);
                             }
@@ -596,9 +596,63 @@
                 }
             });
 
+            document.getElementById("apr-all-sbid-btn").addEventListener("click", function() {
+                const overlay = document.getElementById("progress-overlay");
+                overlay.style.display = "flex";
 
+                var filteredData = table.getSelectedRows();
+
+                var campaignIds = [];
+                var bids = [];
+
+                filteredData.forEach(function(row) {
+                    var rowEl = row.getElement();
+                    if(rowEl && rowEl.offsetParent !== null){
+                        
+                        var rowData = row.getData();
+                        var l1_cpc = parseFloat(rowData.l1_cpc) || 0;
+                        var l7_cpc = parseFloat(rowData.l7_cpc) || 0;
+
+                        var sbid = 0;
+                        if(l1_cpc > l7_cpc){
+                            sbid = Math.floor(l1_cpc * 1.05 * 100) / 100;
+                        }else{
+                            sbid = Math.floor(l7_cpc * 1.05 * 100) / 100;
+                        }
+
+                        campaignIds.push(rowData.campaign_id);
+                        bids.push(sbid);
+                    }
+                });
+                console.log("Campaign IDs:", campaignIds);
+                console.log("Bids:", bids);
+                fetch('/update-google-ads-bid-price', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                            .getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        campaign_ids: campaignIds,
+                        bids: bids
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    console.log("Backend response:", data);
+                    if (data.status === 200) {
+                        alert("Keywords updated successfully!");
+                    } else {
+                        alert("Something went wrong: " + data.message);
+                    }
+                })
+                .catch(err => console.error(err))
+                .finally(() => {
+                    overlay.style.display = "none";
+                });
+            });
             
-
             function updateBid(aprBid, campaignId) {
                 const overlay = document.getElementById("progress-overlay");
                 overlay.style.display = "flex";
@@ -646,10 +700,10 @@
                     let cpc_L7 = parseFloat(row.cpc_L7 || 0);
                     let sbid = 0;
 
-                    if (cpc_L7 > cpc_L1) {
-                        sbid = (cpc_L7 * 1.05).toFixed(2);
+                    if (cpc_L1 > cpc_L7) {
+                        sbid = Math.floor(cpc_L1 * 1.05 * 100) / 100;
                     } else {
-                        sbid = (cpc_L1 * 1.05).toFixed(2);
+                        sbid = Math.floor(cpc_L7 * 1.05 * 100) / 100;
                     }
 
                     return {
