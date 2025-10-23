@@ -1079,10 +1079,10 @@
                             <div class="collapse" id="instagram-web-ads">
                                 <ul class="side-nav-second-level">
                                     <li>
-                                        <a href="#">Insta Video to Web</a>
+                                        <a href="{{ route('instagram.web.to.video') }}">Insta Video to Web</a>
                                     </li>
                                     <li>
-                                        <a href="#">Insta Img Caraousal to Web</a>
+                                        <a href="{{ route('insta.img.caraousal.to.web') }}">Insta Img Caraousal to Web</a>
                                     </li>
                                 </ul>
                             </div>
@@ -1097,10 +1097,10 @@
                             <div class="collapse" id="youtube-web-ads">
                                 <ul class="side-nav-second-level">
                                     <li>
-                                        <a href="#">YouTube Video to Web</a>
+                                        <a href="{{ route('youtube.web.to.video') }}">YouTube Video to Web</a>
                                     </li>
                                     <li>
-                                        <a href="#">YouTube Img Caraousal to Web</a>
+                                        <a href="{{ route('yt.img.caraousal.to.web') }}">YouTube Img Caraousal to Web</a>
                                     </li>
                                 </ul>
                             </div>
@@ -1118,10 +1118,10 @@
                                     <li><a href="{{ url('tiktokAnalysis') }}">Tiktok Analytics</a></li>
 
                                     <li>
-                                        <a href="#">Tiktok Video to Web</a>
+                                        <a href="{{ route('tiktok.web.to.video') }}">Tiktok Video to Web</a>
                                     </li>
                                     <li>
-                                        <a href="#">Tiktok Img Caraousal to Web</a>
+                                        <a href="{{ route('tk.img.caraousal.to.web') }}">Tiktok Img Caraousal to Web</a>
                                     </li>
                                 </ul>
                             </div>
