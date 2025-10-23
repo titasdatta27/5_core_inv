@@ -2126,6 +2126,15 @@
             return "$" + num.toFixed(2);
         }
 
+        // Copy SKU to clipboard function
+        function copySkuToClipboard(sku) {
+            navigator.clipboard.writeText(sku).then(() => {
+                // SKU copied to clipboard
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+        }
+
         // Marketplace table generator
         function buildOVL30Table(data) {
             console.log('Data LMP:', data.lmp, 'Data Link:', data.link);
@@ -2576,7 +2585,7 @@
             topSaveBtn.dataset.ship = data.SHIP || 0;
             topSaveBtn.dataset.temuShip = data.temu_ship || 0;
             topPushPrice.value = data.shopifyb2c_price || data.ebay_price || data.amz_price || '';
-            document.getElementById('ovl30SkuLabel').textContent = data.SKU ? `${data.SKU}` : "0";     
+            document.getElementById('ovl30SkuLabel').innerHTML = `${data.SKU || "0"} <button class="btn btn-sm btn-outline-primary ms-2" onclick="copySkuToClipboard('${data.SKU || "0"}')"><i class="bi bi-clipboard"></i></button>`;     
             document.getElementById('ovl30InvLabel').textContent = data.INV ? `${data.INV}` : "0"; 
             document.getElementById('ovl30').textContent = data.shopifyb2c_l30 ? `${data.shopifyb2c_l30}` : "0";    
             document.getElementById('total_views').textContent = data.total_views ? `${data.total_views}` : "0";  
@@ -2718,10 +2727,10 @@
 
             dialogEl.addEventListener('mousedown', dragStart);
             document.addEventListener('mousemove', drag);
-            document.addEventListener('mou seup', dragEnd);
+            document.addEventListener('mouseup', dragEnd);
 
             function dragStart(e) {
-                if (e.target.closest('.modal-header')) {
+                if (e.target.closest('.modal-header') && !e.target.closest('button')) {
                     isDragging = true;
                     initialX = e.clientX - xOffset;
                     initialY = e.clientY - yOffset;
