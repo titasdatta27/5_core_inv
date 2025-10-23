@@ -2,7 +2,8 @@
 
 @section('css')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('assets/css/styles.css') }}">
     <style>
         #image-hover-preview {
@@ -2113,6 +2114,13 @@
         // Marketplace table generator
         function buildOVL30Table(data) {
             console.log('Data LMP:', data.lmp, 'Data Link:', data.link);
+            console.log('Channel Links:', {
+                amz: data.link_amz,
+                ebay: data.link_ebay,
+                shein: data.link_shein,
+                tiktok: data.link_tiktok,
+                aliexpress: data.link_aliexpress
+            });
           const rows = [
                 { label: "Amazon", prefix: "amz", logo: "{{ asset('uploads/amazon.png') }}" },
                 { label: "eBay", prefix: "ebay", logo:  "{{ asset('uploads/1.png') }}" },
@@ -2339,13 +2347,22 @@
                     </td>
 
                     <td>
-                        <div class="value-indicator">
-                            ${r.prefix === 'amz' ? fmtMoney(data.price_lmpa) 
-                                : r.prefix === 'ebay' ? fmtMoney(data.ebay_price_lmpa) 
-                                : r.prefix === 'shein' ? fmtMoney(data.lmp) 
-                                : r.prefix === 'tiktok' ? fmtMoney(data.tiktok_price_lmpa) 
-                                : r.prefix === 'aliexpress' ? fmtMoney(data.aliexpress_price_lmpa) 
-                                : '-'}
+                        <div class="value-indicator d-flex align-items-center">
+                            ${(() => {
+                                let priceValue = r.prefix === 'amz' ? data.price_lmpa 
+                                    : r.prefix === 'ebay' ? data.ebay_price_lmpa 
+                                    : r.prefix === 'shein' ? data.lmp 
+                                    : r.prefix === 'tiktok' ? data.tiktok_price_lmpa 
+                                    : r.prefix === 'aliexpress' ? data.aliexpress_price_lmpa 
+                                    : '-';
+                                let link = r.prefix === 'amz' ? data.link_amz 
+                                    : r.prefix === 'ebay' ? data.link_ebay 
+                                    : r.prefix === 'shein' ? data.link_shein 
+                                    : r.prefix === 'tiktok' ? data.link_tiktok 
+                                    : r.prefix === 'aliexpress' ? data.link_aliexpress 
+                                    : null;
+                                return `${fmtMoney(priceValue)} ${link && priceValue !== '-' ? `<a href="${link}" target="_blank" class="ms-1"><i class="bi bi-link"></i></a>` : ''}`;
+                            })()}
                         </div>
                     </td>
 
@@ -2529,6 +2546,9 @@
         // Modal open function
         function showOVL30Modal(row) {
             const data = row.getData();
+            
+            console.log('OVL30 Data:', data);
+            console.log('Link:', data.link);
             
             // Initialize top push button
             const topPushPrice = document.getElementById('topPushPrice');
