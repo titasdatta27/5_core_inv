@@ -98,7 +98,7 @@ class AutoUpdateAmazonBgtHl extends Command
                 : 0;
 
             $row['spend_l30']       = $matchedCampaignL30->spend ?? 0;
-            $row['ad_sales_l30']    = $matchedCampaignL30->sales30d ?? 0;
+            $row['ad_sales_l30']    = $matchedCampaignL30->sales ?? 0;
 
             $acos = (float) ($row['acos_L30'] ?? 0);
 
