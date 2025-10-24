@@ -245,9 +245,7 @@
                         </li>
 
 
-                        <li>
-                            <a href="{{ url('calculate-cvr-masters') }}">CVR Masters</a>
-                        </li>
+                       
 
                          <li>
                             <a href="{{ url('calculate-wmp-masters') }}">WMP Masters</a>
@@ -775,6 +773,30 @@
                 <div class="collapse" id="sidebarPages2">
                     <ul class="side-nav-second-level">
 
+
+                        <li>
+                            <a href="{{ route('view.missing.listing') }}">Missing Listing </a>
+                        </li>
+
+                        <li>
+                            <a href="{{ route('view.stock.mapping') }}">Stock Mapping</a>
+                        </li>
+                   
+
+                        <li>
+                            <a href="{{ url('/live-pending-data') }}">Live Pending Masters</a>
+                        </li>
+
+                         <li>
+                            <a href="{{ route('zero.visibility') }}">Zero Views Masters</a>
+                        </li>
+
+                        <li>
+                            <a href="{{ url('listing-master-counts') }}">Low Visibility Masters</a>
+                        </li>
+                         <li>
+                            <a href="{{ url('calculate-cvr-masters') }}">CVR Masters</a>
+                        </li>
                         <!--- Start Nikhil Code -->
                         <li class="side-nav-item">
                             <a data-bs-toggle="collapse" href="#video-ads-master" aria-expanded="false"
@@ -814,15 +836,14 @@
                             <a href="{{ route('listingMaster') }}">Listing Masters</a>
                         </li>
 
-                        <li>
-                            <a href="{{ url('listing-master-counts') }}">Low Visibility Masters</a>
-                        </li>
+                        
                         <li>
                             <a href="{{ route('listing.audit') }}">Listing Audit Masters</a>
                         </li>
-                        <li>
-                            <a href="{{ route('zero.visibility') }}">0 Views Masters</a>
-                        </li>
+
+                          
+
+                       
                         <li>
                             <a href="{{ url('movement-pricing-master') }}"> Movement Analysis Master</a>
                         </li>
@@ -1212,19 +1233,7 @@
             </li>
 
             {{-- Inventory Management --}}
-              <li class="side-nav-item">
-                <a href="{{ route('view.missing.listing') }}" class="side-nav-link">
-                    <i class="ri-dashboard-3-line"></i>
-                    <span> Missing Listing </span>
-                </a>
-            </li>
-
-            <li class="side-nav-item">
-                <a href="{{ route('view.stock.mapping') }}" class="side-nav-link">
-                    <i class="ri-dashboard-3-line"></i>
-                    <span> Stock Mapping </span>
-                </a>
-            </li>
+        
             
             <li class="side-nav-item">
                 <a data-bs-toggle="collapse" href="#invsidebarPages" aria-expanded="false"
