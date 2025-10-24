@@ -362,7 +362,7 @@
                             `;
                         },
                         hozAlign: "center",
-                        visible: true
+                        visible: false
                     },
                     {
                         title: "C NAME",

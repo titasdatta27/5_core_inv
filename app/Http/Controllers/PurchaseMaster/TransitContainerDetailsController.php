@@ -215,16 +215,20 @@ class TransitContainerDetailsController extends Controller
 
     public function deleteTransitItem(Request $request)
     {
-        $ids = $request->ids;
+        try {
+            $ids = $request->ids;
+            TransitContainerDetail::whereIn('id', $ids)->delete();
 
-        TransitContainerDetail::whereIn('id', $ids)->update([
-            'status' => 'inactive'
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Rows marked as inactive successfully.'
-        ]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Records deleted successfully'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error deleting records: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     //transit container changes

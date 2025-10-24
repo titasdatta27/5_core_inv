@@ -127,6 +127,104 @@ class ZeroVisibilityMasterController extends Controller
         return view('marketing-masters.zero-visibility-master', compact('totalSkuCount', 'zeroInvCount','channels'));
     }
 
+
+
+
+
+
+
+
+     public function Zeroviewmasters()
+    {
+        $productSKUs = ProductMaster::where('sku', 'NOT LIKE', '%PARENT%')
+            ->pluck('sku')
+            ->toArray();
+
+        $zeroInvCount = ShopifySku::whereIn('sku', $productSKUs)
+            ->where('inv', '<=', 0)
+            ->count();
+
+
+        $totalSkuCount = count($productSKUs);
+
+        $channels = MarketplacePercentage::pluck('marketplace')->toArray();
+
+        // Mapping for special channel/controller names
+        $controllerMap = [
+            'ebay'          => 'EbayZeroController',
+            'ebaythree'     => 'Ebay3ZeroController',
+            'ebay3'         => 'Ebay3ZeroController',
+            'ebaytwo'       => 'Ebay2ZeroController',
+            'ebay2'         => 'Ebay2ZeroController',
+            'ebayvariation' => 'EbayVariationZeroController',
+            'tiktokshop'    => 'TiktokShopZeroController',
+            'doba'          => 'DobaZeroController',
+            'walmart'       => 'WalmartZeroController',
+            'shein'         => 'SheinZeroController',
+            'bestbuyusa'    => 'BestbuyUSAZeroController',
+            'aliexpress'    => 'AliexpressZeroController',
+            'tiendamia'     => 'TiendamiaZeroController',
+            'pls'           => 'PLSZeroController',
+            'mercariwship'  => 'MercariWShipZeroController',
+            'mercariwoship' => 'MercariWoShipZeroController',
+            'instagramshop' => 'InstagramShopZeroController',
+            'fbshop'        => 'FBShopZeroController',
+            'fbmarketplace' => 'FBMarketplaceZeroController',
+            'faire'         => 'FaireZeroController',
+            'business5core' => 'Business5CoreZeroController',
+            // Add more mappings as needed
+        ];
+
+        $livePendingData = [];
+
+        foreach ($channels as $channelName) {
+            $livePending = null;
+            $zeroView = null;
+
+            // Check if channel has special mapping
+            $key = strtolower(str_replace([' ', '&', '-', '/'], '', trim($channelName)));
+            if (isset($controllerMap[$key])) {
+                $controllerName = $controllerMap[$key];
+                if ($controllerName === 'EbayZeroController') {
+                    $controllerClass = "App\\Http\\Controllers\\MarketPlace\\{$controllerName}";
+                } else {
+                    $controllerClass = "App\\Http\\Controllers\\MarketPlace\\ZeroViewMarketPlace\\{$controllerName}";
+                }
+            } else {
+                // Build controller class name dynamically (e.g., "Amazon" => AmazonZeroController)
+                $baseName = str_replace([' ', '&', '-', '/'], '', ucwords(strtolower(trim($channelName))));
+                $controllerClass = "App\\Http\\Controllers\\MarketPlace\\{$baseName}ZeroController";
+            }
+
+            if (class_exists($controllerClass)) {
+                $controller = app($controllerClass);
+                if (method_exists($controller, 'getLivePendingAndZeroViewCounts')) {
+                    $counts = $controller->getLivePendingAndZeroViewCounts();
+                    $livePending = $counts['live_pending'] ?? null;
+                    $zeroView = $counts['zero_view'] ?? null;
+                }
+            }
+
+            $livePendingData[$channelName] = $livePending;
+        }
+
+        $data = array_map(function($channelName) use ($livePendingData) {
+            return [
+                'Channel ' => $channelName,
+                'R&A' => false, // placeholder
+                'Live Pending' => $livePendingData[$channelName] ?? 0,
+            ];
+        }, $channels);
+
+        return view('marketing-masters.live-pending-masters', compact('data', 'totalSkuCount', 'zeroInvCount'));
+    }
+
+
+
+
+
+
+
     /**
      * Show the form for creating a new resource.
      */

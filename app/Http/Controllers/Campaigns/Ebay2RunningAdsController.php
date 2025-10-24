@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\campaigns;
+namespace App\Http\Controllers\Campaigns;
 
 use App\Http\Controllers\Controller;
 use App\Models\Ebay2GeneralReport;
@@ -14,10 +14,10 @@ class Ebay2RunningAdsController extends Controller
 {
     public function index()
     {
-        return view('campaign.ebay-running-ads');
+        return view('campaign.ebay-two.running-ads');
     }
 
-    public function getEbayRunningAdsData()
+    public function getEbay2RunningAdsData()
     {
         $normalizeSku = fn($sku) => strtoupper(trim($sku));
 
@@ -67,6 +67,10 @@ class Ebay2RunningAdsController extends Controller
                 return trim((string)$item->listing_id) == trim((string)$ebay->item_id);
             });
 
+            if (!$matchedGeneralL30 && !$matchedGeneralL7) {
+                continue;
+            }
+
             $row = [];
 
             $row['parent'] = $parent;
@@ -74,19 +78,6 @@ class Ebay2RunningAdsController extends Controller
             $row['INV'] = $shopify->inv ?? 0;
             $row['L30'] = $shopify->quantity ?? 0;
             $row['e_l30'] = $ebay->ebay_l30 ?? 0;
-            $row['campaignName'] = $matchedCampaignL7->campaign_name ?? ($matchedCampaignL30->campaign_name ?? '');
-
-            //kw
-            $row['kw_spend_L30'] = (float) str_replace('USD ', '', $matchedCampaignL30->cpc_ad_fees_payout_currency ?? 0);
-            $row['kw_spend_L7'] = (float) str_replace('USD ', '', $matchedCampaignL7->cpc_ad_fees_payout_currency ?? 0);
-            $row['kw_sales_L30'] = (float) str_replace('USD ', '', $matchedCampaignL30->cpc_sale_amount_payout_currency ?? 0);
-            $row['kw_sales_L7'] = (float) str_replace('USD ', '', $matchedCampaignL7->cpc_sale_amount_payout_currency ?? 0);
-            $row['kw_sold_L30'] = (int) ($matchedCampaignL30->cpc_attributed_sales ?? 0);
-            $row['kw_sold_L7'] = (int) ($matchedCampaignL7->cpc_attributed_sales ?? 0);
-            $row['kw_clicks_L30'] = (int) ($matchedCampaignL30?->cpc_clicks ?? 0);
-            $row['kw_clicks_L7'] = (int) ($matchedCampaignL7?->cpc_clicks ?? 0);
-            $row['kw_impr_L30'] = (int) ($matchedCampaignL30?->cpc_impressions ?? 0);
-            $row['kw_impr_L7'] = (int) ($matchedCampaignL7?->cpc_impressions ?? 0);
 
             //pmt
             $row['pmt_spend_L30'] = (float) str_replace('USD ', '', $matchedGeneralL30->ad_fees ?? 0);
@@ -101,16 +92,16 @@ class Ebay2RunningAdsController extends Controller
             $row['pmt_impr_L30'] = (int) ($matchedGeneralL30->impressions ?? 0);
             $row['pmt_impr_L7'] = (int) ($matchedGeneralL7->impressions ?? 0);
 
-            $row['SPEND_L30'] = $row['kw_spend_L30'] + $row['pmt_spend_L30'];
-            $row['SPEND_L7'] = $row['kw_spend_L7'] + $row['pmt_spend_L7'];
-            $row['SALES_L30'] = $row['kw_sales_L30'] + $row['pmt_sales_L30'];
-            $row['SALES_L7'] = $row['kw_sales_L7'] + $row['pmt_sales_L7'];
-            $row['SOLD_L30'] = $row['kw_sold_L30'] + $row['pmt_sold_L30'];
-            $row['SOLD_L7'] = $row['kw_sold_L7'] + $row['pmt_sold_L7'];
-            $row['CLICKS_L30'] = $row['kw_clicks_L30'] + $row['pmt_clicks_L30'];
-            $row['CLICKS_L7'] = $row['kw_clicks_L7'] + $row['pmt_clicks_L7'];
-            $row['IMP_L30'] = $row['kw_impr_L30'] + $row['pmt_impr_L30'];
-            $row['IMP_L7'] = $row['kw_impr_L7'] + $row['pmt_impr_L7'];
+            $row['SPEND_L30'] = $row['pmt_spend_L30'];
+            $row['SPEND_L7'] = $row['pmt_spend_L7'];
+            $row['SALES_L30'] = $row['pmt_sales_L30'];
+            $row['SALES_L7'] = $row['pmt_sales_L7'];
+            $row['SOLD_L30'] = $row['pmt_sold_L30'];
+            $row['SOLD_L7'] = $row['pmt_sold_L7'];
+            $row['CLICKS_L30'] = $row['pmt_clicks_L30'];
+            $row['CLICKS_L7'] = $row['pmt_clicks_L7'];
+            $row['IMP_L30'] = $row['pmt_impr_L30'];
+            $row['IMP_L7'] = $row['pmt_impr_L7'];
 
             $row['NR'] = '';
             if (isset($nrValues[$pm->sku])) {
@@ -123,9 +114,7 @@ class Ebay2RunningAdsController extends Controller
                 }
             }
 
-            if($row['campaignName'] !== ''){
-                $result[] = $row;
-            }
+            $result[] = $row;
         }
 
         return response()->json([

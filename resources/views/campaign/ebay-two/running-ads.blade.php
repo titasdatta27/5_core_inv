@@ -1,4 +1,4 @@
-@extends('layouts.vertical', ['title' => 'Ebay Running Ads', 'mode' => $mode ?? '', 'demo' => $demo ?? ''])
+@extends('layouts.vertical', ['title' => 'Ebay2 Running Ads', 'mode' => $mode ?? '', 'demo' => $demo ?? ''])
 @section('css')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator.min.css" rel="stylesheet">
@@ -121,8 +121,8 @@
 @endsection
 @section('content')
     @include('layouts.shared.page-title', [
-        'page_title' => 'Ebay Running Ads',
-        'sub_title' => 'Ebay Running Ads',
+        'page_title' => 'Ebay2 Running Ads',
+        'sub_title' => 'Ebay2 Running Ads',
     ])
     <div class="row">
         <div class="col-12">
@@ -220,7 +220,7 @@
 
             var table = new Tabulator("#budget-under-table", {
                 index: "sku",
-                ajaxURL: "/ebay/ad-running/data",
+                ajaxURL: "/ebay-2/ad-running/data",
                 layout: "fitDataFill",
                 movableColumns: true,
                 resizableColumns: true,
@@ -329,17 +329,6 @@
                         }
                     },
                     {
-                        title: "KW Spend L30",
-                        field: "kw_spend_L30",
-                        visible: false,
-                        formatter: function(cell) {
-                            let KW_SPEND_L30 = cell.getValue() || 0;
-                            return `
-                                <span>${parseFloat(KW_SPEND_L30).toFixed(0)}</span>
-                            `;
-                        }
-                    },
-                    {
                         title: "PMT Spend L30",
                         field: "pmt_spend_L30",
                         visible: false,
@@ -360,17 +349,6 @@
                                 <i class="fa fa-info-circle text-primary toggle-spendL7-btn" 
                                 data-spend-l7="${SPEND_L7}" 
                                 style="cursor:pointer; margin-left:8px;"></i>
-                            `;
-                        }
-                    },
-                    {
-                        title: "KW Spend L7",
-                        field: "kw_spend_L7",
-                        visible: false,
-                        formatter: function(cell) {
-                            let KW_SPEND_L7 = cell.getValue() || 0;
-                            return `
-                                <span>${parseFloat(KW_SPEND_L7).toFixed(0)}</span>
                             `;
                         }
                     },
@@ -399,17 +377,6 @@
                         }
                     },
                     {
-                        title: "KW Sold L30",
-                        field: "kw_sold_L30",
-                        visible: false,
-                        formatter: function(cell) {
-                            let KW_SOLD_L30 = cell.getValue() || 0;
-                            return `
-                                <span>${parseFloat(KW_SOLD_L30).toFixed(0)}</span>
-                            `;
-                        }
-                    },
-                    {
                         title: "PMT Sold L30",
                         field: "pmt_sold_L30",
                         visible: false,
@@ -430,17 +397,6 @@
                                 <i class="fa fa-info-circle text-primary toggle-soldL7-btn" 
                                 data-sold-l7="${SOLD_L7}" 
                                 style="cursor:pointer; margin-left:8px;"></i>
-                            `;
-                        }
-                    },
-                    {
-                        title: "KW Sold L7",
-                        field: "kw_sold_L7",
-                        visible: false,
-                        formatter: function(cell) {
-                            let KW_SOLD_L7 = cell.getValue() || 0;
-                            return `
-                                <span>${parseFloat(KW_SOLD_L7).toFixed(0)}</span>
                             `;
                         }
                     },
@@ -469,17 +425,6 @@
                         }
                     },
                     {
-                        title: "KW Sales L30",
-                        field: "kw_sales_L30",
-                        visible: false,
-                        formatter: function(cell) {
-                            let KW_SALES_L30 = cell.getValue() || 0;
-                            return `
-                                <span>${parseFloat(KW_SALES_L30).toFixed(0)}</span>
-                            `;
-                        }
-                    },
-                    {
                         title: "PMT Sales L30",
                         field: "pmt_sales_L30",
                         visible: false,
@@ -500,17 +445,6 @@
                                 <i class="fa fa-info-circle text-primary toggle-salesL7-btn" 
                                 data-sales-l30="${SALES_L7}" 
                                 style="cursor:pointer; margin-left:8px;"></i>
-                            `;
-                        }
-                    },
-                    {
-                        title: "KW Sales L7",
-                        field: "kw_sales_L7",
-                        visible: false,
-                        formatter: function(cell) {
-                            let KW_SALES_L7 = cell.getValue() || 0;
-                            return `
-                                <span>${parseFloat(KW_SALES_L7).toFixed(0)}</span>
                             `;
                         }
                     },
@@ -539,17 +473,6 @@
                         }
                     },
                     {
-                        title: "KW Clicks L30",
-                        field: "kw_clicks_L30",
-                        visible: false,
-                        formatter: function(cell) {
-                            let KW_CLICKS_L30 = cell.getValue() || 0;
-                            return `
-                                <span>${parseFloat(KW_CLICKS_L30).toFixed(0)}</span>
-                            `;
-                        }
-                    },
-                    {
                         title: "PMT Clicks L30",
                         field: "pmt_clicks_L30",
                         visible: false,
@@ -570,17 +493,6 @@
                                 <i class="fa fa-info-circle text-primary toggle-clicksL7-btn" 
                                 data-clicks-l7="${CLICKS_L7}" 
                                 style="cursor:pointer; margin-left:8px;"></i>
-                            `;
-                        }
-                    },
-                    {
-                        title: "KW Clicks L7",
-                        field: "kw_clicks_L7",
-                        visible: false,
-                        formatter: function(cell) {
-                            let KW_CLICKS_L7 = cell.getValue() || 0;
-                            return `
-                                <span>${parseFloat(KW_CLICKS_L7).toFixed(0)}</span>
                             `;
                         }
                     },
@@ -609,17 +521,6 @@
                         }
                     },
                     {
-                        title: "KW IMP L30",
-                        field: "kw_impr_L30",
-                        visible: false,
-                        formatter: function(cell) {
-                            let KW_IMP_L30 = cell.getValue() || 0;
-                            return `
-                                <span>${parseFloat(KW_IMP_L30).toFixed(0)}</span>
-                            `;
-                        }
-                    },
-                    {
                         title: "PMT IMP L30",
                         field: "pmt_impr_L30",
                         visible: false,
@@ -640,17 +541,6 @@
                                 <i class="fa fa-info-circle text-primary toggle-impL7-btn" 
                                 data-clicks-l7="${IMP_L7}" 
                                 style="cursor:pointer; margin-left:8px;"></i>
-                            `;
-                        }
-                    },
-                    {
-                        title: "KW IMP L7",
-                        field: "kw_impr_L7",
-                        visible: false,
-                        formatter: function(cell) {
-                            let KW_IMP_L7 = cell.getValue() || 0;
-                            return `
-                                <span>${parseFloat(KW_IMP_L7).toFixed(0)}</span>
                             `;
                         }
                     },
@@ -759,33 +649,33 @@
 
             let initialSpendL30Data = {};
 
-            table.on("dataLoaded", function(data) {
-                data.forEach(row => {
-                if (row.SPEND_L30 !== undefined) {
-                    initialSpendL30Data[row.sku] = row.SPEND_L30;
+            // table.on("dataLoaded", function(data) {
+            //     data.forEach(row => {
+            //     if (row.SPEND_L30 !== undefined) {
+            //         initialSpendL30Data[row.sku] = row.SPEND_L30;
 
-                    fetch('/update-ebay-nr-data', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    },
-                    body: JSON.stringify({
-                        sku: row.sku,
-                        field: 'Spend_L30', 
-                        value: row.SPEND_L30
-                    })
-                    })
-                    .then(res => res.json())
-                    .then(data => {
-                    console.log('SPEND_L30 saved for SKU:', row.sku);
-                    })
-                    .catch(err => {
-                    console.error('Error saving SPEND_L30:', err);
-                    });
-                }
-                });
-            });
+            //         fetch('/update-ebay-nr-data', {
+            //         method: 'POST',
+            //         headers: {
+            //             'Content-Type': 'application/json',
+            //             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            //         },
+            //         body: JSON.stringify({
+            //             sku: row.sku,
+            //             field: 'Spend_L30', 
+            //             value: row.SPEND_L30
+            //         })
+            //         })
+            //         .then(res => res.json())
+            //         .then(data => {
+            //         console.log('SPEND_L30 saved for SKU:', row.sku);
+            //         })
+            //         .catch(err => {
+            //         console.error('Error saving SPEND_L30:', err);
+            //         });
+            //     }
+            //     });
+            // });
 
             table.on("tableBuilt", function () {
 
@@ -880,6 +770,7 @@
                 updateCampaignStats();
             });
 
+
             document.addEventListener("click", function(e) {
                 if (e.target.classList.contains("toggle-cols-btn")) {
                     let btn = e.target;
@@ -897,7 +788,7 @@
 
             document.addEventListener("click", function(e) {
                 if (e.target.classList.contains("toggle-spendL30-btn")) {
-                    let colsToToggle = ["kw_spend_L30", "pmt_spend_L30"];
+                    let colsToToggle = ["pmt_spend_L30"];
 
                     colsToToggle.forEach(colField => {
                         let col = table.getColumn(colField);
@@ -907,7 +798,7 @@
                     });
                 }
                 if (e.target.classList.contains("toggle-spendL7-btn")) {
-                    let colsToToggle = ["kw_spend_L7", "pmt_spend_L7"];
+                    let colsToToggle = ["pmt_spend_L7"];
 
                     colsToToggle.forEach(colField => {
                         let col = table.getColumn(colField);
@@ -927,7 +818,7 @@
                     });
                 }
                 if (e.target.classList.contains("toggle-soldL7-btn")) {
-                    let colsToToggle = ["kw_sold_L7", "pmt_sold_L7"];
+                    let colsToToggle = ["pmt_sold_L7"];
 
                     colsToToggle.forEach(colField => {
                         let col = table.getColumn(colField);
@@ -947,7 +838,7 @@
                     });
                 }
                 if (e.target.classList.contains("toggle-salesL7-btn")) {
-                    let colsToToggle = ["kw_sales_L7", "pmt_sales_L7"];
+                    let colsToToggle = ["pmt_sales_L7"];
 
                     colsToToggle.forEach(colField => {
                         let col = table.getColumn(colField);
@@ -957,7 +848,7 @@
                     });
                 }
                 if (e.target.classList.contains("toggle-clicksL30-btn")) {
-                    let colsToToggle = ["kw_clicks_L30", "pmt_clicks_L30"];
+                    let colsToToggle = ["pmt_clicks_L30"];
 
                     colsToToggle.forEach(colField => {
                         let col = table.getColumn(colField);
@@ -967,7 +858,7 @@
                     });
                 }
                 if (e.target.classList.contains("toggle-clicksL7-btn")) {
-                    let colsToToggle = ["kw_clicks_L7", "pmt_clicks_L7"];
+                    let colsToToggle = ["pmt_clicks_L7"];
 
                     colsToToggle.forEach(colField => {
                         let col = table.getColumn(colField);
@@ -977,7 +868,7 @@
                     });
                 }
                 if (e.target.classList.contains("toggle-impL30-btn")) {
-                    let colsToToggle = ["kw_impr_L30", "pmt_impr_L30"];
+                    let colsToToggle = ["pmt_impr_L30"];
 
                     colsToToggle.forEach(colField => {
                         let col = table.getColumn(colField);
@@ -987,7 +878,7 @@
                     });
                 }
                 if (e.target.classList.contains("toggle-impL7-btn")) {
-                    let colsToToggle = ["kw_impr_L7", "pmt_impr_L7"];
+                    let colsToToggle = ["pmt_impr_L7"];
 
                     colsToToggle.forEach(colField => {
                         let col = table.getColumn(colField);
@@ -1016,7 +907,7 @@
                 let wb = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(wb, ws, "Campaigns");
 
-                XLSX.writeFile(wb, "ebay_ad_running.xlsx");
+                XLSX.writeFile(wb, "ebay2_ad_running.xlsx");
             });
 
             document.body.style.zoom = "80%";
