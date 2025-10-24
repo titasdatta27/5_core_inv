@@ -1,7 +1,6 @@
-@extends('layouts.vertical', ['title' => 'Doba Zero View', 'mode' => $mode ?? '', 'demo' => $demo ?? ''])
+@extends('layouts.vertical', ['title' => 'Instagram Shop', 'mode' => $mode ?? '', 'demo' => $demo ?? ''])
 
 <meta name="csrf-token" content="{{ csrf_token() }}">
-
 @section('css')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -175,11 +174,9 @@
             padding: 8px;
             position: absolute;
             z-index: 1001;
-            top: 100%;
-            /* <-- changed from bottom: 100% */
+            bottom: 100%;
             left: 50%;
-            transform: translateX(-50%) translateY(8px);
-            /* add a little gap below */
+            transform: translateX(-50%);
             opacity: 0;
             transition: opacity 0.3s;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -985,21 +982,6 @@
             text-decoration: underline;
         }
 
-        /* Custom Resizable Table */
-        .custom-resizable-table th,
-        .custom-resizable-table td {
-            transition: width 0.2s, min-width 0.2s, max-width 0.2s;
-        }
-
-        .truncated-text {
-            transition: all 0.2s;
-            display: inline-block;
-            max-width: 100%;
-            white-space: nowrap;
-            overflow: hidden;
-            vertical-align: middle;
-        }
-
         .nr-hide {
             display: none !important;
         }
@@ -1009,209 +991,390 @@
 @endsection
 
 @section('content')
-    @include('layouts.shared/page-title', ['page_title' => 'Doba Zero View', 'sub_title' => 'Doba'])
+    @include('layouts.shared/page-title', ['page_title' => 'Instagram Shop', 'sub_title' => 'Market Place'])
 
     <div class="row">
         <div class="col-12">
             <div class="card">
+                <div class="card-body d-flex align-items-center" style="gap: 12px;">
+                    <div id="percent-edit-div" class="d-flex align-items-center">
+                        <div class="input-group" style="width: 150px;">
+                            <input type="number" id="updateAllSkusPercent" class="form-control" min="0"
+                                max="100" value="{{ $percentage }}" step="0.01" title="Percent" disabled />
+                            <span class="input-group-text">%</span>
+                        </div>
+                        <button id="editPercentBtn" class="btn btn-outline-primary ms-2">
+                            <i class="fa fa-pen"></i>
+                        </button>
+                    </div>
+                    <div class="d-inline-flex align-items-center ms-2">
+                        <div class="badge bg-danger text-white px-3 py-2 me-2" style="font-size: 1rem; border-radius: 8px;">
+                            0 SOLD - <span id="zero-sold-count">0</span>
+                        </div>
+                        <div class="badge bg-primary text-white px-3 py-2" style="font-size: 1rem; border-radius: 8px;">
+                            SOLD - <span id="sold-count">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
                 <div class="card-body">
-                    <h4 class="header-title">Doba Zero View</h4>
+                    <h4 class="header-title">Instagram Shop Product Analysis</h4>
 
                     <!-- Custom Dropdown Filters Row -->
-                    <div class="d-flex flex-wrap gap-2 mb-3">
-                        <!-- Dil% Filter -->
+                    <div class="d-flex flex-wrap gap-2 mb-3 align-items-center justify-content-between">
+                        <div class="d-flex flex-wrap gap-2 align-items-center">
+                            <!-- Dil% Filter -->
+                            <div class="dropdown manual-dropdown-container">
+                                <button class="btn btn-light dropdown-toggle" type="button" id="dilFilterDropdown">
+                                    <span class="status-circle default"></span> OV DIL%
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="dilFilterDropdown">
+                                    <li><a class="dropdown-item column-filter" href="#" data-column="Dil%"
+                                            data-color="all">
+                                            <span class="status-circle default"></span> All OV DIL</a></li>
+                                    <li><a class="dropdown-item column-filter" href="#" data-column="Dil%"
+                                            data-color="red">
+                                            <span class="status-circle red"></span> Red</a></li>
+                                    <li><a class="dropdown-item column-filter" href="#" data-column="Dil%"
+                                            data-color="yellow">
+                                            <span class="status-circle yellow"></span> Yellow</a></li>
+                                    <li><a class="dropdown-item column-filter" href="#" data-column="Dil%"
+                                            data-color="green">
+                                            <span class="status-circle green"></span> Green</a></li>
+                                    <li><a class="dropdown-item column-filter" href="#" data-column="Dil%"
+                                            data-color="pink">
+                                            <span class="status-circle pink"></span> Pink</a></li>
+                                </ul>
+                            </div>
+
+                            <!-- A Dil% Filter -->
+                            <div class="dropdown manual-dropdown-container ">
+                                <button class="btn btn-light dropdown-toggle" type="button" id="aDilFilterDropdown">
+                                    <span class="status-circle default"></span> A Dil%
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="aDilFilterDropdown">
+                                    <li><a class="dropdown-item column-filter" href="#" data-column="A Dil%"
+                                            data-color="all">
+                                            <span class="status-circle default"></span> All A Dil</a></li>
+                                    <li><a class="dropdown-item column-filter" href="#" data-column="A Dil%"
+                                            data-color="red">
+                                            <span class="status-circle red"></span> Red</a></li>
+                                    <li><a class="dropdown-item column-filter" href="#" data-column="A Dil%"
+                                            data-color="yellow">
+                                            <span class="status-circle yellow"></span> Yellow</a></li>
+                                    <li><a class="dropdown-item column-filter" href="#" data-column="A Dil%"
+                                            data-color="green">
+                                            <span class="status-circle green"></span> Green</a></li>
+                                    <li><a class="dropdown-item column-filter" href="#" data-column="A Dil%"
+                                            data-color="pink">
+                                            <span class="status-circle pink"></span> Pink</a></li>
+                                </ul>
+                            </div>
+
+                            <!-- PFT % Filter -->
+                            {{-- <div class="dropdown manual-dropdown-container">
+                            <button class="btn btn-light dropdown-toggle" type="button" id="pftFilterDropdown">
+                                <span class="status-circle default"></span> PFT%
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="pftFilterDropdown">
+                                <li><a class="dropdown-item column-filter" href="#" data-column="PFT %"
+                                        data-color="all">
+                                        <span class="status-circle default"></span> All PFT</a></li>
+                                <li><a class="dropdown-item column-filter" href="#" data-column="PFT %"
+                                        data-color="red">
+                                        <span class="status-circle red"></span> Red</a></li>
+                                <li><a class="dropdown-item column-filter" href="#" data-column="PFT %"
+                                        data-color="yellow">
+                                        <span class="status-circle yellow"></span> Yellow</a></li>
+                                <li><a class="dropdown-item column-filter" href="#" data-column="PFT %"
+                                        data-color="blue">
+                                        <span class="status-circle blue"></span> Blue</a></li>
+                                <li><a class="dropdown-item column-filter" href="#" data-column="PFT %"
+                                        data-color="green">
+                                        <span class="status-circle green"></span> Green</a></li>
+                                <li><a class="dropdown-item column-filter" href="#" data-column="PFT %"
+                                        data-color="pink">
+                                        <span class="status-circle pink"></span> Pink</a></li>
+                            </ul>
+                        </div>
+
+                        <!-- ROI Filter -->
                         <div class="dropdown manual-dropdown-container">
-                            <button class="btn btn-light dropdown-toggle" type="button" id="dilFilterDropdown">
-                                <span class="status-circle default"></span> OV DIL%
+                            <button class="btn btn-light dropdown-toggle" type="button" id="roiFilterDropdown">
+                                <span class="status-circle default"></span> ROI
                             </button>
-                            <ul class="dropdown-menu" aria-labelledby="dilFilterDropdown">
-                                <li><a class="dropdown-item column-filter" href="#" data-column="ov_dil"
+                            <ul class="dropdown-menu" aria-labelledby="roiFilterDropdown">
+                                <li><a class="dropdown-item column-filter" href="#" data-column="Roi"
                                         data-color="all">
-                                        <span class="status-circle default"></span> All OV DIL</a></li>
-                                <li><a class="dropdown-item column-filter" href="#" data-column="ov_dil"
+                                        <span class="status-circle default"></span> All ROI</a></li>
+                                <li><a class="dropdown-item column-filter" href="#" data-column="Roi"
                                         data-color="red">
                                         <span class="status-circle red"></span> Red</a></li>
-                                <li><a class="dropdown-item column-filter" href="#" data-column="ov_dil"
+                                <li><a class="dropdown-item column-filter" href="#" data-column="Roi"
                                         data-color="yellow">
                                         <span class="status-circle yellow"></span> Yellow</a></li>
-                                <li><a class="dropdown-item column-filter" href="#" data-column="ov_dil"
+                                <li><a class="dropdown-item column-filter" href="#" data-column="Roi"
                                         data-color="green">
                                         <span class="status-circle green"></span> Green</a></li>
-                                <li><a class="dropdown-item column-filter" href="#" data-column="ov_dil"
+                                <li><a class="dropdown-item column-filter" href="#" data-column="Roi"
                                         data-color="pink">
                                         <span class="status-circle pink"></span> Pink</a></li>
                             </ul>
                         </div>
 
-                        <!-- A Dil% Filter -->
-                        <div class="dropdown manual-dropdown-container ">
-                            <button class="btn btn-light dropdown-toggle" type="button" id="aDilFilterDropdown">
-                                <span class="status-circle default"></span> A Dil%
+                        <!-- Tacos Filter -->
+                        <div class="dropdown manual-dropdown-container">
+                            <button class="btn btn-light dropdown-toggle" type="button" id="tacosFilterDropdown">
+                                <span class="status-circle default"></span> TACOS
                             </button>
-                            <ul class="dropdown-menu" aria-labelledby="aDilFilterDropdown">
-                                <li><a class="dropdown-item column-filter" href="#" data-column="A Dil%"
+                            <ul class="dropdown-menu" aria-labelledby="tacosFilterDropdown">
+                                <li><a class="dropdown-item column-filter" href="#" data-column="Tacos30"
                                         data-color="all">
-                                        <span class="status-circle default"></span> All A Dil</a></li>
-                                <li><a class="dropdown-item column-filter" href="#" data-column="A Dil%"
-                                        data-color="red">
-                                        <span class="status-circle red"></span> Red</a></li>
-                                <li><a class="dropdown-item column-filter" href="#" data-column="A Dil%"
-                                        data-color="yellow">
-                                        <span class="status-circle yellow"></span> Yellow</a></li>
-                                <li><a class="dropdown-item column-filter" href="#" data-column="A Dil%"
-                                        data-color="green">
-                                        <span class="status-circle green"></span> Green</a></li>
-                                <li><a class="dropdown-item column-filter" href="#" data-column="A Dil%"
+                                        <span class="status-circle default"></span> All TACOS</a></li>
+                                <li><a class="dropdown-item column-filter" href="#" data-column="Tacos30"
                                         data-color="pink">
                                         <span class="status-circle pink"></span> Pink</a></li>
+                                <li><a class="dropdown-item column-filter" href="#" data-column="Tacos30"
+                                        data-color="green">
+                                        <span class="status-circle green"></span> Green</a></li>
+                                <li><a class="dropdown-item column-filter" href="#" data-column="Tacos30"
+                                        data-color="blue">
+                                        <span class="status-circle blue"></span> Blue</a></li>
+                                <li><a class="dropdown-item column-filter" href="#" data-column="Tacos30"
+                                        data-color="yellow">
+                                        <span class="status-circle yellow"></span> Yellow</a></li>
+                                <li><a class="dropdown-item column-filter" href="#" data-column="Tacos30"
+                                        data-color="red">
+                                        <span class="status-circle red"></span> Red</a></li>
                             </ul>
                         </div>
 
-                        <!-- Task Board Button -->
-                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
-                            data-bs-target="#createTaskModal">
-                            <i class="bi bi-plus-circle me-2"></i>Create Task
-                        </button>
+                        <!-- CVR Filter -->
+                        <div class="dropdown manual-dropdown-container">
+                            <button class="btn btn-light dropdown-toggle" type="button" id="scvrFilterDropdown">
+                                <span class="status-circle default"></span> CVR
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="scvrFilterDropdown">
+                                <li><a class="dropdown-item column-filter" href="#" data-column="SCVR"
+                                        data-color="all">
+                                        <span class="status-circle default"></span> All CVR</a></li>
+                                <li><a class="dropdown-item column-filter" href="#" data-column="SCVR"
+                                        data-color="red">
+                                        <span class="status-circle red"></span> Red</a></li>
+                                <li><a class="dropdown-item column-filter" href="#" data-column="SCVR"
+                                        data-color="green">
+                                        <span class="status-circle green"></span> Green</a></li>
+                                <li><a class="dropdown-item column-filter" href="#" data-column="SCVR"
+                                        data-color="pink">
+                                        <span class="status-circle pink"></span> Pink</a></li>
+                            </ul>
+                        </div> --}}
 
-                        <!-- for popup modal start Modal -->
-                        <div class="modal fade" id="createTaskModal" tabindex="-1" aria-labelledby="createTaskModalLabel"
-                            aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered modal-lg">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h4 class="modal-title" id="createTaskModalLabel">📝 Create New Task Ebay to Task
-                                            Manager</h4>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                            aria-label="Close"></button>
-                                    </div>
+                            <!-- Task Board Button -->
+                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                                data-bs-target="#createTaskModal">
+                                <i class="bi bi-plus-circle me-2"></i>Create Task
+                            </button>
 
-                                    <div class="modal-body">
-                                        <form id="taskForm">
-                                            <div class="form-section">
-                                                <div class="row g-3">
-                                                    <div class="col-md-12">
-                                                        <label class="form-label">Group</label>
-                                                        <input type="text" class="form-control"
-                                                            placeholder="Enter Group">
-                                                    </div>
+                            <!-- for popup modal start Modal -->
+                            <div class="modal fade" id="createTaskModal" tabindex="-1"
+                                aria-labelledby="createTaskModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h4 class="modal-title" id="createTaskModalLabel">📝 Create New Task Ebay to
+                                                Task
+                                                Manager</h4>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                        </div>
 
-                                                    <div class="col-md-6">
-                                                        <label class="form-label">Title<span
-                                                                class="text-danger">*</span></label>
-                                                        <input type="text" class="form-control"
-                                                            placeholder="Enter Title">
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label class="form-label">Priority</label>
-                                                        <select class="form-select">
-                                                            <option>Low</option>
-                                                            <option>Medium</option>
-                                                            <option>High</option>
-                                                        </select>
+                                        <div class="modal-body">
+                                            <form id="taskForm">
+                                                <div class="form-section">
+                                                    <div class="row g-3">
+                                                        <div class="col-md-12">
+                                                            <label class="form-label">Group</label>
+                                                            <input type="text" class="form-control"
+                                                                placeholder="Enter Group">
+                                                        </div>
+
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Title<span
+                                                                    class="text-danger">*</span></label>
+                                                            <input type="text" class="form-control"
+                                                                placeholder="Enter Title">
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Priority</label>
+                                                            <select class="form-select">
+                                                                <option>Low</option>
+                                                                <option>Medium</option>
+                                                                <option>High</option>
+                                                            </select>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
 
-                                            <div class="form-section">
-                                                <div class="row g-3">
-                                                    <div class="col-md-6">
-                                                        <label class="form-label">Assignor<span
-                                                                class="text-danger">*</span></label>
-                                                        <select class="form-select">
-                                                            <option selected disabled>Select Assignor</option>
-                                                            <option>Srabani Ghosh</option>
-                                                            <option>Rahul Mehta</option>
-                                                            <option>Anjali Verma</option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label class="form-label">Status</label>
-                                                        <select class="form-select">
-                                                            <option disabled selected>Select Status</option>
-                                                            <option value="Todo">Todo</option>
-                                                            <option value="Not Started">Not Started</option>
-                                                            <option value="Working">Working</option>
-                                                            <option value="In Progress">In Progress</option>
-                                                            <option value="Monitor">Monitor</option>
-                                                            <option value="Done">Done</option>
-                                                            <option value="Need Help">Need Help</option>
-                                                            <option value="Review">Review</option>
-                                                            <option value="Need Approval">Need Approval</option>
-                                                            <option value="Dependent">Dependent</option>
-                                                            <option value="Approved">Approved</option>
-                                                            <option value="Hold">Hold</option>
-                                                            <option value="Rework">Rework</option>
-                                                            <option value="Urgent">Urgent</option>
-                                                            <option value="Q-Task">Q-Task</option>
-                                                        </select>
-                                                    </div>
+                                                <div class="form-section">
+                                                    <div class="row g-3">
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Assignor<span
+                                                                    class="text-danger">*</span></label>
+                                                            <select class="form-select">
+                                                                <option selected disabled>Select Assignor</option>
+                                                                <option>Srabani Ghosh</option>
+                                                                <option>Rahul Mehta</option>
+                                                                <option>Anjali Verma</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Status</label>
+                                                            <select class="form-select">
+                                                                <option disabled selected>Select Status</option>
+                                                                <option value="Todo">Todo</option>
+                                                                <option value="Not Started">Not Started</option>
+                                                                <option value="Working">Working</option>
+                                                                <option value="In Progress">In Progress</option>
+                                                                <option value="Monitor">Monitor</option>
+                                                                <option value="Done">Done</option>
+                                                                <option value="Need Help">Need Help</option>
+                                                                <option value="Review">Review</option>
+                                                                <option value="Need Approval">Need Approval</option>
+                                                                <option value="Dependent">Dependent</option>
+                                                                <option value="Approved">Approved</option>
+                                                                <option value="Hold">Hold</option>
+                                                                <option value="Rework">Rework</option>
+                                                                <option value="Urgent">Urgent</option>
+                                                                <option value="Q-Task">Q-Task</option>
+                                                            </select>
+                                                        </div>
 
-                                                    <div class="col-md-6">
-                                                        <label class="form-label">Assign To<span
-                                                                class="text-danger">*</span></label>
-                                                        <select class="form-select">
-                                                            <option>Please Select</option>
-                                                            <option>Dev Team</option>
-                                                            <option>QA Team</option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label class="form-label">Duration<span
-                                                                class="text-danger">*</span></label>
-                                                        <input type="text" id="duration" class="form-control"
-                                                            placeholder="Select start and end date/time">
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Assign To<span
+                                                                    class="text-danger">*</span></label>
+                                                            <select class="form-select">
+                                                                <option>Please Select</option>
+                                                                <option>Dev Team</option>
+                                                                <option>QA Team</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Duration<span
+                                                                    class="text-danger">*</span></label>
+                                                            <input type="text" id="duration" class="form-control"
+                                                                placeholder="Select start and end date/time">
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
 
-                                            <div class="form-section">
-                                                <div class="row g-3">
-                                                    <div class="col-md-6">
-                                                        <label class="form-label">L1</label>
-                                                        <input type="text" class="form-control"
-                                                            placeholder="Enter L1">
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label class="form-label">L2</label>
-                                                        <input type="text" class="form-control"
-                                                            placeholder="Enter L2">
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label class="form-label">Description</label>
-                                                        <textarea class="form-control" rows="4" placeholder="Enter Description"></textarea>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label class="form-label">Image</label>
-                                                        <label class="choose-file">
-                                                            Choose File
-                                                            <input type="file" class="form-control d-none">
-                                                        </label>
+                                                <div class="form-section">
+                                                    <div class="row g-3">
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">L1</label>
+                                                            <input type="text" class="form-control"
+                                                                placeholder="Enter L1">
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">L2</label>
+                                                            <input type="text" class="form-control"
+                                                                placeholder="Enter L2">
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Description</label>
+                                                            <textarea class="form-control" rows="4" placeholder="Enter Description"></textarea>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Image</label>
+                                                            <label class="choose-file">
+                                                                Choose File
+                                                                <input type="file" class="form-control d-none">
+                                                            </label>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        </form>
-                                    </div>
+                                            </form>
+                                        </div>
 
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary"
-                                            data-bs-dismiss="modal">Cancel</button>
-                                        <button type="button" class="btn btn-warning text-white"
-                                            id="createBtn">Create</button>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Cancel</button>
+                                            <button type="button" class="btn btn-warning text-white"
+                                                id="createBtn">Create</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+
+                            <!--for popup modal -->
+
+                            <!-- Close All Modals Button -->
+                            <button id="close-all-modals" class="btn btn-danger btn-sm" style="display: none;">
+                                <i class="fas fa-times"></i> Close All Modals
+                            </button>
                         </div>
 
-                        <!--for popup modal -->
+                        <div class="d-flex flex-wrap gap-2 align-items-center">
+                            <!-- Export Button -->
+                            <a href="{{ route('instagram.analytics.export') }}" class="btn btn-success">
+                                <i class="fas fa-file-export me-1"></i> Export Live/Listings
+                            </a>
 
-                        <!-- Close All Modals Button -->
-                        <button id="close-all-modals" class="btn btn-danger btn-sm" style="display: none;">
-                            <i class="fas fa-times"></i> Close All Modals
-                        </button>
+                            <!-- Import Button -->
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                data-bs-target="#instagramImportModal">
+                                <i class="fas fa-file-import me-1"></i> Import Live/Listings
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="modal fade" id="instagramImportModal" tabindex="-1" aria-labelledby="instagramImportModalLabel"
+                        aria-hidden="true">
+                        <div class="modal-dialog">
+                            <form action="{{ route('instagram.analytics.import') }}" method="POST"
+                                enctype="multipart/form-data" class="modal-content" id="instagramImportForm">
+                                @csrf
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="instagramImportModalLabel">Import Instagram Data</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <!-- File Input -->
+                                    <div class="mb-3">
+                                        <label for="instagramExcelFile" class="form-label">Select Excel File</label>
+                                        <input type="file" class="form-control" id="instagramExcelFile" name="excel_file"
+                                            accept=".xlsx,.xls,.csv" required>
+                                    </div>
+
+                                    <!-- Sample File Link -->
+                                    <div class="alert alert-info">
+                                        <small>
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            Download the <a href="{{ route('instagram.analytics.sample') }}"
+                                                class="alert-link">sample file</a>
+                                            to see the required format. Columns should be: SKU, Listed, Live.
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Cancel</button>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-file-import me-1"></i> Import
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
 
                     <!-- play backward forwad  -->
-                    {{-- <div class="btn-group time-navigation-group" role="group" aria-label="Parent navigation">
+                    <div class="btn-group time-navigation-group" role="group" aria-label="Parent navigation">
                         <button id="play-backward" class="btn btn-light rounded-circle" title="Previous parent">
                             <i class="fas fa-step-backward"></i>
                         </button>
@@ -1225,7 +1388,7 @@
                         <button id="play-forward" class="btn btn-light rounded-circle" title="Next parent">
                             <i class="fas fa-step-forward"></i>
                         </button>
-                    </div> --}}
+                    </div>
 
                     <!-- Controls row -->
                     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -1244,7 +1407,12 @@
                                 <select id="inv-filter" class="form-control form-control-sm">
                                     <option value="all">All</option>
                                     <option value="0">0</option>
-                                    <option value="1-100+">1-100+</option>
+                                    <option value="1-15">1 - 15</option>
+                                    <option value="16-30">16 - 30</option>
+                                    <option value="31-50">31 - 50</option>
+                                    <option value="51-75">51 - 75</option>
+                                    <option value="76-100">76 - 100</option>
+                                    <option value="101+">101+</option>
                                 </select>
                             </div>
                         </div>
@@ -1275,7 +1443,7 @@
                     </div>
 
                     <div class="table-container">
-                        <table class="custom-resizable-table" id="amazonZero-table">
+                        <table class="custom-resizable-table" id="temu-table">
                             <thead>
                                 <tr>
                                     <th data-field="sl_no">SL No. <span class="sort-arrow">↓</span></th>
@@ -1329,35 +1497,44 @@
                                             <div class="metric-total" id="ovl30-total">0</div>
                                         </div>
                                     </th>
-                                    <th data-field="ov_dil" style="vertical-align: middle; white-space: nowrap;">
+                                    <th data-field="sl_30" style="vertical-align: middle; white-space: nowrap;">
                                         <div class="d-flex flex-column align-items-center" style="gap: 4px">
                                             <div class="d-flex align-items-center">
-                                                OV DIL <span class="sort-arrow">↓</span>
+                                                SL 30 <span class="sort-arrow">↓</span>
                                             </div>
                                             <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
-                                            <div class="metric-total" id="ovdil-total">0%</div>
+                                            <div class="metric-total" id="lDil-total">0</div>
                                         </div>
                                     </th>
-                                    <th data-field="al_30" style="vertical-align: middle; white-space: nowrap;">
+                                    <th data-field="w_dil" style="vertical-align: middle; white-space: nowrap;">
                                         <div class="d-flex flex-column align-items-center" style="gap: 4px">
                                             <div class="d-flex align-items-center">
-                                                Doba L30 <span class="sort-arrow">↓</span>
+                                                S DIL <span class="sort-arrow">↓</span>
                                             </div>
                                             <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
-                                            <div class="metric-total" id="al30-total">0</div>
+                                            <div class="metric-total" id="wDil-total">0%</div>
                                         </div>
                                     </th>
-                                    <th data-field="a_dil" style="vertical-align: middle; white-space: nowrap;">
+                                    <th>NRL</th>
+
+                                    <th data-field="listed" style="vertical-align: middle; white-space: nowrap;">
                                         <div class="d-flex flex-column align-items-center" style="gap: 4px">
                                             <div class="d-flex align-items-center">
-                                                A DIL <span class="sort-arrow">↓</span>
+                                                LISTED <span class="sort-arrow">↓</span>
                                             </div>
                                             <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
-                                            <div class="metric-total" id="lDil-total">0%</div>
+                                            <div class="metric-total" id="listed-total">0</div>
                                         </div>
                                     </th>
-                                    <th data-field="nr" style="vertical-align: middle; white-space: nowrap;">
-                                        NRL
+
+                                    <th data-field="live" style="vertical-align: middle; white-space: nowrap;">
+                                        <div class="d-flex flex-column align-items-center" style="gap: 4px">
+                                            <div class="d-flex align-items-center">
+                                                LIVE <span class="sort-arrow">↓</span>
+                                            </div>
+                                            <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
+                                            <div class="metric-total" id="live-total">0</div>
+                                        </div>
                                     </th>
                                     <th data-field="views" style="vertical-align: middle; white-space: nowrap;">
                                         <div class="d-flex flex-column align-items-center" style="gap: 4px">
@@ -1365,20 +1542,44 @@
                                                 VIEWS <span class="sort-arrow">↓</span>
                                             </div>
                                             <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
-                                            <!-- 0 view div after create task -->
-                                            <div id="zero-view-div"
-                                                style="display:inline-block; background:#dc3545; color:white; border-radius:8px; padding:8px 18px; font-weight:600; font-size:15px;">
-                                                0
-                                            </div>
-                                            {{-- <div class="metric-total" id="views-total">0</div> --}}
+                                            <div class="metric-total" id="views-total">0</div>
                                         </div>
                                     </th>
-                                    <th data-field="reason" style="vertical-align: middle; white-space: nowrap;">Reason
+                                    <th data-field="price"
+                                        style="vertical-align: middle; white-space: nowrap; padding-right: 4px;">
+                                        <div class="d-flex flex-column align-items-center" style="gap: 4px">
+                                            <div class="d-flex align-items-center">
+                                                PRICE <span class="sort-arrow">↓</span>
+                                            </div>
+                                        </div>
                                     </th>
-                                    <th data-field="action_required" style="vertical-align: middle; white-space: nowrap;">
-                                        Action Required</th>
-                                    <th data-field="action_taken" style="vertical-align: middle; white-space: nowrap;">
-                                        Action Taken</th>
+                                    <th data-field="pft" style="vertical-align: middle; white-space: nowrap;">
+                                        <div class="d-flex flex-column align-items-center" style="gap: 4px">
+                                            <div class="d-flex align-items-center">
+                                                PFT <span class="sort-arrow">↓</span>
+                                            </div>
+                                            <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
+                                            <div class="metric-total" id="pft-total">0%</div>
+                                        </div>
+                                    </th>
+                                    <th data-field="roi" style="vertical-align: middle; white-space: nowrap;">
+                                        <div class="d-flex flex-column align-items-center" style="gap: 4px">
+                                            <div class="d-flex align-items-center">
+                                                ROI <span class="sort-arrow">↓</span>
+                                            </div>
+                                            <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
+                                            <div class="metric-total" id="roi-total">0%</div>
+                                        </div>
+                                    </th>
+                                    <th data-field="cvr" style="vertical-align: middle; white-space: nowrap;">
+                                        <div class="d-flex flex-column align-items-center" style="gap: 4px">
+                                            <div class="d-flex align-items-center">
+                                                CVR <span class="sort-arrow">↓</span>
+                                            </div>
+                                            <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
+                                            <div class="metric-total" id="cvr-total">0%</div>
+                                        </div>
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -1405,42 +1606,9 @@
                             <div class="spinner-border text-primary" role="status">
                                 <span class="visually-hidden">Loading...</span>
                             </div>
-                            <div class="loader-text">Loading Doba Zero...</div>
+                            <div class="loader-text">Loading Business 5Core data...</div>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Reason/Action Modal -->
-    <div id="reasonActionModal" class="modal fade" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Update Reason / Action</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="reasonActionForm">
-                        <div class="mb-3">
-                            <label for="modalReason" class="form-label">Reason</label>
-                            <input type="text" class="form-control" id="modalReason" name="reason">
-                        </div>
-                        <div class="mb-3">
-                            <label for="modalActionRequired" class="form-label">Action Required</label>
-                            <input type="text" class="form-control" id="modalActionRequired" name="action_required">
-                        </div>
-                        <div class="mb-3">
-                            <label for="modalActionTaken" class="form-label">Action Taken</label>
-                            <input type="text" class="form-control" id="modalActionTaken" name="action_taken">
-                        </div>
-                        <input type="hidden" id="modalSlNo" name="sl_no">
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="saveReasonActionBtn">Save</button>
                 </div>
             </div>
         </div>
@@ -1480,8 +1648,50 @@
     <script>
         document.body.style.zoom = "80%";
         $(document).ready(function() {
+            $('#editPercentBtn').on('click', function() {
+                var $input = $('#updateAllSkusPercent');
+                var $icon = $(this).find('i');
+                var originalValue = $input.val(); // Store original value
+
+                if ($icon.hasClass('fa-pen')) {
+                    // Enable editing
+                    $input.prop('disabled', false).focus();
+                    $icon.removeClass('fa-pen').addClass('fa-check');
+                } else {
+                    // Submit and disable editing
+                    var percent = parseFloat($input.val());
+
+                    // Validate input
+                    if (isNaN(percent) || percent < 0 || percent > 100) {
+                        showNotification('danger', 'Invalid percentage value. Must be between 0 and 100.');
+                        $input.val(originalValue); // Restore original value
+                        return;
+                    }
+
+                    $.ajax({
+                        url: '/update-all-temu-skus',
+                        type: 'POST',
+                        data: {
+                            percent: percent,
+                            _token: $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: function(response) {
+                            showNotification('success', 'Percentage updated successfully!');
+                            $input.prop('disabled', true);
+                            $icon.removeClass('fa-check').addClass('fa-pen');
+                        },
+                        error: function(xhr) {
+                            showNotification('danger', 'Error updating percentage.');
+                            $input.val(originalValue); // Restore original value
+                            $input.prop('disabled', true);
+                            $icon.removeClass('fa-check').addClass('fa-pen');
+                        }
+                    });
+                }
+            });
+
             // Cache system
-            const amazonZeroDataCache = {
+            const temuDataCache = {
                 cache: {},
 
                 set: function(id, data) {
@@ -1505,7 +1715,7 @@
 
             // Clear cache on page load
             window.addEventListener('load', function() {
-                amazonZeroDataCache.clear();
+                temuDataCache.clear();
             });
 
             // Current state
@@ -1530,7 +1740,7 @@
 
             // Define status indicator fields for different modal types
             const statusIndicatorFields = {
-                'price view': ['PFT_percentage', 'TPFT', 'ROI_percentage', 'Spft%'],
+                'price view': ['PFT %', 'TPFT', 'Roi', 'Spft%'],
                 'advertisement view': ['KwAcos60', 'KwAcos30', 'KwCvr60', 'KwCvr30',
                     'PtAcos60', 'PtAcos30', 'PtCvr60', 'PtCvr30',
                     'DspAcos60', 'DspAcos30', 'DspCvr60', 'DspCvr30',
@@ -1546,10 +1756,10 @@
             // Filter state
             const state = {
                 filters: {
-                    'ov_dil': 'all',
+                    'Dil%': 'all',
                     'A Dil%': 'all',
-                    'PFT_percentage': 'all',
-                    'ROI_percentage': 'all',
+                    'PFT %': 'all',
+                    'Roi': 'all',
                     'Tacos30': 'all',
                     'SCVR': 'all',
                     'entryType': 'all'
@@ -1928,15 +2138,6 @@
                 }
             }
 
-            // Update the 0 view count using tableData directly (no Sess30 or views field needed)
-            function updateZeroViewDiv() {
-                const nrCount = tableData.filter(item => item.NR === 'NR').length;
-                const finalCount = tableData.length - nrCount;
-                $('#zero-view-div').html(`${finalCount}`);
-            }
-
-
-
             // Initialize everything
             function initTable() {
                 loadData().then(() => {
@@ -1954,9 +2155,8 @@
                     initManualDropdowns();
                     initModalTriggers();
                     initPlaybackControls();
-                    initRAEditHandlers(); // Add this line
-                    initNREditHandlers();
-                    updateZeroViewDiv();
+                    initRAEditHandlers();
+                    initNRSelectChangeHandler();
                 });
             }
 
@@ -2038,56 +2238,41 @@
             function loadData() {
                 showLoader();
                 return $.ajax({
-                    url: '/zero_doba/view-data',
+                    url: '/instagram/view-data',
                     type: 'GET',
                     dataType: 'json',
                     success: function(response) {
                         if (response && response.data) {
+                            console.log(response.data, 'ddd');
+
                             tableData = response.data.map((item, index) => {
-                                // Calculate A Dil% as (A L30 / INV), handle division by zero
-                                const inv = Number(item.inv) || 0;
-                                const aL30 = Number(item['A_L30']) || 0;
-                                const l30 = Number(item.ov_l30) || 0;
-                                const ovDil = inv > 0 ? l30 / inv : 0;
-                                const aDil = inv > 0 ? aL30 / inv : 0;
+
+                                const valueJson = item.value ? JSON.parse(item.value) : {};
+                                const listedVal = valueJson.Listed !== undefined ? parseInt(
+                                    valueJson.Listed) : 0;
+                                const liveVal = valueJson.Live !== undefined ? parseInt(
+                                    valueJson.Live) : 0;
 
                                 return {
                                     sl_no: index + 1,
                                     'SL No.': item['SL No.'] || index + 1,
                                     Parent: item.Parent || item.parent || item.parent_asin ||
                                         item.Parent_ASIN || '(No Parent)',
-                                    'sku': item['sku'] || '',
-                                    'R&A': item['R&A'] !== undefined ? item['R&A'] : '',
-                                    INV: inv,
-                                    L30: item.ov_l30 || 0,
-                                    ov_dil: ovDil,
-                                    'A L30': aL30,
-                                    units_ordered_l60: item.units_ordered_l60 || 0,
-                                    'A Dil%': aDil,
-                                    Sess30: item.Sess30 || 0,
-                                    price: Number(item.price) || 0,
-                                    COMP: item.COMP || 0,
-                                    min_price: item.scout_data ? item.scout_data.min_price : 0,
-                                    all_products: item.scout_data ? item.scout_data.all_data :
-                                        0,
-                                    'PFT_percentage': item['PFT_percentage'] || 0,
-                                    TPFT: item.TPFT || 0,
-                                    ROI_percentage: item.ROI_percentage || 0,
-                                    Tacos30: item.Tacos30 || 0,
-                                    SCVR: item.SCVR || 0,
-                                    LP: item.LP_productmaster || 0,
-                                    SHIP: item.Ship_productmaster || 0,
-                                    A_Z_Reason: item.A_Z_Reason || '',
-                                    A_Z_ActionRequired: item.A_Z_ActionRequired || '',
-                                    A_Z_ActionTaken: item.A_Z_ActionTaken || '',
-                                    is_parent: item['sku'] ? item['sku']
+                                    Sku: item.Sku || '',
+                                    'R&A': item['R&A'] !== undefined ? item['R&A'] :
+                                    '', // Get R&A value from server data
+                                    INV: item.INV || 0,
+                                    L30: item.L30 || 0,
+
+                                    is_parent: item.Sku ? item.Sku
                                         .toUpperCase().includes("PARENT") : false,
-                                    raw_data: item || {},
+                                    raw_data: item || {}, // Ensure raw_data always exists
                                     NR: item.NR || '',
+                                    listed: listedVal,
+                                    live: liveVal,
                                 };
                             });
 
-                            console.log('Data loaded successfully:', tableData);
                             filteredData = [...tableData];
 
                         }
@@ -2102,12 +2287,27 @@
                 });
             }
 
+            // Add this function to update 0 SOLD and SOLD counts
+            function updateSoldCounts() {
+                let zeroSold = 0;
+                let totalSku = 0;
+                filteredData.forEach(item => {
+                    if (!item.is_parent) {
+                        const l30 = 0;
+                        const inv = parseFloat(item.INV) || 0;
+                        // 0 SOLD: L30 == 0, INV > 0
+                        if (l30 === 0 && inv > 0) zeroSold++;
+                        // SOLD: count all SKUs (not parent)
+                        totalSku++;
+                    }
+                });
+                $('#zero-sold-count').text(zeroSold);
+                $('#sold-count').text(totalSku - zeroSold);
+            }
+
             // Render table with current data
             function renderTable() {
-                const $tbody = $('#amazonZero-table tbody');
-                const $tableContainer = $('.table-container');
-                const prevScrollTop = $tableContainer.scrollTop();
-
+                const $tbody = $('#temu-table tbody');
                 $tbody.empty();
 
                 if (isLoading) {
@@ -2120,20 +2320,26 @@
                     return;
                 }
 
-                // Get current column widths from header
-                const $headers = $('#amazonZero-table thead th');
-                const reasonCellWidth = $headers.eq(10).outerWidth() || 120;
-                const actionRequiredCellWidth = $headers.eq(11).outerWidth() || 120;
-                const actionTakenCellWidth = $headers.eq(12).outerWidth() || 120;
-
                 filteredData.forEach(item => {
                     const $row = $('<tr>');
                     if (item.is_parent) {
                         $row.addClass('parent-row');
                     }
-                    // if (item.NR === 'NR') {
-                    //     $row.addClass('nr-hide');
-                    // }
+                    if (item.NR === 'NRA') {
+                        $row.addClass('nr-hide');
+                    }
+
+                    let rawData = {};
+                    if (typeof item.raw_data === 'string') {
+                        try {
+                            rawData = JSON.parse(item.raw_data || '{}');
+                        } catch (e) {
+                            console.error('Invalid JSON in raw_data for SKU', item['(Child) sku'], e);
+                        }
+                    } else if (typeof item.raw_data === 'object' && item.raw_data !== null) {
+                        rawData = item.raw_data;
+                    }
+
                     // Helper functions for color coding
                     const getDilColor = (value) => {
                         const percent = parseFloat(value) * 100;
@@ -2143,79 +2349,62 @@
                         return 'pink'; // 50 and above
                     };
 
+                    const getPftColor = (value) => {
+                        const percent = parseFloat(value) * 100;
+                        if (percent < 10) return 'red';
+                        if (percent >= 10 && percent < 15) return 'yellow';
+                        if (percent >= 15 && percent < 20) return 'blue';
+                        if (percent >= 20 && percent <= 40) return 'green';
+                        return 'pink';
+                    };
+
+                    const getRoiColor = (value) => {
+                        const percent = parseFloat(value) * 100;
+                        if (percent >= 0 && percent < 50) return 'red';
+                        if (percent >= 50 && percent < 75) return 'yellow';
+                        if (percent >= 75 && percent <= 100) return 'green';
+                        return 'pink';
+                    };
+
+                    const getTacosColor = (value) => {
+                        const percent = parseFloat(value) * 100;
+                        if (percent <= 5) return 'pink';
+                        if (percent > 5 && percent <= 10) return 'green';
+                        if (percent > 10 && percent <= 15) return 'blue';
+                        if (percent > 15 && percent <= 20) return 'yellow';
+                        return 'red';
+                    };
+
+                    const getCvrColor = (value) => {
+                        const percent = parseFloat(value) * 100;
+                        if (percent <= 7) return 'red';
+                        if (percent > 7 && percent <= 13) return 'green';
+                        return 'pink';
+                    };
+
                     $row.append($('<td>').text(item['SL No.']));
                     $row.append($('<td>').text(item.Parent));
 
                     // SKU with hover content for links
                     const $skuCell = $('<td>').addClass('skuColumn').css('position', 'static');
                     if (item.is_parent) {
-                        $skuCell.html(`<strong>${item['sku']}</strong>`);
+                        $skuCell.html(`<strong>${item.Sku}</strong>`);
                     } else {
-                        const imageUrl = item.raw_data.image_path || '';
-                        const buyerLink = item.raw_data['AMZ LINK BL'];
-                        const sellerLink = item.raw_data['AMZ LINK SL'];
+                        const buyerLink = item.raw_data[''] || '';
+                        const sellerLink = item.raw_data[''] || '';
 
-                        function isValidUrl(url) {
-                            try {
-                                return Boolean(url && new URL(url));
-                            } catch (e) {
-                                return false;
-                            }
-                        }
-
-                        if (buyerLink || sellerLink || imageUrl) {
+                        if (buyerLink || sellerLink) {
                             $skuCell.html(`
-                                <div class="sku-tooltip-container" style="position:relative;display:inline-block;">
-                                    <span class="sku-text">${item['sku']}</span>
-                                    <div class="sku-tooltip" style="display:none;">
-                                        ${imageUrl ? `<img src="${imageUrl}" alt="SKU Image" style="max-width:120px;max-height:120px;border-radius:6px;display:block;margin:0 auto 6px auto;">` : ''}
-                                        <div class="sku-link">
-                                            ${buyerLink !== undefined
-                                                ? (isValidUrl(buyerLink)
-                                                    ? `<a href="${buyerLink}" target="_blank" rel="noopener noreferrer">Buyer link</a>`
-                                                    : 'link invalid')
-                                                : ''}
-                                        </div>
-                                        <div class="sku-link">
-                                            ${sellerLink !== undefined
-                                                ? (isValidUrl(sellerLink)
-                                                    ? `<a href="${sellerLink}" target="_blank" rel="noopener noreferrer">Seller link</a>`
-                                                    : 'link invalid')
-                                                : ''}
-                                        </div>
+                                <div class="sku-tooltip-container">
+                                    <span class="sku-text">${item['Sku']}</span>
+                                    <div class="sku-tooltip">
+                                        ${buyerLink ? `<div class="sku-link"><a href="${buyerLink}" target="_blank" rel="noopener noreferrer">Buyer link</a></div>` : ''}
+                                        ${sellerLink ? `<div class="sku-link"><a href="${sellerLink}" target="_blank" rel="noopener noreferrer">Seller link</a></div>` : ''}
                                     </div>
                                 </div>
                             `);
-
-                            // Tooltip show/hide with delay
-                            setTimeout(() => {
-                                const $container = $skuCell.find('.sku-tooltip-container');
-                                let hideTimeout = null;
-
-                                $container.on('mouseenter', function() {
-                                    clearTimeout(hideTimeout);
-                                    $(this).find('.sku-tooltip').stop(true, true).fadeIn(
-                                        120);
-                                }).on('mouseleave', function() {
-                                    const $tooltip = $(this).find('.sku-tooltip');
-                                    hideTimeout = setTimeout(() => {
-                                        $tooltip.fadeOut(120);
-                                    }, 250); // 250ms delay before hiding
-                                });
-
-                                // If mouse enters tooltip itself, cancel hide
-                                $container.find('.sku-tooltip').on('mouseenter', function() {
-                                    clearTimeout(hideTimeout);
-                                }).on('mouseleave', function() {
-                                    const $tooltip = $(this);
-                                    hideTimeout = setTimeout(() => {
-                                        $tooltip.fadeOut(120);
-                                    }, 250);
-                                });
-                            }, 0);
-
                         } else {
-                            $skuCell.text(item['sku']);
+                            $skuCell.text(item.Sku);
                         }
                     }
                     $row.append($skuCell);
@@ -2253,108 +2442,128 @@
 
                     $row.append($('<td>').text(item.INV));
                     $row.append($('<td>').text(item.L30));
-
-                    // OV DIL with color coding and WMPNM tooltip
-                    $row.append($('<td>').html(
-                        `<span class="dil-percent-value ${getDilColor(item.ov_dil)}">${Math.round(item.ov_dil * 100)}%</span>
-                            <span class="text-info tooltip-icon wmpnm-view-trigger" 
-                            data-bs-toggle="tooltip" 
-                                data-bs-placement="left" 
-                                title="WMPNM View"
-                                data-item='${JSON.stringify(item.raw_data)}'>W</span>`
-                    ));
-
+                    // S Sales column
                     $row.append($('<td>').html(`
-                        <div class="sku-tooltip-container">
-                            <span class="sku-text">${item['A L30']}</span>
-                            <div class="sku-tooltip">
-                                <div class="sku-link"><strong>L60:</strong> ${item['units_ordered_l60']}</div>
-                                <div class="sku-link"><strong>L7:</strong></div>
-                            </div>
-                        </div>
-                    `));
+            <div class="sku-tooltip-container">
+                <span class="sku-text">${item.l30 || 0}</span>
+                <div class="sku-tooltip">
+                    <div class="sku-link"><strong>Sheet L30:</strong> ${item.l30 || 0}</div>
+                </div>
+            </div>
+        `));
 
-                    // A DIL with color coding
-                    $row.append($('<td>').html(
-                        `<span class="dil-percent-value ${getDilColor(item['A Dil%'])}">${(item['A Dil%'] * 100).toFixed(2)}%</span>`
-                    ));
+                    // S DIL with color coding - using the calculated S_DIL value
+                    const sheetDilValue = item.dil || 0;
+                    $row.append($('<td>').html(`
+            <span class="dil-percent-value ${getDilColor(sheetDilValue)}">
+                ${Math.round(sheetDilValue)}%
+            </span>
+        `));
 
-                    // --- NR column ---
                     if (item.is_parent) {
                         $row.append($('<td>')); // Empty cell for parent
                     } else {
-                        const currentNR = item.NR === 'REQ' || item.NR === 'NR' ? item.NR :
-                        'REQ'; // default to REQ
+                        const currentNR = (item.NR === 'RA' || item.NR === 'NRA' || item.NR === 'LATER') ?
+                            item.NR : 'RA';
+
                         const $select = $(`
                             <select class="form-select form-select-sm nr-select" style="min-width: 100px;">
-                                <option value="NR" ${currentNR === 'NR' ? 'selected' : ''}>NR</option>
-                                <option value="REQ" ${currentNR === 'REQ' ? 'selected' : ''}>REQ</option>
+                                <option value="NRA" ${currentNR === 'NRA' ? 'selected' : ''}>NRA</option>
+                                <option value="RA" ${currentNR === 'RA' ? 'selected' : ''}>RA</option>
+                                <option value="LATER" ${currentNR === 'LATER' ? 'selected' : ''}>LATER</option>
                             </select>
                         `);
 
                         // Set background color based on value
-                        if (currentNR === 'NR') {
+                        if (currentNR === 'NRA') {
                             $select.css('background-color', '#dc3545');
                             $select.css('color', '#ffffff');
-                        } else if (currentNR === 'REQ') {
+                        } else if (currentNR === 'RA') {
                             $select.css('background-color', '#28a745');
                             $select.css('color', '#ffffff');
                         }
-                        $select.data('sku', item['sku']);
+
+                        $select.data('sku', item.Sku);
                         $row.append($('<td>').append($select));
                     }
 
-                    // Sess30 with tooltip icon (no color coding)
+                    //Listed checkbox
+                    const listedVal = rawData.Listed === true || rawData.Listed === 'true' || rawData
+                        .Listed === 1 || rawData.Listed === '1';
+                    const $listedCb = $('<input>', {
+                        type: 'checkbox',
+                        class: 'listed-checkbox',
+                        checked: listedVal
+                    }).data('sku', item['Sku']);
+
+                    $row.append($('<td>').append($listedCb));
+
+                    // Live checkbox
+                    const liveVal = rawData.Live === true || rawData.Live === 'true' || rawData.Live ===
+                        1 || rawData.Live === '1';
+                    const $liveCb = $('<input>', {
+                        type: 'checkbox',
+                        class: 'live-checkbox',
+                        checked: liveVal
+                    }).data('sku', item['Sku']);
+
+                    $row.append($('<td>').append($liveCb));
                     $row.append($('<td>').html(
-                        `<span>${Math.round(item.Sess30)}</span>
-                            <span class="text-info tooltip-icon ad-view-trigger" 
-                                data-bs-toggle="tooltip" 
-                                data-bs-placement="left" 
-                                title="visibility View"
-                                data-item='${JSON.stringify(item.raw_data)}'>V</span>`
+                        `<span>${Math.round(item?.VIEWS || 0)}%</span>
+                         <span class="text-info tooltip-icon ad-view-trigger" 
+                               data-bs-toggle="tooltip" 
+                               data-bs-placement="left" 
+                               title="visibility View"
+                               data-item='${JSON.stringify(item.raw_data)}'>V</span>`
                     ));
 
-                    // Truncate function for dynamic column width
-                    function truncateWithTooltip(text, cellWidth) {
-                        if (!text) return '';
-                        let minLetters = 10;
-                        let letters = Math.max(minLetters, Math.floor(cellWidth / 12));
-                        const truncated = text.length > letters ? text.substring(0, letters) + '...' : text;
-                        return `<span class="truncated-text" title="${text.replace(/"/g, '&quot;')}">${truncated}</span>`;
-                    }
 
-                    // Reason column with plus icon and tooltip
-                    $row.append($('<td>').html(`
-                        ${truncateWithTooltip(item.A_Z_Reason, reasonCellWidth)}
-                        <i class="fas fa-plus reason-action-plus" style="cursor:pointer; color:#007bff; margin-left:8px;" 
-                        data-slno="${item['SL No.']}" data-type="reason"></i>
-                    `));
+                    //price with tooltip
+                    const safePrice = typeof item.price === 'number' ? item.price : parseFloat(item
+                        .price) || 0;
+                    $row.append($('<td>').html(
+                        `$${safePrice.toFixed(2)}
+                        <span class="" style="margin-left:8px">
+                            <i class="fas fa-tag text-warning price-view-trigger" 
+                            style="transform:translateY(1px)"
+                            data-bs-toggle="tooltip" 
+                            data-bs-placement="top-end" 
+                            title="Pricing view"
+                            data-item='${JSON.stringify(item.raw_data)}'"></i>
+                        </span>`
+                    ));
 
-                    // Action Required column
-                    $row.append($('<td>').html(`
-                        ${truncateWithTooltip(item.A_Z_ActionRequired, actionRequiredCellWidth)}
-                        <i class="fas fa-plus reason-action-plus" style="cursor:pointer; color:#007bff; margin-left:8px;" 
-                        data-slno="${item['SL No.']}" data-type="action_required"></i>
-                    `));
+                    // PFT with color coding (always show 0% if value is missing)
+                    const pftValue = (typeof item['PFT %'] === 'number' && !isNaN(item['PFT %'])) ? Math
+                        .round(item['PFT %'] * 100) : 0;
+                    $row.append($('<td>').html(
+                        `<span class="dil-percent-value ${getPftColor(item['PFT %'])}">${pftValue}%</span>`
+                    ));
 
-                    // Action Taken column
-                    $row.append($('<td>').html(`
-                        ${truncateWithTooltip(item.A_Z_ActionTaken, actionTakenCellWidth)}
-                        <i class="fas fa-plus reason-action-plus" style="cursor:pointer; color:#007bff; margin-left:8px;" 
-                        data-slno="${item['SL No.']}" data-type="action_taken"></i>
-                    `));
+                    // ROI with color coding (always show 0% if value is missing)
+                    const roiValue = (typeof item.Roi === 'number' && !isNaN(item.Roi)) ? Math.round(item
+                        .Roi * 100) : 0;
+                    $row.append($('<td>').html(
+                        `<span class="dil-percent-value ${getRoiColor(item.Roi)}">${roiValue}%</span>`
+                    ));
+
+                    $row.append($('<td>').html(
+                        `<span class="dil-percent-value ${getCvrColor(item.SCVR || 0)}">${Math.round((item.SCVR || 0)  * 100)}%</span>
+    <i class="fas fa-check-circle text-success tooltip-icon conversion-view-trigger ms-2"
+        data-bs-toggle="tooltip" data-bs-placement="bottom" title="Conversion view"
+        data-item='${JSON.stringify(item.raw_data)}'></i>`
+                    ));
+
+
 
                     $tbody.append($row);
                 });
 
                 updatePaginationInfo();
                 $('#visible-rows').text(`Showing all ${filteredData.length} rows`);
+                // Initialize tooltips
                 initTooltips();
-
-                // Restore scroll position
-                setTimeout(() => {
-                    $tableContainer.scrollTop(prevScrollTop);
-                }, 0);
+                updateSoldCounts();
             }
 
             function initRAEditHandlers() {
@@ -2406,54 +2615,103 @@
                 });
             }
 
-
-            function initNREditHandlers() {
+            function initNRSelectChangeHandler() {
+                $(document).off('change', '.nr-select');
                 $(document).on('change', '.nr-select', function() {
                     const $select = $(this);
-                    const sku = $(this).data('sku');
-                    const nrValue = $(this).val();
+                    const newValue = $select.val();
+                    const sku = $select.data('sku');
 
-                    if (nrValue === 'NR') {
+                    // Change background color based on selected value
+                    if (newValue === 'NRA') {
                         $select.css('background-color', '#dc3545').css('color', '#ffffff');
                     } else {
                         $select.css('background-color', '#28a745').css('color', '#ffffff');
                     }
 
+                    // Send AJAX
                     $.ajax({
-                        url: '/amazon/save-nr',
+                        url: '/temu/save-nr',
                         type: 'POST',
                         data: {
                             sku: sku,
-                            nr: JSON.stringify({
-                                NR: nrValue
-                            }),
-                            _token: $('meta[name="csrf-token"]').attr('content') // CSRF protection
+                            nr: newValue,
+                            _token: $('meta[name="csrf-token"]').attr('content')
                         },
-                        success: function(res) {
-                            showNotification('success', 'NR updated successfully');
-                            // ✅ Update tableData and filteredData correctly
+                        success: function(response) {
+                            showNotification('success', 'NR updated successfully!');
+
+                            // Update tableData and filteredData
                             tableData.forEach(item => {
-                                if (item['sku'] === sku) {
-                                    item.NR = nrValue;
+                                if (item.Sku === sku) {
+                                    item.NR = newValue;
                                 }
                             });
                             filteredData.forEach(item => {
-                                if (item['sku'] === sku) {
-                                    item.NR = nrValue;
+                                if (item.Sku === sku) {
+                                    item.NR = newValue;
                                 }
                             });
-                            // ✅ Recalculate & re-render
-                            updateZeroViewDiv();
                             calculateTotals();
                             renderTable();
                         },
-                        error: function(err) {
-                            console.error('Error saving NR:', err);
-                            showNotification('danger', 'Failed to update NR');
+                        error: function(xhr) {
+                            showNotification('danger', 'Failed to update NR.');
                         }
                     });
                 });
             }
+
+            $(document).on('change', '.listed-checkbox, .live-checkbox', function() {
+                const $cb = $(this);
+                const sku = $cb.data('sku');
+                const field = $cb.hasClass('listed-checkbox') ? 'Listed' : 'Live';
+                const value = $cb.is(':checked') ? 1 : 0;
+
+                $.ajax({
+                    url: '/instagram/update-listed-live',
+                    method: 'POST',
+                    data: {
+                        sku: sku,
+                        field: field,
+                        value: value,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(res) {
+                        // Update local filteredData to reflect the change for realtime totals
+                        let updated = false;
+                        for (let i = 0; i < filteredData.length; i++) {
+                            if (filteredData[i]['Sku'] === sku) {
+                                let raw = filteredData[i].raw_data;
+                                if (typeof raw === 'string') {
+                                    try {
+                                        raw = JSON.parse(raw || '{}');
+                                    } catch (e) {
+                                        raw = {};
+                                    }
+                                } else if (typeof raw !== 'object' || raw === null) {
+                                    raw = {};
+                                }
+                                raw[field] = value;
+                                filteredData[i].raw_data =
+                                    raw;
+                                updated = true;
+                                break;
+                            }
+                        }
+
+                        if (updated) {
+                            calculateTotals();
+                        }
+                        console.log(`${field} updated for SKU ${sku}`);
+                    },
+                    error: function(err) {
+                        console.error('Update failed', err);
+                        alert('Failed to update. Try again.');
+                        $cb.prop('checked', !value); // revert on error
+                    }
+                });
+            });
 
             window.openModal = function(selectedItem, type) {
                 try {
@@ -2482,16 +2740,16 @@
                         return;
                     }
 
-                    const itemId = itemData['SL No.'] || `row-${Math.random().toString(36).substr(2, 9)}`;
+                    const itemId = itemData['SL No.'] || 'unknown';
                     const modalId = `modal-${itemId}-${type.replace(/\s+/g, '-').toLowerCase()}`;
 
                     // Check cache first - use the cached data if available
-                    const cachedData = amazonZeroDataCache.get(itemId);
+                    const cachedData = temuDataCache.get(itemId);
                     const dataToUse = cachedData || itemData;
 
                     // Store the data in cache if it wasn't already
                     if (!cachedData) {
-                        amazonZeroDataCache.set(itemId, itemData);
+                        temuDataCache.set(itemId, itemData);
                     }
 
                     // Check if this modal already exists
@@ -2518,350 +2776,27 @@
                         },
                         {
                             title: 'SKU',
-                            content: dataToUse['sku']
+                            content: dataToUse['Sku']
                         }
                     ];
 
                     // Fields specific to each modal type
                     let fieldsToDisplay = [];
                     switch (type.toLowerCase()) {
+                        case 'conversion view':
+                            fieldsToDisplay = [];
+                            break;
                         case 'visibility view':
-                            fieldsToDisplay = [{
-                                    title: 'Sess30',
-                                    content: selectedItem['Sess30']
-                                },
-                                {
-                                    title: 'Sessl60',
-                                    content: selectedItem['sessions_l60']
-                                },
-                                {
-                                    title: 'KwImp60',
-                                    content: selectedItem['KwImp60']
-                                },
-                                {
-                                    title: 'KwImp30',
-                                    content: selectedItem['KwImp30']
-                                },
-                                {
-                                    title: 'KwClks60',
-                                    content: selectedItem['KwClks60']
-                                },
-                                {
-                                    title: 'KwClks30',
-                                    content: selectedItem['KwClks30']
-                                },
-                                {
-                                    title: 'KwCtr60',
-                                    content: selectedItem['KwCtr60']
-                                },
-                                {
-                                    title: 'KwCtr30',
-                                    content: selectedItem['KwCtr30']
-                                },
-                                {
-                                    title: 'PtImp60',
-                                    content: selectedItem['PtImp60']
-                                },
-                                {
-                                    title: 'PtImp30',
-                                    content: selectedItem['PtImp30']
-                                },
-                                {
-                                    title: 'PtClks60',
-                                    content: selectedItem['PtClks60']
-                                },
-                                {
-                                    title: 'PtClks30',
-                                    content: selectedItem['PtClks30']
-                                },
-                                {
-                                    title: 'PtCtr60',
-                                    content: selectedItem['PtCtr60']
-                                },
-                                {
-                                    title: 'PtCtr30',
-                                    content: selectedItem['PtCtr30']
-                                },
-                                {
-                                    title: 'DspImp60',
-                                    content: selectedItem['DspImp60']
-                                },
-                                {
-                                    title: 'DspImp30',
-                                    content: selectedItem['DspImp30']
-                                },
-                                {
-                                    title: 'DspClks60',
-                                    content: selectedItem['DspClks60']
-                                },
-                                {
-                                    title: 'DspClks30',
-                                    content: selectedItem['DspClks30']
-                                },
-                                {
-                                    title: 'DspCtr60',
-                                    content: selectedItem['DspCtr60']
-                                },
-                                {
-                                    title: 'DspCtr30',
-                                    content: selectedItem['DspCtr30']
-                                },
-                                {
-                                    title: 'HdImp60',
-                                    content: selectedItem['HdImp60']
-                                },
-                                {
-                                    title: 'HdImp30',
-                                    content: selectedItem['HdImp30']
-                                },
-                                {
-                                    title: 'HdClks60',
-                                    content: selectedItem['HdClks60']
-                                },
-                                {
-                                    title: 'HdClks30',
-                                    content: selectedItem['HdClks30']
-                                },
-                                {
-                                    title: 'HdCtr60',
-                                    content: selectedItem['HdCtr60']
-                                },
-                                {
-                                    title: 'HdCtr30',
-                                    content: selectedItem['HdCtr30']
-                                },
-                                {
-                                    title: 'TImp60',
-                                    content: selectedItem['TImp60']
-                                },
-                                {
-                                    title: 'TImp30',
-                                    content: selectedItem['TImp30']
-                                },
-                                {
-                                    title: 'TClks60',
-                                    content: selectedItem['TClks60']
-                                },
-                                {
-                                    title: 'TClks30',
-                                    content: selectedItem['TClks30']
-                                },
-                                {
-                                    title: 'TCtr60',
-                                    content: selectedItem['TCtr60']
-                                },
-                                {
-                                    title: 'TCtr30',
-                                    content: selectedItem['TCtr30']
-                                }
-                            ];
+                            fieldsToDisplay = [];
+                            break;
+                        case 'price view':
+                            fieldsToDisplay = [];
+                            break;
+                        case 'advertisement view':
+                            fieldsToDisplay = [];
                             break;
                         case 'wmpnm view':
-                            fieldsToDisplay = [{
-                                    title: 'HIDE',
-                                    content: dataToUse['HIDE'],
-                                    isCheckbox: true
-                                },
-                                {
-                                    title: 'LISTING STATUS',
-                                    isSectionHeader: true,
-                                    children: [{
-                                            title: 'LISTED',
-                                            content: dataToUse['LISTED'],
-                                            isCheckbox: true
-                                        },
-                                        {
-                                            title: 'LIVE / ACTIVE',
-                                            content: dataToUse['LIVE / ACTIVE'],
-                                            isCheckbox: true
-                                        }
-                                    ]
-                                },
-                                {
-                                    title: '0 VISIBILITY ISSUE',
-                                    isSectionHeader: true,
-                                    children: [{
-                                            title: 'VISIBILITY ISSUE',
-                                            content: dataToUse['VISIBILITY ISSUE'],
-                                            isCheckbox: true
-                                        },
-                                        {
-                                            title: 'INV SYNCED',
-                                            content: dataToUse['INV SYNCED'],
-                                            isCheckbox: true
-                                        }, {
-                                            title: 'RIGHT CATEGORY',
-                                            content: dataToUse['RIGHT CATEGORY'],
-                                            isCheckbox: true
-                                        },
-                                        {
-                                            title: 'INCOMPLETE LISTING',
-                                            content: dataToUse['INCOMPLETE LISTING'],
-                                            isCheckbox: true
-                                        }, {
-                                            title: 'BUYBOX ISSUE',
-                                            content: dataToUse['BUYBOX ISSUE'],
-                                            isCheckbox: true
-                                        },
-                                        {
-                                            title: 'SEO  (KW RICH) ISSUE',
-                                            content: dataToUse['SEO  (KW RICH) ISSUE'],
-                                            isCheckbox: true
-                                        }, {
-                                            title: 'TITLE ISSUEAD ISSUE',
-                                            content: dataToUse['TITLE ISSUEAD ISSUE'],
-                                            isCheckbox: true
-                                        },
-                                        {
-                                            title: 'AD ISSUE',
-                                            content: dataToUse['AD ISSUE'],
-                                            isCheckbox: true
-                                        },
-                                    ]
-                                },
-                                {
-                                    title: 'LOW VISIBILITY (1-300 clicks)',
-                                    isSectionHeader: true,
-                                    children: [{
-                                            title: 'SEO  (KW RICH) ISSUE',
-                                            content: dataToUse['SEO  (KW RICH) ISSUE'],
-                                            isCheckbox: true
-                                        },
-                                        {
-                                            title: 'TITLE ISSUE',
-                                            content: dataToUse['TITLE ISSUE'],
-                                            isCheckbox: true
-                                        },
-                                        {
-                                            title: 'BP ISSUE',
-                                            content: dataToUse['TBP ISSUE'],
-                                            isCheckbox: true
-                                        },
-                                        {
-                                            title: 'DESCR ISSUE',
-                                            content: dataToUse['DESCR ISSUE'],
-                                            isCheckbox: true
-                                        },
-                                        {
-                                            title: 'SPECS ISSUE',
-                                            content: dataToUse['SPECS ISSUE'],
-                                            isCheckbox: true
-                                        },
-                                        {
-                                            title: 'IMG ISSUE',
-                                            content: dataToUse['IMG ISSUE'],
-                                            isCheckbox: true
-                                        },
-                                        {
-                                            title: 'AD ISSUE',
-                                            content: dataToUse['AD ISSUE'],
-                                            isCheckbox: true
-                                        }
-                                    ]
-                                },
-                                {
-                                    title: 'CTR ISSUE (impressions but no clicks)',
-                                    isSectionHeader: true,
-                                    children: [{
-                                            title: 'CATEGORY ISSUE',
-                                            content: dataToUse['CATEGORY ISSUE'],
-                                            isCheckbox: true
-                                        },
-                                        {
-                                            title: 'TITILE ISSUE',
-                                            content: dataToUse['TITILE ISSUE'],
-                                            isCheckbox: true
-                                        },
-                                        {
-                                            title: 'MAIN IMAGE ISSUE',
-                                            content: dataToUse['MAIN IMAGE ISSUE'],
-                                            isCheckbox: true
-                                        },
-                                        {
-                                            title: 'PRICE ISSUE',
-                                            content: dataToUse['PRICE ISSUE'],
-                                            isCheckbox: true
-                                        },
-                                        {
-                                            title: 'REVIEW ISSUE',
-                                            content: dataToUse['REVIEW ISSUE'],
-                                            isCheckbox: true
-                                        },
-                                        {
-                                            title: 'WRONG KW IN LISTING',
-                                            content: dataToUse['WRONG KW IN LISTING'],
-                                            isCheckbox: true
-                                        }
-                                    ]
-                                },
-                                {
-                                    title: 'CVR ISSUE',
-                                    isSectionHeader: true,
-                                    children: [{
-                                            title: 'CVR ISSUE',
-                                            content: dataToUse['CVR ISSUE'],
-                                            isCheckbox: true
-                                        },
-                                        {
-                                            title: 'PRICE ISSUE',
-                                            content: dataToUse['PRICE ISSUE'],
-                                            isCheckbox: true
-                                        },
-                                        {
-                                            title: 'REV ISSUE',
-                                            content: dataToUse['REV ISSUE'],
-                                            isCheckbox: true
-                                        },
-                                        {
-                                            title: 'IMAGE ISSUE',
-                                            content: dataToUse['IMAGE ISSUE'],
-                                            isCheckbox: true
-                                        },
-                                        {
-                                            title: 'VID ISSUE',
-                                            content: dataToUse['VID ISSUE'],
-                                            isCheckbox: true
-                                        },
-                                        {
-                                            title: 'BP ISSUE',
-                                            content: dataToUse['BP ISSUE'],
-                                            isCheckbox: true
-                                        },
-                                        {
-                                            title: 'DESCR ISSUE',
-                                            content: dataToUse['DESCR ISSUE'],
-                                            isCheckbox: true
-                                        },
-                                        {
-                                            title: 'USP HIGHLIGHT ISSUE',
-                                            content: dataToUse['USP HIGHLIGHT ISSUE'],
-                                            isCheckbox: true
-                                        },
-                                        {
-                                            title: 'SPECS ISSUES',
-                                            content: dataToUse['SPECS ISSUES'],
-                                            isCheckbox: true
-                                        },
-                                        {
-                                            title: 'MISMATCH ISSUE',
-                                            content: dataToUse['MISMATCH ISSUE'],
-                                            isCheckbox: true
-                                        }
-                                    ]
-                                },
-                                {
-                                    title: 'NOTES',
-                                    content: dataToUse['NOTES']
-                                },
-                                {
-                                    title: 'ACTION',
-                                    content: dataToUse['ACTION']
-                                },
-                                {
-                                    title: 'ACTION',
-                                    content: dataToUse['ACTION']
-                                },
-                            ];
+                            fieldsToDisplay = [];
                             break;
                         default:
                             fieldsToDisplay = commonFields;
@@ -2960,7 +2895,7 @@
                     </div>
                     <div class="scouth-header-item">
                         <div class="scouth-product-label">SKU</div>
-                        <div class="scouth-product-value">${data['sku'] || 'N/A'}</div>
+                        <div class="scouth-product-value">${data.sku || 'N/A'}</div>
                     </div>
                 `;
 
@@ -3079,59 +3014,30 @@
             function createFieldCard(field, data, type, itemId) {
                 const hyperlinkFields = ['LINK 1', 'LINK 2', 'LINK 3', 'LINK 4', 'LINK 5'];
 
-                const editableFields = [
-                    'SPRICE', 'Tannishtha done', 'LMP 1', 'LINK 1', 'LMP 2', 'LINK 2',
-                    'LMP3', 'LINK 3', 'LMP 4', 'LINK 4', 'LMP 5', 'LINK 5',
-                    'HIDE', 'LISTED', 'LIVE / ACTIVE', 'VISIBILITY ISSUE', 'INV SYNCED',
-                    'RIGHT CATEGORY', 'INCOMPLETE LISTING', 'BUYBOX ISSUE', 'SEO  (KW RICH) ISSUE',
-                    'TITLE ISSUEAD ISSUE', 'AD ISSUE', 'BP ISSUE', 'DESCR ISSUE', 'SPECS ISSUE',
-                    'IMG ISSUE', 'CATEGORY ISSUE', 'MAIN IMAGE ISSUE', 'PRICE ISSUE',
-                    'REVIEW ISSUE', 'WRONG KW IN LISTING', 'CVR ISSUE', 'REV ISSUE',
-                    'IMAGE ISSUE', 'VID ISSUE', 'USP HIGHLIGHT ISSUE', 'SPECS ISSUES',
-                    'MISMATCH ISSUE', 'NOTES', 'ACTION', 'TITLE ISSUE'
-                ];
 
-                const percentageFields = ['KwCtr60', 'KwCtr30', 'PtCtr60', 'PtCtr30', 'DspCtr60',
-                    'DspCtr30',
-                    'HdCtr60', 'HdCtr30', 'SCVR', 'KwCvr60', 'KwCvr30', 'PtCvr60', 'PtCvr30',
-                    'DspCvr60', 'DspCvr30', 'HdCvr60', 'HdCvr30', 'TCvr60', 'TCvr30',
-                    'KwAcos60', 'KwAcos30', 'PtAcos60', 'PtAcos30', 'DspAcos60', 'DspAcos30',
-                    'HdAcos60', 'HdAcos30', 'TCtr60', 'TCtr30', 'TAcos60', 'TAcos30',
-                    'Tacos60', 'Tacos30', 'PFT_percentage', 'TPFT', 'ROI_percentage'
-                ];
+
+                const percentageFields = ['KwCtr60', 'KwCtr30'];
 
                 const getIndicatorColor = (fieldTitle, fieldValue) => {
-                    // Handle both string percentages (like "15%") and raw numbers
-                    let value;
-                    if (typeof fieldValue === 'string' && fieldValue.includes('%')) {
-                        value = parseFloat(fieldValue.replace('%', ''));
-                    } else {
-                        value = parseFloat(fieldValue);
-                    }
+                    const value = (fieldValue * 100).toFixed(2) || 0;
 
-                    // Handle NaN cases (invalid numbers)
-                    if (isNaN(value)) {
-                        return 'gray';
-                    }
+                    if (type === 'price view') {
+                        const numericValue = parseFloat(fieldValue);
+                        if (isNaN(numericValue)) return 'gray';
 
-                    // Price view specific colors
-                    if (type.toLowerCase() === 'price view') {
-                        if (['PFT_percentage', 'TPFT'].includes(fieldTitle)) {
+                        if (['PFT %', 'TPFT'].includes(fieldTitle)) {
                             if (value < 10) return 'red';
                             if (value >= 10 && value < 15) return 'yellow';
                             if (value >= 15 && value < 20) return 'blue';
                             if (value >= 20 && value < 40) return 'green';
-                            return 'pink'; // 40 and above
-                        }
-                        if (fieldTitle === 'ROI_percentage') {
-                            if (value <= 50) return 'red';
-                            if (value > 50 && value <= 75) return 'yellow';
-                            if (value > 75 && value <= 100) return 'green';
-                            return 'pink'; // Above 100
+                            if (value >= 40) return 'pink';
                         }
                         if (fieldTitle === 'Spft%') {
                             // Convert to percentage for easier comparison
-                            const percentValue = Math.abs(value) < 100 ? value * 100 : value;
+                            const percentValue = Math.abs(numericValue) < 100 ?
+                                numericValue * 100 :
+                                numericValue;
+
                             if (percentValue < 0) return 'red'; // Negative values (loss)
                             if (percentValue < 10) return 'red'; // Less than 10%
                             if (percentValue < 15) return 'yellow'; // 10-14.99%
@@ -3139,13 +3045,20 @@
                             if (percentValue < 40) return 'green'; // 20-39.99%
                             return 'pink'; // 40% and above
                         }
+                        if (fieldTitle === 'Roi') {
+                            if (value <= 50) return 'red';
+                            if (value > 50 && value <= 75) return 'yellow';
+                            if (value > 75 && value <= 100) return 'green';
+                            if (value > 100) return 'pink';
+                        }
+                        return 'gray';
                     }
 
-                    // Advertisement view specific colors
-                    if (type.toLowerCase() === 'advertisement view') {
-                        if (['KwAcos60', 'KwAcos30', 'PtAcos60', 'PtAcos30', 'DspAcos60',
-                                'DspAcos30', 'TAcos60', 'TAcos30'
-                            ].includes(fieldTitle)) {
+                    if (type === 'advertisement view') {
+                        if (['KwAcos60', 'KwAcos30', 'PtAcos60', 'PtAcos30', 'DspAcos60', 'DspAcos30',
+                                'TAcos60', 'TAcos30'
+                            ]
+                            .includes(fieldTitle)) {
                             if (value === 0) return 'red';
                             if (value > 0.01 && value <= 7) return 'pink';
                             if (value > 7 && value <= 14) return 'green';
@@ -3153,30 +3066,32 @@
                             if (value > 21 && value <= 28) return 'yellow';
                             if (value > 28) return 'red';
                         }
-                        if (['KwCvr60', 'KwCvr30', 'PtCvr60', 'DspCvr60', 'PtCvr30',
-                                'DspCvr30', 'HdAcos60', 'HdAcos30', 'HdCvr60', 'HdCvr30',
-                                'TCvr60', 'TCvr30'
+                        if (['KwCvr60', 'KwCvr30', 'PtCvr60', 'DspCvr60', 'PtCvr30', 'DspCvr30', 'HdAcos60',
+                                'HdAcos30',
+                                'HdCvr60', 'HdCvr30', 'TCvr60', 'TCvr30'
                             ].includes(fieldTitle)) {
                             if (value <= 7) return 'red';
                             if (value > 7 && value <= 13) return 'green';
-                            return fieldTitle.includes('PtCvr') || fieldTitle.includes('DspCvr') ||
-                                fieldTitle.includes('HdCvr') || fieldTitle.includes('TCvr') ? 'pink' : 'gray';
+                            if (value > 13) return fieldTitle.includes('PtCvr') || fieldTitle.includes(
+                                    'DspCvr') ||
+                                fieldTitle.includes('HdCvr') || fieldTitle.includes('TCvr') ? 'pink' :
+                                'gray';
                         }
+                        return 'gray';
                     }
 
-                    // Conversion view specific colors
-                    if (type.toLowerCase() === 'conversion view') {
-                        if (['Scvr', 'KwCvr60', 'KwCvr30', 'PtCvr60', 'PtCvr30',
-                                'DspCvr60', 'DspCvr30', 'HdCvr60', 'HdCvr30',
-                                'TCvr60', 'TCvr30'
+                    if (type === 'conversion view') {
+                        if (['Scvr', 'KwCvr60', 'KwCvr30', 'PtCvr60', 'PtCvr30', 'DspCvr60', 'DspCvr30',
+                                'HdCvr60',
+                                'HdCvr30', 'TCvr60', 'TCvr30'
                             ].includes(fieldTitle)) {
                             if (value <= 7) return 'red';
                             if (value > 7 && value <= 13) return 'green';
-                            return 'pink';
+                            if (value > 13) return 'pink';
                         }
+                        return 'gray';
                     }
 
-                    // Default color for all other cases
                     return 'gray';
                 };
 
@@ -3214,23 +3129,19 @@
                 fieldInput.value = field.title;
                 card.appendChild(fieldInput);
 
-                if (percentageFields.includes(field.title) && typeof content === 'number') {
-                    // Skip multiplication for PFT_percentage and ROI_percentage
-                    if (!['PFT_percentage', 'ROI_percentage'].includes(field.title)) {
-                        content = `${(content * 100).toFixed(2)}%`;
-                    } else {
-                        content = `${content.toFixed(2)}%`;
-                    }
+                if (percentageFields.includes(field.title) && typeof content ===
+                    'number') {
+                    content = `${(content * 100).toFixed(2)}%`;
                 }
 
                 // Add edit icon if field is editable
-                if (editableFields.includes(field.title)) {
-                    const editIcon = document.createElement('div');
-                    editIcon.className = 'position-absolute top-0 end-0 p-2 edit-icon';
-                    editIcon.style.cssText = 'cursor:pointer; z-index: 1;';
-                    editIcon.innerHTML = '<i class="fas fa-pen text-primary"></i>';
-                    card.appendChild(editIcon);
-                }
+                // if (editableFields.includes(field.title)) {
+                //     const editIcon = document.createElement('div');
+                //     editIcon.className = 'position-absolute top-0 end-0 p-2 edit-icon';
+                //     editIcon.style.cssText = 'cursor:pointer; z-index: 1;';
+                //     editIcon.innerHTML = '<i class="fas fa-pen text-primary"></i>';
+                //     card.appendChild(editIcon);
+                // }
 
                 const cardBody = document.createElement('div');
                 cardBody.className = 'card-body';
@@ -3293,81 +3204,68 @@
                 const modalElement = document.getElementById(modalId);
                 if (!modalElement) return;
 
-                $(modalElement).off('click', '.edit-icon, .save-icon');
+                // Get editable fields from the same array used in createFieldCard
+                const editableFields = [
+                    'SPRICE', 'Tannishtha done', 'LMP 1'
+                ];
+                // Remove all edit/save icons
+                $(modalElement).find('.edit-icon, .save-icon').remove();
 
-                $(modalElement).on('click', '.edit-icon', function(e) {
-                    e.stopPropagation();
+                // Enable only editable fields
+                $(modalElement).find('.card').each(function() {
+                    const $card = $(this);
+                    const title = $card.find('.card-title').text().trim();
+                    if (!editableFields.includes(title)) return;
 
-                    const icon = $(this);
-                    const card = icon.closest('.card');
-                    const contentElement = card.find('.editable-content');
-                    const checkbox = contentElement.find('.form-check-input');
-                    const title = card.find('.card-title').text().trim();
+                    const $content = $card.find('.editable-content');
+                    const $checkbox = $content.find('.form-check-input');
+                    const isHyperlink = $content.data('is-hyperlink');
 
-                    // If it's a checkbox field, enable it and change to save icon
-                    if (checkbox.length > 0) {
-                        checkbox.prop('disabled', false);
-                        icon.html('<i class="fas fa-check text-success"></i>')
-                            .removeClass('edit-icon')
-                            .addClass('save-icon');
-                        return;
+                    if ($checkbox.length) {
+                        $checkbox.prop('disabled', false);
+                    } else {
+                        let originalContent = $content.text().trim();
+                        if (isHyperlink && $content.find('a').length) {
+                            originalContent = $content.find('a').attr('href');
+                            $content.html(originalContent);
+                        }
+                        $content
+                            .attr('contenteditable', 'true')
+                            .addClass('border border-primary')
+                            .data('original-content', originalContent);
                     }
-
-                    const isHyperlink = contentElement.data('is-hyperlink');
-                    const slNo = card.find('.hidden-sl-no').val();
-
-                    if (currentEditingElement && currentEditingElement.is(contentElement)) {
-                        return;
-                    }
-
-                    if (isEditMode && currentEditingElement) {
-                        exitEditMode(currentEditingElement);
-                    }
-
-                    let originalContent = contentElement.text().trim();
-                    if (isHyperlink && contentElement.find('a').length) {
-                        originalContent = contentElement.find('a').attr('href');
-                    }
-
-                    contentElement.data('original-content', originalContent)
-                        .html(originalContent)
-                        .attr('contenteditable', 'true')
-                        .addClass('border border-primary')
-                        .focus();
-
-                    isEditMode = true;
-                    currentEditingElement = contentElement;
-
-                    icon.html('<i class="fas fa-check text-success"></i>')
-                        .removeClass('edit-icon')
-                        .addClass('save-icon');
                 });
 
-                // Save handler
-                $(modalElement).on('click', '.save-icon', function(e) {
-                    e.stopPropagation();
-                    const icon = $(this);
-                    const card = icon.closest('.card');
-                    const contentElement = card.find('.editable-content');
-                    const checkbox = contentElement.find('.form-check-input');
-                    const title = card.find('.card-title').text().trim();
-                    const slNo = card.find('.hidden-sl-no').val();
-                    const isHyperlink = contentElement.data('is-hyperlink');
-
-                    // Get the updated value
-                    let updatedValue;
-                    if (checkbox.length > 0) {
-                        updatedValue = checkbox.prop('checked') ? "true" : "false";
-                        checkbox.prop('disabled', true);
-                    } else {
-                        updatedValue = contentElement.text().trim();
-                        if (isHyperlink && contentElement.find('a').length) {
-                            updatedValue = contentElement.find('a').attr('href');
-                        }
+                // Save on Enter for text fields
+                $(modalElement).off('keydown', '.editable-content[contenteditable="true"]');
+                $(modalElement).on('keydown', '.editable-content[contenteditable="true"]', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const $content = $(this);
+                        const $card = $content.closest('.card');
+                        const title = $card.find('.card-title').text().trim();
+                        const slNo = $card.find('.hidden-sl-no').val();
+                        const isHyperlink = $content.data('is-hyperlink');
+                        let updatedValue = $content.text().trim();
+                        if (isHyperlink) updatedValue = updatedValue;
+                        saveChanges($content, title, slNo, isHyperlink, updatedValue, false);
                     }
+                });
 
-                    saveChanges(contentElement, title, slNo, isHyperlink, updatedValue, checkbox.length >
-                        0);
+                // Save on Enter for checkboxes
+                $(modalElement).off('keydown', '.form-check-input');
+                $(modalElement).on('keydown', '.form-check-input', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const $checkbox = $(this);
+                        const $card = $checkbox.closest('.card');
+                        const $content = $card.find('.editable-content');
+                        const title = $card.find('.card-title').text().trim();
+                        const slNo = $card.find('.hidden-sl-no').val();
+                        const isHyperlink = $content.data('is-hyperlink');
+                        let updatedValue = $checkbox.prop('checked') ? "true" : "false";
+                        saveChanges($content, title, slNo, isHyperlink, updatedValue, true);
+                    }
                 });
             }
 
@@ -3426,7 +3324,7 @@
 
                 // 1. First update the cache immediately
                 const cacheUpdateValue = isCheckbox ? (updatedValue === "true") : updatedValue;
-                amazonZeroDataCache.updateField(itemId, title, cacheUpdateValue);
+                temuDataCache.updateField(itemId, title, cacheUpdateValue);
 
                 // 2. Update the filteredData array to reflect the change
                 const index = filteredData.findIndex(item => item['SL No.'] == itemId);
@@ -3436,12 +3334,12 @@
                     // If this is an SPRICE update, calculate and update Spft% in cache using new formula
                     if (title === 'SPRICE' && filteredData[index].raw_data) {
                         const item = filteredData[index];
-                        const price = parseFloat(item.price) || 0;
+                        const AMZ = parseFloat(item.AMZ) || 0;
                         const SHIP = parseFloat(item.raw_data.SHIP) || 0;
                         const LP = parseFloat(item.raw_data.LP) || 0;
                         const SPRICE = parseFloat(updatedValue) || 0;
 
-                        // Calculate Spft% using new formula: (SPRICE * price - SHIP - LP) / SPRICE
+                        // Calculate Spft% using new formula: (SPRICE * AMZ - SHIP - LP) / SPRICE
                         let Spft = 0;
                         if (SPRICE !== 0) {
                             Spft = (SPRICE * 0.71 - SHIP - LP) / SPRICE;
@@ -3449,7 +3347,7 @@
                         }
 
                         // Update Spft% in cache and local data
-                        amazonZeroDataCache.updateField(itemId, 'Spft%', Spft);
+                        temuDataCache.updateField(itemId, 'Spft%', Spft);
                         filteredData[index]['Spft%'] = Spft;
                         filteredData[index].raw_data['Spft%'] = Spft;
                     }
@@ -3517,8 +3415,8 @@
                 // 5. Send the update to the server ONLY for the original field
                 $.ajax({
                     method: 'POST',
-                    // url: window.location.origin + (window.location.pathname.includes('/public') ?
-                    //     '/public' : '') + '/api/update-amazon-column',
+                    url: window.location.origin + (window.location.pathname.includes('/public') ?
+                        '/public' : '') + '/api/update-temu-column',
                     data: JSON.stringify(data),
                     contentType: 'application/json',
                     headers: {
@@ -3561,7 +3459,7 @@
                         const originalValue = contentElement.data('original-value');
 
                         // Revert cache
-                        amazonZeroDataCache.updateField(itemId, title, originalValue);
+                        temuDataCache.updateField(itemId, title, originalValue);
 
                         // Revert filteredData
                         if (index !== -1) {
@@ -3580,10 +3478,10 @@
 
                                 let Spft = 0;
                                 if (SPRICE !== 0) {
-                                    Spft = (SPRICE * price - SHIP - LP) / SPRICE;
+                                    Spft = (SPRICE * AMZ - SHIP - LP) / SPRICE;
                                 }
 
-                                amazonZeroDataCache.updateField(itemId, 'Spft%', Spft);
+                                temuDataCache.updateField(itemId, 'Spft%', Spft);
                                 filteredData[index]['Spft%'] = Spft;
                                 filteredData[index].raw_data['Spft%'] = Spft;
                             }
@@ -3651,7 +3549,7 @@
 
             // Make columns resizable
             function initResizableColumns() {
-                const $table = $('#amazonZero-table');
+                const $table = $('#temu-table');
                 const $headers = $table.find('th');
                 let startX, startWidth, columnIndex;
 
@@ -3673,42 +3571,16 @@
                     $('body').css('user-select', 'none');
                 });
 
-                let resizeDebounceTimer = null;
-
                 $(document).on('mousemove', function(e) {
                     if (!isResizing) return;
 
                     const $resizer = $('.resize-handle.resizing');
                     if ($resizer.length) {
                         const $th = $resizer.parent();
-                        const columnIndex = $th.index();
                         const newWidth = startWidth + (e.pageX - startX);
                         $th.css('width', newWidth + 'px');
                         $th.css('min-width', newWidth + 'px');
                         $th.css('max-width', newWidth + 'px');
-
-                        // Debounced update for truncated text
-                        if ([10, 11, 12].includes(columnIndex)) {
-                            clearTimeout(resizeDebounceTimer);
-                            resizeDebounceTimer = setTimeout(() => {
-                                const $table = $('#amazonZero-table');
-                                $table.find('tbody tr').each(function() {
-                                    const $cell = $(this).find('td').eq(columnIndex);
-                                    const $span = $cell.find('.truncated-text');
-                                    if ($span.length) {
-                                        const fullText = $span.attr('title') || $span
-                                            .text();
-                                        let minLetters = 10;
-                                        let letters = Math.max(minLetters, Math.floor(
-                                            newWidth / 12));
-                                        const truncated = fullText.length > letters ?
-                                            fullText.substring(0, letters) + '...' :
-                                            fullText;
-                                        $span.text(truncated);
-                                    }
-                                });
-                            }, 50); // 50ms debounce
-                        }
                     }
                 });
 
@@ -3719,30 +3591,6 @@
                     $('.resize-handle').removeClass('resizing');
                     $('body').css('user-select', '');
                     isResizing = false;
-
-                    // Get the new width of the resized column
-                    const $table = $('#amazonZero-table');
-                    const $headers = $table.find('th');
-                    const newWidth = $headers.eq(columnIndex).outerWidth() || 120;
-
-                    // Only update truncated text for Reason, Action Required, Action Taken columns
-                    // Adjust columnIndex if needed (here: 10, 11, 12)
-                    if ([10, 11, 12].includes(columnIndex)) {
-                        $table.find('tbody tr').each(function() {
-                            const $cell = $(this).find('td').eq(columnIndex);
-                            const $span = $cell.find('.truncated-text');
-                            if ($span.length) {
-                                // Get full text from title attribute
-                                const fullText = $span.attr('title') || $span.text();
-                                // Update truncated text
-                                let minLetters = 10;
-                                let letters = Math.max(minLetters, Math.floor(newWidth / 12));
-                                const truncated = fullText.length > letters ? fullText.substring(0,
-                                    letters) + '...' : fullText;
-                                $span.text(truncated);
-                            }
-                        });
-                    }
                 });
             }
 
@@ -3844,7 +3692,7 @@
 
             // Initialize column toggle functionality
             function initColumnToggle() {
-                const $table = $('#amazonZero-table');
+                const $table = $('#temu-table');
                 const $headers = $table.find('th[data-field]');
                 const $menu = $('#columnToggleMenu');
                 const $dropdownBtn = $('#hideColumnsBtn');
@@ -3871,7 +3719,6 @@
                     e.stopPropagation();
                     $menu.toggleClass('show');
                 });
-
 
                 $(document).on('click', function(e) {
                     if (!$(e.target).closest('.custom-dropdown').length) {
@@ -3931,9 +3778,9 @@
                 applyColumnFilters();
             });
 
-
+            // Apply column filters
             function applyColumnFilters() {
-                // Default: show all rows
+                // Reset filteredData to all data first
                 filteredData = [...tableData];
 
                 // Apply row type filter first
@@ -3944,18 +3791,23 @@
                     filteredData = filteredData.filter(item => !item.is_parent);
                 }
 
-                // Apply INV filter
+                // --- INV filter ---
                 const invFilter = $('#inv-filter').val();
                 if (invFilter && invFilter !== 'all') {
                     filteredData = filteredData.filter(item => {
                         const inv = Number(item.INV) || 0;
                         if (invFilter === '0') return inv === 0;
-                        if (invFilter === '1-100+') return inv >= 1;
+                        if (invFilter === '1-15') return inv >= 1 && inv <= 15;
+                        if (invFilter === '16-30') return inv >= 16 && inv <= 30;
+                        if (invFilter === '31-50') return inv >= 31 && inv <= 50;
+                        if (invFilter === '51-75') return inv >= 51 && inv <= 75;
+                        if (invFilter === '76-100') return inv >= 76 && inv <= 100;
+                        if (invFilter === '101+') return inv > 100;
                         return true;
                     });
                 }
 
-                // Apply other filters
+                // Then apply other filters as before
                 Object.entries(state.filters).forEach(([column, filterValue]) => {
                     if (filterValue === 'all') return;
 
@@ -3976,28 +3828,23 @@
                 calculateTotals();
             }
 
-
             // Get color for column based on value
             function getColorForColumn(column, rowData) {
                 if (!rowData || rowData[column] === undefined || rowData[column] === null || rowData[column] ===
                     '') {
                     return '';
                 }
-
-                // Only multiply by 100 for columns that are stored as decimals
-                let value = parseFloat(rowData[column]);
-                if (['ov_dil', 'A Dil%', 'Tacos30', 'SCVR'].includes(column)) {
-                    value = value * 100;
-                }
+                const value = parseFloat(rowData[column]) * 100;
 
                 // Special cases for numeric columns that must be valid numbers
-                const numericColumns = ['PFT_percentage', 'ROI_percentage', 'Tacos30', 'SCVR'];
+                const numericColumns = ['PFT %', 'Roi', 'Tacos30', 'SCVR']; // Add other numeric columns as needed
                 if (numericColumns.includes(column) && isNaN(value)) {
                     return '';
                 }
 
+
                 const colorRules = {
-                    'ov_dil': {
+                    'Dil%': {
                         ranges: [16.66, 25, 50], // Key change here
                         colors: ['red', 'yellow', 'green', 'pink']
                     },
@@ -4005,11 +3852,11 @@
                         ranges: [16.66, 25, 50],
                         colors: ['red', 'yellow', 'green', 'pink']
                     },
-                    'PFT_percentage': {
+                    'PFT %': {
                         ranges: [10, 15, 20, 40],
                         colors: ['red', 'yellow', 'blue', 'green', 'pink']
                     },
-                    'ROI_percentage': {
+                    'Roi': {
                         ranges: [50, 75, 100],
                         colors: ['red', 'yellow', 'green', 'pink']
                     },
@@ -4059,52 +3906,78 @@
                         rowCount: 0,
                         totalPftSum: 0,
                         totalSalesL30Sum: 0,
-                        totalCogsSum: 0
+                        totalCogsSum: 0,
+                        listedCount: 0,
+                        liveCount: 0
+
                     };
 
                     filteredData.forEach(item => {
-                        if(item.NR === 'NR'){
+                        if (item.NR === 'NR') {
                             return;
                         }
+
+                        let rawData = {};
+                        if (typeof item.raw_data === 'string') {
+                            try {
+                                rawData = JSON.parse(item.raw_data || '{}');
+                            } catch (e) {
+                                console.error(`Invalid JSON in raw_data for SKU ${item['(Child) sku']}`, e);
+                            }
+                        } else if (typeof item.raw_data === 'object' && item.raw_data !== null) {
+                            rawData = item.raw_data;
+
+                        }
+
+                        // Count listed checkboxes
+                        if (rawData.Listed === true || rawData.Listed === 'true' || rawData.Listed === 1 ||
+                            rawData.Listed === '1') {
+                            metrics.listedCount++;
+                        }
+
+                        // Count Live checkboxes
+                        if (rawData.Live === true || rawData.Live === 'true' || rawData.Live === 1 ||
+                            rawData.Live === '1') {
+                            metrics.liveCount++;
+                        }
+
                         metrics.invTotal += parseFloat(item.INV) || 0;
                         metrics.ovL30Total += parseFloat(item.L30) || 0;
                         metrics.el30Total += parseFloat(item['A L30']) || 0;
                         metrics.eDilTotal += parseFloat(item['A Dil%']) || 0;
-                        let views = parseFloat(item.Sess30) || 0;
-                        if (item.NR !== 'NR') {
-                            metrics.viewsTotal += views;
-                        }
+                        metrics.viewsTotal += parseFloat(item.Sess30) || 0;
                         metrics.tacosTotal += parseFloat(item.Tacos30) || 0;
-                        metrics.pftSum += parseFloat(item['PFT_percentage']) || 0;
-                        metrics.roiSum += parseFloat(item.ROI_percentage) || 0;
+                        metrics.pftSum += parseFloat(item['PFT %']) || 0;
+                        metrics.roiSum += parseFloat(item.Roi) || 0;
                         metrics.scvrSum += parseFloat(item.SCVR) || 0;
                         metrics.rowCount++;
 
-                        // Only sum for child rows (not parent rows)
+                        // Only sum if not a parent row
                         if (
-                            item['sku'] &&
-                            typeof item['sku'] === 'string' &&
-                            !item['sku'].toUpperCase().includes('PARENT')
+                            item.Sku &&
+                            typeof item.Sku === 'string' &&
+                            !item.Sku.toUpperCase().includes('PARENT')
                         ) {
-                            const totalPft = parseFloat(item.raw_data['Total_pft']) || 0;
-                            const t_sale_l30 = parseFloat(item.raw_data['T_Sale_l30']) || 0;
-                            const cogs = parseFloat(item.raw_data['T_COGS']) || 0;
-
+                            // Use raw_data for original keys
+                            const totalPft = item.raw_data && item.raw_data['TOTAL PFT'] ? parseFloat(item
+                                .raw_data['TOTAL PFT']) : 0;
+                            const tSalesL30 = item.raw_data && item.raw_data['T Sales L30'] ? parseFloat(
+                                item.raw_data['T Sales L30']) : 0;
+                            const cogs = item.raw_data && item.raw_data['COGS'] ? parseFloat(item.raw_data[
+                                'COGS']) : 0;
                             metrics.totalPftSum += totalPft;
-                            metrics.totalSalesL30Sum += t_sale_l30;
+                            metrics.totalSalesL30Sum += tSalesL30;
                             metrics.totalCogsSum += cogs;
+                        } else {
+                            // For parent rows, use the original values directly
+                            metrics.totalPftSum += parseFloat(item['TOTAL PFT']) || 0;
+                            metrics.totalSalesL30Sum += parseFloat(item['T Sales L30']) || 0;
+                            metrics.totalCogsSum += parseFloat(item.COGS) || 0;
                         }
                     });
 
                     metrics.ovDilTotal = metrics.invTotal > 0 ?
                         (metrics.ovL30Total / metrics.invTotal) * 100 : 0;
-
-                    // --- A Dil% metric: (sum of A L30) / (sum of INV) * 100 ---
-                    let aDilTotalDisplay = '0%';
-                    if (metrics.invTotal > 0) {
-                        aDilTotalDisplay = Math.round((metrics.el30Total / metrics.invTotal) * 100) + '%';
-                    }
-
                     const divisor = metrics.rowCount || 1;
 
                     // Update metric displays
@@ -4112,23 +3985,26 @@
                     $('#ovl30-total').text(metrics.ovL30Total.toLocaleString());
                     $('#ovdil-total').text(Math.round(metrics.ovDilTotal) + '%');
                     $('#al30-total').text(metrics.el30Total.toLocaleString());
-                    $('#lDil-total').text(aDilTotalDisplay);
+                    $('#lDil-total').text(Math.round(metrics.eDilTotal / divisor * 100) + '%');
                     $('#views-total').text(metrics.viewsTotal.toLocaleString());
+                    $('#listed-total').text(metrics.listedCount.toLocaleString());
+                    $('#live-total').text(metrics.liveCount.toLocaleString());
+
 
                     // --- Custom PFT TOTAL calculation ---
                     let pftTotalDisplay = '0%';
                     if (metrics.totalSalesL30Sum > 0) {
-                        pftTotalDisplay = Math.round(metrics.totalPftSum / metrics.totalSalesL30Sum * 100) + '%';
+                        const pftTotal = (metrics.totalPftSum / metrics.totalSalesL30Sum) * 100;
+                        pftTotalDisplay = Math.round(pftTotal) + '%';
                     }
                     $('#pft-total').text(pftTotalDisplay);
 
-                    // --- ROI TOTAL calculation ---
                     let roiTotalDisplay = '0%';
                     if (metrics.totalCogsSum > 0) {
-                        roiTotalDisplay = Math.round(metrics.totalPftSum / metrics.totalCogsSum * 100) + '%';
+                        const roiTotal = (metrics.totalPftSum / metrics.totalCogsSum) * 100;
+                        roiTotalDisplay = Math.round(roiTotal) + '%';
                     }
                     $('#roi-total').text(roiTotalDisplay);
-
                     $('#tacos-total').text(Math.round(metrics.tacosTotal / divisor * 100) + '%');
                     $('#cvr-total').text(Math.round(metrics.scvrSum / divisor * 100) + '%');
 
@@ -4149,6 +4025,9 @@
                 $('#roi-total').text('0%');
                 $('#tacos-total').text('0%');
                 $('#cvr-total').text('0%');
+                $('#listed-total').text('0');
+                $('#live-total').text('0');
+
             }
 
             // Initialize enhanced dropdowns
@@ -4166,7 +4045,7 @@
 
                 // Initialize both dropdowns
                 initEnhancedDropdown($parentSearch, $parentResults, 'Parent');
-                initEnhancedDropdown($skuSearch, $skuResults, 'sku');
+                initEnhancedDropdown($skuSearch, $skuResults, 'Sku');
 
                 // Close dropdowns when clicking outside
                 $(document).on('click', function(e) {
@@ -4530,69 +4409,6 @@
             function hideLoader() {
                 $('#data-loader').fadeOut();
             }
-
-            // Handle plus icon click to open modal
-            $(document).on('click', '.reason-action-plus', function() {
-                const slNo = $(this).data('slno');
-                const row = filteredData.find(item => item['SL No.'] == slNo);
-
-                // Fill modal fields with current values using the correct keys
-                $('#modalReason').val(row.A_Z_Reason || '');
-                $('#modalActionRequired').val(row.A_Z_ActionRequired || '');
-                $('#modalActionTaken').val(row.A_Z_ActionTaken || '');
-                $('#modalSlNo').val(slNo);
-
-                // Show modal
-                $('#reasonActionModal').modal('show');
-            });
-
-            // Save button in modal
-            $('#saveReasonActionBtn').on('click', function() {
-                const slNo = $('#modalSlNo').val();
-                const reason = $('#modalReason').val();
-                const actionRequired = $('#modalActionRequired').val();
-                const actionTaken = $('#modalActionTaken').val();
-
-                // Find the SKU for this row
-                const row = filteredData.find(item => item['SL No.'] == slNo);
-                const sku = row ? row['sku'] : null;
-
-                // Update data in filteredData and tableData
-                [filteredData, tableData].forEach(arr => {
-                    const row = arr.find(item => item['SL No.'] == slNo);
-                    if (row) {
-                        row.A_Z_Reason = reason;
-                        row.A_Z_ActionRequired = actionRequired;
-                        row.A_Z_ActionTaken = actionTaken;
-                    }
-                });
-
-                // Save to backend via AJAX
-                if (sku) {
-                    $.ajax({
-                        url: '/zero_doba/reason-action/update-data',
-                        method: 'POST',
-                        data: {
-                            sku: sku,
-                            reason: reason,
-                            action_required: actionRequired,
-                            action_taken: actionTaken,
-                            _token: $('meta[name="csrf-token"]').attr('content')
-                        },
-                        success: function(response) {
-                            showNotification('success', 'Reason/Action updated successfully!');
-                            renderTable();
-                            $('#reasonActionModal').modal('hide');
-                        },
-                        error: function(xhr) {
-                            showNotification('danger', 'Failed to update Reason/Action.');
-                        }
-                    });
-                } else {
-                    renderTable();
-                    $('#reasonActionModal').modal('hide');
-                }
-            });
 
             // Initialize everything
             initTable();

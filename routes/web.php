@@ -246,6 +246,7 @@ use App\Http\Controllers\MarketPlace\Business5coreController;
 use App\Http\Controllers\MarketPlace\FaireController;
 use App\Http\Controllers\MarketPlace\FbmarketplaceController;
 use App\Http\Controllers\MarketPlace\FbshopController;
+use App\Http\Controllers\MarketPlace\InstagramController;
 use App\Http\Controllers\MarketPlace\MercariWoShipController;
 use App\Http\Controllers\MarketPlace\MercariWShipController;
 use App\Http\Controllers\MarketPlace\PlsController;
@@ -1521,6 +1522,18 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::post('/business5core-analytics/import', [Business5coreController::class, 'importBusiness5CoreAnalytics'])->name('business5core.analytics.import');
     Route::get('/business5core-analytics/export', [Business5coreController::class, 'exportBusiness5CoreAnalytics'])->name('business5core.analytics.export');
     Route::get('/business5core-analytics/sample', [Business5coreController::class, 'downloadSample'])->name('business5core.analytics.sample');
+
+
+      //instagram shop
+    Route::get('instagramAnalysis', action: [InstagramController::class, 'overallInstagram']);
+    Route::get('/instagram/view-data', [InstagramController::class, 'getViewInstagramData']);
+    Route::get('instagramPricingCVR', [InstagramController::class, 'instagramPricingCVR'])->name('instagram.pricing.cvr');
+    Route::post('/update-all-instagram-skus', [InstagramController::class, 'updateAllInstagramSkus']);
+    Route::post('/instagram/save-nr', [InstagramController::class, 'saveNrToDatabase']);
+    Route::post('/instagram/update-listed-live', [InstagramController::class, 'updateListedLive']);
+    Route::post('/instagram-analytics/import', [InstagramController::class, 'importInstagramAnalytics'])->name('instagram.analytics.import');
+    Route::get('/instagram-analytics/export', [InstagramController::class, 'exportInstagramAnalytics'])->name('instagram.analytics.export');
+    Route::get('/instagram-analytics/sample', [InstagramController::class, 'downloadSample'])->name('instagram.analytics.sample');
 
 
     //tiendamia
