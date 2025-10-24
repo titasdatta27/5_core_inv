@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use App\Models\JungleScoutProductData;
 use App\Models\Supplier;
+use App\Models\TransitContainerDetail;
 
 class ForecastAnalysisController extends Controller
 {
@@ -73,7 +74,25 @@ class ForecastAnalysisController extends Controller
         $movementMap = DB::table('movement_analysis')->get()->keyBy(fn($item) => $normalizeSku($item->sku));
         $readyToShipMap = DB::table('ready_to_ship')->get()->keyBy(fn($item) => $normalizeSku($item->sku));
         $mfrg = DB::table('mfrg_progress')->get()->keyBy(fn($item) => $normalizeSku($item->sku));
-        $transitContainer = DB::table('transit_container_details')->where('status', '')->select('our_sku', 'tab_name', 'no_of_units', 'total_ctn')->get()->keyBy(fn($item) => $normalizeSku($item->our_sku));
+        $transitContainer = TransitContainerDetail::where('status', '')
+            ->select('our_sku', 'tab_name', 'no_of_units', 'total_ctn')
+            ->get()
+            ->groupBy(fn($item) => $normalizeSku($item->our_sku))
+            ->map(function ($group) {
+                $transitSum = 0;
+                foreach ($group as $row) {
+                    $no_of_units = (float) $row->no_of_units;
+                    $total_ctn = (float) $row->total_ctn;
+                    $transitSum += $no_of_units * $total_ctn;
+                }
+
+                return (object)[
+                    'tab_name' => $group->pluck('tab_name')->unique()->implode(', '),
+                    'transit' => $transitSum,
+                ];
+            })
+            ->keyBy(fn($item, $key) => $key);
+
 
         $processedData = [];
 
@@ -137,9 +156,8 @@ class ForecastAnalysisController extends Controller
             }
 
             $item->containerName = $transitContainer[$normalizeSku($prodData->sku)]->tab_name ?? '';
-            $noOfUnit = $transitContainer[$normalizeSku($prodData->sku)]->no_of_units ?? 0;
-            $totalCtn = $transitContainer[$normalizeSku($prodData->sku)]->total_ctn ?? 0;
-            $item->transit = $noOfUnit * $totalCtn;
+            $item->transit = $transitContainer[$normalizeSku($prodData->sku)]->transit ?? 0;
+
 
             $readyToShipQty = 0;
             if($readyToShipMap->has($sheetSku)){
@@ -204,8 +222,6 @@ class ForecastAnalysisController extends Controller
         return $processedData;
     }
 
-
-    
     public function getViewForecastAnalysisData()
     {
         try {
