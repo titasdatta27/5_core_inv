@@ -995,9 +995,10 @@
                     const inv = parseFloat(item["INV"]) || 0;
                     const transit = parseFloat(item["Transit"] ?? item["transit"]) || 0;
                     const orderGiven = parseFloat(item["order_given"] ?? item["Order Given"]) || 0;
+                    const r2s = parseFloat(item["readyToShipQty"] ?? item["readyToShipQty"]) || 0;
                     const msl = totalMonth > 0 ? (total / totalMonth) * 4 : 0;
 
-                    const toOrder = Math.round(msl - inv - transit - orderGiven);
+                    const toOrder = Math.round(msl - inv - transit - orderGiven - r2s);
 
                     // if (toOrder == 0) {
                     //     return false;

@@ -172,6 +172,7 @@ use App\Http\Controllers\Campaigns\AmzCorrectlyUtilizedController;
 use App\Http\Controllers\Campaigns\AmzUnderUtilizedBgtController;
 use App\Http\Controllers\Campaigns\CampaignImportController;
 use App\Http\Controllers\Campaigns\Ebay2PMTAdController;
+use App\Http\Controllers\campaigns\Ebay2RunningAdsController;
 use App\Http\Controllers\Campaigns\Ebay3AcosController;
 use App\Http\Controllers\Campaigns\Ebay3KeywordAdsController;
 use App\Http\Controllers\Campaigns\Ebay3PinkDilAdController;
@@ -2099,6 +2100,11 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
         Route::get('/ebay-2/pmp/ads/data', 'getEbay2PmtAdsData');
         Route::post('/update-ebay-2-pmt-percentage', 'updateEbay2Percentage');
         Route::post('/update-ebay-2-pmt-sprice', 'saveEbay2PMTSpriceToDatabase');
+    });
+
+    Route::controller(Ebay2RunningAdsController::class)->group(function () {
+        Route::get('/ebay-2/ad-running/list', 'index')->name('ebay2.running.ads');
+        Route::get('/ebay-2/ad-running/data', 'getEbay2RunningAdsData');
     });
 
     // ebay 3 ads section
