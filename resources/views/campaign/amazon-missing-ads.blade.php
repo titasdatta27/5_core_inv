@@ -235,6 +235,9 @@
                                                 <i class="fas fa-exclamation-triangle me-1"></i>
                                                 All Missing
                                             </button>
+                                            <a href="javascript:void(0)" id="export-btn" class="btn btn-sm btn-success d-flex align-items-center justify-content-center">
+                                                <i class="fas fa-file-export me-1"></i> Export Excel/CSV
+                                            </a>
                                         </div>
                                     </div>
 
@@ -295,6 +298,8 @@
 @section('script')
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://unpkg.com/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
+    <!-- SheetJS for Excel Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
 
@@ -499,72 +504,89 @@
                             var ptCampaign = row.pt_campaign_name || '';
                             var nra = row.NRA || '';
                             var sku = row.sku || '';
+                            var inv = row.INV || 0;
                             const isParent = sku.toUpperCase().includes("PARENT");
 
                             if(!isParent){
                                 if(kwCampaign && ptCampaign){
-                                    if(nra !== 'NRA'){
-                                        return `
-                                            <span style="color: green;">Both Running</span>
-                                            <i class="fa fa-info-circle text-primary toggle-missingAds-btn" 
-                                                style="cursor:pointer; margin-left:8px;">
-                                            </i>
-                                        `;
+                                    if(inv > 0){
+                                        if(nra !== 'NRA'){
+                                            return `
+                                                <span style="color: green;">Both Running</span>
+                                                <i class="fa fa-info-circle text-primary toggle-missingAds-btn" 
+                                                    style="cursor:pointer; margin-left:8px;">
+                                                </i>
+                                            `;
+                                        }else{
+                                            return `
+                                                <span style="color: red;">NRA</span>
+                                                <i class="fa fa-info-circle text-primary toggle-missingAds-btn" 
+                                                    style="cursor:pointer; margin-left:8px;">
+                                                </i>
+                                            `;
+                                        }
                                     }else{
-                                        return `
-                                            <span style="color: red;">NRA</span>
-                                            <i class="fa fa-info-circle text-primary toggle-missingAds-btn" 
-                                                style="cursor:pointer; margin-left:8px;">
-                                            </i>
-                                        `;
+                                        return '';
                                     }
                                 } else if(kwCampaign){
-                                    if(nra !== 'NRA'){
-                                        return `
-                                            <span style="color: red;">PT Missing</span>
-                                            <i class="fa fa-info-circle text-primary toggle-missingAds-btn" 
-                                                style="cursor:pointer; margin-left:8px;">
-                                            </i>
-                                        `;
+                                    if(inv > 0){
+                                        if(nra !== 'NRA'){
+                                            return `
+                                                <span style="color: red;">PT Missing</span>
+                                                <i class="fa fa-info-circle text-primary toggle-missingAds-btn" 
+                                                    style="cursor:pointer; margin-left:8px;">
+                                                </i>
+                                            `;
+                                        }else{
+                                            return `
+                                                <span style="color: red;">NRA</span>
+                                                <i class="fa fa-info-circle text-primary toggle-missingAds-btn" 
+                                                    style="cursor:pointer; margin-left:8px;">
+                                                </i>
+                                            `;
+                                        }
                                     }else{
-                                        return `
-                                            <span style="color: red;">NRA</span>
-                                            <i class="fa fa-info-circle text-primary toggle-missingAds-btn" 
-                                                style="cursor:pointer; margin-left:8px;">
-                                            </i>
-                                        `;
+                                        return '';
                                     }
                                 } else if(ptCampaign){
-                                    if(nra !== 'NRA'){
-                                        return `
-                                            <span style="color: red;">KW Missing</span>
-                                            <i class="fa fa-info-circle text-primary toggle-missingAds-btn" 
-                                                style="cursor:pointer; margin-left:8px;">
-                                            </i>
-                                        `;
+                                    if(inv > 0){
+                                        if(nra !== 'NRA'){
+                                            return `
+                                                <span style="color: red;">KW Missing</span>
+                                                <i class="fa fa-info-circle text-primary toggle-missingAds-btn" 
+                                                    style="cursor:pointer; margin-left:8px;">
+                                                </i>
+                                            `;
+                                        }else{
+                                            return `
+                                                <span style="color: red;">NRA</span>
+                                                <i class="fa fa-info-circle text-primary toggle-missingAds-btn" 
+                                                    style="cursor:pointer; margin-left:8px;">
+                                                </i>
+                                            `;
+                                        }
                                     }else{
-                                        return `
-                                            <span style="color: red;">NRA</span>
-                                            <i class="fa fa-info-circle text-primary toggle-missingAds-btn" 
-                                                style="cursor:pointer; margin-left:8px;">
-                                            </i>
-                                        `;
+                                        return '';
                                     }
                                 } else {
-                                    if(nra !== 'NRA'){
-                                        return `
-                                            <span style="color: red;">KW Missing </br> PT Missing</span>
-                                            <i class="fa fa-info-circle text-primary toggle-missingAds-btn" 
-                                                style="cursor:pointer; margin-left:8px;">
-                                            </i>
-                                        `;
+                                    if(inv > 0){
+                                        if(nra !== 'NRA'){
+                                            return `
+                                                <span style="color: red;">KW Missing </br> PT Missing</span>
+                                                <i class="fa fa-info-circle text-primary toggle-missingAds-btn" 
+                                                    style="cursor:pointer; margin-left:8px;">
+                                                </i>
+                                            `;
+                                        }else{
+                                            return `
+                                                <span style="color: red;">NRA</span>
+                                                <i class="fa fa-info-circle text-primary toggle-missingAds-btn" 
+                                                    style="cursor:pointer; margin-left:8px;">
+                                                </i>
+                                            `;
+                                        }
                                     }else{
-                                        return `
-                                            <span style="color: red;">NRA</span>
-                                            <i class="fa fa-info-circle text-primary toggle-missingAds-btn" 
-                                                style="cursor:pointer; margin-left:8px;">
-                                            </i>
-                                        `;
+                                        return '';
                                     }
                                 }
                             }else{
@@ -681,19 +703,18 @@
                     
                     // 🔹 Missing Ads Filter
                     let missingVal = $("#missingAds-filter").val();
-                    let kw = data.kw_campaign_name || "";
-                    let pt = data.pt_campaign_name || "";
+                    let kw = (data.kw_campaign_name || "").toString().trim();
+                    let pt = (data.pt_campaign_name || "").toString().trim();
+                    const hasKW = kw !== "";
+                    const hasPT = pt !== "";
+                    const invVal = parseFloat(data.INV) || 0;
+                    const nraVal = (data.NRA || "").toString().trim();
 
-                    if (missingVal === "Both Running" && !(kw && pt)) return false;
-                    if (missingVal === "KW Missing" && (!pt || kw)) {
-                        if (pt && !kw) return true;
-                        else return false;
-                    }
-                    if (missingVal === "PT Missing" && (!kw || pt)) {
-                        if (kw && !pt) return true;
-                        else return false;
-                    }
-                    if (missingVal === "Both Missing" && (kw || pt)) return false;
+                    // Only include rows where INV > 0 and not marked NRA for missing-ads checks
+                    if (missingVal === "Both Running" && !(hasKW && hasPT && invVal > 0 && nraVal !== 'NRA')) return false;
+                    if (missingVal === "KW Missing" && !( !hasKW && hasPT && invVal > 0 && nraVal !== 'NRA')) return false;
+                    if (missingVal === "PT Missing" && !( hasKW && !hasPT && invVal > 0 && nraVal !== 'NRA')) return false;
+                    if (missingVal === "Both Missing" && !( !hasKW && !hasPT && invVal > 0 && nraVal !== 'NRA')) return false;
 
                     return true;
                 }
@@ -721,7 +742,7 @@
                         let nra = (row.NRA || "").trim();
 
                         // Existing counts
-                        if(nra !== "NRA") {
+                        if(nra !== "NRA" && (parseFloat(row.INV) || 0) > 0) {
                             if (kw && pt) bothRunning++;
                             else if (kw && !pt) ptMissing++;
                             else if (!kw && pt) kwMissing++;
@@ -729,23 +750,23 @@
                         }
 
                         // New running counts
-                        if(nra !== "NRA") {
+                        if(nra !== "NRA" && (parseFloat(row.INV) || 0) > 0) {
                             if (kw) kwRunning++;
                             if (pt) ptRunning++;
                         }
 
                         // Total Missing Ads Count
-                        if(nra !== "NRA") {
+                        if(nra !== "NRA" && (parseFloat(row.INV) || 0) > 0) {
                             totalMissingAds = `( ${ptMissing + kwMissing + (bothMissing)} ) `;
                         }
 
                         // Total NRA Count
-                        if(row.NRA && row.NRA.trim() === "NRA"){
+                        if(row.NRA && row.NRA.trim() === "NRA" && (parseFloat(row.INV) || 0) > 0){
                             totalNRA++;
                         }
 
                         // Total RA Count
-                        if(!row.NRA || row.NRA.trim() !== "NRA"){
+                        if(!row.NRA || row.NRA.trim() !== "NRA" && (parseFloat(row.INV) || 0) > 0){
                             totalRA++;
                         }
                     });
@@ -838,6 +859,58 @@
                         }
                     });
                 }
+            });
+
+            document.getElementById("export-btn").addEventListener("click", function () {
+                let allData = table.getData("active"); 
+
+                if (allData.length === 0) {
+                    alert("No data available to export!");
+                    return;
+                }
+
+                let exportData = allData.map(row => {
+                    let sku = row.sku || '';
+                    let isParent = sku.toUpperCase().includes("PARENT");
+                    let missingStatus = '';
+                    
+                    if (!isParent) {
+                        let kwCampaign = row.kw_campaign_name || '';
+                        let ptCampaign = row.pt_campaign_name || '';
+                        let nra = row.NRA || '';
+                        let inv = row.INV || 0;
+
+                        if (inv > 0) {
+                            if (nra !== 'NRA') {
+                                if (kwCampaign && ptCampaign) {
+                                    missingStatus = 'Both Running';
+                                } else if (kwCampaign) {
+                                    missingStatus = 'PT Missing';
+                                } else if (ptCampaign) {
+                                    missingStatus = 'KW Missing';
+                                } else {
+                                    missingStatus = 'KW & PT Missing';
+                                }
+                            } else {
+                                missingStatus = 'NRA';
+                            }
+                        }
+                    } else if (row.NRA === 'NRA') {
+                        missingStatus = 'NRA';
+                    }
+
+                    return {
+                        "SKU": row.sku,
+                        "INV": row.INV,
+                        "Missing Status": missingStatus
+                    };
+                });
+
+                let ws = XLSX.utils.json_to_sheet(exportData);
+                let wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Campaigns");
+
+                XLSX.writeFile(wb, "amazon_missing_ads.xlsx");
             });
 
 
