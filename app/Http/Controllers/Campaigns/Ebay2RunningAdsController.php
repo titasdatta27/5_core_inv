@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\campaigns;
+namespace App\Http\Controllers\Campaigns;
 
 use App\Http\Controllers\Controller;
 use App\Models\Ebay2GeneralReport;
