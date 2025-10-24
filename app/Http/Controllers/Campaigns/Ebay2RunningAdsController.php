@@ -67,7 +67,7 @@ class Ebay2RunningAdsController extends Controller
                 return trim((string)$item->listing_id) == trim((string)$ebay->item_id);
             });
 
-            if (!$matchedGeneralL30) {
+            if (!$matchedGeneralL30 && !$matchedGeneralL7) {
                 continue;
             }
 

@@ -677,12 +677,12 @@
             //     });
             // });
 
-            table.on("tableBuilt", function() {
+            table.on("tableBuilt", function () {
 
                 function combinedFilter(data) {
                     if (!data) return false;
 
-                    // Search filter
+                    // 🔍 Search filter
                     let searchVal = $("#global-search").val()?.toLowerCase() || "";
                     if (searchVal) {
                         const sku = (data.sku || "").toLowerCase();
@@ -691,33 +691,40 @@
                         }
                     }
 
-                    // Status filter
+                    // 🟢 Status filter
                     let statusVal = $("#status-filter").val();
                     if (statusVal && data.campaignStatus !== statusVal) {
                         return false;
                     }
 
-                    // Inventory filter
+                    // 📦 Inventory filter (fixed logic)
                     let invFilterVal = $("#inv-filter").val();
                     if (invFilterVal) {
                         const inv = parseFloat(data.INV || 0);
-                        if (invFilterVal === "ALL" && inv === 0) {
+
+                        if (invFilterVal === "INV_0" && inv !== 0) {
+                            // Show only rows where inventory = 0
                             return false;
-                        } else if (invFilterVal === "INV_0" && inv !== 0) {
+                        } 
+                        else if (invFilterVal === "OTHERS" && inv === 0) {
+                            // Show only rows where inventory > 0
                             return false;
-                        } else if (invFilterVal === "OTHERS" && inv === 0) {
-                            return false;
+                        } 
+                        else if (invFilterVal === "ALL") {
+                            // Show all — no filter
                         }
                     }
 
-                    // NRA filter
+                    // 🧮 NRA filter (fixed select lookup)
                     let nraFilterVal = $("#nra-filter").val();
                     if (nraFilterVal) {
-                        const rowSelect = document.querySelector(
-                            `select[data-sku="${data.sku}"][data-field="NR"]`
-                        );
-                        let rowVal = rowSelect ? rowSelect.value : (data.NR || "");
-                        
+                        let rowVal = data.NR || "";
+                        // Try to read from select if it's rendered
+                        let rowSelect = document.querySelector(`select[data-sku="${data.sku}"][data-field="NR"]`);
+                        if (rowSelect && rowSelect.value) {
+                            rowVal = rowSelect.value;
+                        }
+
                         if (rowVal !== nraFilterVal) {
                             return false;
                         }
@@ -726,8 +733,10 @@
                     return true;
                 }
 
+                // 🧩 Apply combined filter
                 table.setFilter(combinedFilter);
 
+                // 📊 Update campaign stats
                 function updateCampaignStats() {
                     let allRows = table.getData();
                     let filteredRows = allRows.filter(combinedFilter);
@@ -741,21 +750,26 @@
                     document.getElementById("percentage-campaigns").innerText = percentage + "%";
                 }
 
+                // 🔁 Update stats on relevant table events
                 table.on("dataFiltered", updateCampaignStats);
                 table.on("pageLoaded", updateCampaignStats);
                 table.on("dataProcessed", updateCampaignStats);
 
-                $("#global-search").on("keyup", function() {
+                // 🔍 Live search + filter events
+                $("#global-search").on("keyup", function () {
                     table.setFilter(combinedFilter);
+                    updateCampaignStats();
                 });
 
-                $("#status-filter,#inv-filter, #nra-filter").on("change",
-                    function() {
-                        table.setFilter(combinedFilter);
-                    });
+                $("#status-filter, #inv-filter, #nra-filter").on("change", function () {
+                    table.setFilter(combinedFilter);
+                    updateCampaignStats();
+                });
 
+                // Initialize stats after build
                 updateCampaignStats();
             });
+
 
             document.addEventListener("click", function(e) {
                 if (e.target.classList.contains("toggle-cols-btn")) {
