@@ -57,6 +57,7 @@ class FaireZeroController extends Controller
                     'ov_l30' => $ov_l30,
                     'ov_dil' => $ov_dil,
                     'NR' => isset($value['NR']) && in_array($value['NR'], ['REQ', 'NR']) ? $value['NR'] : 'REQ',
+                    // 'NR' => $dataView['NR'] ?? 'REQ',
                     'A_Z_Reason' => $value['A_Z_Reason'] ?? '',
                     'A_Z_ActionRequired' => $value['A_Z_ActionRequired'] ?? '',
                     'A_Z_ActionTaken' => $value['A_Z_ActionTaken'] ?? '',

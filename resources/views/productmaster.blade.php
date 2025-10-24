@@ -1356,6 +1356,7 @@
                             });
                             document.getElementById('parentCount').textContent = `(${parentSet.size})`;
                             document.getElementById('skuCount').textContent = `(${skuCount})`;
+                            setupHeaderColumnSearch();
 
                         } else {
                             showError('Invalid data format received from server');
@@ -1428,8 +1429,6 @@
                 // Before rendering rows, calculate totals for each parent
                 const parentTotals = {};
                 data.forEach(item => {
-                    console.log(item,'ddd');
-                    
                     if (item.Parent && !String(item.SKU).toUpperCase().includes('PARENT')) {
                         if (!parentTotals[item.Parent]) {
                             parentTotals[item.Parent] = {
@@ -1834,6 +1833,17 @@
             function updateTableHeader(hiddenColumns) {
                 const thead = document.querySelector('#row-callback-datatable thead tr');
 
+                // Preserve current search input values so re-rendering header doesn't clear them
+                const existingParentVal = document.getElementById('parentSearch')?.value || '';
+                const existingSkuVal = document.getElementById('skuSearch')?.value || '';
+                const existingCustomVal = document.getElementById('customSearch')?.value || '';
+
+                // Preserve focus and selection so user's typing isn't interrupted
+                const activeEl = document.activeElement;
+                const activeId = (activeEl && ['parentSearch', 'skuSearch', 'customSearch'].includes(activeEl.id)) ? activeEl.id : null;
+                const activeSelectionStart = activeEl && activeId ? activeEl.selectionStart : null;
+                const activeSelectionEnd = activeEl && activeId ? activeEl.selectionEnd : null;
+
                 // Store the checkbox column if it exists
                 const checkboxTh = thead.querySelector('.checkbox-column');
 
@@ -1897,6 +1907,26 @@
                 // Update parent and SKU counts if they're visible
                 const parentCount = document.getElementById('parentCount');
                 const skuCount = document.getElementById('skuCount');
+
+                // Restore any preserved search values to inputs that were recreated
+                if (document.getElementById('parentSearch')) document.getElementById('parentSearch').value = existingParentVal;
+                if (document.getElementById('skuSearch')) document.getElementById('skuSearch').value = existingSkuVal;
+                if (document.getElementById('customSearch')) document.getElementById('customSearch').value = existingCustomVal;
+
+                // Restore focus and cursor position if applicable
+                if (activeId) {
+                    const restored = document.getElementById(activeId);
+                    if (restored) {
+                        restored.focus();
+                        try {
+                            if (typeof activeSelectionStart === 'number' && typeof activeSelectionEnd === 'number') {
+                                restored.setSelectionRange(activeSelectionStart, activeSelectionEnd);
+                            }
+                        } catch (err) {
+                            // ignore (some browsers may throw if input type doesn't support selection)
+                        }
+                    }
+                }
 
                 if (parentCount && skuCount) {
                     const parentSet = new Set();
@@ -2153,109 +2183,30 @@
             }
             
             function setupSearch() {
-                const searchInput = document.getElementById('customSearch');
-                
-                const skuSearchInput = document.getElementById('skuSearch');
-                
-                const parentSearchInput = document.getElementById('parentSearch');
-
-                const clearButton = document.getElementById('clearSearch');
-
-                // Global search (search all columns)
-                if (searchInput) {
-                    searchInput.addEventListener('input', debounce(function () {
-                        const searchTerm = searchInput.value.toLowerCase().trim();
-
-                        let filteredData = [...tableData];
-                        if (searchTerm) {
-                            filteredData = filteredData.filter(item =>
-                                Object.values(item).some(value =>
-                                    String(value).toLowerCase().includes(searchTerm)
-                                )
-                            );
-                        }
-
-                        renderTable(filteredData);
-                    }, 300));
-                }
-
-                // SKU search (only filter by SKU)
-                if (skuSearchInput) {
-                    
-                    skuSearchInput.addEventListener('input', debounce(function () {
-                        const skuValue = skuSearchInput.value.toLowerCase().trim();
-
-                        let filteredData = [...tableData];
-                        if (skuValue) {
-                            filteredData = filteredData.filter(item =>
-                                (item.SKU || item.sku || '').toLowerCase().includes(skuValue)
-                            );
-                        }
-
-                        renderTable(filteredData);
-                    }, 300));
-                }
-
-                // Parent search (only filter by Parent)
-                if (parentSearchInput) {
-                    parentSearchInput.addEventListener('input', debounce(function () {
-                        const parentValue = parentSearchInput.value.toLowerCase().trim();
-
-                        let filteredData = [...tableData];
-                        if (parentValue) {
-                            filteredData = filteredData.filter(item =>
-                                (item.Parent || item.parent || '').toLowerCase().includes(parentValue)
-                            );
-                        }
-
-                        renderTable(filteredData);
-                    }, 300));
-                }
-
-                // Clear all searches
-                if (clearButton) {
-                    clearButton.addEventListener('click', function () {
-                        if (searchInput) searchInput.value = '';
-                        if (skuSearchInput) skuSearchInput.value = '';
-                        if (parentSearchInput) parentSearchInput.value = '';
-                        renderTable(tableData);
-                    });
-                }
-            }
-
-            // Setup header column search
-            function setupHeaderColumnSearch() {
-                const parentSearch = document.getElementById('parentSearch');
-                const skuSearch = document.getElementById('skuSearch');
-                const globalSearch = document.getElementById('customSearch');
-
+                // Centralized filter logic that reads current values from DOM and filters tableData
                 function applyFilters() {
-                    const parentValue = parentSearch ? parentSearch.value.toLowerCase().trim() : '';
-                    const skuValue = skuSearch ? skuSearch.value.toLowerCase().trim() : '';
-                    const globalValue = globalSearch ? globalSearch.value.toLowerCase().trim() : '';
-
-                    console.log('Header Parent Search:', parentValue);
-                    console.log('Header SKU Search:', skuValue);
-                    console.log('Header Global Search:', globalValue);
+                    const parentValue = (document.getElementById('parentSearch')?.value || '').toLowerCase().trim();
+                    const skuValue = (document.getElementById('skuSearch')?.value || '').toLowerCase().trim();
+                    const globalValue = (document.getElementById('customSearch')?.value || '').toLowerCase().trim();
 
                     let filteredData = [...tableData];
 
                     if (parentValue) {
                         filteredData = filteredData.filter(item =>
-                            (item.Parent || item.parent || '').toLowerCase().includes(parentValue)
+                            ((item.Parent || item.parent || '') + '').toLowerCase().includes(parentValue)
                         );
                     }
 
                     if (skuValue) {
                         filteredData = filteredData.filter(item =>
-                            (item.SKU || item.sku || '').toLowerCase().includes(skuValue)
+                            ((item.SKU || item.sku || '') + '').toLowerCase().includes(skuValue)
                         );
                     }
 
                     if (globalValue) {
                         filteredData = filteredData.filter(item =>
                             Object.values(item).some(value =>
-                                String(value).toLowerCase().includes(globalValue)
+                                String(value || '').toLowerCase().includes(globalValue)
                             )
                         );
                     }
@@ -2263,8 +2214,35 @@
                     renderTable(filteredData);
                 }
 
-                if (parentSearch) parentSearch.addEventListener('input', debounce(applyFilters, 300));
-                if (skuSearch) skuSearch.addEventListener('input', debounce(applyFilters, 300));
+                // Use event delegation so listeners survive header re-rendering
+                document.addEventListener('input', debounce(function (e) {
+                    const id = e.target && e.target.id;
+                    if (!id) return;
+                    if (id === 'customSearch' || id === 'skuSearch' || id === 'parentSearch') {
+                        applyFilters();
+                    }
+                }, 250));
+
+                // Clear button (delegated click) - resets inputs and renders full table
+                document.addEventListener('click', function (e) {
+                    const target = e.target.closest ? e.target.closest('#clearSearch') : (e.target.id === 'clearSearch' ? e.target : null);
+                    if (!target) return;
+                    const custom = document.getElementById('customSearch');
+                    const sku = document.getElementById('skuSearch');
+                    const parent = document.getElementById('parentSearch');
+                    if (custom) custom.value = '';
+                    if (sku) sku.value = '';
+                    if (parent) parent.value = '';
+                    renderTable(tableData);
+                });
+            }
+
+            // Header column search is intentionally a no-op because we handle header inputs
+            // via delegated listeners inside setupSearch() above. Keeping this function
+            // prevents other code from breaking if it's called elsewhere.
+            function setupHeaderColumnSearch() {
+                // No-op: listeners are attached by setupSearch using delegation so they
+                // survive dynamic header updates.
             }
 
 
