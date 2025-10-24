@@ -321,33 +321,34 @@ class PricingMasterViewsController extends Controller
         $dobaProductSheetLookup = DB::table('doba_sheet_data')->whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
 
         // Fetch LMPA and LMP data
-        $lmpaLookup = collect();
-        try {
-            $lmpaLookup = DB::connection('repricer')
-                ->table('lmpa_data')
-                ->select('sku', DB::raw('MIN(price) as lowest_price'), DB::raw('MAX(link) as link'))
-                ->where('price', '>', 0)
-                ->whereIn('sku', $nonParentSkus)
-                ->groupBy('sku')
-                ->get()
-                ->keyBy('sku');
-        } catch (Exception $e) {
-            Log::warning('Could not fetch LMPA data from repricer_5core database: ' . $e->getMessage());
-        }
-
         $lmpLookup = collect();
-        try {
-            $lmpLookup = DB::connection('repricer')
-                ->table('lmp_data')
-                ->select('sku', DB::raw('MIN(price) as lowest_price'), DB::raw('MAX(link) as link'))
-                ->where('price', '>', 0)
-                ->whereIn('sku', $nonParentSkus)
-                ->groupBy('sku')
-                ->get()
-                ->keyBy('sku');
-        } catch (Exception $e) {
-            Log::warning('Could not fetch LMP data from repricer_5core database: ' . $e->getMessage());
-        }
+try {
+    $lmpLookup = DB::connection('repricer')
+        ->table('lmp_data as l1')
+        ->select('l1.sku', 'l1.price as lowest_price', 'l1.link')
+        ->where('l1.price', '>', 0)
+        ->whereIn('l1.sku', $nonParentSkus)
+        ->whereRaw('l1.price = (SELECT MIN(l2.price) FROM lmp_data l2 WHERE l2.sku = l1.sku AND l2.price > 0)')
+        ->get()
+        ->keyBy('sku');
+} catch (Exception $e) {
+    Log::warning('Could not fetch LMP data: ' . $e->getMessage());
+}
+
+$lmpaLookup = collect();
+try {
+    $lmpaLookup = DB::connection('repricer')
+        ->table('lmpa_data as l1')
+        ->select('l1.sku', 'l1.price as lowest_price', 'l1.link')
+        ->where('l1.price', '>', 0)
+        ->whereIn('l1.sku', $nonParentSkus)
+        ->whereRaw('l1.price = (SELECT MIN(l2.price) FROM lmpa_data l2 WHERE l2.sku = l1.sku AND l2.price > 0)')
+        ->get()
+        ->keyBy('sku');
+} catch (Exception $e) {
+    Log::warning('Could not fetch LMPA data: ' . $e->getMessage());
+}
+
 
 
         $processedData = [];
@@ -672,7 +673,7 @@ class PricingMasterViewsController extends Controller
                 'link' => $lmp ? ($lmp->link ?? null) : null,
                 'link_amz' => $lmpa ? ($lmpa->link ?? null) : null,
                 'link_ebay' => $lmp ? ($lmp->link ?? null) : null,
-                'link_shein' => $lmp ? ($lmp->link ?? null) : null,
+                'link_shein' => $shein ? ($shein->link1 ?? null) : null,
                 'link_tiktok' => $tiktok ? ($tiktok->link ?? null) : null,
                 'link_aliexpress' => $aliexpress ? ($aliexpress->link ?? null) : null,
                 'shopify_sheinl30' => $shein ? ($shein->shopify_sheinl30 ?? 0) : 0,
@@ -745,6 +746,7 @@ class PricingMasterViewsController extends Controller
             $item->shopifyb2c_l30 = $shopify ? $shopify->quantity : 0;
             $item->shopifyb2c_l30_data = $shopify ? $shopify->shopify_l30 : 0;
             $item->shopifyb2c_image = $shopify ? $shopify->image_src : null;
+            $item->image_url = $product->image_url;
             $item->shopifyb2c_pft = $item->shopifyb2c_price > 0 ? (($item->shopifyb2c_price * 0.75 - $lp - $ship) / $item->shopifyb2c_price) : 0;
             $item->shopifyb2c_roi = ($lp > 0 && $item->shopifyb2c_price > 0) ? (($item->shopifyb2c_price * 0.75 - $lp - $ship) / $lp) : 0;
 
@@ -1612,5 +1614,34 @@ class PricingMasterViewsController extends Controller
     {
 
         return view('pricing-master.pricing_master_copy', []);
+    }
+
+    public function saveImageUrl(Request $request)
+    {
+        $data = $request->validate([
+            'sku' => 'required|string',
+            'image_url' => 'required|url',
+        ]);
+
+        $product = ProductMaster::where('sku', $data['sku'])->first();
+
+        if (!$product) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Product not found',
+            ], 404);
+        }
+
+        $product->image_url = $data['image_url'];
+        $product->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Image URL saved successfully',
+            'data' => [
+                'sku' => $product->sku,
+                'image_url' => $product->image_url,
+            ]
+        ]);
     }
 }

@@ -626,8 +626,7 @@ class AmazonACOSController extends Controller
                 $expected1 = $sku;                
                 $expected2 = $sku . ' HEAD';      
 
-                return ($cleanName === $expected1 || $cleanName === $expected2)
-                    && strtoupper($item->campaignStatus) === 'ENABLED';
+                return ($cleanName === $expected1 || $cleanName === $expected2);
             });
 
             $matchedCampaignL7 = $amazonSpCampaignReportsL7->first(function ($item) use ($sku) {
@@ -635,8 +634,7 @@ class AmazonACOSController extends Controller
                 $expected1 = $sku;                
                 $expected2 = $sku . ' HEAD';      
 
-                return ($cleanName === $expected1 || $cleanName === $expected2)
-                    && strtoupper($item->campaignStatus) === 'ENABLED';
+                return ($cleanName === $expected1 || $cleanName === $expected2);
             });
 
 

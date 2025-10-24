@@ -323,7 +323,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     //Channel Ads Master
     Route::get('/channel/ads/master', [ChannelAdsMasterController::class, 'channelAdsMaster'])->name('channel.ads.master');
     Route::get('/channel/ads/data', [ChannelAdsMasterController::class, 'getAdsMasterData'])->name('channel.ads.data');
-
+    Route::get('/channel/adv/master', [ChannelAdsMasterController::class, 'channelAdvMaster'])->name('channel.adv.master');
 
 
     //Zero Visibility Master
@@ -1201,6 +1201,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::get('/pricing-master-data-views', [PricingMasterViewsController::class, 'getViewPricingAnalysisData']);
     Route::get('/pricing-master/roi-dashboard', [PricingMasterViewsController::class, 'getViewPricingAnalysisROIDashboardData']);
     Route::post('/pricing-master/save', [PricingMasterViewsController::class, 'save']);
+    Route::post('/pricing-master/save-image-url', [PricingMasterViewsController::class, 'saveImageUrl']);
     Route::get('/parent.pricing-masters', [PricingMasterViewsController::class, 'pricingMasterCopy']);
     Route::get('/calculate-cvr-masters', [PricingMasterViewsController::class, 'calculateCVRMasters']);
     Route::get('/calculate-wmp-masters', [PricingMasterViewsController::class, 'calculateWMPMasters']);
@@ -1856,12 +1857,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
         Route::get('/traffic/caraudio', 'getTrafficCaraudio')->name('traffic.caraudio');
         Route::get('/traffic/musicinst', 'getTrafficMusicInst')->name('traffic.musicinst');
         Route::get('/traffic/repaire', 'getTrafficRepaire')->name('traffic.repaire');
-        Route::get('/traffic/musicschool', 'getTrafficMusicSchool')->name('traffic.musicschool');
-
-
-
-       
-        
+        Route::get('/traffic/musicschool', 'getTrafficMusicSchool')->name('traffic.musicschool');       
     });
 
     Route::controller(ShoppableVideoController::class)->group(function () {
@@ -2225,6 +2221,19 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::get('', [RoutingController::class, 'index'])->name('root');
     Route::get('{firstShop}/{secondShop}', [ShopifyController::class, 'shopifyView'])->name('shopify');
     Route::get('{first}/{second}', [RoutingController::class, 'secondLevel'])->name('second');
+    Route::get('/.well-known/{file}', function ($file) {
+    $allowedFiles = ['assetlinks.json', 'apple-app-site-association', 'com.chrome.devtools.json'];
+    if (!in_array($file, $allowedFiles)) {
+        abort(404);
+    }
+
+    $path = public_path(".well-known/{$file}");
+    if (!file_exists($path)) {
+        abort(404);
+    }
+
+    return response()->file($path);
+})->where('file', '.*');
     Route::get('{first}/{second}/{third}', [RoutingController::class, 'thirdLevel'])->name('third');
     Route::post('/ebay-product-price-update', [EbayDataUpdateController::class, 'updatePrice'])->name('ebay_product_price_update');
 

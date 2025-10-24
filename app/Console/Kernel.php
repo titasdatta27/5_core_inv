@@ -38,7 +38,8 @@ class Kernel extends ConsoleKernel
         \App\Console\Commands\AutoUpdateAmazonFbaOverPtBids::class,
         \App\Console\Commands\AutoUpdateAmazonFbaUnderPtBids::class,
         \App\Console\Commands\GenerateMovementAnalysis::class,
-        \App\Console\Commands\UpdateEbaySuggestedBid::class
+        \App\Console\Commands\UpdateEbaySuggestedBid::class,
+        \App\Console\Commands\UpdateEbayTwoSuggestedBid::class,
 
     ];
 
@@ -200,6 +201,9 @@ class Kernel extends ConsoleKernel
             ->dailyAt('12:00')
             ->timezone('Asia/Kolkata');
         $schedule->command('ebay:update-suggestedbid')
+            ->dailyAt('12:00')
+            ->timezone('Asia/Kolkata');
+        $schedule->command('ebay2:update-suggestedbid')
             ->dailyAt('12:00')
             ->timezone('Asia/Kolkata');
         // end of bids update commands

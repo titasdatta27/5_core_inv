@@ -33,6 +33,8 @@ use App\Models\MacysListingStatus;
 use App\Models\EbayListingStatus;
 use App\Models\EbayTwoListingStatus;
 use App\Models\EbayThreeListingStatus;
+use App\Models\BestbuyUSAListingStatus;
+use App\Models\TiendamiaListingStatus;
 
 
 use App\Services\ShopifyApiService;
@@ -47,8 +49,9 @@ use App\Services\SheinApiService;
 use App\Services\DobaApiService;
 use App\Services\WayfairApiService;
 use App\Services\MacysApiService;
-use App\Services\BestbuyusaApiService;
-
+use App\Services\BestBuyApiService;
+use App\Services\TiendamiaApiService;
+use App\Services\AliExpressApiService;
 
 use GuzzleHttp\Client;
 
@@ -107,6 +110,9 @@ $marketplaces = [
     'ebay1'   => [EbayListingStatus::class,    'inventory_ebay1'],
     'ebay2'   => [EbayTwoListingStatus::class, 'inventory_ebay2'],
     'ebay3'   => [EbayThreeListingStatus::class,'inventory_ebay3'],
+    'bestbuy' => [BestbuyUSAListingStatus::class,'inventory_bestbuy'],
+    'tiendamia' => [TiendamiaListingStatus::class,'inventory_tiendamia'],
+    
 ];
 
 
@@ -147,43 +153,50 @@ foreach ($marketplaces as $key => [$model, $inventoryField]) {
 }
 
     
-    $freshData=$this->fetchFreshData();   
-    $datainfo=$this->getDataInfo($freshData);
+    // $freshData=$this->fetchFreshData();   
+    // $datainfo=$this->getDataInfo($freshData);
 
-    return response()->json([
-        'message' => 'Data fetched successfully',
-        'data' => $freshData,
-        'datainfo'=>$datainfo,
-        'status' => 200
-    ]);
+    // return response()->json([
+    //     'message' => 'Data fetched successfully',
+    //     'data' => $freshData,
+    //     'datainfo'=>$datainfo,
+    //     'status' => 200
+    // ]);
     
 }
 
 
 protected function fetchFreshData(){
-    ini_set('max_execution_time', 1500);
+    ini_set('max_execution_time', 300);
 
-    // Fetch fresh data from APIs
-    $delete=ProductStockMapping::truncate();
-    $shopifyInventoryData = (new ShopifyApiService())->getinventory();        
-    $parentskuList=$this->filterParentSKU($shopifyInventoryData);
-    $amazonInventoryData = (new AmazonSpApiService())->getinventory();
-    $walmartInventory=(new WalmartApiService())->getinventory();
-    $reverbInventory=(new ReverbApiService())->getInventory();
-    $sheinInventory = (new SheinApiService())->listAllProducts();
-    $dobaInventory = (new DobaApiService())->getinventory();
-    $temuInventory = (new TemuApiService())->getInventory();
-    $macyInventory = (new MacysApiService())->getInventory();
-    $ebay1Inventory = (new EbayApiService())->getEbayInventory();
-    $ebay2Inventory = (new Ebay2ApiService())->getEbayInventory();
-    $ebay3Inventory = (new Ebay3ApiService())->getEbayInventory();
-    $data = ProductStockMapping::all();
-    return $data;
+    $result=(new AliExpressApiService())->getInventory();
+    dd($result);
+    // $result=(new BestBuyApiService())->getInventory();
+    
+    // // Fetch fresh data from APIs
+    // $delete=ProductStockMapping::truncate();
+    // $shopifyInventoryData = (new ShopifyApiService())->getinventory();        
+    // $parentskuList=$this->filterParentSKU($shopifyInventoryData);
+    // $amazonInventoryData = (new AmazonSpApiService())->getinventory();
+    // $walmartInventory=(new WalmartApiService())->getinventory();
+    // $reverbInventory=(new ReverbApiService())->getInventory();
+    // $sheinInventory = (new SheinApiService())->listAllProducts();
+    // $dobaInventory = (new DobaApiService())->getinventory();
+    // $temuInventory = (new TemuApiService())->getInventory();
+    // $macyInventory = (new MacysApiService())->getInventory();
+    // $ebay1Inventory = (new EbayApiService())->getEbayInventory();
+    // $ebay2Inventory = (new Ebay2ApiService())->getEbayInventory();
+    // $ebay3Inventory = (new Ebay3ApiService())->getEbayInventory();
+    // $data = ProductStockMapping::all();
+    // return $data;
 }
 
 
 protected function fetchFreshDataU($type = null)
 {
+
+    //    $result=(new AliExpressApiService())->getInventory();
+    // dd($result);
     ini_set('max_execution_time', 1800);
     $progress = [];
       // Define all sources including Shopify
@@ -199,6 +212,8 @@ protected function fetchFreshDataU($type = null)
         'ebay1'   => fn() => (new EbayApiService())->getEbayInventory(),
         'ebay2'   => fn() => (new Ebay2ApiService())->getEbayInventory(),
         'ebay3'   => fn() => (new Ebay3ApiService())->getEbayInventory(),
+        'bestbuy'   => fn() => (new BestBuyApiService())->getInventory(),
+        'tiendamia'   => fn() => (new TiendamiaApiService())->getInventory(),
     ];
 
     if (!$type) {
@@ -247,6 +262,7 @@ protected function fetchFreshDataU($type = null)
 
 protected function safeFetch(callable $fetcher, string $platform, array &$progress)
 {
+
     try {
         $result = $fetcher();
         $progress[$platform] = 'Completed at ' . now()->toDateTimeString();
@@ -349,6 +365,16 @@ protected function getDataInfo($data){
             'notlisted' => 0,
             'nrl'=>0,
         ],
+          'bestbuy' => [
+            'listed' => 0,
+            'notlisted' => 0,
+            'nrl'=>0,
+        ],
+          'tiendamia' => [
+            'listed' => 0,
+            'notlisted' => 0,
+            'nrl'=>0,
+        ],
     ];
 
     foreach ($data as $item) {
@@ -395,6 +421,14 @@ protected function getDataInfo($data){
         if($item['inventory_ebay3']=='Not Listed'){  $info['ebay3']['notlisted']++; }
         else if($item['inventory_ebay3']=='NRL'){ $info['ebay3']['nrl']++;}
         else {  $info['ebay3']['listed']++; }
+
+         if($item['inventory_bestbuy']=='Not Listed'){  $info['bestbuy']['notlisted']++; }
+        else if($item['inventory_bestbuy']=='NRL'){ $info['bestbuy']['nrl']++;}
+        else {  $info['bestbuy']['listed']++; }
+
+         if($item['inventory_tiendamia']=='Not Listed'){  $info['tiendamia']['notlisted']++; }
+        else if($item['inventory_tiendamia']=='NRL'){ $info['tiendamia']['nrl']++;}
+        else {  $info['tiendamia']['listed']++; }
 
         // $shopifyQty = $item['inventory_shopify'] ?? null;
     
@@ -501,7 +535,7 @@ protected function filterParentSKU(array $data): array
         }
     }
 
-    public function refetchLiveDataU(Request $request){
+    public function refetchLiveDataU(Request $request){        
         $freshData=$this->fetchFreshDataU($request->source);   
         if($freshData){
             return response()->json(['status' => 'success']);

@@ -35,7 +35,10 @@ class Ebay2PMTAdController extends Controller
 
         $shopifyData = ShopifySku::whereIn("sku", $skus)->get()->keyBy("sku");
         $ebayMetrics = DB::connection('apicentral')->table('ebay2_metrics')->whereIn("sku", $skus)->get()->keyBy("sku");
-        $nrValues = EbayTwoDataView::whereIn("sku", $skus)->pluck("value", "sku");
+        $matchedSkus = $ebayMetrics->keys()->all();
+        $productMasters = $productMasters->whereIn('sku', $matchedSkus)->values();
+
+        $nrValues = EbayTwoDataView::whereIn("sku", $matchedSkus)->pluck("value", "sku");
 
         $itemIdToSku = $ebayMetrics->pluck('sku', 'item_id')->toArray();
         $campaignIdToSku = $ebayMetrics->pluck('sku', 'campaign_id')->toArray();

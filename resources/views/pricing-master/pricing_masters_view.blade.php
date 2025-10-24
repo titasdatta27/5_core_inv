@@ -1137,8 +1137,23 @@
                     field: "shopifyb2c_image",
                     formatter: function(cell) {
                         const value = cell.getValue();
-                        if (!value) return "";
-                        return `<img src="${value}" width="40" height="40" class="product-thumb" onmouseover="showImagePreview(this)" onmouseout="hideImagePreview()" style="cursor: pointer">`;
+                        const rowData = cell.getRow().getData();
+                        const sku = rowData.SKU;
+                        const imageUrl = rowData.image_url;
+
+                        // Priority: 1) Shopify image, 2) Product Master image_url, 3) Input field
+                        if (value) {
+                            // Show Shopify image
+                            return `<img src="${value}" width="40" height="40" class="product-thumb" onmouseover="showImagePreview(this)" onmouseout="hideImagePreview()" style="cursor: pointer">`;
+                        } else if (imageUrl) {
+                            // Show Product Master image_url
+                            return `<img src="${imageUrl}" width="40" height="40" class="product-thumb" onmouseover="showImagePreview(this)" onmouseout="hideImagePreview()" style="cursor: pointer">`;
+                        } else {
+                            // Show input field for URL when no image exists
+                            return `<input type="text" class="form-control form-control-sm image-url-input"
+                                placeholder="Enter image URL" data-sku="${sku}"
+                                style="width: 120px; font-size: 11px;">`;
+                        }
                     },
                     headerSort: false,
                     width: 70,
@@ -2111,6 +2126,15 @@
             return "$" + num.toFixed(2);
         }
 
+        // Copy SKU to clipboard function
+        function copySkuToClipboard(sku) {
+            navigator.clipboard.writeText(sku).then(() => {
+                // SKU copied to clipboard
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+        }
+
         // Marketplace table generator
         function buildOVL30Table(data) {
             console.log('Data LMP:', data.lmp, 'Data Link:', data.link);
@@ -2561,7 +2585,7 @@
             topSaveBtn.dataset.ship = data.SHIP || 0;
             topSaveBtn.dataset.temuShip = data.temu_ship || 0;
             topPushPrice.value = data.shopifyb2c_price || data.ebay_price || data.amz_price || '';
-            document.getElementById('ovl30SkuLabel').textContent = data.SKU ? `${data.SKU}` : "0";     
+            document.getElementById('ovl30SkuLabel').innerHTML = `${data.SKU || "0"} <button class="btn btn-sm btn-outline-primary ms-2" onclick="copySkuToClipboard('${data.SKU || "0"}')"><i class="bi bi-clipboard"></i></button>`;     
             document.getElementById('ovl30InvLabel').textContent = data.INV ? `${data.INV}` : "0"; 
             document.getElementById('ovl30').textContent = data.shopifyb2c_l30 ? `${data.shopifyb2c_l30}` : "0";    
             document.getElementById('total_views').textContent = data.total_views ? `${data.total_views}` : "0";  
@@ -2703,10 +2727,10 @@
 
             dialogEl.addEventListener('mousedown', dragStart);
             document.addEventListener('mousemove', drag);
-            document.addEventListener('mou seup', dragEnd);
+            document.addEventListener('mouseup', dragEnd);
 
             function dragStart(e) {
-                if (e.target.closest('.modal-header')) {
+                if (e.target.closest('.modal-header') && !e.target.closest('button')) {
                     isDragging = true;
                     initialX = e.clientX - xOffset;
                     initialY = e.clientY - yOffset;
@@ -3357,5 +3381,41 @@ function hideTooltip(img) {
         tooltip.style.visibility = 'hidden';
     }
 }
+
+// Handle image URL input blur event
+$(document).on('blur', '.image-url-input', function() {
+    const $input = $(this);
+    const imageUrl = $input.val().trim();
+    const sku = $input.data('sku');
+
+    if (!sku) return;
+
+    // If URL is empty, do nothing
+    if (!imageUrl) return;
+
+    // Save the image URL via AJAX
+    $.ajax({
+        url: '/pricing-master/save-image-url',
+        type: 'POST',
+        data: {
+            _token: $('meta[name="csrf-token"]').attr('content'),
+            sku: sku,
+            image_url: imageUrl
+        },
+        success: function(response) {
+            if (response.success) {
+                // Replace input field with image
+                const imageHtml = `<img src="${imageUrl}" width="40" height="40" class="product-thumb" onmouseover="showImagePreview(this)" onmouseout="hideImagePreview()" style="cursor: pointer">`;
+                $input.replaceWith(imageHtml);
+            } else {
+                alert('Failed to save image URL: ' + (response.message || 'Unknown error'));
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error saving image URL:', error);
+            alert('Error saving image URL. Please try again.');
+        }
+    });
+});
 </script>
 @endsection
