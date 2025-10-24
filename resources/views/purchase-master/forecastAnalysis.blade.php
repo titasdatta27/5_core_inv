@@ -700,18 +700,18 @@
 
                 {
                     title: "Transit",
-                    field: "c_sku_qty",
-                    accessor: row => (row ? row["c_sku_qty"] : null),
+                    field: "transit",
+                    accessor: row => (row ? row["transit"] : null),
                     sorter: "number",
                     headerSort: true,
                     hozAlign: "center",
                     formatter: function(cell) {
                         const row = cell.getRow();
-                        const c_sku_qty = row.getData().c_sku_qty;
+                        const transit = row.getData().transit;
                         let containerName = row.getData().containerName;
                         containerName = containerName.replace(/Container\s*(\d+)/i, "C-$1");
                         return `<div style="line-height:1.5;">
-                            <span style="font-weight:600;">${c_sku_qty}</span><br>
+                            <span style="font-weight:600;">${transit}</span><br>
                             <small class="text-info">${containerName}</small>
                         </div>`;
                     }

@@ -139,7 +139,7 @@ class ForecastAnalysisController extends Controller
             $item->containerName = $transitContainer[$normalizeSku($prodData->sku)]->tab_name ?? '';
             $noOfUnit = $transitContainer[$normalizeSku($prodData->sku)]->no_of_units ?? 0;
             $totalCtn = $transitContainer[$normalizeSku($prodData->sku)]->total_ctn ?? 0;
-            $item->c_sku_qty = $noOfUnit * $totalCtn;
+            $item->transit = $noOfUnit * $totalCtn;
 
             $readyToShipQty = 0;
             if($readyToShipMap->has($sheetSku)){
