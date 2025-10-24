@@ -625,6 +625,28 @@ class ZeroVisibilityMasterController extends Controller
         }
     }
 
+    private function getModelForChannel($channel)
+    {
+        $modelMap = [
+            'amazon' => AmazonDataView::class,
+            'ebay' => EbayDataView::class,
+            'ebaytwo' => EbayTwoDataView::class,
+            'ebaythree' => EbayThreeDataView::class,
+            'ebayvariation' => EbayDataView::class,
+            'temu' => TemuDataView::class,
+            'macy' => MacyDataView::class,
+            'wayfair' => WayfairDataView::class,
+            'doba' => DobaDataView::class,
+            'walmart' => WalmartDataView::class,
+            'aliexpress' => AliexpressDataView::class,
+            'tiktokshop' => TiktokShopDataView::class,
+            'shein' => SheinDataView::class,
+        ];
+
+        $key = strtolower(str_replace([' ', '&', '-', '/'], '', trim($channel)));
+        return $modelMap[$key] ?? null;
+    }
+
 
 
 

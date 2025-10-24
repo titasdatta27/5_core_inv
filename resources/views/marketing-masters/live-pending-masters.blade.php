@@ -98,39 +98,7 @@
         const debouncedTableReload = debounce(() => table.setData(), 300);
 
         // Handle R&A checkbox change
-        function handleRACheckbox(checkbox, channel) {
-            const isChecked = checkbox.checked;
-
-            // Ask for confirmation
-            const confirmMsg = `Are you sure you want to ${isChecked ? 'check' : 'uncheck'} the R&A box for "${channel}"?`;
-            if (!confirm(confirmMsg)) {
-                checkbox.checked = !isChecked; // Revert change if cancelled
-                return;
-            }
-
-            // Send to Laravel proxy
-            fetch('/update-ra-checkbox', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': window.csrfToken,
-                },
-                body: JSON.stringify({
-                    channel: channel,
-                    checked: isChecked
-                })
-            })
-            .then(res => res.json())
-            .then(data => {
-                console.log('Laravel proxy response:', data);
-                alert('Google Sheet updated successfully');
-            })
-            .catch(err => {
-                console.error('Error:', err);
-                alert('Error updating checkbox in Google Sheet');
-                checkbox.checked = !isChecked; // Revert if failed
-            });
-        }
+        
 
         // Enhanced number parsing function
         function parseNumber(value) {

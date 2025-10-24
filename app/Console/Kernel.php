@@ -98,26 +98,21 @@ class Kernel extends ConsoleKernel
             ->timezone('UTC');
         // Sync Temu sheet command
       
-        // Sync Newegg sheet command
-        $schedule->command('sync:neweegg-sheet')->everyTenMinutes();
-        // Sync Wayfair sheet command
-        $schedule->command('sync:wayfair-sheet')->everyTenMinutes();
+        $schedule->command('sync:neweegg-sheet')->twiceDaily(1, 13);
+        $schedule->command('sync:wayfair-sheet')->twiceDaily(2, 14);
 
-        $schedule->command('sync:shein-sheet')->daily();
+
+        $schedule->command('sync:shein-sheet')->twiceDaily(1, 13);
 
         // Sync Walmart sheet command
-        $schedule->command('sync:walmart-sheet')->everyTenMinutes();
-        $schedule->command('sync:temu-sheet-data')->everyTwelveHours();
+        $schedule->command('sync:walmart-sheet')->twiceDaily(1, 13);
+        $schedule->command('sync:temu-sheet-data')->twiceDaily(1, 13);
 
 
-        // // Sync eBay 2 sheet command
-        // $schedule->command('sync:ebay-two-sheet')->everyTenMinutes();
-        // // Sync eBay 3 sheet command
-        // $schedule->command('sync:ebay-three-sheet')->everyTenMinutes();
 
         // Sync Shopify sheet command
-        $schedule->command('sync:shopify-quantity')->everyTenMinutes()
-            ->timezone('UTC');   
+        $schedule->command('sync:shopify-quantity')->twiceDaily(1, 13);
+          
 
         $schedule->command('app:fetch-ebay-three-metrics')
             ->dailyAt('02:00')
@@ -209,7 +204,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('sync:tiktok-sheet-data')->everyMinute();
         $schedule->command('app:aliexpress-sheet-sync')->everyMinute();
         $schedule->command('app:fetch-ebay-table-data')->dailyAt('00:00');
-          $schedule->call(function () {
+        $schedule->call(function () {
             DB::connection('apicentral')
                 ->table('google_ads_campaigns')
                 ->where('id', 1)
