@@ -41,6 +41,8 @@ class TiktokAdsManagerController extends Controller
 
         $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy('sku');
 
+        $nrValues = AmazonDataView::whereIn('sku', $skus)->pluck('value', 'sku');
+
         $result = [];
 
         foreach ($productMasters as $pm) {
@@ -48,8 +50,6 @@ class TiktokAdsManagerController extends Controller
             $parent = $pm->parent;
 
             $shopify = $shopifyData[$pm->sku] ?? null;
-
-            $nrValues = AmazonDataView::whereIn('sku', $skus)->pluck('value', 'sku');
 
             $row = [];
             $row['parent'] = $parent;

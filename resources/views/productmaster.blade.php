@@ -1370,6 +1370,7 @@
 
             // Modified renderTable function to respect column permissions
             function renderTable(data) {
+                
                 const tbody = document.getElementById('table-body');
                 tbody.innerHTML = '';
 
@@ -1427,6 +1428,8 @@
                 // Before rendering rows, calculate totals for each parent
                 const parentTotals = {};
                 data.forEach(item => {
+                    console.log(item,'ddd');
+                    
                     if (item.Parent && !String(item.SKU).toUpperCase().includes('PARENT')) {
                         if (!parentTotals[item.Parent]) {
                             parentTotals[item.Parent] = {
@@ -1615,11 +1618,27 @@
                                 cell.textContent = formatNumber(item.upc, 0);
                                 break;
                             case "INV":
-                                cell.textContent = escapeHtml(item.shopify_inv) || '-';
+                                if (item.shopify_inv === 0 || item.shopify_inv === "0") {
+                                    cell.textContent = "0";
+                                } else if (item.shopify_inv === null || item.shopify_inv === undefined || item.shopify_inv === "") {
+                                    cell.textContent = "-";
+                                } else {
+                                    cell.textContent = escapeHtml(item.shopify_inv);
+                                }
                                 break;
+                                // cell.textContent = escapeHtml(item.shopify_inv) || '-';
+                                // break;
                             case "OV L30":
-                                cell.textContent = escapeHtml(item.shopify_quantity) || '-';
+                                if (item.shopify_quantity === 0 || item.shopify_quantity === "0") {
+                                    cell.textContent = "0";
+                                } else if (item.shopify_quantity === null || item.shopify_quantity === undefined || item.shopify_quantity === "") {
+                                    cell.textContent = "-";
+                                } else {
+                                    cell.textContent = escapeHtml(item.shopify_quantity);
+                                }
                                 break;
+                                // cell.textContent = escapeHtml(item.shopify_quantity) || '-';
+                                // break;
                             case "STATUS":
                                 cell.textContent = escapeHtml(item.status) || '-';
                                 break;

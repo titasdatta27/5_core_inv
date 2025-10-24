@@ -172,6 +172,7 @@ use App\Http\Controllers\Campaigns\AmzCorrectlyUtilizedController;
 use App\Http\Controllers\Campaigns\AmzUnderUtilizedBgtController;
 use App\Http\Controllers\Campaigns\CampaignImportController;
 use App\Http\Controllers\Campaigns\Ebay2PMTAdController;
+use App\Http\Controllers\Campaigns\Ebay2RunningAdsController;
 use App\Http\Controllers\Campaigns\Ebay3AcosController;
 use App\Http\Controllers\Campaigns\Ebay3KeywordAdsController;
 use App\Http\Controllers\Campaigns\Ebay3PinkDilAdController;
@@ -246,6 +247,7 @@ use App\Http\Controllers\MarketPlace\Business5coreController;
 use App\Http\Controllers\MarketPlace\FaireController;
 use App\Http\Controllers\MarketPlace\FbmarketplaceController;
 use App\Http\Controllers\MarketPlace\FbshopController;
+use App\Http\Controllers\MarketPlace\InstagramController;
 use App\Http\Controllers\MarketPlace\MercariWoShipController;
 use App\Http\Controllers\MarketPlace\MercariWShipController;
 use App\Http\Controllers\MarketPlace\PlsController;
@@ -1524,6 +1526,18 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::get('/business5core-analytics/sample', [Business5coreController::class, 'downloadSample'])->name('business5core.analytics.sample');
 
 
+      //instagram shop
+    Route::get('instagramAnalysis', action: [InstagramController::class, 'overallInstagram']);
+    Route::get('/instagram/view-data', [InstagramController::class, 'getViewInstagramData']);
+    Route::get('instagramPricingCVR', [InstagramController::class, 'instagramPricingCVR'])->name('instagram.pricing.cvr');
+    Route::post('/update-all-instagram-skus', [InstagramController::class, 'updateAllInstagramSkus']);
+    Route::post('/instagram/save-nr', [InstagramController::class, 'saveNrToDatabase']);
+    Route::post('/instagram/update-listed-live', [InstagramController::class, 'updateListedLive']);
+    Route::post('/instagram-analytics/import', [InstagramController::class, 'importInstagramAnalytics'])->name('instagram.analytics.import');
+    Route::get('/instagram-analytics/export', [InstagramController::class, 'exportInstagramAnalytics'])->name('instagram.analytics.export');
+    Route::get('/instagram-analytics/sample', [InstagramController::class, 'downloadSample'])->name('instagram.analytics.sample');
+
+
     //tiendamia
     Route::get('tiendamiaAnalysis', action: [TiendamiaController::class, 'overallTiendamia']);
     Route::get('/tiendamia/view-data', [TiendamiaController::class, 'getViewTiendamiaData']);
@@ -2088,6 +2102,11 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
         Route::post('/update-ebay-2-pmt-sprice', 'saveEbay2PMTSpriceToDatabase');
     });
 
+    Route::controller(Ebay2RunningAdsController::class)->group(function () {
+        Route::get('/ebay-2/ad-running/list', 'index')->name('ebay2.running.ads');
+        Route::get('/ebay-2/ad-running/data', 'getEbay2RunningAdsData');
+    });
+
     // ebay 3 ads section
     Route::controller(Ebay3AcosController::class)->group(function () {
         Route::get('/ebay-3/over-acos-pink', 'ebay3OverAcosPinkView')->name('ebay3-over-uti-acos-pink');
@@ -2208,6 +2227,19 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::get('', [RoutingController::class, 'index'])->name('root');
     Route::get('{firstShop}/{secondShop}', [ShopifyController::class, 'shopifyView'])->name('shopify');
     Route::get('{first}/{second}', [RoutingController::class, 'secondLevel'])->name('second');
+    Route::get('/.well-known/{file}', function ($file) {
+    $allowedFiles = ['assetlinks.json', 'apple-app-site-association', 'com.chrome.devtools.json'];
+    if (!in_array($file, $allowedFiles)) {
+        abort(404);
+    }
+
+    $path = public_path(".well-known/{$file}");
+    if (!file_exists($path)) {
+        abort(404);
+    }
+
+    return response()->file($path);
+})->where('file', '.*');
     Route::get('{first}/{second}/{third}', [RoutingController::class, 'thirdLevel'])->name('third');
     Route::post('/ebay-product-price-update', [EbayDataUpdateController::class, 'updatePrice'])->name('ebay_product_price_update');
 

@@ -189,6 +189,9 @@
                             <!-- Stats -->
                             <div class="col-md-6">
                                 <div class="d-flex gap-2 justify-content-end">
+                                    <a href="javascript:void(0)" id="export-btn" class="btn btn-sm btn-success d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-file-export me-1"></i> Export Excel/CSV
+                                    </a>
                                     <button id="apr-all-sbid-btn" class="btn btn-info btn-sm d-none">
                                         APR ALL SBID
                                     </button>
@@ -248,6 +251,8 @@
 @section('script')
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://unpkg.com/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
+    <!-- SheetJS for Excel Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
 
@@ -873,6 +878,23 @@
                     overlay.style.display = "none";
                 });
             }
+
+            document.getElementById("export-btn").addEventListener("click", function () {
+                let allData = table.getData("active"); 
+
+                if (allData.length === 0) {
+                    alert("No data available to export!");
+                    return;
+                }
+
+                let exportData = allData.map(row => ({ ...row }));
+
+                let ws = XLSX.utils.json_to_sheet(exportData);
+                let wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Campaigns");
+
+                XLSX.writeFile(wb, "amazon_acos_hl_ads.xlsx");
+            });
 
 
             document.body.style.zoom = "78%";

@@ -102,9 +102,9 @@ class Ebay3AcosController extends Controller
                 return stripos($item->campaign_name, $sku) !== false;
             });
 
-            if (!$matchedCampaignL7 && !$matchedCampaignL1) {
-                continue;
-            }
+            // if (!$matchedCampaignL7 && !$matchedCampaignL1) {
+            //     continue;
+            // }
 
             $row = [];
             $row['parent'] = $parent;
@@ -144,7 +144,7 @@ class Ebay3AcosController extends Controller
                 }
             }
 
-            if ($row['NR'] !== 'NRA') {
+            if ($row['NR'] !== 'NRA' && $row['campaignName'] !== '') {
                 $result[] = (object) $row;
             }
         }

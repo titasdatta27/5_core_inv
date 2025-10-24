@@ -130,8 +130,20 @@ class ProductMasterController extends Controller
             }
 
             // Add Shopify inv and quantity if available
-            $row['shopify_inv'] = $shopifySkus[$product->sku]->inv ?? null;
-            $row['shopify_quantity'] = $shopifySkus[$product->sku]->quantity ?? null;
+            // $row['shopify_inv'] = $shopifySkus[$product->sku]->inv ?? null;
+            // $row['shopify_quantity'] = $shopifySkus[$product->sku]->quantity ?? null;
+
+            if (isset($shopifySkus[$product->sku])) {
+                $shopifyData = $shopifySkus[$product->sku];
+                $row['shopify_inv'] = $shopifyData->inv !== null ? (float)$shopifyData->inv : 0;
+                $row['shopify_quantity'] = $shopifyData->quantity !== null ? (float)$shopifyData->quantity : 0;
+                $shopifyImage = $shopifyData->image_src ?? null;
+            } else {
+                $row['shopify_inv'] = 0;
+                $row['shopify_quantity'] = 0;
+                $shopifyImage = null;
+            }
+
 
             $shopifyImage = $shopifySkus[$product->sku]->image_src ?? null;
             // image_path is inside $row (from Values JSON)

@@ -2048,8 +2048,7 @@
                 const zeroCount = tableData.filter(item => {
                     const clicks = parseFloat(item.Views) || 0;
                     const inv = parseFloat(item.INV) || 0;
-                    // return clicks === 0 && inv > 0 && item.NR !== 'NR';
-                    return clicks === 0 && inv > 0;
+                    return clicks === 0 && inv > 0 && item.NR !== 'NR';
                 }).length;
 
                 $('#zero-view-div').html(`${zeroCount}`);

@@ -117,6 +117,13 @@
         .red-bg {
             color: #ff2727 !important;
         }
+
+        .tabulator-col-title {
+            white-space: normal !important;
+            overflow: visible !important;
+            height: auto !important;
+            line-height: 1.2em;
+        }
     </style>
 @endsection
 @section('content')
@@ -400,7 +407,7 @@
                     visible: false
                 },
                 {
-                    title: 'SPEND L30 <span class="text-muted" id="spend-l30-total"></span>',
+                    title: 'SPEND L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="spend-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "SPEND_L30",
                     formatter: function(cell) {
                         let SPEND_L30 = cell.getValue();
@@ -428,7 +435,7 @@
                     visible: false
                 },
                 {
-                    title: 'SPEND L7 <span class="text-muted" id="spend-l7-total"></span>',
+                    title: 'SPEND L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="spend-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "SPEND_L7",
                     formatter: function(cell) {
                         let SPEND_L7 = cell.getValue();
@@ -456,7 +463,7 @@
                     visible: false
                 },
                 {
-                    title: 'CLICKS L30 <span class="text-muted" id="clicks-l30-total"></span>',
+                    title: 'CLICKS L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="clicks-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "CLICKS_L30",
                     formatter: function(cell) {
                         let CLICKS_L30 = cell.getValue();
@@ -484,7 +491,7 @@
                     visible: false
                 },
                 {
-                    title: 'CLICKS L7 <span class="text-muted" id="clicks-l7-total"></span>',
+                    title: 'CLICKS L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="clicks-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "CLICKS_L7",
                     formatter: function(cell) {
                         let CLICKS_L7 = cell.getValue();
@@ -512,7 +519,7 @@
                     visible: false
                 },
                 {
-                    title: 'IMP L30 <span class="text-muted" id="imp-l30-total"></span>',
+                    title: 'IMP L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="imp-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "IMP_L30",
                     formatter: function(cell) {
                         let IMP_L30 = cell.getValue();
@@ -540,7 +547,7 @@
                     visible: false
                 },
                 {
-                    title: 'IMP L7 <span class="text-muted" id="imp-l7-total"></span>',
+                    title: 'IMP L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="imp-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "IMP_L7",
                     formatter: function(cell) {
                         let IMP_L7 = cell.getValue();

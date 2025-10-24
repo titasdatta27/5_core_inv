@@ -1008,83 +1008,44 @@
   
 
     <div class="row">
-        {{-- <div class="col-xxl-3 col-sm-6">
-            <div class="card widget-flat text-bg-danger">
-                <div class="card-body">
-                    <h4 class="my-3">Not Listed</h4>
-                    <h6 class="text-uppercase mt-0" title="Customers">Shopify: <span id="shopifynotlisted"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Amazon: <span id="amazonnotlisted"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Walmart: <span id="walmartnotlisted"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Reverb: <span id="reverbnotlisted"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Shein: <span id="sheinnotlisted"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Doba: <span id="dobanotlisted"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Temu: <span id="temunotlisted"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Macy: <span id="macynotlisted"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Ebay1: <span id="ebay1notlisted"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Ebay2: <span id="ebay2notlisted"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Ebay3: <span id="ebay3notlisted"></span></h6>
-                   
-                </div>
-            </div>
-        </div>  --}}
-        <!-- end col-->
 
-        <div class="col-xxl-3 col-sm-6">
-            <div class="card widget-flat text-bg-danger">
+         <div class="col-xxl-3 col-sm-6">
+            <button id="NotMatching" class="text-danger btn btn-primary btn-sm" style="font-size:22px;background:#fff;cursor: pointer;margin:3px;">Not Matching Total: <span id="totalNotMatching"></span></button>
+            
+            <div class="card widget-flat text-bg-danger" style="display:none;" id="showNotMatching">
                 <div class="card-body">
+                    {{-- <div class="float-end">
+                        <i class="ri-eye-line widget-icon"></i>
+                    </div> --}}
                     <h4 class="my-3">Not Matching</h4>
-                    <h6 class="text-uppercase mt-0" title="Customers">Shopify: <span id="shopifynotmatching"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Amazon: <span id="amazonnotmatching"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Walmart: <span id="walmartnotmatching"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Reverb: <span id="reverbnotmatching"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Shein: <span id="sheinnotmatching"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Doba: <span id="dobanotmatching"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Temu: <span id="temunotmatching"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Macy: <span id="macynotmatching"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Ebay1: <span id="ebay1notmatching"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Ebay2: <span id="ebay2notmatching"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Ebay3: <span id="ebay3notmatching"></span></h6>
+                    <div class="row">
+                        <div class="col">
+                            <h5 class="text-uppercase mt-0" title="Shopify Not Listed">Shopify: <span id="shopifymatching"></span></h5>
+                            <h5 class="text-uppercase mt-0" title="Customers">Amazon: <span id="amazonmatching"></span></h5>
+                            <h5 class="text-uppercase mt-0" title="Customers">Walmart: <span id="walmartmatching"></span></h5>
+                            <h5 class="text-uppercase mt-0" title="Customers">Reverb: <span id="reverbmatching"></span></h5>
+                            <h5 class="text-uppercase mt-0" title="Customers">Shein: <span id="sheinmatching"></span></h5>
+                            <h5 class="text-uppercase mt-0" title="Customers">Doba: <span id="dobamatching"></span></h5>
+                        </div>
+                        <div class="col">
+                            <h5 class="text-uppercase mt-0" title="Customers">Temu: <span id="temumatching"></span></h5>
+                            <h5 class="text-uppercase mt-0" title="Customers">Macy: <span id="macymatching"></span></h5>
+                            <h5 class="text-uppercase mt-0" title="Customers">Ebay1: <span id="ebay1matching"></span></h5>
+                            <h5 class="text-uppercase mt-0" title="Customers">Ebay2: <span id="ebay2matching"></span></h5>
+                            <h5 class="text-uppercase mt-0" title="Customers">Ebay3: <span id="ebay3matching"></span></h5>
+                            {{-- <h5 class="text-uppercase mt-0" title="Customers">Ebay3: <span id="ebay3matching"></span></h5> --}}
+                        </div>
+                    </div>
+                    
+                    
+                    <!-- <p class="mb-0">
+                        <span class="badge bg-white bg-opacity-10 me-1">2.97%</span>
+                        <span class="text-nowrap">Since last month</span>
+                    </p> -->
                 </div>
             </div>
         </div> <!-- end col-->
 
-        <div class="col-xxl-3 col-sm-6">
-            <div class="card widget-flat text-bg-success">
-                <div class="card-body">
-                    <h4 class="my-3">Listed</h4>
-                    <h6 class="text-uppercase mt-0" title="Customers">Shopify: <span id="shopifylisted"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Amazon: <span id="amazonlisted"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Walmart: <span id="walmartlisted"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Reverb: <span id="reverblisted"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Shein: <span id="sheinlisted"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Doba: <span id="dobalisted"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Temu: <span id="temulisted"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Macy: <span id="macylisted"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Ebay1: <span id="ebay1listed"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Ebay2: <span id="ebay2listed"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Ebay3: <span id="ebay3listed"></span></h6>
-                </div>
-            </div>
-        </div> <!-- end col-->
-
-        <div class="col-xxl-3 col-sm-6">
-            <div class="card widget-flat text-bg-success">
-                <div class="card-body">
-                    <h4 class="my-3">Matching</h4>
-                    <h6 class="text-uppercase mt-0" title="Customers">Shopify: <span id="shopifymatching"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Amazon: <span id="amazonmatching"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Walmart: <span id="walmartmatching"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Reverb: <span id="reverbmatching"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Shein: <span id="sheinmatching"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Doba: <span id="dobamatching"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Temu: <span id="temumatching"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Macy: <span id="macymatching"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Ebay1: <span id="ebay1matching"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Ebay2: <span id="ebay2matching"></span></h6>
-                    <h6 class="text-uppercase mt-0" title="Customers">Ebay3: <span id="ebay3matching"></span></h6>
-                </div>
-            </div>
-        </div> <!-- end col-->
     </div>
     <div class="row">
         <div class="col-12">
@@ -1097,7 +1058,7 @@
                     <!-- Controls row -->
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <!-- Left side controls -->
-                        <div class="form-inline">
+                        {{-- <div class="form-inline">
                             <div class="form-group mr-2">
                                 <label for="row-data-type" class="mr-2">Filter Type:</label>
                                 <select id="row-data-type" class="form-control form-control-sm">
@@ -1106,7 +1067,7 @@
                                     <option value="notmatching">Mismatch</option>                                  
                                 </select>
                             </div>
-                        </div>
+                        </div> --}}
                        
 
                     <!-- Search on right -->
@@ -1118,8 +1079,32 @@
                             </div>
                         </div>
                         <div class="form-inline">
-                            <button id="updatenotrequired" class="btn btn-primary btn-sm">Update Not Required</button>
-                            <button id="reFetchliveData" class="btn btn-primary btn-sm">Refech Live Data</button>
+                            {{-- <button id="updatenotrequired" class="btn btn-primary btn-sm">Update Not Required</button> --}}
+                            {{-- <button id="reFetchliveData" class="btn btn-primary btn-sm">Refech Live Data</button> --}}
+                            <div class="row">
+                                <div class="col">
+                                    <select id="refetchFilter" class="form-select-sm border border-primary" style="width: 150px;">
+                                        <option>🔁 Fetch For</option>
+                                        <option value="sku">🔹 SKU (Child)</option>
+                                        <option value="shopify">🔸Shopify</option>
+                                        <option value="amazon">🔹Amazon</option>
+                                        <option value="walmart">🔸Walmart</option>
+                                        <option value="reverb">🔹Reverb</option>
+                                        <option value="shein">🔸Shein</option>
+                                        <option value="doba">🔹Doba</option>
+                                        <option value="temu">🔸Temu</option>
+                                        <option value="macy">🔹Macy</option>
+                                        <option value="ebay1">🔸Ebay1</option>
+                                        <option value="ebay2">🔹Ebay2</option>
+                                        <option value="ebay3">🔸Ebay3</option>
+                                        <option value="bestbuy">🔹BestBuyUSA</option>
+                                        <option value="tiendamia">🔸Tiendamia</option>
+                                    </select>
+                                </div>
+                                <div class="col">
+                                    <button id="reFetchliveDataFor" class="btn btn-primary btn-sm">Refetch For</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="row">
@@ -1128,7 +1113,7 @@
                             <div class="table-container">
                         <table class="custom-resizable-table" id="inventory-table">
                             <thead>
-                                <tr><th colspan="15" class="text-center text-bg-success"><b>Inventory</b></th></tr>                                
+                                <tr><th colspan="17" class="text-center text-bg-success"><b>Inventory</b></th></tr>                                
                                 <tr>
                                      <th style="max-width: 30px;">Not Required</th>
                                     <th style="max-width: 30px;">Image</th>
@@ -1151,86 +1136,119 @@
                                         </div>
                                     </th> --}}
 
-                                     <th data-field="INV_shopify" style="vertical-align: middle; white-space: nowrap;">
-                                        <div class="d-flex flex-column align-items-center sortable">
+                                     <th style="vertical-align: middle; white-space: nowrap;">
+                                        <div data-field="INV_shopify" class="d-flex flex-column align-items-center sortable">
                                             <div class="d-flex align-items-left">
-                                                 Shopfiy <span class="sort-arrow">↓</span>
+                                                 Shopify <span class="sort-arrow">↓</span>
                                             </div>
-                                            
+                                                <a href="{{ route('listing.shopifyb2c') }}" target="_blank"><span class="text-danger text-center mx-auto d-block" id="hShopifynm"></span></a>
                                             </div>
+                                        </div>
+                                    </th>
+                                    
+                                    <th style="vertical-align: middle; white-space: nowrap;">
+                                        <div data-field="INV_amazon" class="d-flex flex-column align-items-center">
+                                            <div class="d-flex align-items-center">
+                                                Amazon <span class="sort-arrow">↓</span>
+                                            </div>                                           
+                                            <a href="{{ route('listing.amazon') }}" target="_blank"><span class="text-danger text-center mx-auto d-block" id="hAmazonnm"></span></a>
                                         </div>
                                     </th>
 
-                                  
-                                  
-                                     <th data-field="INV_amazon" style="vertical-align: middle; white-space: nowrap;">
-                                        <div class="d-flex flex-column align-items-center">
-                                            <div class="d-flex align-items-center">
-                                                Amazon <span class="sort-arrow">↓</span>
-                                            </div>                                            
-                                        </div>
-                                    </th>
-                                     <th data-field="INV_wallmart" style="vertical-align: middle; white-space: nowrap;">
-                                        <div class="d-flex flex-column align-items-center">
+                                     <th style="vertical-align: middle; white-space: nowrap;">
+                                        <div data-field="INV_wallmart" class="d-flex flex-column align-items-center">
                                             <div class="d-flex align-items-center">
                                                 Walmart <span class="sort-arrow">↓</span>
-                                            </div>                                            
+                                            </div>
+                                            <a href="{{ route('listing.walmart') }}" target="_blank"><span class="text-danger text-center mx-auto d-block" id="hWalmartnm"></span></a>
                                         </div>
                                     </th>
-                                     <th data-field="INV_reverb" style="vertical-align: middle; white-space: nowrap;">
-                                        <div class="d-flex flex-column align-items-center">
+
+                                     <th style="vertical-align: middle; white-space: nowrap;">                                        
+                                        <div data-field="INV_reverb" class="d-flex flex-column align-items-center">
                                             <div class="d-flex align-items-center">
                                                 Reverb <span class="sort-arrow">↓</span>
                                             </div>                                            
                                         </div>
+                                        <a href="{{ route('listing.reverb') }}" target="_blank"><span class="text-danger text-center mx-auto d-block" id="hReverbnm"></span></a>
                                     </th>
-                                    <th data-field="INV_shein" style="vertical-align: middle; white-space: nowrap;">
-                                        <div class="d-flex flex-column align-items-center">
+
+                                    <th style="vertical-align: middle; white-space: nowrap;">
+                                        <div data-field="INV_shein" class="d-flex flex-column align-items-center">
                                             <div class="d-flex align-items-center">
                                                 Shein <span class="sort-arrow">↓</span>
                                             </div>                                            
+                                            <a href="{{ route('listing.shein') }}" target="_blank"><span class="text-danger text-center mx-auto d-block" id="hSheinnm"></span></a>
                                         </div>
                                     </th>
-                                    <th data-field="INV_doba" style="vertical-align: middle; white-space: nowrap;">
-                                        <div class="d-flex flex-column align-items-center">
+                                    
+                                    <th style="vertical-align: middle; white-space: nowrap;">
+                                        <div data-field="INV_doba" class="d-flex flex-column align-items-center">
                                             <div class="d-flex align-items-center">
                                                 Doba <span class="sort-arrow">↓</span>
                                             </div>                                            
+                                            <a href="{{ route('listing.doba') }}" target="_blank"><span class="text-danger text-center mx-auto d-block" id="hDobanm"></span></a>
                                         </div>
                                     </th>
-                                    <th data-field="INV_temu" style="vertical-align: middle; white-space: nowrap;">
-                                        <div class="d-flex flex-column align-items-center">
+
+                                    <th style="vertical-align: middle; white-space: nowrap;">
+                                        <div data-field="INV_temu" class="d-flex flex-column align-items-center">
                                             <div class="d-flex align-items-center">
                                                 Temu <span class="sort-arrow">↓</span>
                                             </div>                                            
+                                            <a href="{{ route('listing.temu') }}" target="_blank"><span class="text-danger text-center mx-auto d-block" id="hTemunm"></span></a>
                                         </div>
                                     </th>
-                                    <th data-field="INV_macy" style="vertical-align: middle; white-space: nowrap;">
-                                        <div class="d-flex flex-column align-items-center">
+
+                                    <th style="vertical-align: middle; white-space: nowrap;">
+                                        <div data-field="INV_macy" class="d-flex flex-column align-items-center">
                                             <div class="d-flex align-items-center">
                                                 Macy <span class="sort-arrow">↓</span>
                                             </div>                                            
+                                            <a href="{{ route('listing.macys') }}" target="_blank"><span class="text-danger text-center mx-auto d-block" id="hMacynm"></span></a>
                                         </div>
                                     </th>
-                                    <th data-field="INV_ebay1" style="vertical-align: middle; white-space: nowrap;">
-                                        <div class="d-flex flex-column align-items-center">
+
+                                    <th style="vertical-align: middle; white-space: nowrap;">
+                                        <div data-field="INV_ebay1" class="d-flex flex-column align-items-center">
                                             <div class="d-flex align-items-center">
                                                 Ebay1 <span class="sort-arrow">↓</span>
                                             </div>                                            
+                                            <a href="{{ route('listing.ebay') }}" target="_blank"><span class="text-danger text-center mx-auto d-block" id="hEbay1nm"></span></a>
                                         </div>
                                     </th>
-                                    <th data-field="INV_ebay2" style="vertical-align: middle; white-space: nowrap;">
-                                        <div class="d-flex flex-column align-items-center">
+                                    <th style="vertical-align: middle; white-space: nowrap;">
+                                        <div data-field="INV_ebay2" class="d-flex flex-column align-items-center">
                                             <div class="d-flex align-items-center">
                                                 Ebay2 <span class="sort-arrow">↓</span>
                                             </div>                                            
+                                            <a href="{{ route('listing.ebayTwo') }}" target="_blank"><span class="text-danger text-center mx-auto d-block" id="hEbay2nm"></span></a>
                                         </div>
                                     </th>
-                                    <th data-field="INV_ebay3" style="vertical-align: middle; white-space: nowrap;">
-                                        <div class="d-flex flex-column align-items-center">
+                                    <th style="vertical-align: middle; white-space: nowrap;">
+                                        <div data-field="INV_ebay3" class="d-flex flex-column align-items-center">
                                             <div class="d-flex align-items-center">
                                                 Ebay3 <span class="sort-arrow">↓</span>
                                             </div>                                            
+                                            <a href="{{ route('listing.ebayThree') }}" target="_blank"><span class="text-danger text-center mx-auto d-block" id="hEbay3nm"></span></a>
+                                        </div>
+                                    </th>
+
+                                    <th style="vertical-align: middle; white-space: nowrap;">
+                                        <div data-field="INV_bestbuy" class="d-flex flex-column align-items-center">
+                                            <div class="d-flex align-items-center">
+                                                BestBuyUSA <span class="sort-arrow">↓</span>
+                                            </div>                                            
+                                            <a href="{{ route('listing.bestbuyusa') }}" target="_blank"><span class="text-danger text-center mx-auto d-block" id="hbestbuynm"></span></a>
+                                        </div>
+                                    </th>
+
+                                    <th style="vertical-align: middle; white-space: nowrap;">
+                                        <div data-field="INV_tiendamia" class="d-flex flex-column align-items-center">
+                                            <div class="d-flex align-items-center">
+                                                Tiendamia <span class="sort-arrow">↓</span>
+                                            </div>                                            
+                                            <a href="{{ route('listing.tiendamia') }}" target="_blank"><span class="text-danger text-center mx-auto d-block" id="htiendamianm"></span></a>
                                         </div>
                                     </th>
                                 </tr>
@@ -1239,83 +1257,139 @@
                                     <th>&nbsp;</th>
                                     <th>&nbsp;</th>
                                     <th>&nbsp;</th>
+
                                     <th><div class="mt-1 dropdown-search-container">
                                                <select id="filter-shopify" class="form-control form-control-sm">
                                                     <option value="all">All</option>
-                                                    <option value="listed">Listed</option>
-                                                    <option value="notlisted">Not Listed</option>                                  
+                                                    <option value="matching">Matching</option>
+                                                    <option value="notmatching">Not Matching</option>                                  
+                                                    {{-- <option value="nrl">NRL</option> --}}
                                                 </select>
-                                            </div> </th>
+                                            </div> 
+                                        <span class="text-danger text-center mx-auto d-block" id="filter-shopify-count"></span>
+                                        </th>
                                     <th><div class="d-flex align-items-center">
                                                 <select id="filter-amazon" class="form-control form-control-sm">
                                                     <option value="all">All</option>
-                                                    <option value="listed">Listed</option>
-                                                    <option value="notlisted">Not Listed</option>
+                                                    <option value="matching">Matching</option>
+                                                    <option value="notmatching">Not Matching</option>
+                                                    {{-- <option value="nrl">NRL</option> --}}
                                                 </select>
-                                            </div></th>
+                                            </div>
+                                        <span class="text-danger text-center mx-auto d-block" id="filter-amazon-count"></span>
+                                        </th>
                                             <th><div class="d-flex align-items-center">
                                                 <select id="filter-walmart" class="form-control form-control-sm">
                                                     <option value="all">All</option>
-                                                    <option value="listed">Listed</option>
-                                                    <option value="notlisted">Not Listed</option>
-                                                </select>
-                                            </div></th>
+                                                    <option value="matching">Matching</option>
+                                                    <option value="notmatching">Not Matching</option>
+                                                    {{-- <option value="nrl">NRL</option> --}}
+                                                </select>                                                                                                
+                                            </div>
+                                            <span class="text-danger text-center mx-auto d-block" id="filter-walmart-count"></span>
+                                        </th>
                                               <th><div class="d-flex align-items-center">
                                                 <select id="filter-reverb" class="form-control form-control-sm">
                                                     <option value="all">All</option>
-                                                    <option value="listed">Listed</option>
-                                                    <option value="notlisted">Not Listed</option>
+                                                    <option value="matching">Matching</option>
+                                                    <option value="notmatching">Not Matching</option>
+                                                    {{-- <option value="nrl">NRL</option> --}}
                                                 </select>
-                                            </div></th>
+                                            </div>
+                                            <span class="text-danger text-center mx-auto d-block" id="filter-reverb-count"></span>
+                                        </th>
                                              <th><div class="d-flex align-items-center">
                                                 <select id="filter-shein" class="form-control form-control-sm">
                                                     <option value="all">All</option>
-                                                    <option value="listed">Listed</option>
-                                                    <option value="notlisted">Not Listed</option>
+                                                    <option value="matching">Matching</option>
+                                                    <option value="notmatching">Not Matching</option>
+                                                    {{-- <option value="nrl">NRL</option> --}}
                                                 </select>
-                                            </div></th>
+                                            </div>
+                                        <span class="text-danger text-center mx-auto d-block" id="filter-shein-count"></span>
+                                        </th>
                                             <th><div class="d-flex align-items-center">
                                                 <select id="filter-doba" class="form-control form-control-sm">
                                                     <option value="all">All</option>
-                                                    <option value="listed">Listed</option>
-                                                    <option value="notlisted">Not Listed</option>
+                                                    <option value="matching">Matching</option>
+                                                    <option value="notmatching">Not Matching</option>
+                                                    {{-- <option value="nrl">NRL</option> --}}
                                                 </select>
-                                            </div></th>
+                                            </div>
+                                        <span class="text-danger text-center mx-auto d-block" id="filter-doba-count"></span>
+                                        </th>
                                             <th><div class="d-flex align-items-center">
                                                 <select id="filter-temu" class="form-control form-control-sm">
                                                     <option value="all">All</option>
-                                                    <option value="listed">Listed</option>
-                                                    <option value="notlisted">Not Listed</option>
+                                                    <option value="matching">Matching</option>
+                                                    <option value="notmatching">Not Matching</option>
+                                                    {{-- <option value="nrl">NRL</option> --}}
                                                 </select>
-                                            </div></th>
+                                            </div>
+                                        <span class="text-danger text-center mx-auto d-block" id="filter-temu-count"></span>
+                                        </th>
                                               <th><div class="d-flex align-items-center">
                                                 <select id="filter-macy" class="form-control form-control-sm">
                                                     <option value="all">All</option>
-                                                    <option value="listed">Listed</option>
-                                                    <option value="notlisted">Not Listed</option>
+                                                    <option value="matching">Matching</option>
+                                                    <option value="notmatching">Not Matching</option>
+                                                    {{-- <option value="nrl">NRL</option> --}}
                                                 </select>
-                                            </div></th>
+                                            </div>
+                                            <span class="text-danger text-center mx-auto d-block" id="filter-macy-count"></span>
+                                        </th>
                                              <th><div class="d-flex align-items-center">
                                                 <select id="filter-ebay1" class="form-control form-control-sm">
                                                     <option value="all">All</option>
-                                                    <option value="listed">Listed</option>
-                                                    <option value="notlisted">Not Listed</option>
+                                                    <option value="matching">Matching</option>
+                                                    <option value="notmatching">Not Matching</option>
+                                                    {{-- <option value="nrl">NRL</option> --}}
                                                 </select>
-                                            </div></th>
+                                            </div>
+                                            <span class="text-danger text-center mx-auto d-block" id="filter-ebay1-count"></span>
+                                        </th>
                                             <th><div class="d-flex align-items-center">
                                                 <select id="filter-ebay2" class="form-control form-control-sm">
                                                     <option value="all">All</option>
-                                                    <option value="listed">Listed</option>
-                                                    <option value="notlisted">Not Listed</option>
+                                                    <option value="matching">Matching</option>
+                                                    <option value="notmatching">Not Matching</option>
+                                                    {{-- <option value="nrl">NRL</option> --}}
                                                 </select>
-                                            </div></th>
+                                            </div>
+                                            <span class="text-danger text-center mx-auto d-block" id="filter-ebay2-count"></span>
+                                        </th>
                                             <th><div class="d-flex align-items-center">
                                                 <select id="filter-ebay3" class="form-control form-control-sm">
                                                     <option value="all">All</option>
-                                                    <option value="listed">Listed</option>
-                                                    <option value="notlisted">Not Listed</option>
+                                                    <option value="matching">Matching</option>
+                                                    <option value="notmatching">Not Matching</option>
+                                                    {{-- <option value="nrl">NRL</option> --}}
                                                 </select>
-                                            </div></th>
+                                            </div>
+                                        <span class="text-danger text-center mx-auto d-block" id="filter-ebay3-count"></span>
+                                        </th>
+
+                                         <th><div class="d-flex align-items-center">
+                                                <select id="filter-bestbuy" class="form-control form-control-sm">
+                                                    <option value="all">All</option>
+                                                    <option value="matching">Matching</option>
+                                                    <option value="notmatching">Not Matching</option>
+                                                    <option value="nrl">NRL</option>
+                                                </select>
+                                            </div>
+                                        <span class="text-danger text-center mx-auto d-block" id="filter-bestbuy-count"></span>
+                                        </th>
+                                          <th><div class="d-flex align-items-center">
+                                                <select id="filter-tiendamia" class="form-control form-control-sm">
+                                                    <option value="all">All</option>
+                                                    <option value="matching">Matching</option>
+                                                    <option value="notmatching">Not Matching</option>
+                                                    {{-- <option value="nrl">NRL</option> --}}
+                                                </select>
+                                            </div>
+                                        <span class="text-danger text-center mx-auto d-block" id="filter-tiendamia-count"></span>
+                                        </th>
+
                                 </tr>
                             </thead>
                             <tbody>
@@ -1378,14 +1452,7 @@
                 <div class="modal-body p-0">
                     <div class="row g-0">
                         <div class="col-12">  
-                            <div class="row">
-                                <div class="col">
-                                    <div id="stockContent" class="p-3" style="color: #000000; width:100%; max-height: 70vh; overflow-y: auto;"></div>                            
-                                </div>
-                                <div class="col">
-                                    <div id="stockContent1" class="p-3" style="color: #000000; width:100%; max-height: 70vh; overflow-y: auto;"></div>                            
-                                </div>
-                            </div>                                                     
+                            <div id="stockContent" class="p-3" style="color: #000000; width:100%; max-height: 70vh; overflow-y: auto;"></div>                                                        
                         </div>
                     </div>
                 </div>
@@ -1441,138 +1508,165 @@
                     : Object.values(response.data || {});
                 
                 datainfo=response.datainfo;                
-                $('#shopifynotlisted').text(datainfo.shopify.notlisted);
-                $('#amazonnotlisted').text(datainfo.amazon.notlisted);
-                $('#walmartnotlisted').text(datainfo.walmart.notlisted);
-                $('#reverbnotlisted').text(datainfo.reverb.notlisted);
-                $('#sheinnotlisted').text(datainfo.shein.notlisted);
-                $('#dobanotlisted').text(datainfo.doba.notlisted);
-                $('#temunotlisted').text(datainfo.temu.notlisted);
-                $('#macynotlisted').text(datainfo.macy.notlisted);
-                $('#ebay1notlisted').text(datainfo.ebay1.notlisted);
-                $('#ebay2notlisted').text(datainfo.ebay2.notlisted);
-                $('#ebay3notlisted').text(datainfo.ebay3.notlisted);
+                console.info(datainfo.amazon);
+                $('#totalNotMatching').text(datainfo.shopify.notmatching+datainfo.amazon.notmatching+datainfo.walmart.notmatching+datainfo.reverb.notmatching+datainfo.shein.notmatching+datainfo.doba.notmatching+datainfo.temu.notmatching+datainfo.macy.notmatching+datainfo.ebay1.notmatching+datainfo.ebay2.notmatching+datainfo.ebay3.notmatching);
 
-                $('#shopifynotmatching').text(datainfo.shopify.mismatching);
-                $('#amazonnotmatching').text(datainfo.amazon.mismatching);
-                $('#walmartnotmatching').text(datainfo.walmart.mismatching);
-                $('#reverbnotmatching').text(datainfo.reverb.mismatching);
-                $('#sheinnotmatching').text(datainfo.shein.mismatching);
-                $('#dobanotmatching').text(datainfo.doba.mismatching);
-                $('#temunotmatching').text(datainfo.temu.mismatching);
-                $('#macynotmatching').text(datainfo.macy.mismatching);
-                $('#ebay1notmatching').text(datainfo.ebay1.mismatching);
-                $('#ebay2notmatching').text(datainfo.ebay2.mismatching);
-                $('#ebay3notmatching').text(datainfo.ebay3.mismatching);
+                $('#shopifynotmatching').text(datainfo.shopify.notmatching);
+                if(datainfo.shopify.notmatching==0){
+                    $('#hShopifynm').text(`(${datainfo.shopify.notmatching})`).removeClass('text-danger').css('color', 'green');
+                }else{
+                    $('#hShopifynm').text(`(${datainfo.shopify.notmatching})`);
+                }
+                
+                
+                $('#amazonnotmatching').text(datainfo.amazon.notmatching);
+                if(datainfo.amazon.notmatching==0){
+                    $('#hAmazonnm').text(`(${datainfo.amazon.notmatching})`).removeClass('text-danger').css('color', 'green');
+                }else{
+                    $('#hAmazonnm').text(`(${datainfo.amazon.notmatching})`);
+                }
 
-                $('#shopifylisted').text(datainfo.shopify.listed);
-                $('#amazonlisted').text(datainfo.amazon.listed);
-                $('#walmartlisted').text(datainfo.walmart.listed);
-                $('#reverblisted').text(datainfo.reverb.listed);
-                $('#sheinlisted').text(datainfo.shein.listed);
-                $('#dobalisted').text(datainfo.doba.listed);
-                $('#temulisted').text(datainfo.temu.listed);
-                $('#macylisted').text(datainfo.macy.listed);
-                $('#ebay1listed').text(datainfo.ebay1.listed);
-                $('#ebay2listed').text(datainfo.ebay2.listed);
-                $('#ebay3listed').text(datainfo.ebay3.listed);
+                $('#walmartnotmatching').text(datainfo.walmart.notmatching);
+                if(datainfo.walmart.notmatching==0){
+                    $('#hWalmartnm').text(`(${datainfo.walmart.notmatching})`).removeClass('text-danger').css('color', 'green');
+                }else{
+                    $('#hWalmartnm').text(`(${datainfo.walmart.notmatching})`);
+                }
 
-                $('#shopifymatching').text(datainfo.shopify.matching);
-                $('#amazonmatching').text(datainfo.amazon.matching);
-                $('#walmartmatching').text(datainfo.walmart.matching);
-                $('#reverbmatching').text(datainfo.reverb.matching);
-                $('#sheinmatching').text(datainfo.shein.matching);
-                $('#dobamatching').text(datainfo.doba.matching);
-                $('#temumatching').text(datainfo.temu.matching);
-                $('#macymatching').text(datainfo.macy.matching);
-                $('#ebay1matching').text(datainfo.ebay1.matching);
-                $('#ebay2matching').text(datainfo.ebay2.matching);
-                $('#ebay3matching').text(datainfo.ebay3.matching);
+                $('#reverbnotmatching').text(datainfo.reverb.notmatching);
+                if(datainfo.reverb.notmatching==0){
+                    $('#hReverbnm').text(`(${datainfo.reverb.notmatching})`).removeClass('text-danger').css('color', 'green');
+                }else{
+                    $('#hReverbnm').text(`(${datainfo.reverb.notmatching})`);
+                }
 
-                tableData = sheetData.map((item, index) => {
-                    const sku = (item.sku || '').toUpperCase().trim();
-                    const isparent=item.isparent && item.isparent!==null?item.isparent:'';
-                    const parent = item.parent && item.parent !== 'null' ? item.parent : '-';
-                    const variant_id=item.variant_id;
-                    const sku_dbid=item.id;
-                    const image= item.image;
-                    const INV_shopify = parseFloat(item.inventory_shopify) || 0;
-                    const INV_amazon = parseFloat(item.inventory_amazon) || item.inventory_amazon;
-                    const INV_walmart = parseFloat(item.inventory_walmart) || item.inventory_walmart;
-                    const INV_reverb = parseFloat(item.inventory_reverb) || item.inventory_reverb;
-                    const INV_shein = parseFloat(item.inventory_shein) || item.inventory_shein;
-                    const INV_doba = parseFloat(item.inventory_doba) || item.inventory_doba;
-                    const INV_temu = parseFloat(item.inventory_temu) || item.inventory_temu;
-                    const INV_macy = parseFloat(item.inventory_macy) || item.inventory_macy;
-                    const INV_ebay1 = parseFloat(item.inventory_ebay1) || item.inventory_ebay1;
-                    const INV_ebay2 = parseFloat(item.inventory_ebay2) || item.inventory_ebay2;
-                    const INV_ebay3 = parseFloat(item.inventory_ebay3) || item.inventory_ebay3;
-                    const notrequired=item.not_required;
+                $('#sheinnotmatching').text(datainfo.shein.notmatching);
+                if(datainfo.shein.notmatching==0){
+                    $('#hSheinnm').text(`(${datainfo.shein.notmatching})`).removeClass('text-danger').css('color', 'green');
+                }else{
+                    $('#hSheinnm').text(`(${datainfo.shein.notmatching})`);
+                }
 
-                        if(INV_amazon=='Not Listed'){notlisted +=1;}
-                    return {
-                        sku_dbid:sku_dbid,
-                        sl_no: index + 1,
-                        image:image,
-                        variant_id:variant_id,
-                        SKU: sku,
-                        isparent:isparent,
-                        parent:parent,
-                        TITLE: item.product_title || item.title,
-                        INV_shopify: INV_shopify,
-                        INV_amazon: INV_amazon,
-                        INV_walmart: INV_walmart,
-                        INV_reverb: INV_reverb,
-                        INV_shein: INV_shein,
-                        INV_doba: INV_doba,
-                        INV_temu: INV_temu,
-                        INV_macy: INV_macy,
-                        INV_ebay1: INV_ebay1,
-                        INV_ebay2: INV_ebay2,
-                        INV_ebay3: INV_ebay3,
-                        notrequired:notrequired,
+                $('#dobanotmatching').text(datainfo.doba.notmatching);
+                if(datainfo.doba.notmatching==0){
+                    $('#hDobanm').text(`(${datainfo.doba.notmatching})`).removeClass('text-danger').css('color', 'green');
+                }else{
+                    $('#hDobanm').text(`(${datainfo.doba.notmatching})`);
+                }
 
-                       is_notlisted_shopify: (() => {
-                            return INV_shopify=='Not Listed'?'notlisted':'listed';
-                        })(),
-                        is_notlisted_amazon: (() => {
-                            return INV_amazon=='Not Listed'?'notlisted':'listed';
-                        })(),
-                        is_notlisted_walmart: (() => {
-                            return INV_walmart=='Not Listed'?'notlisted':'listed';
-                        })(),
-                        is_notlisted_reverb: (() => {
-                            return INV_reverb=='Not Listed'?'notlisted':'listed';
-                        })(),
-                        is_notlisted_shein: (() => {
-                            return INV_shein=='Not Listed'?'notlisted':'listed';
-                        })(),
-                        is_notlisted_doba: (() => {
-                            return INV_doba=='Not Listed'?'notlisted':'listed';
-                        })(),
-                        is_notlisted_temu: (() => {
-                            return INV_temu=='Not Listed'?'notlisted':'listed';
-                        })(),
-                        is_notlisted_macy: (() => {
-                            return INV_macy=='Not Listed'?'notlisted':'listed';
-                        })(),
-                        is_notlisted_ebay1: (() => {
-                            return INV_ebay1=='Not Listed'?'notlisted':'listed';
-                        })(),
-                        is_notlisted_ebay2: (() => {
-                            return INV_ebay2=='Not Listed'?'notlisted':'listed';
-                        })(),
-                        is_notlisted_ebay3: (() => {
-                            return INV_ebay3=='Not Listed'?'notlisted':'listed';
-                        })(),
+                $('#temunotmatching').text(datainfo.temu.notmatching);
+                if(datainfo.temu.notmatching==0){
+                    $('#hTemunm').text(`(${datainfo.temu.notmatching})`).removeClass('text-danger').css('color', 'green');
+                }else{
+                    $('#hTemunm').text(`(${datainfo.temu.notmatching})`);
+                }
 
-                                                matching: (() => {
-                            return INV_shopify == INV_amazon ? 'matching' : 'notmatching';
-                        })(),
+                $('#macynotmatching').text(datainfo.macy.notmatching);
+                if(datainfo.macy.notmatching==0){
+                    $('#hMacynm').text(`(${datainfo.macy.notmatching})`).removeClass('text-danger').css('color', 'green');
+                }else{
+                    $('#hMacynm').text(`(${datainfo.macy.notmatching})`);
+                }
 
-                        raw_data: item
-                    };
-                });
+                $('#ebay1notmatching').text(datainfo.ebay1.notmatching);
+                if(datainfo.ebay1.notmatching==0){
+                    $('#hEbay1nm').text(`(${datainfo.ebay1.notmatching})`).removeClass('text-danger').css('color', 'green');
+                }else{
+                    $('#hEbay1nm').text(`(${datainfo.ebay1.notmatching})`);
+                }
+
+
+                $('#ebay2notmatching').text(datainfo.ebay2.notmatching);
+                if(datainfo.ebay2.notmatching==0){
+                    $('#hEbay2nm').text(`(${datainfo.ebay2.notmatching})`).removeClass('text-danger').css('color', 'green');
+                }else{
+                    $('#hEbay2nm').text(`(${datainfo.ebay2.notmatching})`);
+                }
+
+                $('#ebay3notmatching').text(datainfo.ebay3.notmatching);
+                if(datainfo.ebay3.notmatching==0){
+                    $('#hEbay3nm').text(`(${datainfo.ebay3.notmatching})`).removeClass('text-danger').css('color', 'green');
+                }else{
+                    $('#hEbay3nm').text(`(${datainfo.ebay3.notmatching})`);
+                }
+
+                     $('#bestbuymatching').text(datainfo.bestbuy.notmatching);
+                if(datainfo.bestbuy.notmatching==0){
+                    $('#hbestbuynm').text(`(${datainfo.bestbuy.notmatching})`).removeClass('text-danger').css('color', 'green');
+                }else{
+                    $('#hbestbuynm').text(`(${datainfo.bestbuy.notmatching})`);
+                }
+
+                  $('#tiendamiamatching').text(datainfo.tiendamia.notmatching);
+                if(datainfo.tiendamia.notmatching==0){
+                    $('#htiendamianm').text(`(${datainfo.tiendamia.notmatching})`).removeClass('text-danger').css('color', 'green');
+                }else{
+                    $('#htiendamianm').text(`(${datainfo.tiendamia.notmatching})`);
+                }
+
+
+
+$('#shopifymatching').text(datainfo.shopify.notmatching);
+$('#amazonmatching').text(datainfo.amazon.notmatching);
+$('#walmartmatching').text(datainfo.walmart.notmatching);
+$('#reverbmatching').text(datainfo.reverb.notmatching);
+$('#sheinmatching').text(datainfo.shein.notmatching);
+$('#dobamatching').text(datainfo.doba.notmatching);
+$('#temumatching').text(datainfo.temu.notmatching);
+$('#macymatching').text(datainfo.macy.notmatching);
+$('#ebay1matching').text(datainfo.ebay1.notmatching);
+$('#ebay2matching').text(datainfo.ebay2.notmatching);
+$('#ebay3matching').text(datainfo.ebay3.notmatching);
+$('#bestbuymatching').text(datainfo.bestbuy.matching);
+$('#tiendamiamatching').text(datainfo.tiendamia.matching);
+
+                
+                const platforms = [
+  'amazon', 'walmart', 'reverb', 'shein', 'doba',
+  'temu', 'macy', 'ebay1', 'ebay2', 'ebay3','bestbuy','tiendamia'
+];
+
+tableData = sheetData.map((item, index) => {
+  const sku = (item.sku || '').toUpperCase().trim();
+  const isparent = item.isparent && item.isparent !== 0 ? item.isparent : '';
+  const parent = item.parent && item.parent !== '0' ? item.parent : '-';
+  const variant_id = item.variant_id;
+  const sku_dbid = item.id;
+  const image = item.image;
+  const notrequired = item.not_required;
+  const rawShopify = item.inventory_shopify;
+  const INV_shopify = !isNaN(parseFloat(rawShopify)) ? parseFloat(rawShopify) : 0;
+
+  const row = {
+    sku_dbid,
+    sl_no: index + 1,
+    image,
+    variant_id,
+    SKU: sku,
+    isparent,
+    parent,
+    TITLE: item.product_title || item.title,
+    INV_shopify,
+    notrequired,
+    is_notlisted_shopify: INV_shopify === 0 ? 'notlisted' : 'listed',
+    raw_data: item
+  };
+
+  platforms.forEach(platform => {
+    const raw = item[`inventory_${platform}`];
+    const parsed = !['Not Listed', 'NRL'].includes(raw) && !isNaN(parseFloat(raw))
+      ? parseFloat(raw)
+      : 0;
+
+    row[`INV_${platform}`] = parsed;
+    row[`is_notmatching_${platform}`] =
+      parsed !== 0 && INV_shopify !== 0 && parsed !== INV_shopify
+        ? 'notmatching'
+        : 'matching';
+  });
+
+  return row;
+});
                 filteredData=tableData;
                 renderTable(filteredData);
                 hideLoader();
@@ -1607,7 +1701,8 @@
                const isMismatchEbay1 = item.INV_ebay1 !== 'Not Listed' && parseFloat(item.INV_shopify) === parseFloat(item.INV_ebay1) ? true:false;
                const isMismatchEbay2 = item.INV_ebay2 !== 'Not Listed' && parseFloat(item.INV_shopify) === parseFloat(item.INV_ebay2) ? true:false;
                const isMismatchEbay3 = item.INV_ebay3 !== 'Not Listed' && parseFloat(item.INV_shopify) === parseFloat(item.INV_ebay3) ? true:false;
-
+               const isMismatchbestbuy = item.INV_bestbuy !== 'Not Listed' && parseFloat(item.INV_shopify) === parseFloat(item.INV_bestbuy) ? true:false;
+               const isMismatchtiendamia = item.INV_tiendamia !== 'Not Listed' && parseFloat(item.INV_shopify) === parseFloat(item.INV_tiendamia) ? true:false;
 
 
 
@@ -1634,17 +1729,19 @@
                 <i class="bi bi-eye me-1"></i>
             </button>
         </td>
-        <td style="${item.INV_shopify === 'Not Listed' ? 'color:red;' : ''}">${item.INV_shopify!='Not Listed'?item.INV_shopify:'N/L'}</td>
-        <td style="${item.INV_amazon === 'Not Listed' ? 'color:red;' : isMismatchAmz==true?'color:green':'color:red'}">${item.INV_amazon!='Not Listed'?item.INV_amazon:'N/L'}</td>
-        <td style="${item.INV_walmart === 'Not Listed' ? 'color:red;' : isMismatchwal==true?'color:green':'color:red'}">${item.INV_walmart!='Not Listed'?item.INV_walmart:'N/L'}</td>
-        <td style="${item.INV_reverb === 'Not Listed' ? 'color:red;' : isMismatchRev==true?'color:green':'color:red'}">${item.INV_reverb!='Not Listed'?item.INV_reverb:'N/L'}</td>
-        <td style="${item.INV_shein === 'Not Listed' ? 'color:red;' : isMismatchShein==true?'color:green':'color:red'}">${item.INV_shein!='Not Listed'?item.INV_shein:'N/L'}</td>
-        <td style="${item.INV_doba === 'Not Listed' ? 'color:red;' : isMismatchDoba==true?'color:green':'color:red'}">${item.INV_doba!='Not Listed'?item.INV_doba:'N/L'}</td>
-        <td style="${item.INV_temu === 'Not Listed' ? 'color:red;' : isMismatchTemu==true?'color:green':'color:red'}">${item.INV_temu!='Not Listed'?item.INV_temu:'N/L'}</td>
-        <td style="${item.INV_macy === 'Not Listed' ? 'color:red;' : isMismatchMacy==true?'color:green':'color:red'}">${item.INV_macy!='Not Listed'?item.INV_macy:'N/L'}</td>
-        <td style="${item.INV_ebay1 === 'Not Listed' ? 'color:red;' : isMismatchEbay1==true?'color:green':'color:red'}">${item.INV_ebay1!='Not Listed'?item.INV_ebay1:'N/L'}</td>
-        <td style="${item.INV_ebay2 === 'Not Listed' ? 'color:red;' : isMismatchEbay2==true?'color:green':'color:red'}">${item.INV_ebay2!='Not Listed'?item.INV_ebay2:'N/L'}</td>
-        <td style="${item.INV_ebay3 === 'Not Listed' ? 'color:red;' : isMismatchEbay3==true?'color:green':'color:red'}">${item.INV_ebay3!='Not Listed'?item.INV_ebay3:'N/L'}</td>
+        <td style="${item.INV_shopify === 'Not Listed' ? 'color:red;' : ''}">${item.INV_shopify}</td>
+        <td style="${isMismatchAmz==true?'color:green':'color:red'}">${item.INV_amazon}</td>
+        <td style="${isMismatchwal==true?'color:green':'color:red'}">${item.INV_walmart}</td>
+        <td style="${isMismatchRev==true?'color:green':'color:red'}">${item.INV_reverb}</td>
+        <td style="${isMismatchShein==true?'color:green':'color:red'}">${item.INV_shein}</td>
+        <td style="${isMismatchDoba==true?'color:green':'color:red'}">${item.INV_doba}</td>
+        <td style="${isMismatchTemu==true?'color:green':'color:red'}">${item.INV_temu}</td>
+        <td style="${isMismatchMacy==true?'color:green':'color:red'}">${item.INV_macy}</td>
+        <td style="${isMismatchEbay1==true?'color:green':'color:red'}">${item.INV_ebay1}</td>
+        <td style="${isMismatchEbay2==true?'color:green':'color:red'}">${item.INV_ebay2}</td>
+        <td style="${isMismatchEbay3==true?'color:green':'color:red'}">${item.INV_ebay3}</td>
+        <td style="${isMismatchbestbuy==true?'color:green':'color:red'}">${item.INV_bestbuy}</td>
+        <td style="${isMismatchtiendamia==true?'color:green':'color:red'}">${item.INV_tiendamia}</td>
     </tr>
     </tr>
     </tr>
@@ -1826,105 +1923,54 @@ function applyRowTypeFilter(filterType) {
         filteredData = filteredData.filter(item => item.matching === 'notmatching');
     }
 
-    // if (filterType === 'listed') {
-    //     filteredData = filteredData.filter(item => item.is_notlisted === 'listed');
-    // } else if (filterType === 'notlisted') {
-    //     filteredData = filteredData.filter(item => item.is_notlisted === 'notlisted');
-    // }
-
     currentPage = 1;
     renderTable(filteredData);
     calculateTotals();
 }
 
 
-// $('#filter-amazon').on('change', function(e) {
-//     e.preventDefault();
-//                     const filterType = $(this).val();
-//                     applyRowTypeFilterAmazon(filterType);
-//                 });
-                
-// function applyRowTypeFilterAmazon(filterType) {
-//    filteredData = [...tableData];
-//     console.log(filterType);
-   
-//     if (filterType === 'listed') {
-//         filteredData = filteredData.filter(item => item.is_notlisted_amazon === 'listed');
-//     } else if (filterType === 'notlisted') {
-//         filteredData = filteredData.filter(item => item.is_notlisted_amazon === 'notlisted');
-//     }
-
-//     currentPage = 1;
-//     renderTable(filteredData);
-//     calculateTotals();
-// }
-
-// $('#filter-walmart').on('change', function(e) {
-//     e.preventDefault();
-//                     const filterType = $(this).val();
-//                     applyRowTypeFilterWalmart(filterType);
-//                 });
-                
-// function applyRowTypeFilterWalmart(filterType) {
-//    filteredData = [...tableData];
-//     console.log(filterType);
-   
-//     if (filterType === 'listed') {
-//         filteredData = filteredData.filter(item => item.is_notlisted_walmart === 'listed');
-//     } else if (filterType === 'notlisted') {
-//         filteredData = filteredData.filter(item => item.is_notlisted_walmart === 'notlisted');
-//     }
-
-//     currentPage = 1;
-//     renderTable(filteredData);
-//     calculateTotals();
-// }
-
-
-// $('#filter-shopify').on('change', function(e) {
-//     e.preventDefault();
-//     const filterType = $(this).val();
-//     applyRowTypeFilterShopify(filterType);
-// });
-
-                
-// function applyRowTypeFilterShopify(filterType) {
-//      filteredData = [...tableData];
-//     console.log(filterType);
-   
-//     if (filterType === 'listed') {
-//         filteredData = filteredData.filter(item => item.is_notlisted_shopify === 'listed');
-//     } else if (filterType === 'notlisted') {
-//         filteredData = filteredData.filter(item => item.is_notlisted_shopify === 'notlisted');
-//     }
-
-//     currentPage = 1;
-//     renderTable(filteredData);
-//     calculateTotals();
-// }
 
 function applyRowTypeFilterA(platform, filterType) {
-    const key = `is_notlisted_${platform}`;
-    filteredData = [...tableData];
+    let key = '';
+    let filteredData = [...tableData];
+    let countFiltered = 0;
 
-    if (filterType === 'listed' || filterType === 'notlisted') {
+    // Set the correct key based on filterType
+    if (filterType === 'nrl') {
+        key = `is_nrl_${platform}`;
+    } else if (filterType === 'matching' || filterType === 'notmatching') {
+        key = `is_notmatching_${platform}`;
+    }
+    
+    // Apply filtering
+    if (filterType === 'matching' || filterType === 'notmatching' || filterType === 'nrl') {
         filteredData = filteredData.filter(item => item[key] === filterType);
+        countFiltered = filteredData.length;
+    }
+
+    // Update count display
+    const $countEl = $(`#filter-${platform}-count`);
+    if (filterType === 'all') {
+        $countEl.hide().text('');
+    } else {
+        $countEl.show().text(countFiltered);
     }
 
     currentPage = 1;
+    console.log(filteredData);    
+
     renderTable(filteredData);
     calculateTotals();
 }
 
 // Generic event binding for all filters
-['shopify', 'walmart', 'amazon','reverb','shein','doba'].forEach(platform => {
+['shopify', 'walmart', 'amazon','reverb','shein','doba','temu','macy','ebay1','ebay2','ebay3','bestbuy','tiendamia'].forEach(platform => {
     $(`#filter-${platform}`).on('change', function(e) {
         e.preventDefault();
         const filterType = $(this).val();
         applyRowTypeFilterA(platform, filterType);
     });
 });
-
 
 $(document).on('mouseenter', '.product-thumb', function (e) {
     const imgSrc = $(this).attr('src');
@@ -1974,7 +2020,6 @@ function moveImagePreview(e) {
         $('#stockSkuLabel').text("("+sku+")");
     // Render modal content
   $('#stockContent').html(buildStockTable(item));
-  $('#stockContent1').html(buildStockTable1(item));
 
 
     const modalEl = document.getElementById('stockModal');
@@ -2024,7 +2069,8 @@ function moveImagePreview(e) {
     modal.show();
 });
 
-function buildStockTable(data, showShopify = false) {
+
+function buildStockTable(data, showShopify = true) {
     let html = `
         <div class="table-responsive">
             <div class="table-responsive" style="max-height: 600px; overflow-y: auto; position: relative;">
@@ -2060,66 +2106,9 @@ function buildStockTable(data, showShopify = false) {
         { key: 'INV_macy', name: 'Macy', img: 'macy.png' },
         { key: 'INV_ebay1', name: 'Ebay1', img: '1.png' },
         { key: 'INV_ebay2', name: 'Ebay2', img: '2.png' },
-        { key: 'INV_ebay3', name: 'Ebay3', img: '3.png' },
-    ];
-
-    channels.forEach(channel => {
-        const value = data[channel.key];
-        const isMismatch = value !== data.INV_shopify;
-        const isNotListed = value === 'Not Listed';
-
-      if (!isNotListed) return;
-
-        html += `<tr>
-            <td>
-                <img src="https://inventory.5coremanagement.com/uploads/${channel.img}" alt="${channel.name}" class="channel-logo mb-1" style="width:50px; height:50px; object-fit:contain;">
-                <p class="d-inline-block">${channel.name}</p>
-            </td>
-            <td style="${isMismatch ? 'color:red;' : ''}">${value}</td>
-        </tr>`;
-    });
-
-    html += `</tbody></table></div></div>`;
-    return html;
-}
-
-function buildStockTable1(data, showShopify = true) {
-    let html = `
-        <div class="table-responsive">
-            <div class="table-responsive" style="max-height: 600px; overflow-y: auto; position: relative;">
-                <table class="table table-sm table-bordered align-middle sortable-table">
-                    <thead class="table-light position-sticky" style="top: 0; z-index: 1000;">
-                        <tr>
-                            <th>Channel</th>
-                            <th>Stock Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>`;
-
-    // Always show Shopify
-    if(showShopify==true)
-    {
-        html += `<tr>
-        <td>
-            <img src="https://inventory.5coremanagement.com/uploads/shopify.png" alt="Shopify" class="channel-logo mb-1" style="width:30px; height:30px; object-fit:contain;">
-            <p class="d-inline-block">Shopify</p>
-        </td>
-        <td>${data.INV_shopify}</td>
-    </tr>`;
-    }
-    
-
-    const channels = [
-        { key: 'INV_amazon', name: 'Amazon', img: 'amazon.png' },
-        { key: 'INV_walmart', name: 'Walmart', img: 'walmart.png' },
-        { key: 'INV_reverb', name: 'Reverb', img: 'reverb.png' },
-        { key: 'INV_shein', name: 'Shein', img: 'Shein.jpg' },
-        { key: 'INV_doba', name: 'Doba', img: 'doba.png' },
-        { key: 'INV_temu', name: 'Temu', img: 'temu.jpeg' },
-        { key: 'INV_macy', name: 'Macy', img: 'macy.png' },
-        { key: 'INV_ebay1', name: 'Ebay1', img: '1.png' },
-        { key: 'INV_ebay2', name: 'Ebay2', img: '2.png' },
-        { key: 'INV_ebay3', name: 'Ebay3', img: '3.png' },
+        { key: 'INV_ebay3', name: 'Ebay3', img: '3.png' },        
+        { key: 'INV_bestbuy', name: 'BestBuyUSA', img: 'bestbuy.jpeg' },
+        { key: 'INV_tiendamia', name: 'Tiendamia', img: 'ten.jpg' },
     ];
 
     channels.forEach(channel => {
@@ -2144,59 +2133,39 @@ function buildStockTable1(data, showShopify = true) {
 
 
 
-
-$(document).on('click', '#updatenotrequired', function (e) {
+$(document).on('click', '#reFetchliveDataFor', function (e) {
     e.preventDefault();
-
-    let getallchecked_nr = [];
-    $(".checkboxnotrequired:checked").each(function () {
-        getallchecked_nr.push($(this).val());
-    });
-
-    $.ajax({
-        url: '/stock/mapping/inventory/update_not_required',
-        type: 'POST',
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content') // safer than blade token in JS
-        },
-        data: JSON.stringify({ notrequired: getallchecked_nr })
-    })
-    .then(response => {
-        console.log("Update successful:", response);
-          showToast('danger', 'Not Required Updated Successfully');
-        // Optionally show success message or refresh UI
-    })
-    .catch(error => {
-        console.error("Error loading data:", error);
-        hideLoader();
-    });
-});
-
-
-$(document).on('click', '#reFetchliveData', function (e) {
     showLoader();
-    e.preventDefault();
-     $.ajax({
-        url: '/stock/missing/inventory/refetch_live_data',
-        type: 'GET',
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content') // safer than blade token in JS
-        },
-        
-    })
-    .then(response => {
-        console.log("Refetch successful:", response);
-        window.location.reload();
-    })
-    .catch(error => {
-        console.error("Error loading data:", error);
-        hideLoader();
-    });
 
+    const source = $("#refetchFilter").val();
+    const csrfToken = $('meta[name="csrf-token"]').attr('content');
+    $.ajax({
+        url: '/stock/missing/inventory/refetch_live_data_u',
+        type: 'POST',        
+         data: {
+                source: source,
+                _token: $('meta[name="csrf-token"]').attr('content')
+            },
+        // contentType: 'application/json', // ensures server interprets JSON
+        headers: {
+            'X-CSRF-TOKEN': csrfToken
+        }
+    })
+    .done(response => {
+        console.log('✅ Refetch successful:', response);
+        location.reload(); // reload page on success
+    })
+    .fail((jqXHR, textStatus, errorThrown) => {
+        console.error(`❌ Refetch failed: ${textStatus}`, errorThrown);
+        hideLoader(); // hide loader on failure
+    });
 });
 
+
+$(document).on('click', '#NotMatching', function (e) {
+        e.preventDefault();
+        $('#showNotMatching').toggle();
+    });
 
 
     });
