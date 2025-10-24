@@ -14,7 +14,7 @@ class Ebay2RunningAdsController extends Controller
 {
     public function index()
     {
-        return view('campaign.ebay-running-ads');
+        return view('campaign.ebay-two.running-ads');
     }
 
     public function getEbay2RunningAdsData()
