@@ -4,13 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes; // ✅ Correct import
 
 class TransitContainerDetail extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes; // ✅ Add trait here
 
     protected $fillable = [
-        'id',
         'tab_name',
         'supplier_name',
         'company_name',
@@ -32,4 +32,5 @@ class TransitContainerDetail extends Model
         'comparison_link',
     ];
 
+    protected $dates = ['deleted_at']; 
 }

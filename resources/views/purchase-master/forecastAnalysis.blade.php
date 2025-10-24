@@ -672,28 +672,47 @@
                 //     }
                 // },
 
+                // {
+                //     title: "Trnst",
+                //     field: "transit",
+                //     accessor: row => (row ? row["transit"] : null),
+                //     sorter: "number",
+                //     headerSort: true,
+                //     formatter: function(cell) {
+                //         const value = cell.getValue();
+                //         const rowData = cell.getRow().getData();
+
+                //         const sku = rowData.SKU ?? '';
+                //         const parent = rowData.Parent ?? '';
+
+                //         return `<div 
+                //             class="editable-qty" 
+                //             contenteditable="true" 
+                //             data-field="Transit" 
+                //             data-original="${value ?? ''}" 
+                //             data-sku='${sku}' 
+                //             data-parent='${parent}' 
+                //             style="outline:none; min-width:40px; text-align:center; font-weight:bold;">
+                //             ${value ?? ''}
+                //         </div>`;
+                //     }
+                // },
+
                 {
-                    title: "Trnst",
-                    field: "transit",
-                    accessor: row => (row ? row["transit"] : null),
+                    title: "Transit",
+                    field: "c_sku_qty",
+                    accessor: row => (row ? row["c_sku_qty"] : null),
                     sorter: "number",
                     headerSort: true,
+                    hozAlign: "center",
                     formatter: function(cell) {
-                        const value = cell.getValue();
-                        const rowData = cell.getRow().getData();
-
-                        const sku = rowData.SKU ?? '';
-                        const parent = rowData.Parent ?? '';
-
-                        return `<div 
-                            class="editable-qty" 
-                            contenteditable="true" 
-                            data-field="Transit" 
-                            data-original="${value ?? ''}" 
-                            data-sku='${sku}' 
-                            data-parent='${parent}' 
-                            style="outline:none; min-width:40px; text-align:center; font-weight:bold;">
-                            ${value ?? ''}
+                        const row = cell.getRow();
+                        const c_sku_qty = row.getData().c_sku_qty;
+                        let containerName = row.getData().containerName;
+                        containerName = containerName.replace(/Container\s*(\d+)/i, "C-$1");
+                        return `<div style="line-height:1.5;">
+                            <span style="font-weight:600;">${c_sku_qty}</span><br>
+                            <small class="text-info">${containerName}</small>
                         </div>`;
                     }
                 },

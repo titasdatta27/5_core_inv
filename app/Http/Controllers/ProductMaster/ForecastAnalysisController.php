@@ -73,6 +73,7 @@ class ForecastAnalysisController extends Controller
         $movementMap = DB::table('movement_analysis')->get()->keyBy(fn($item) => $normalizeSku($item->sku));
         $readyToShipMap = DB::table('ready_to_ship')->get()->keyBy(fn($item) => $normalizeSku($item->sku));
         $mfrg = DB::table('mfrg_progress')->get()->keyBy(fn($item) => $normalizeSku($item->sku));
+        $transitContainer = DB::table('transit_container_details')->where('status', '')->select('our_sku', 'tab_name', 'no_of_units', 'total_ctn')->get()->keyBy(fn($item) => $normalizeSku($item->our_sku));
 
         $processedData = [];
 
@@ -123,7 +124,6 @@ class ForecastAnalysisController extends Controller
                 $forecast = $forecastMap->get($sheetSku);
                 $item->{'s-msl'} = $forecast->s_msl ?? 0;
                 $item->{'Approved QTY'} = $forecast->approved_qty ?? 0;
-                $item->transit = $forecast->transit ?? '';
                 $item->nr = $forecast->nr ?? '';
                 $item->req = $forecast->req ?? '';
                 $item->hide = $forecast->hide ?? '';
@@ -135,6 +135,11 @@ class ForecastAnalysisController extends Controller
                 $item->date_apprvl = $forecast->date_apprvl ?? '';
                 $item->stage = $forecast->stage ?? '';
             }
+
+            $item->containerName = $transitContainer[$normalizeSku($prodData->sku)]->tab_name ?? '';
+            $noOfUnit = $transitContainer[$normalizeSku($prodData->sku)]->no_of_units ?? 0;
+            $totalCtn = $transitContainer[$normalizeSku($prodData->sku)]->total_ctn ?? 0;
+            $item->c_sku_qty = $noOfUnit * $totalCtn;
 
             $readyToShipQty = 0;
             if($readyToShipMap->has($sheetSku)){
@@ -517,9 +522,9 @@ class ForecastAnalysisController extends Controller
                 }
 
                 $item->containerName = $transitContainer[strtoupper(trim($prodData->sku))]->tab_name ?? '';
-                    $noOfUnit = $transitContainer[strtoupper(trim($prodData->sku))]->no_of_units ?? 0;
-                    $totalCtn = $transitContainer[strtoupper(trim($prodData->sku))]->total_ctn	 ?? 0;
-                    $item->c_sku_qty = $noOfUnit * $totalCtn;
+                $noOfUnit = $transitContainer[strtoupper(trim($prodData->sku))]->no_of_units ?? 0;
+                $totalCtn = $transitContainer[strtoupper(trim($prodData->sku))]->total_ctn	 ?? 0;
+                $item->c_sku_qty = $noOfUnit * $totalCtn;
 
                 if($readyToShipMap->has($sheetSku)){
                     $item->readyToShipQty = $readyToShipMap->get($sheetSku)->qty ?? 0;
