@@ -552,12 +552,14 @@
                         }
                     }
                 },
-
-
                 {
                     title: "M AVG ",
                     field: "MSL_Four",
-                  
+                    accessor: row => row["MSL_Four"],
+                    formatter: function(cell) {
+                        const value = cell.getValue() || 0;
+                        return `<div style="text-align:center; font-weight:bold;">${value.toFixed(0)}</div>`;
+                    }
                 },
                 //   {
                 //     title: "S-MSL",
@@ -783,21 +785,26 @@
                     field: "nr",
                     headerSort: false,
                     formatter: function(cell) {
-                        const value = cell.getValue() ?? '';
+                        let value = cell.getValue() ?? '';
                         const rowData = cell.getRow().getData();
                         const sku = rowData["SKU"] || '';
                         const parent = rowData["Parent"] || '';
 
-                        // Corrected color logic with proper #
                         let bgColor = '#ffffff'; // default white
                         let textColor = '#000000'; // default black
 
+                        // ✅ If value is empty or null, treat as REQ by default
+                        if (!value || value === '') {
+                            value = 'REQ';
+                        }
+
+                        // ✅ Set background and text color based on value
                         if (value === 'NR') {
                             bgColor = '#dc3545'; // red
                             textColor = '#ffffff';
                         } else if (value === 'REQ') {
                             bgColor = '#28a745'; // green
-                            textColor = '#ffffff';
+                            textColor = '#000000';
                         } else if (value === 'LATER') {
                             bgColor = '#ffc107'; // yellow
                             textColor = '#000000';
@@ -823,6 +830,7 @@
                                 <option value="LATER" ${value === 'LATER' ? 'selected' : ''}>LATER</option>
                             </select>
                         `;
+
                     }
                 },
                 {
