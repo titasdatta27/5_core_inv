@@ -555,7 +555,7 @@
                 {
                     title: "M AVG ",
                     field: "MSL_Four",
-                    accessor: row => row["MSL_Four"],
+                    accessor: row => (row ? row["MSL_Four"] : null),
                     formatter: function(cell) {
                         const value = cell.getValue() || 0;
                         return `<div style="text-align:center; font-weight:bold;">${value.toFixed(0)}</div>`;
@@ -711,7 +711,17 @@
                         const row = cell.getRow();
                         const transit = row.getData().transit;
                         let containerName = row.getData().containerName;
-                        containerName = containerName.replace(/Container\s*(\d+)/i, "C-$1");
+                        if (containerName) {
+                            containerName = containerName
+                                .split(",") 
+                                .map(name => name.trim()) 
+                                .filter(name => name.length > 0) 
+                                .map(name => {
+                                    const match = name.match(/(\d+)/);
+                                    return match ? `C-${match[1]}` : name;
+                                })
+                                .join(", ");
+                        }
                         return `<div style="line-height:1.5;">
                             <span style="font-weight:600;">${transit}</span><br>
                             <small class="text-info">${containerName}</small>
