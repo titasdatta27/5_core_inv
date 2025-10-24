@@ -7,6 +7,10 @@ use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use App\Console\Commands\FetchReverbData;
 use App\Console\Commands\FetchMacyProducts;
 use App\Console\Commands\FetchWayfairData;
+use App\Console\Commands\SyncFbMarketplaceSheet;
+use App\Console\Commands\SyncFbShopSheet;
+use App\Console\Commands\SyncMercariWoShipSheet;
+use App\Console\Commands\SyncMercariWShipSheet;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -16,6 +20,10 @@ class Kernel extends ConsoleKernel
         FetchReverbData::class,
         FetchMacyProducts::class,
         FetchWayfairData::class,
+        SyncFbMarketplaceSheet::class,
+        SyncFbShopSheet::class,
+        SyncMercariWShipSheet::class,
+        SyncMercariWoShipSheet::class,
         \App\Console\Commands\LogClear::class,
         \App\Console\Commands\SyncTemuSheet::class,
         \App\Console\Commands\AutoUpdateAmazonKwBids::class,
@@ -96,6 +104,27 @@ class Kernel extends ConsoleKernel
         $schedule->command('app:sync-sheet')
             ->dailyAt('02:10')
             ->timezone('UTC');
+
+
+        // Sync mercari-w-ship sheet update command
+        $schedule->command('app:sync-mercari-w-ship-sheet')
+            ->dailyAt('02:30')
+            ->timezone('UTC');
+
+            // Sync mercari-wo-ship sheet update command
+        $schedule->command('app:sync-mercari-wo-ship-sheet')
+            ->dailyAt('03:00')
+            ->timezone('UTC');
+
+        // Sync fbshop sheet update command
+        $schedule->command('app:sync-fb-shop-sheet')
+        ->dailyAt('03:00')
+        ->timezone('UTC');
+
+        // Sync fb marketplace sheet update command
+        $schedule->command('app:sync-fb-marketplace-sheet')
+        ->dailyAt('03:00')
+        ->timezone('UTC');
         // Sync Temu sheet command
       
         // Sync Newegg sheet command
