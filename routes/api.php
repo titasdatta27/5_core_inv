@@ -7,6 +7,7 @@ use App\Http\Controllers\ApiController;
 use App\Http\Controllers\ProductMaster\ProductMasterController;
 use App\Http\Controllers\PricingMaster\PricingMasterViewsController;
 use App\Http\Controllers\PurchaseMaster\SupplierRFQController;
+use App\Http\Controllers\MarketingMaster\ZeroVisibilityMasterController;
 
 /*
 |--------------------------------------------------------------------------
@@ -59,3 +60,6 @@ Route::prefix('rfq-form')->group(function() {
 
 // api for task manager
 Route::get('/l30-total-sales', [ApiController::class, 'l30totalsales']);
+
+// Channel chart data for live pending trends
+Route::get('/channel-chart-data', [ZeroVisibilityMasterController::class, 'getChannelChartData']);
