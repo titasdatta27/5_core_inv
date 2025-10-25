@@ -35,6 +35,99 @@
         .date-filter-container input {
             flex: 1;
         }
+        
+        /* Sticky Header */
+        .row.mb-4 {
+            position: sticky;
+            top: 70px;
+            z-index: 999;
+            background: #f8f9fa;
+            padding: 15px 0;
+            margin-left: 0;
+            margin-right: 0;
+        }
+        
+        /* Beautiful Cards Styling */
+        .stats-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            background: white;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+        
+        .stats-card.card-info {
+            border-left: 4px solid #667eea;
+        }
+        
+        .stats-card.card-success.positive {
+            border-left: 4px solid #38ef7d;
+        }
+        
+        .stats-card.card-success.negative {
+            border-left: 4px solid #f45c43;
+        }
+        
+        .stats-card .card-body {
+            padding: 20px;
+            position: relative;
+        }
+        
+        .stats-card .card-title {
+            color: #666;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .stats-card .badge {
+            font-size: 26px;
+            font-weight: 700;
+            padding: 8px 16px;
+            background: #f8f9fa !important;
+            border-radius: 8px;
+        }
+        
+        .stats-card.card-info .badge {
+            color: #667eea !important;
+        }
+        
+        .stats-card.card-success.positive .badge {
+            color: #38ef7d !important;
+        }
+        
+        .stats-card.card-success.negative .badge {
+            color: #f45c43 !important;
+        }
+        
+        .stats-card .card-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 40px;
+            opacity: 0.15;
+        }
+        
+        .stats-card.card-info .card-icon {
+            color: #667eea;
+        }
+        
+        .stats-card.card-success.positive .card-icon {
+            color: #38ef7d;
+        }
+        
+        .stats-card.card-success.negative .card-icon {
+            color: #f45c43;
+        }
     </style>
 
 @endsection
@@ -46,12 +139,24 @@
     ])
 
     <!-- Summary Badges -->
-    <div class="row ">
-        <div class="col-md-2">
-            <div class="card">
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card stats-card card-info">
                 <div class="card-body text-center">
+                    <i class="fas fa-clock card-icon"></i>
                     <h5 class="card-title">Live Pending</h5>
-                    <span class="badge bg-info" id="livePendingCountBadge">0</span>
+                    <span class="badge" id="livePendingCountBadge">0</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stats-card card-success {{ ($todayUpdates ?? 0) >= 0 ? 'positive' : 'negative' }}">
+                <div class="card-body text-center">
+                    <i class="fas {{ ($todayUpdates ?? 0) >= 0 ? 'fa-arrow-up' : 'fa-arrow-down' }} card-icon"></i>
+                    <h5 class="card-title">Total Diff ({{ date('d M Y') }})</h5>
+                    <span class="badge" id="todayUpdatesBadge">
+                        {{ ($todayUpdates ?? 0) >= 0 ? '+' : '' }}{{ $todayUpdates ?? 0 }}
+                    </span>
                 </div>
             </div>
         </div>
@@ -329,6 +434,40 @@
                         bottomCalc: "sum",
                         formatter: function(cell) {
                             return `<span class="live-pending" data-row="${cell.getRow().getPosition()}">${cell.getValue() ?? 0}</span>`;
+                        }
+                    },
+                    {
+                        title: "Updated Today",
+                        field: "Updated Today",
+                        headerSort: false,
+                        hozAlign: "center",
+                        formatter: function(cell) {
+                            const isUpdated = cell.getValue();
+                            if (isUpdated) {
+                                return '<span style="color: green; font-size: 18px;">✓</span>';
+                            } else {
+                                return '<span style="color: red; font-size: 18px;">❌</span>';
+                            }
+                        }
+                    },
+                    {
+                        title: "Diff",
+                        field: "Diff",
+                        hozAlign: "center",
+                        bottomCalc: "sum",
+                        formatter: function(cell) {
+                            const diff = cell.getValue() ?? 0;
+                            let color = 'black';
+                            let symbol = '';
+                            
+                            if (diff > 0) {
+                                color = 'green';
+                                symbol = '+';
+                            } else if (diff < 0) {
+                                color = 'red';
+                            }
+                            
+                            return `<span style="color: ${color}; font-weight: bold;">${symbol}${diff}</span>`;
                         }
                     },
                     {
@@ -612,7 +751,6 @@
                     }
                 }
             });
-            console.log('Chart created successfully');
         }
 
         // Apply date filter

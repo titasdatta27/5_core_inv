@@ -183,23 +183,44 @@ class ZeroVisibilityMasterController extends Controller
 
         // Save today's counts for each channel
         $today = now()->toDateString();
+        $yesterday = now()->subDay()->toDateString();
+        $todayUpdates = 0;
+        $channelUpdateData = [];
+        
         foreach ($livePendingData as $channel => $count) {
             $record = ChannelDailyCount::firstOrNew(['channel_name' => $channel]);
             $counts = $record->counts ?? [];
-            $counts[$today] = $count ?? 0;
+            
+            // Get yesterday's count
+            $yesterdayCount = $counts[$yesterday] ?? 0;
+            $todayCount = $count ?? 0;
+            
+            // Calculate difference (today - yesterday)
+            $difference = $todayCount - $yesterdayCount;
+            $todayUpdates += $difference;
+            
+            // Store update status for each channel
+            $channelUpdateData[$channel] = [
+                'updated' => $difference != 0,
+                'diff' => $difference
+            ];
+            
+            $counts[$today] = $todayCount;
             $record->counts = $counts;
             $record->save();
         }
 
-        $data = array_map(function($channelName) use ($livePendingData) {
+        $data = array_map(function($channelName) use ($livePendingData, $channelUpdateData) {
             return [
                 'Channel ' => $channelName,
                 'R&A' => false, // placeholder
                 'Live Pending' => $livePendingData[$channelName] ?? 0,
+                'Updated Today' => $channelUpdateData[$channelName]['updated'] ?? false,
+                'Diff' => $channelUpdateData[$channelName]['diff'] ?? 0,
             ];
         }, $channels);
 
-        return view('marketing-masters.live-pending-masters', compact('data', 'totalSkuCount', 'zeroInvCount'));
+        return view('marketing-masters.live-pending-masters', compact('data', 'totalSkuCount', 'zeroInvCount', 'todayUpdates'));
     }
 
     public function store(Request $request)
