@@ -199,7 +199,7 @@ class ReadyToShipController extends Controller
             if (!empty($ids)) {
                 $user = auth()->check() ? auth()->user()->name : 'System';
 
-                ReadyToShip::whereIn('id', $ids)->update([
+                ReadyToShip::whereIn('sku', $ids)->update([
                     'auth_user' => $user,
                     'deleted_at' => now(),
                 ]);
