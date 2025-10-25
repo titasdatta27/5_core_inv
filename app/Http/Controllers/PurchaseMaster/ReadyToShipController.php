@@ -193,17 +193,32 @@ class ReadyToShipController extends Controller
 
     public function deleteItems(Request $request)
     {
-        $skus = $request->input('skus', []);
-
-        if (empty($skus)) {
-            return response()->json(['success' => false, 'message' => 'No SKUs provided.']);
-        }
-
         try {
-            ReadyToShip::whereIn('sku', $skus)->update(['deleted_at' => now()]);
-            return response()->json(['success' => true]);
+            $ids = $request->input('skus', []);
+
+            if (!empty($ids)) {
+                $user = auth()->check() ? auth()->user()->name : 'System';
+
+                ReadyToShip::whereIn('id', $ids)->update([
+                    'auth_user' => $user,
+                    'deleted_at' => now(),
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Records soft-deleted successfully by ' . $user,
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'No IDs provided',
+            ], 400);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Action failed: ' . $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error deleting records: ' . $e->getMessage(),
+            ], 500);
         }
     }
 
