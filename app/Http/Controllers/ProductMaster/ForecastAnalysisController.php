@@ -72,10 +72,11 @@ class ForecastAnalysisController extends Controller
 
         $forecastMap = DB::table('forecast_analysis')->get()->keyBy(fn($item) => $normalizeSku($item->sku));
         $movementMap = DB::table('movement_analysis')->get()->keyBy(fn($item) => $normalizeSku($item->sku));
-        $readyToShipMap = DB::table('ready_to_ship')->get()->keyBy(fn($item) => $normalizeSku($item->sku));
+        $readyToShipMap = DB::table('ready_to_ship')->whereNull('deleted_at')->get()->keyBy(fn($item) => $normalizeSku($item->sku));
         $mfrg = DB::table('mfrg_progress')->get()->keyBy(fn($item) => $normalizeSku($item->sku));
         $transitContainer = TransitContainerDetail::where('status', '')
-            ->select('our_sku', 'tab_name', 'no_of_units', 'total_ctn')
+            ->whereNull('deleted_at')
+            ->select('our_sku', 'tab_name', 'no_of_units', 'total_ctn', 'rate')
             ->get()
             ->groupBy(fn($item) => $normalizeSku($item->our_sku))
             ->map(function ($group) {
@@ -84,11 +85,13 @@ class ForecastAnalysisController extends Controller
                     $no_of_units = (float) $row->no_of_units;
                     $total_ctn = (float) $row->total_ctn;
                     $transitSum += $no_of_units * $total_ctn;
+                    $rate = (float) $row->rate;
                 }
 
                 return (object)[
                     'tab_name' => $group->pluck('tab_name')->unique()->implode(', '),
                     'transit' => $transitSum,
+                    'rate' => $rate,
                 ];
             })
             ->keyBy(fn($item, $key) => $key);
