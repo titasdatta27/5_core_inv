@@ -463,6 +463,138 @@
                     visible: false
                 },
                 {
+                    title: 'SOLD L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="sold-l30-total" style="display:inline-block; margin-top:2px;"></span>',
+                    field: "SOLD_L30",
+                    formatter: function(cell) {
+                        let SOLD_L30 = cell.getValue();
+                        return `
+                            <span>${SOLD_L30.toFixed(0)}</span>
+                            <i class="fa fa-info-circle text-primary toggle-soldL30-btn" 
+                            data-sold-l30="${SOLD_L30}" 
+                            style="cursor:pointer; margin-left:8px;"></i>
+                        `;
+                    }
+                },
+                {
+                    title: 'KW Sold L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="kw-sold-l30-total" style="display:inline-block; margin-top:2px;"></span>',
+                    field: "kw_sold_L30",
+                    visible: false
+                },
+                {
+                    title: 'PT Sold L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="pt-sold-l30-total" style="display:inline-block; margin-top:2px;"></span>',
+                    field: "pt_sold_L30",
+                    visible: false
+                },
+                {
+                    title: 'HL Sold L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="hl-sold-l30-total" style="display:inline-block; margin-top:2px;"></span>',
+                    field: "hl_sold_L30",
+                    formatter: function(cell) {
+                        let HL_SOLD_L30 = cell.getValue();
+                        return `
+                            <span>${HL_SOLD_L30.toFixed(0)}</span>`;
+                    },
+                    visible: false
+                },
+                {
+                    title: 'SOLD L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="sold-l7-total" style="display:inline-block; margin-top:2px;"></span>',
+                    field: "SOLD_L7",
+                    formatter: function(cell) {
+                        let SOLD_L7 = cell.getValue();
+                        return `
+                            <span>${SOLD_L7.toFixed(0)}</span>
+                            <i class="fa fa-info-circle text-primary toggle-soldL7-btn" 
+                            data-sold-l7="${SOLD_L7}" 
+                            style="cursor:pointer; margin-left:8px;"></i>
+                        `;
+                    }
+                },
+                {
+                    title: 'KW Sold L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="kw-sold-l7-total" style="display:inline-block; margin-top:2px;"></span>',
+                    field: "kw_sold_L7",
+                    visible: false
+                },
+                {
+                    title: 'PT Sold L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="pt-sold-l7-total" style="display:inline-block; margin-top:2px;"></span>',
+                    field: "pt_sold_L7",
+                    visible: false
+                },
+                {
+                    title: 'HL Sold L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="hl-sold-l7-total" style="display:inline-block; margin-top:2px;"></span>',
+                    field: "hl_sold_L7",
+                    formatter: function(cell) {
+                        let HL_SOLD_L7 = cell.getValue();
+                        return `
+                            <span>${HL_SOLD_L7.toFixed(0)}</span>`;
+                    },
+                    visible: false
+                },
+                {
+                    title: 'SALES L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="sales-l30-total" style="display:inline-block; margin-top:2px;"></span>',
+                    field: "SALES_L30",
+                    formatter: function(cell) {
+                        let SALES_L30 = cell.getValue();
+                        return `
+                            <span>${SALES_L30.toFixed(0)}</span>
+                            <i class="fa fa-info-circle text-primary toggle-salesL30-btn" 
+                            data-sales-l30="${SALES_L30}" 
+                            style="cursor:pointer; margin-left:8px;"></i>
+                        `;
+                    }
+                },
+                {
+                    title: 'KW Sales L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="kw-sales-l30-total" style="display:inline-block; margin-top:2px;"></span>',
+                    field: "kw_sales_L30",
+                    visible: false
+                },
+                {
+                    title: 'PT Sales L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="pt-sales-l30-total" style="display:inline-block; margin-top:2px;"></span>',
+                    field: "pt_sales_L30",
+                    visible: false
+                },
+                {
+                    title: 'HL Sales L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="hl-sales-l30-total" style="display:inline-block; margin-top:2px;"></span>',
+                    field: "hl_sales_L30",
+                    formatter: function(cell) {
+                        let HL_SALES_L30 = cell.getValue();
+                        return `
+                            <span>${HL_SALES_L30.toFixed(0)}</span>`;
+                    },
+                    visible: false
+                },
+                {
+                    title: 'SALES L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="sales-l7-total" style="display:inline-block; margin-top:2px;"></span>',
+                    field: "SALES_L7",
+                    formatter: function(cell) {
+                        let SALES_L7 = cell.getValue();
+                        return `
+                            <span>${SALES_L7.toFixed(0)}</span>
+                            <i class="fa fa-info-circle text-primary toggle-salesL7-btn" 
+                            data-sales-l7="${SALES_L7}" 
+                            style="cursor:pointer; margin-left:8px;"></i>
+                        `;
+                    }
+                },
+                {
+                    title: 'KW Sales L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="kw-sales-l7-total" style="display:inline-block; margin-top:2px;"></span>',
+                    field: "kw_sales_L7",
+                    visible: false
+                },
+                {
+                    title: 'PT Sales L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="pt-sales-l7-total" style="display:inline-block; margin-top:2px;"></span>',
+                    field: "pt_sales_L7",
+                    visible: false
+                },
+                {
+                    title: 'HL Sales L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="hl-sales-l7-total" style="display:inline-block; margin-top:2px;"></span>',
+                    field: "hl_sales_L7",
+                    formatter: function(cell) {
+                        let HL_SALES_L7 = cell.getValue();
+                        return `
+                            <span>${HL_SALES_L7.toFixed(0)}</span>`;
+                    },
+                    visible: false
+                },
+                {
                     title: 'CLICKS L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="clicks-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "CLICKS_L30",
                     formatter: function(cell) {
@@ -821,15 +953,22 @@
                 let hlImpL30Total = calculateTotal('hl_impr_L30');
                 let hlImpL7Total = calculateTotal('hl_impr_L7');
 
-                // Debug logging
-                console.log("Calculated Totals:", {
-                    spendTotal,
-                    kwSpendL30Total,
-                    spendL7Total,
-                    kwSpendL7Total,
-                    ptSpendL30Total,
-                    ptSpendL7Total
-                });
+                let soldL30Total = calculateTotal('SOLD_L30');
+                let soldL7Total = calculateTotal('SOLD_L7');
+                let salesL30Total = calculateTotal('SALES_L30');
+                let salesL7Total = calculateTotal('SALES_L7');
+                let kwSoldL30Total = calculateTotal('kw_sold_L30');
+                let kwSoldL7Total = calculateTotal('kw_sold_L7');
+                let ptSoldL30Total = calculateTotal('pt_sold_L30');
+                let ptSoldL7Total = calculateTotal('pt_sold_L7');
+                let hlSoldL30Total = calculateTotal('hl_sold_L30');
+                let hlSoldL7Total = calculateTotal('hl_sold_L7');
+                let kwSalesL30Total = calculateTotal('kw_sales_L30');
+                let kwSalesL7Total = calculateTotal('kw_sales_L7');
+                let ptSalesL30Total = calculateTotal('pt_sales_L30');
+                let ptSalesL7Total = calculateTotal('pt_sales_L7');
+                let hlSalesL30Total = calculateTotal('hl_sales_L30');
+                let hlSalesL7Total = calculateTotal('hl_sales_L7');
 
                 // Update SPEND totals
                 document.getElementById("spend-l30-total").innerText = spendTotal > 0 ? ` (${spendTotal.toFixed(2)})` : "";
@@ -915,6 +1054,56 @@
                 document.getElementById("hl-imp-l7-total").innerText = hlImpL7Total > 0 ? ` (${hlImpL7Total.toFixed(0)})` : "";
                 document.getElementById("hl-imp-l7-total").style.display = hlImpL7Total > 0 ? "inline" : "none";
 
+                // Update SOLD totals
+                document.getElementById("sold-l30-total").innerText = soldL30Total > 0 ? ` (${soldL30Total.toFixed(0)})` : "";
+                document.getElementById("sold-l30-total").style.display = soldL30Total > 0 ? "inline" : "none";
+
+                document.getElementById("sold-l7-total").innerText = soldL7Total > 0 ? ` (${soldL7Total.toFixed(0)})` : "";
+                document.getElementById("sold-l7-total").style.display = soldL7Total > 0 ? "inline" : "none";
+
+                // Update SALES totals
+                document.getElementById("sales-l30-total").innerText = salesL30Total > 0 ? ` (${salesL30Total.toFixed(0)})` : "";
+                document.getElementById("sales-l30-total").style.display = salesL30Total > 0 ? "inline" : "none";
+
+                document.getElementById("sales-l7-total").innerText = salesL7Total > 0 ? ` (${salesL7Total.toFixed(0)})` : "";
+                document.getElementById("sales-l7-total").style.display = salesL7Total > 0 ? "inline" : "none";
+
+                // Update KW SOLD totals
+                document.getElementById("kw-sold-l30-total").innerText = kwSoldL30Total > 0 ? ` (${kwSoldL30Total.toFixed(0)})` : "";
+                document.getElementById("kw-sold-l30-total").style.display = kwSoldL30Total > 0 ? "inline" : "none";
+                document.getElementById("kw-sold-l7-total").innerText = kwSoldL7Total > 0 ? ` (${kwSoldL7Total.toFixed(0)})` : "";
+                document.getElementById("kw-sold-l7-total").style.display = kwSoldL7Total > 0 ? "inline" : "none";
+
+                // Update PT SOLD totals
+                document.getElementById("pt-sold-l30-total").innerText = ptSoldL30Total > 0 ? ` (${ptSoldL30Total.toFixed(0)})  ` : "";
+                document.getElementById("pt-sold-l30-total").style.display = ptSoldL30Total > 0 ? "inline" : "none";
+                document.getElementById("pt-sold-l7-total").innerText = ptSoldL7Total > 0 ? ` (${ptSoldL7Total.toFixed(0)})` : "";
+                document.getElementById("pt-sold-l7-total").style.display = ptSoldL7Total > 0 ? "inline" : "none";
+
+                // Update HL SOLD totals
+                document.getElementById("hl-sold-l30-total").innerText = hlSoldL30Total > 0 ? ` (${hlSoldL30Total.toFixed(0)})` : "";
+                document.getElementById("hl-sold-l30-total").style.display = hlSoldL30Total > 0 ? "inline" : "none";
+                document.getElementById("hl-sold-l7-total").innerText = hlSoldL7Total > 0 ? ` (${hlSoldL7Total.toFixed(0)})` : "";
+                document.getElementById("hl-sold-l7-total").style.display = hlSoldL7Total > 0 ? "inline" : "none";
+
+                // Update KW SALES totals
+                document.getElementById("kw-sales-l30-total").innerText = kwSalesL30Total > 0 ? ` (${kwSalesL30Total.toFixed(0)})` : "";
+                document.getElementById("kw-sales-l30-total").style.display = kwSalesL30Total > 0 ? "inline" : "none";
+                document.getElementById("kw-sales-l7-total").innerText = kwSalesL7Total > 0 ? ` (${kwSalesL7Total.toFixed(0)})` : "";
+                document.getElementById("kw-sales-l7-total").style.display = kwSalesL7Total > 0 ? "inline" : "none";
+
+                // Update PT SALES totals
+                document.getElementById("pt-sales-l30-total").innerText = ptSalesL30Total > 0 ? ` (${ptSalesL30Total.toFixed(0)})` : "";
+                document.getElementById("pt-sales-l30-total").style.display = ptSalesL30Total > 0 ? "inline" : "none";
+                document.getElementById("pt-sales-l7-total").innerText = ptSalesL7Total > 0 ? ` (${ptSalesL7Total.toFixed(0)})` : "";
+                document.getElementById("pt-sales-l7-total").style.display = ptSalesL7Total > 0 ? "inline" : "none";
+
+                // Update HL SALES totals
+                document.getElementById("hl-sales-l30-total").innerText = hlSalesL30Total > 0 ? ` (${hlSalesL30Total.toFixed(0)})` : "";
+                document.getElementById("hl-sales-l30-total").style.display = hlSalesL30Total > 0 ? "inline" : "none";
+                document.getElementById("hl-sales-l7-total").innerText = hlSalesL7Total > 0 ? ` (${hlSalesL7Total.toFixed(0)})` : "";
+                document.getElementById("hl-sales-l7-total").style.display = hlSalesL7Total > 0 ? "inline" : "none";
+
                 // Update campaign count and percentage
                 let percentage = total > 0 ? ((filtered / total) * 100).toFixed(0) : 0;
                 document.getElementById("total-campaigns").innerText = filtered;
@@ -965,6 +1154,46 @@
             }
             if (e.target.classList.contains("toggle-spendL7-btn")) {
                 let colsToToggle = ["kw_spend_L7", "pt_spend_L7", "hl_spend_L7"];
+
+                colsToToggle.forEach(colField => {
+                    let col = table.getColumn(colField);
+                    if (col) {
+                        col.toggle();
+                    }
+                });
+            }
+            if (e.target.classList.contains("toggle-soldL30-btn")) {
+                let colsToToggle = ["kw_sold_L30", "pt_sold_L30", "hl_sold_L30"];
+
+                colsToToggle.forEach(colField => {
+                    let col = table.getColumn(colField);
+                    if (col) {
+                        col.toggle();
+                    }
+                });
+            }
+            if (e.target.classList.contains("toggle-soldL7-btn")) {
+                let colsToToggle = ["kw_sold_L7", "pt_sold_L7", "hl_sold_L7"];
+
+                colsToToggle.forEach(colField => {
+                    let col = table.getColumn(colField);
+                    if (col) {
+                        col.toggle();
+                    }
+                });
+            }
+            if (e.target.classList.contains("toggle-salesL30-btn")) {
+                let colsToToggle = ["kw_sales_L30", "pt_sales_L30", "hl_sales_L30"];
+
+                colsToToggle.forEach(colField => {
+                    let col = table.getColumn(colField);
+                    if (col) {
+                        col.toggle();
+                    }
+                });
+            }
+            if (e.target.classList.contains("toggle-salesL7-btn")) {
+                let colsToToggle = ["kw_sales_L7", "pt_sales_L7", "hl_sales_L7"];
 
                 colsToToggle.forEach(colField => {
                     let col = table.getColumn(colField);

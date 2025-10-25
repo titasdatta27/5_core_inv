@@ -167,8 +167,8 @@ class AmazonAdRunningController extends Controller
             $row['kw_spend_L7']   = $matchedCampaignKwL7->spend ?? 0;
             $row['kw_sales_L30']  = $matchedCampaignKwL30->sales30d ?? 0;
             $row['kw_sales_L7']   = $matchedCampaignKwL7->sales7d ?? 0;
-            $row['kw_sold_L30']  = $matchedCampaignKwL30->unitsSoldClicks30d ?? 0;
-            $row['kw_sold_L7']   = $matchedCampaignKwL7->unitsSoldClicks7d ?? 0;
+            $row['kw_sold_L30']  = $matchedCampaignKwL30->unitsSoldSameSku30d ?? 0;
+            $row['kw_sold_L7']   = $matchedCampaignKwL7->unitsSoldSameSku7d ?? 0;
 
             // --- PT ---
             $row['pt_impr_L30'] = $matchedCampaignPtL30->impressions ?? 0;
@@ -179,8 +179,8 @@ class AmazonAdRunningController extends Controller
             $row['pt_spend_L7']   = $matchedCampaignPtL7->spend ?? 0;
             $row['pt_sales_L30']  = $matchedCampaignPtL30->sales30d ?? 0;
             $row['pt_sales_L7']   = $matchedCampaignPtL7->sales7d ?? 0;
-            $row['pt_sold_L30']  = $matchedCampaignPtL30->unitsSoldClicks30d ?? 0;
-            $row['pt_sold_L7']   = $matchedCampaignPtL7->unitsSoldClicks7d ?? 0;
+            $row['pt_sold_L30']  = $matchedCampaignPtL30->unitsSoldSameSku30d ?? 0;
+            $row['pt_sold_L7']   = $matchedCampaignPtL7->unitsSoldSameSku7d ?? 0;
 
             // --- HL  ---
             $row['hl_impr_L30'] = $matchedCampaignHlL30->impressions ?? 0;
@@ -189,10 +189,10 @@ class AmazonAdRunningController extends Controller
             $row['hl_clicks_L7']  = $matchedCampaignHlL7->clicks ?? 0;
             $row['hl_campaign_L30'] = $matchedCampaignHlL30->campaignName ?? null;
             $row['hl_campaign_L7']  = $matchedCampaignHlL7->campaignName ?? null;
-            $row['hl_sales_L30']  = 0;
-            $row['hl_sales_L7']   = 0;
-            $row['hl_sold_L30']  = 0;
-            $row['hl_sold_L7']   = 0;
+            $row['hl_sales_L30']  = $matchedCampaignHlL30->sales ?? 0;
+            $row['hl_sales_L7']   = $matchedCampaignHlL7->sales ?? 0;
+            $row['hl_sold_L30']  = $matchedCampaignHlL30->unitsSold ?? 0;
+            $row['hl_sold_L7']   = $matchedCampaignHlL7->unitsSold ?? 0;
 
             if (str_starts_with($sku, 'PARENT')) {
                 $row['hl_spend_L30'] = $matchedCampaignHlL30->cost ?? 0;

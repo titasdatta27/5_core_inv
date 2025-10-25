@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Cache;
 use App\Models\EbayMetric;
 use App\Models\ProductMaster;
 use App\Models\ShopifySku;
+use Exception;
 
 class UpdateEbaySuggestedBid extends Command
 {
@@ -43,6 +44,7 @@ class UpdateEbaySuggestedBid extends Command
         $campaignListings = DB::connection('apicentral')
             ->table('ebay_campaign_ads_listings')
             ->select('listing_id', 'campaign_id')
+            ->where('funding_strategy', 'COST_PER_SALE')
             ->get()
             ->keyBy('listing_id');
             
@@ -144,7 +146,6 @@ class UpdateEbaySuggestedBid extends Command
                     "sell/marketing/v1/ad_campaign/{$campaignId}/bulk_update_ads_bid_by_listing_id",
                     ['json' => ['requests' => $requests]]
                 );
-
                 $this->info("Campaign {$campaignId}: Updated " . count($requests) . " listings.");
                 Log::info("eBay campaign {$campaignId} bulk update response: " . $response->getBody()->getContents());
             } catch (\Exception $e) {

@@ -44,7 +44,7 @@ class UpdateEbayTwoSuggestedBid extends Command
         $campaignListings = DB::connection('apicentral')
             ->table('ebay2_campaign_ads_listings')
             ->select('listing_id', 'campaign_id')
-            ->where('listing_id', '365822904420')
+            ->where('funding_strategy', 'COST_PER_SALE')
             ->get()
             ->keyBy('listing_id');
             
