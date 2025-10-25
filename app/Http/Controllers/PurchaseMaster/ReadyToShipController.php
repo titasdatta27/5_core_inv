@@ -200,7 +200,7 @@ class ReadyToShipController extends Controller
         }
 
         try {
-            ReadyToShip::whereIn('sku', $skus)->delete();
+            ReadyToShip::whereIn('sku', $skus)->update(['deleted_at' => now()]);
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Action failed: ' . $e->getMessage()]);

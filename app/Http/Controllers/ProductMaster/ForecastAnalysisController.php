@@ -315,8 +315,10 @@ class ForecastAnalysisController extends Controller
                             'approved_qty' => $orderQty,
                             'date_apprvl' => now()->toDateString(),
                             'stage' => '',
+                            'auth_user' => Auth::user()->name,
                             'updated_at' => now(),
                             'created_at' => now(),
+                            'deleted_at' => null,
                         ]
                     );
                 }
@@ -339,8 +341,10 @@ class ForecastAnalysisController extends Controller
                         [
                             'qty' => $orderQty,
                             'transit_inv_status' => 0,
+                            'auth_user' => Auth::user()->name,
                             'updated_at' => now(),
                             'created_at' => now(),
+                            'deleted_at' => null,
                         ]
                     );
                 }

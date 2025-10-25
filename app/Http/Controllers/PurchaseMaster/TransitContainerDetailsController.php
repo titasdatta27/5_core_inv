@@ -217,19 +217,27 @@ class TransitContainerDetailsController extends Controller
     {
         try {
             $ids = $request->ids;
+
+            $authUser = auth()->check() ? auth()->user()->name : 'system';
+
+            TransitContainerDetail::whereIn('id', $ids)->update([
+                'auth_user' => $authUser,
+            ]);
+
             TransitContainerDetail::whereIn('id', $ids)->delete();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Records deleted successfully'
+                'message' => 'Records deleted successfully by ' . $authUser,
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error deleting records: ' . $e->getMessage()
+                'message' => 'Error deleting records: ' . $e->getMessage(),
             ], 500);
         }
     }
+
 
     //transit container changes
     public function transitContainerChanges(){

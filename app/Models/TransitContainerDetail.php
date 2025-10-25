@@ -30,6 +30,7 @@ class TransitContainerDetail extends Model
         'cbm',
         'order_link',
         'comparison_link',
+        'auth_user',
     ];
 
     protected $dates = ['deleted_at']; 

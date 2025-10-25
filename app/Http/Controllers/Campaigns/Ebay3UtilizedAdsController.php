@@ -57,9 +57,7 @@ class Ebay3UtilizedAdsController extends Controller
                 return $normalize($c->campaign_name) === $sku;
             });
 
-            if ($matchedCampaigns->isEmpty()) {
-                continue;
-            }
+            
 
             $matchedL1  = $matchedCampaigns->firstWhere('report_range', 'L1');
             $matchedL7  = $matchedCampaigns->firstWhere('report_range', 'L7');
@@ -101,8 +99,9 @@ class Ebay3UtilizedAdsController extends Controller
                 } else {
                     $row['sbid'] = 0.30;
                 }
-                $result[] = (object) $row;
             }
+
+            $result[] = (object) $row;
         }
 
         return response()->json([

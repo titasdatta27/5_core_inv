@@ -1049,6 +1049,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
         Route::post('/update-link', 'updateLink')->name('update.rfq.link');
         Route::post('/mfrg-progresses/insert', 'storeMFRG')->name('mfrg.progresses.insert');
         Route::post('/save-to-order-review', 'storeToOrderReview')->name('save.to_order_review');
+        Route::post('/to-order-analysis/delete', 'deleteToOrderAnalysis')->name('delete.to_order_analysis');
     });
 
     //Movement Analysis
