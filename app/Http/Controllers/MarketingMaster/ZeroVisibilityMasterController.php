@@ -81,14 +81,22 @@ class ZeroVisibilityMasterController extends Controller
             'ebay3'         => 'Ebay3ZeroController',
             'ebaytwo'       => 'Ebay2ZeroController',
             'ebay2'         => 'Ebay2ZeroController',
-            // 'ebayvariation' => 'EbayVariationZeroController',
+            'ebayvariation' => 'EbayVariationZeroController',
             'tiktokshop'    => 'TiktokShopZeroController',
             'doba'          => 'DobaZeroController',
             'walmart'       => 'WalmartZeroController',
             'shein'         => 'SheinZeroController',
             'bestbuyusa'    => 'BestbuyUSAZeroController',
             'aliexpress'    => 'AliexpressZeroController',
-            'business5core' =>'Business5CoreZeroController',
+            'tiendamia'     => 'TiendamiaZeroController',
+            'pls'           => 'PLSZeroController',
+            'mercariwship'  => 'MercariWShipZeroController',
+            'mercariwoship' => 'MercariWoShipZeroController',
+            'instagramshop' => 'InstagramShopZeroController',
+            'fbshop'        => 'FBShopZeroController',
+            'fbmarketplace' => 'FBMarketplaceZeroController',
+            'faire'         => 'FaireZeroController',
+            'business5core' => 'Business5CoreZeroController',
             // Add more mappings as needed
         ];
 
@@ -615,6 +623,28 @@ class ZeroVisibilityMasterController extends Controller
         } catch (\Throwable $e) {
             return 0;
         }
+    }
+
+    private function getModelForChannel($channel)
+    {
+        $modelMap = [
+            'amazon' => AmazonDataView::class,
+            'ebay' => EbayDataView::class,
+            'ebaytwo' => EbayTwoDataView::class,
+            'ebaythree' => EbayThreeDataView::class,
+            'ebayvariation' => EbayDataView::class,
+            'temu' => TemuDataView::class,
+            'macy' => MacyDataView::class,
+            'wayfair' => WayfairDataView::class,
+            'doba' => DobaDataView::class,
+            'walmart' => WalmartDataView::class,
+            'aliexpress' => AliexpressDataView::class,
+            'tiktokshop' => TiktokShopDataView::class,
+            'shein' => SheinDataView::class,
+        ];
+
+        $key = strtolower(str_replace([' ', '&', '-', '/'], '', trim($channel)));
+        return $modelMap[$key] ?? null;
     }
 
 

@@ -22,6 +22,7 @@ class EventServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        Log::info('EventServiceProvider booted');
         // Listen when cron job starts
         Event::listen(ScheduledTaskStarting::class, function ($event) {
             $this->postStatus([

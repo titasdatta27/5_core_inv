@@ -420,17 +420,17 @@
                     }
                 },
                 {
-                    title: 'KW Spend L30 <span class="text-muted" id="kw-spend-l30-total"></span>',
+                    title: 'KW Spend L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="kw-spend-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "kw_spend_L30",
                     visible: false
                 },
                 {
-                    title: 'PT Spend L30 <span class="text-muted" id="pt-spend-l30-total"></span>',
+                    title: 'PT Spend L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="pt-spend-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "pt_spend_L30",
                     visible: false
                 },
                 {
-                    title: 'HL Spend L30 <span class="text-muted" id="hl-spend-l30-total"></span>',
+                    title: 'HL Spend L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="hl-spend-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "hl_spend_L30",
                     visible: false
                 },
@@ -448,17 +448,17 @@
                     }
                 },
                 {
-                    title: 'KW Spend L7 <span class="text-muted" id="kw-spend-l7-total"></span>',
+                    title: 'KW Spend L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="kw-spend-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "kw_spend_L7",
                     visible: false
                 },
                 {
-                    title: 'PT Spend L7 <span class="text-muted" id="pt-spend-l7-total"></span>',
+                    title: 'PT Spend L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="pt-spend-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "pt_spend_L7",
                     visible: false
                 },
                 {
-                    title: 'HL Spend L7 <span class="text-muted" id="hl-spend-l7-total"></span>',
+                    title: 'HL Spend L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="hl-spend-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "hl_spend_L7",
                     visible: false
                 },
@@ -476,17 +476,17 @@
                     }
                 },
                 {
-                    title: 'KW Clicks L30 <span class="text-muted" id="kw-clicks-l30-total"></span>',
+                    title: 'KW Clicks L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="kw-clicks-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "kw_clicks_L30",
                     visible: false
                 },
                 {
-                    title: 'PT Clicks L30 <span class="text-muted" id="pt-clicks-l30-total"></span>',
+                    title: 'PT Clicks L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="pt-clicks-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "pt_clicks_L30",
                     visible: false
                 },
                 {
-                    title: 'HL Clicks L30 <span class="text-muted" id="hl-clicks-l30-total"></span>',
+                    title: 'HL Clicks L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="hl-clicks-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "hl_clicks_L30",
                     visible: false
                 },
@@ -504,17 +504,17 @@
                     }
                 },
                 {
-                    title: 'KW Clicks L7 <span class="text-muted" id="kw-clicks-l7-total"></span>',
+                    title: 'KW Clicks L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="kw-clicks-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "kw_clicks_L7",
                     visible: false
                 },
                 {
-                    title: 'PT Clicks L7 <span class="text-muted" id="pt-clicks-l7-total"></span>',
+                    title: 'PT Clicks L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="pt-clicks-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "pt_clicks_L7",
                     visible: false
                 },
                 {
-                    title: 'HL Clicks L7 <span class="text-muted" id="hl-clicks-l7-total"></span>',
+                    title: 'HL Clicks L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="hl-clicks-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "hl_clicks_L7",
                     visible: false
                 },
@@ -532,17 +532,17 @@
                     }
                 },
                 {
-                    title: 'KW IMP L30 <span class="text-muted" id="kw-imp-l30-total"></span>',
+                    title: 'KW IMP L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="kw-imp-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "kw_impr_L30",
                     visible: false,
                 },
                 {
-                    title: 'PT IMP L30 <span class="text-muted" id="pt-imp-l30-total"></span>',
+                    title: 'PT IMP L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="pt-imp-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "pt_impr_L30",
                     visible: false
                 },
                 {
-                    title: 'HL IMP L30 <span class="text-muted" id="hl-imp-l30-total"></span>',
+                    title: 'HL IMP L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="hl-imp-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "hl_impr_L30",
                     visible: false
                 },
@@ -560,17 +560,17 @@
                     }
                 },
                 {
-                    title: 'KW IMP L7 <span class="text-muted" id="kw-imp-l7-total"></span>',
+                    title: 'KW IMP L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="kw-imp-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "kw_impr_L7",
                     visible: false
                 },
                 {
-                    title: 'PT IMP L7 <span class="text-muted" id="pt-imp-l7-total"></span>',
+                    title: 'PT IMP L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="pt-imp-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "pt_impr_L7",
                     visible: false
                 },
                 {
-                    title: 'HL IMP L7 <span class="text-muted" id="hl-imp-l7-total"></span>',
+                    title: 'HL IMP L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="hl-imp-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "hl_impr_L7",
                     visible: false
                 },

@@ -4268,6 +4268,8 @@
                     };
 
                     filteredData.forEach(item => {
+                        const sku = String(item.SKU || '').trim().toUpperCase();
+                        if (sku.startsWith('PARENT ')) return;
 
                         metrics.invTotal += parseFloat(item.INV) || 0;
                         metrics.ovL30Total += parseFloat(item.L30) || 0;
