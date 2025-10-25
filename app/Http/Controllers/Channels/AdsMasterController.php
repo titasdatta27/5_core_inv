@@ -39,6 +39,7 @@ use App\Models\TopDawgSheetdata;
 use App\Models\WaifairProductSheet;
 use App\Models\WalmartMetrics;
 use App\Models\EbayDataView;
+use App\Models\EbayGeneralReport;
 use App\Models\EbayPriorityReport;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
