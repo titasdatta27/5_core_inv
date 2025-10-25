@@ -29,85 +29,110 @@ class Ebay3UtilizedAdsController extends Controller
 
     public function getEbay3UtilizedAdsData()
     {
-        $normalize = fn($value) => strtoupper(trim($value));
-
         $productMasters = ProductMaster::orderBy('parent', 'asc')
             ->orderByRaw("CASE WHEN sku LIKE 'PARENT %' THEN 1 ELSE 0 END")
             ->orderBy('sku', 'asc')
             ->get();
 
         $skus = $productMasters->pluck('sku')->filter()->unique()->values()->all();
-
         $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy('sku');
-        $ebayMetricData = Ebay3Metric::whereIn('sku', $skus)->get()->keyBy('sku');
         $nrValues = EbayThreeDataView::whereIn('sku', $skus)->pluck('value', 'sku');
 
-        $allCampaigns = Ebay3PriorityReport::whereIn('campaign_name', $skus)->get();
+        $reports = Ebay3PriorityReport::whereIn('report_range', ['L7', 'L1', 'L30'])
+            ->orderBy('report_range', 'asc')
+            ->get();
 
         $result = [];
+        $matchedCampaignIds = []; 
 
         foreach ($productMasters as $pm) {
-            $sku = $normalize($pm->sku);
+            $sku = strtoupper($pm->sku);
             $parent = $pm->parent;
-
             $shopify = $shopifyData[$pm->sku] ?? null;
-            $ebay = $ebayMetricData[$pm->sku] ?? null;
 
-            $matchedCampaigns = $allCampaigns->filter(function ($c) use ($sku, $normalize) {
-                return $normalize($c->campaign_name) === $sku;
-            });
-
-            
-
-            $matchedL1  = $matchedCampaigns->firstWhere('report_range', 'L1');
-            $matchedL7  = $matchedCampaigns->firstWhere('report_range', 'L7');
-            $matchedL30 = $matchedCampaigns->firstWhere('report_range', 'L30');
-
-            $row = [
-                'parent' => $parent,
-                'sku'    => $pm->sku,
-                'INV'    => $shopify->inv ?? 0,
-                'L30'    => $shopify->quantity ?? 0,
-                'price'  => $ebay->ebay_price ?? 0,
-                'campaign_id' => $matchedL7->campaign_id ?? ($matchedL1->campaign_id ?? ''),
-                'campaignName' => $matchedL7->campaign_name ?? ($matchedL1->campaign_name ?? ''),
-                'campaignStatus' => $matchedL7->campaignStatus ?? ($matchedL1->campaignStatus ?? ''),
-                'campaignBudgetAmount' => $matchedL7->campaignBudgetAmount ?? ($matchedL1->campaignBudgetAmount ?? ''),
-                'l7_spend' => (float) str_replace('USD ', '', $matchedL7->cpc_ad_fees_payout_currency ?? 0),
-                'l7_cpc'   => (float) str_replace('USD ', '', $matchedL7->cost_per_click ?? 0),
-                'l1_spend' => (float) str_replace('USD ', '', $matchedL1->cpc_ad_fees_payout_currency ?? 0),
-                'l1_cpc'   => (float) str_replace('USD ', '', $matchedL1->cost_per_click ?? 0),
-                'sbid'     => 0.10,
-                'NR'       => '',
-            ];
-
+            $nrValue = '';
             if (isset($nrValues[$pm->sku])) {
                 $raw = $nrValues[$pm->sku];
-                if (!is_array($raw)) $raw = json_decode($raw, true);
-                if (is_array($raw)) $row['NR'] = $raw['NR'] ?? null;
-            }
-
-            $adFees = (float) str_replace('USD ', '', $matchedL30->cpc_ad_fees_payout_currency ?? 0);
-            $sales  = (float) str_replace('USD ', '', $matchedL30->cpc_sale_amount_payout_currency ?? 0);
-            $row['acos'] = ($adFees > 0 && $sales === 0) ? 100 : ($sales > 0 ? ($adFees / $sales) * 100 : 0);
-
-            if ($row['price'] < 30) {
-                if ($row['price'] < 10) {
-                    $row['sbid'] = 0.10;
-                } elseif ($row['price'] <= 20) {
-                    $row['sbid'] = 0.20;
-                } else {
-                    $row['sbid'] = 0.30;
+                if (!is_array($raw)) {
+                    $raw = json_decode($raw, true);
+                }
+                if (is_array($raw)) {
+                    $nrValue = $raw['NR'] ?? null;
                 }
             }
 
-            $result[] = (object) $row;
+            $matchedReports = $reports->filter(function ($item) use ($sku) {
+                $campaignSku = strtoupper(trim($item->campaign_name ?? ''));
+                return $campaignSku === $sku;
+            });
+
+            if ($matchedReports->isEmpty()) {
+                continue;
+            }
+
+            foreach ($matchedReports as $campaign) {
+                $matchedCampaignIds[] = $campaign->id;
+
+                $row = [];
+                $row['parent'] = $parent;
+                $row['sku'] = $pm->sku;
+                $row['report_range'] = $campaign->report_range;
+                $row['campaign_id'] = $campaign->campaign_id ?? '';
+                $row['campaignName'] = $campaign->campaign_name ?? '';
+                $row['campaignBudgetAmount'] = $campaign->campaignBudgetAmount ?? 0;
+                $row['INV'] = $shopify->inv ?? 0;
+                $row['L30'] = $shopify->quantity ?? 0;
+
+                $adFees = (float) str_replace('USD ', '', $campaign->cpc_ad_fees_payout_currency ?? 0);
+                $sales  = (float) str_replace('USD ', '', $campaign->cpc_sale_amount_payout_currency ?? 0);
+                $row['l7_spend'] = (float) str_replace('USD ', '', $campaign->report_range == 'L7' ? $campaign->cpc_ad_fees_payout_currency ?? 0 : 0);
+                $row['l7_cpc'] = (float) str_replace('USD ', '', $campaign->report_range == 'L7' ? $campaign->cost_per_click ?? 0 : 0);
+                $row['l1_spend'] = (float) str_replace('USD ', '', $campaign->report_range == 'L1' ? $campaign->cpc_ad_fees_payout_currency ?? 0 : 0);
+                $row['l1_cpc'] = (float) str_replace('USD ', '', $campaign->report_range == 'L1' ? $campaign->cost_per_click ?? 0 : 0);
+
+                $acos = $sales > 0 ? ($adFees / $sales) * 100 : 0;
+                if ($adFees > 0 && $sales == 0) {
+                    $row['acos'] = 100;
+                } else {
+                    $row['acos'] = round($acos, 2);
+                }
+
+                $row['adFees'] = $adFees;
+                $row['sales'] = $sales;
+                $row['NR'] = $nrValue;
+
+                if ($row['NR'] != 'NRA') {
+                    $result[] = (object) $row;
+                }
+            }
         }
 
         return response()->json([
-            'message' => 'Data fetched successfully',
-            'data'    => $result,
-            'status'  => 200,
+            'message' => 'fetched successfully',
+            'data' => $result,
+            'status' => 200,
+        ]);
+    }
+
+    public function updateEbay3NrData(Request $request)
+    {
+        $sku   = $request->input('sku');
+        $field = $request->input('field');
+        $value = $request->input('value');
+
+        $ebayDataView = EbayThreeDataView::firstOrNew(['sku' => $sku]);
+
+        $jsonData = $ebayDataView->value ?? [];
+
+        $jsonData[$field] = $value;
+
+        $ebayDataView->value = $jsonData;
+        $ebayDataView->save();
+
+        return response()->json([
+            'status' => 200,
+            'message' => "Field updated successfully",
+            'updated_json' => $jsonData
         ]);
     }
 

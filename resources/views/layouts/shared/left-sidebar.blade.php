@@ -2196,8 +2196,11 @@
                                         <a href="{{ route('ebay3.keywords.ads.less-than-thirty') }}">Ads < $30</a>
                                     </li>
                                     <li>
-                                        <a href="{{ route('ebay3.make.new.kw.ads') }}">Make New KW Ads</a>
+                                        <a href="{{ route('ebay3.running.ads') }}">Running Ads</a>
                                     </li>
+                                    {{-- <li>
+                                        <a href="{{ route('ebay3.make.new.kw.ads') }}">Make New KW Ads</a>
+                                    </li> --}}
                                 </ul>
                             </div>
                         </li>
