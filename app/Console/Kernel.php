@@ -259,6 +259,17 @@ class Kernel extends ConsoleKernel
         $schedule->command('movement:generate')
             ->dailyAt('12:00')
             ->timezone('Asia/Kolkata');
+
+            // test scheduler for task manager report
+//               $schedule->call(function () {
+//     \Illuminate\Support\Facades\Log::info('Test Scheduler Executed at ' . now());
+
+//     // Optional: visible for testing
+//     file_put_contents(storage_path('logs/test_scheduler_output.txt'), now() . " - Test scheduler executed\n", FILE_APPEND);
+// })
+// ->everyMinute()
+// ->name('test-scheduler')
+// ->withoutOverlapping();
     }
 
     /**
