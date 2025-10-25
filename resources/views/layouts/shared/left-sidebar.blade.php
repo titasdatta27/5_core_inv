@@ -2281,6 +2281,9 @@
                                             Util.</a>
                                     </li>
                                     <li>
+                                        <a href="{{ route('google.shopping.missing.ads') }}">G-Shopping Missing Ads</a>
+                                    </li>
+                                    <li>
                                         <a href="{{ route('google.shopping.report') }}">G-Shopping Report</a>
                                     </li>
                                     <li>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Campaigns;
 
 use App\Http\Controllers\Controller;
+use App\Models\GoogleDataView;
 use App\Models\ProductMaster;
 use App\Models\ShopifySku;
 use Illuminate\Http\Request;
@@ -583,5 +584,97 @@ class GoogleAdsController extends Controller
                 "data" => []
             ], 500);
         }
+    }
+
+    public function googleMissingAdsView(){
+        return view('campaign.google.google-shopping-missing-ads');
+    }
+
+    public function googleShoppingAdsMissingAds()
+    {
+        $productMasters = ProductMaster::orderBy('parent', 'asc')
+            ->orderByRaw("CASE WHEN sku LIKE 'PARENT %' THEN 1 ELSE 0 END")
+            ->orderBy('sku', 'asc')
+            ->get();
+
+        $skus = $productMasters->pluck('sku')->filter()->unique()->values()->all();
+        $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy('sku');
+        $nrValues = GoogleDataView::whereIn('sku', $skus)->pluck('value', 'sku');
+
+        $googleCampaigns = DB::connection('apicentral')
+            ->table('google_ads_campaigns')
+            ->select(
+                'campaign_id',
+                'campaign_name',
+                'campaign_status',
+            )
+            ->get();
+
+        $googleCampaignsKeyed = $googleCampaigns->keyBy(function ($item) {
+            return strtoupper(trim($item->campaign_name));
+        });
+
+        $result = [];
+
+        foreach ($productMasters as $pm) {
+            $sku = strtoupper(trim($pm->sku));
+            $parent = $pm->parent;
+            $shopify = $shopifyData[$pm->sku] ?? null;
+
+            $matchedCampaign = $googleCampaignsKeyed[$sku] ?? null;
+
+            $row = [];
+            $row['parent'] = $parent;
+            $row['sku'] = $pm->sku;
+            $row['INV'] = $shopify->inv ?? 0;
+            $row['L30'] = $shopify->quantity ?? 0;
+            $row['campaign_id'] = $matchedCampaign->campaign_id ?? null;
+            $row['campaignName'] = $matchedCampaign->campaign_name ?? null;
+            $row['campaignStatus'] = $matchedCampaign->campaign_status ?? null;
+
+            $row['NR'] = '';
+            if (isset($nrValues[$pm->sku])) {
+                $raw = $nrValues[$pm->sku];
+                if (!is_array($raw)) {
+                    $raw = json_decode($raw, true);
+                }
+                if (is_array($raw)) {
+                    $row['NR'] = $raw['NR'] ?? null;
+                }
+            }
+
+            
+            $result[] = (object) $row;
+        }
+
+        $uniqueResult = collect($result)->unique('sku')->values()->all();
+
+        return response()->json([
+            'message' => 'Data fetched successfully',
+            'data'    => $uniqueResult,
+            'status'  => 200,
+        ]);
+    }
+
+    public function updateGoogleNrData(Request $request)
+    {
+        $sku   = $request->input('sku');
+        $field = $request->input('field');
+        $value = $request->input('value');
+
+        $googleDataView = GoogleDataView::firstOrNew(['sku' => $sku]);
+
+        $jsonData = $googleDataView->value ?? [];
+
+        $jsonData[$field] = $value;
+
+        $googleDataView->value = $jsonData;
+        $googleDataView->save();
+
+        return response()->json([
+            'status' => 200,
+            'message' => "Field updated successfully",
+            'updated_json' => $jsonData
+        ]);
     }
 }
