@@ -204,6 +204,7 @@ use App\Http\Controllers\Channels\SetupAccountChannelController;
 use App\Http\Controllers\Channels\ShippingMasterController;
 use App\Http\Controllers\Channels\TrafficMasterController;
 use App\Http\Controllers\Campaigns\EbayMissingAdsController;
+use App\Http\Controllers\ChannelWiseReviewsController;
 use App\Http\Controllers\FbaDataController;
 use App\Http\Controllers\InventoryManagement\AutoStockBalanceController;
 use App\Http\Controllers\InventoryManagement\StockBalanceController;
@@ -1200,8 +1201,12 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     // Pricing Master Views Roi Dashboard
 
     Route::get('/pricing-masters.pricing_masters', [PricingMasterViewsController::class, 'pricingMaster']);
+
     Route::get('/inventory-by-sales-value', [PricingMasterViewsController::class, 'inventoryBySalesValue'])->name('inventory.by.sales.value');
     Route::get('/pricing-master-data-views', [PricingMasterViewsController::class, 'getViewPricingAnalysisData']);
+    Route::get('/pricing-master/export', [PricingMasterViewsController::class, 'exportPricingMaster'])->name('pricing-master.export');
+    Route::post('/pricing-master/import-site-l90', [PricingMasterViewsController::class, 'importSiteL90Data'])->name('pricing-master.import-site-l90');
+    Route::get('/pricing-master/download-site-l90-sample', [PricingMasterViewsController::class, 'downloadSiteL90Sample'])->name('pricing-master.download-site-l90-sample');
     Route::get('/pricing-master/roi-dashboard', [PricingMasterViewsController::class, 'getViewPricingAnalysisROIDashboardData']);
     Route::post('/pricing-master/save', [PricingMasterViewsController::class, 'save']);
     Route::post('/pricing-master/save-image-url', [PricingMasterViewsController::class, 'saveImageUrl']);
@@ -1210,7 +1215,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::get('/calculate-wmp-masters', [PricingMasterViewsController::class, 'calculateWMPMasters']);
     Route::get('/pricing-master-incremental', [PricingMasterViewsController::class, 'pricingMasterIncR']);
     Route::post('/product-master/wmp-mark-as-done', [PricingMasterViewsController::class, 'wmpMarkAsDone']);
-
+    Route::get('/pricing-masters-l90.pricing_masters-l90', [PricingMasterViewsController::class, 'pricingMasterl90Data']);
 
 
 
@@ -2234,6 +2239,12 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
 
     Route::get('product-market', [ProductMarketing::class, 'product_master']);
     Route::get('product-market/details', [ProductMarketing::class, 'product_market_details']);
+
+
+
+    Route::get('channels-reviews-master', [ChannelWiseReviewsController::class, 'reviews_dashboard']);
+    Route::get('channels-reviews/details', [ChannelWiseReviewsController::class, 'reviews_dashboard_details']);
+    Route::post('channels-reviews/save', [ChannelWiseReviewsController::class, 'saveReview']);
 
 
     Route::get('', [RoutingController::class, 'index'])->name('root');

@@ -18,6 +18,8 @@ class ProductMaster extends Model
         'group_id',
         'Values',
         'remark',
+        'sales',
+        'views',
     ];
 
     public function setTemuShipAttribute($value)
@@ -34,5 +36,7 @@ class ProductMaster extends Model
 
     protected $casts = [
         'Values' => 'array',
+        'sales' => 'array',
+        'views' => 'array',
     ];
 }
