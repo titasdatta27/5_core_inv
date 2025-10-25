@@ -2037,7 +2037,7 @@
             function loadData() {
                 showLoader();
                 return $.ajax({
-                    url: '/zero_aliexpress/view-data',
+                    url: '/zero_walmart/view-data',
                     type: 'GET',
                     dataType: 'json',
                     success: function(response) {
@@ -2055,7 +2055,7 @@
                                     'SL No.': item['SL No.'] || index + 1,
                                     Parent: item.Parent || item.parent || item.parent_asin ||
                                         item.Parent_ASIN || '(No Parent)',
-                                    'sku': item['sku'] || '',
+                                    'sku': item['Sku'] || '',
                                     'R&A': item['R&A'] !== undefined ? item['R&A'] : '',
                                     INV: inv,
                                     L30: item.ov_l30 || 0,
@@ -2130,9 +2130,9 @@
                     if (item.is_parent) {
                         $row.addClass('parent-row');
                     }
-                    if (item.NR === 'NR') {
-                        $row.addClass('nr-hide');
-                    }
+                    // if (item.NR === 'NR') {
+                    //     $row.addClass('nr-hide');
+                    // }
                     // Helper functions for color coding
                     const getDilColor = (value) => {
                         const percent = parseFloat(value) * 100;
@@ -2405,79 +2405,127 @@
                 });
             }
 
-            $(document).on('change', '.nr-select', function() {
-                const sku = $(this).data('sku');
-                const nrValue = $(this).val();
-                console.log(nrValue, 'nrrr');
-
-
-                $.ajax({
-                    // url: '/doba/save-nr',
-                    type: 'POST',
-                    data: {
-                        sku: sku,
-                        nr: JSON.stringify({
-                            NR: nrValue
-                        }),
-                        _token: $('meta[name="csrf-token"]').attr('content') // CSRF protection
-                    },
-                    success: function(res) {
-                        showNotification('success', 'NR updated successfully');
-                    },
-                    error: function(err) {
-                        console.error('Error saving NR:', err);
-                        showNotification('danger', 'Failed to update NR');
-                    }
-                });
-            });
-
-
             function initNREditHandlers() {
                 $(document).on('change', '.nr-select', function() {
                     const $select = $(this);
-                    const sku = $(this).data('sku');
-                    const nrValue = $(this).val();
+                    console.log($select,'selectttt');
+                    
+                    const sku = $select.data('sku');
+                    const nrValue = $select.val();
 
+                    // Apply background color logic
                     if (nrValue === 'NR') {
                         $select.css('background-color', '#dc3545').css('color', '#ffffff');
                     } else {
                         $select.css('background-color', '#28a745').css('color', '#ffffff');
                     }
 
+                    // Send properly formatted data
                     $.ajax({
-                        // url: '/amazon/save-nr',
+                        url: '/walmart/save-nr',
                         type: 'POST',
                         data: {
                             sku: sku,
-                            nr: JSON.stringify({
-                                NR: nrValue
-                            }),
-                            _token: $('meta[name="csrf-token"]').attr('content') // CSRF protection
+                            nr: nrValue, // send as string
+                            _token: $('meta[name="csrf-token"]').attr('content')
                         },
+                        dataType: 'json',
                         success: function(res) {
                             showNotification('success', 'NR updated successfully');
-                            // ✅ Update tableData and filteredData correctly
+
+                            // Update local data
                             tableData.forEach(item => {
-                                if (item['sku'] === sku) {
-                                    item.NR = nrValue;
-                                }
+                                if (item['sku'] === sku) item.NR = nrValue;
                             });
                             filteredData.forEach(item => {
-                                if (item['sku'] === sku) {
-                                    item.NR = nrValue;
-                                }
+                                if (item['sku'] === sku) item.NR = nrValue;
                             });
-                            // ✅ Recalculate & re-render
+
                             updateZeroViewDiv();
                             renderTable();
                         },
-                        error: function(err) {
-                            console.error('Error saving NR:', err);
+                        error: function(xhr) {
+                            console.error('Error saving NR:', xhr.responseText);
                             showNotification('danger', 'Failed to update NR');
                         }
                     });
                 });
             }
+
+
+            // $(document).on('change', '.nr-select', function() {
+            //     const sku = $(this).data('sku');
+            //     const nrValue = $(this).val();
+            //     console.log(nrValue, 'nrrr');
+
+
+            //     $.ajax({
+            //         // url: '/doba/save-nr',
+            //         type: 'POST',
+            //         data: {
+            //             sku: sku,
+            //             nr: JSON.stringify({
+            //                 NR: nrValue
+            //             }),
+            //             _token: $('meta[name="csrf-token"]').attr('content') // CSRF protection
+            //         },
+            //         success: function(res) {
+            //             showNotification('success', 'NR updated successfully');
+            //         },
+            //         error: function(err) {
+            //             console.error('Error saving NR:', err);
+            //             showNotification('danger', 'Failed to update NR');
+            //         }
+            //     });
+            // });
+
+
+            // function initNREditHandlers() {
+            //     $(document).on('change', '.nr-select', function() {
+            //         const $select = $(this);
+            //         const sku = $(this).data('sku');
+            //         const nrValue = $(this).val();
+
+            //         if (nrValue === 'NR') {
+            //             $select.css('background-color', '#dc3545').css('color', '#ffffff');
+            //         } else {
+            //             $select.css('background-color', '#28a745').css('color', '#ffffff');
+            //         }
+
+            //         $.ajax({
+            //             url: '/walmart/save-nr',
+            //             type: 'POST',
+            //             data: {
+            //                 sku: sku,
+            //                 nr: JSON.stringify({
+            //                     NR: { NR: nrValue },
+            //                 }),
+            //                 _token: $('meta[name="csrf-token"]').attr('content') // CSRF protection
+            //             },
+            //             success: function(res) {
+            //                 showNotification('success', 'NR updated successfully');
+            //                 // ✅ Update tableData and filteredData correctly
+            //                 tableData.forEach(item => {
+            //                     if (item['sku'] === sku) {
+            //                         item.NR = nrValue;
+            //                     }
+            //                 });
+            //                 filteredData.forEach(item => {
+            //                     if (item['sku'] === sku) {
+            //                         item.NR = nrValue;f
+            //                     }
+            //                 });
+            //                 // ✅ Recalculate & re-render
+            //                 updateZeroViewDiv();
+            //                 renderTable();
+            //             },
+            //             error: function(err) {
+            //                 console.error('Error saving NR:', err);
+            //                 showNotification('danger', 'Failed to update NR');
+            //             }
+            //         });
+            //     });
+            // }
 
             window.openModal = function(selectedItem, type) {
                 try {

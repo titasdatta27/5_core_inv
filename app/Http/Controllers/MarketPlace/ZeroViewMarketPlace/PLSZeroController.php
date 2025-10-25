@@ -32,6 +32,7 @@ class PLSZeroController extends Controller
         $skus = $productMasters->pluck('sku')->filter()->unique()->values()->all();
         $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy('sku');
         $plsDataViews = PLSDataView::whereIn('sku', $skus)->get()->keyBy('sku');
+        $plsMetrics = PLSProduct::whereIn('sku', $skus)->get()->keyBy('sku');
 
         $result = [];
         foreach ($productMasters as $pm) {

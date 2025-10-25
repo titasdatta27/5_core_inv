@@ -453,7 +453,7 @@ class ProductMasterController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => count($productIds) . ' product(s) deleted successfully.',
+                'message' => count($productIds) . ' product(s) archived successfully.',
             ]);
         } catch (\Exception $e) {
             Log::error('Error deleting product(s): ' . $e->getMessage());
