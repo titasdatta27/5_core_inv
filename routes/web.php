@@ -177,6 +177,7 @@ use App\Http\Controllers\Campaigns\Ebay3AcosController;
 use App\Http\Controllers\Campaigns\Ebay3KeywordAdsController;
 use App\Http\Controllers\Campaigns\Ebay3PinkDilAdController;
 use App\Http\Controllers\Campaigns\Ebay3PmtAdsController;
+use App\Http\Controllers\Campaigns\Ebay3RunningAdsController;
 use App\Http\Controllers\Campaigns\Ebay3UtilizedAdsController;
 use App\Http\Controllers\Campaigns\EbayKwAdsController;
 use App\Http\Controllers\Campaigns\EbayOverUtilizedBgtController;
@@ -1049,6 +1050,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
         Route::post('/update-link', 'updateLink')->name('update.rfq.link');
         Route::post('/mfrg-progresses/insert', 'storeMFRG')->name('mfrg.progresses.insert');
         Route::post('/save-to-order-review', 'storeToOrderReview')->name('save.to_order_review');
+        Route::post('/to-order-analysis/delete', 'deleteToOrderAnalysis')->name('delete.to_order_analysis');
     });
 
     //Movement Analysis
@@ -2136,6 +2138,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
         Route::get('/ebay-3/under-utilized', 'ebay3UnderUtilizedAdsView')->name('ebay3.under.utilized');
         Route::get('/ebay-3/correctly-utilized', 'ebay3CorrectlyUtilizedAdsView')->name('ebay3.correctly.utilized');
         Route::get('/ebay-3/utilized/ads/data', 'getEbay3UtilizedAdsData');
+        Route::post('/update-ebay3-nr-data', 'updateEbay3NrData');
     });
 
     Route::controller(Ebay3KeywordAdsController::class)->group(function () {
@@ -2147,6 +2150,11 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
 
         Route::get('/ebay-3/make-new/kw-ads', 'ebay3MakeNewKwAdsView')->name('ebay3.make.new.kw.ads');
         Route::get('/ebay-3/make-new/kw-ads/data', 'getEbay3MMakeNewKwAdsData');
+    });
+
+    Route::controller(Ebay3RunningAdsController::class)->group(function () {
+        Route::get('/ebay-3/ad-running/list', 'index')->name('ebay3.running.ads');
+        Route::get('/ebay-3/ad-running/data', 'getEbay3RunningAdsData');
     });
 
     Route::controller(WalmartUtilisationController::class)->group(function () {
@@ -2206,7 +2214,11 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
         Route::get('/google/search/data', 'getGoogleSearchAdsData');
         Route::get('/google/search/report/data', 'getGoogleSearchAdsReportData');
 
+        Route::get('/google/shopping-missings/ads', 'googleMissingAdsView')->name('google.shopping.missing.ads');
+        Route::get('/google/shopping-missings/ads/data', 'googleShoppingAdsMissingAds');
+
         Route::post('/update-google-ads-bid-price', 'updateGoogleAdsCampaignSbid');
+        Route::post('/update-google-nr-data', 'updateGoogleNrData');
     });
 
     Route::controller(FbaDataController::class)->group(function () {

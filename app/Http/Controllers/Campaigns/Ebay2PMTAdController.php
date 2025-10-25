@@ -52,10 +52,6 @@ class Ebay2PMTAdController extends Controller
             ->whereIn('report_range', ['L60', 'L30', 'L7'])
             ->get();
 
-        $priorityReports = Ebay3PriorityReport::whereIn('campaign_id', array_keys($campaignIdToSku))
-            ->whereIn('report_range', ['L60', 'L30', 'L7'])
-            ->get();
-
         $campaignListings = DB::connection('apicentral')->table('ebay2_campaign_ads_listings')->select('listing_id', 'bid_percentage', 'suggested_bid')->get()->keyBy('listing_id')->toArray();
 
         $adMetricsBySku = [];
@@ -80,16 +76,6 @@ class Ebay2PMTAdController extends Controller
 
             $adMetricsBySku[$sku][$range]['Sls'] =
                 ($adMetricsBySku[$sku][$range]['Sls'] ?? 0) + (int) $report->sales;
-        }
-
-        foreach ($priorityReports as $report) {
-            $sku = $campaignIdToSku[$report->campaign_id] ?? null;
-            if (!$sku) continue;
-
-            $range = strtoupper($report->report_range);
-
-            $adMetricsBySku[$sku][$range]['PRIORITY_SPENT'] =
-                ($adMetricsBySku[$sku][$range]['PRIORITY_SPENT'] ?? 0) + $this->extractNumber($report->cpc_ad_fees_payout_currency);
         }
 
         $marketplaceData = MarketplacePercentage::where("marketplace", "Ebay2" )->first();

@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes; // ✅ Correct import
 
 class ReadyToShip extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes; // ✅ Add trait here
 
     protected $table = 'ready_to_ship';
 
@@ -31,6 +32,9 @@ class ReadyToShip extends Model
         'quote_result',
         'pay_term',
         'transit_inv_status',
+        'auth_user',
     ];
+
+    protected $dates = ['deleted_at']; 
     
 }

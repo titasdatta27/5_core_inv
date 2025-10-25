@@ -1,4 +1,4 @@
-@extends('layouts.vertical', ['title' => 'Ebay Running Ads', 'mode' => $mode ?? '', 'demo' => $demo ?? ''])
+@extends('layouts.vertical', ['title' => 'Ebay3 Running Ads', 'mode' => $mode ?? '', 'demo' => $demo ?? ''])
 @section('css')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator.min.css" rel="stylesheet">
@@ -121,8 +121,8 @@
 @endsection
 @section('content')
     @include('layouts.shared.page-title', [
-        'page_title' => 'Ebay Running Ads',
-        'sub_title' => 'Ebay Running Ads',
+        'page_title' => 'Ebay3 Running Ads',
+        'sub_title' => 'Ebay3 Running Ads',
     ])
     <div class="row">
         <div class="col-12">
@@ -220,7 +220,7 @@
 
             var table = new Tabulator("#budget-under-table", {
                 index: "sku",
-                ajaxURL: "/ebay/ad-running/data",
+                ajaxURL: "/ebay-3/ad-running/data",
                 layout: "fitDataFill",
                 movableColumns: true,
                 resizableColumns: true,
@@ -736,7 +736,7 @@
                     let field = e.target.getAttribute("data-field");
                     let value = e.target.value;
 
-                    fetch('/update-ebay-nr-data', {
+                    fetch('/update-ebay3-nr-data', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -764,7 +764,7 @@
                 if (row.SPEND_L30 !== undefined) {
                     initialSpendL30Data[row.sku] = row.SPEND_L30;
 
-                    fetch('/update-ebay-nr-data', {
+                    fetch('/update-ebay3-nr-data', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

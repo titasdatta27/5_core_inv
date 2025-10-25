@@ -481,7 +481,7 @@
                     let field = e.target.getAttribute("data-field");
                     let value = e.target.value;
 
-                    fetch('/update-ebay-nr-data', {
+                    fetch('/update-ebay3-nr-data', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',

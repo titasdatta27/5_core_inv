@@ -142,12 +142,12 @@
                             <td></td>
                             <td></td>
                             <td></td>
+                            <td>{{ $ebay_SPEND_L30_total }}</td>
+                            <td>{{ $ebay_CLICKS_L30_total }}</td>
+                            <td>{{ $ebay_SALES_L30_total }}</td>
                             <td></td>
                             <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
+                            <td>{{ $ebay_SOLD_L30_total }}</td>
                             <td></td>
                         </tr>
 
@@ -156,12 +156,12 @@
                             <td></td>
                             <td></td>
                             <td></td>
+                            <td>{{ $ebay_kw_spend_L30_total }}</td>
+                            <td>{{ $ebay_kw_clicks_L30_total }}</td>
+                            <td>{{ $ebay_kw_sales_L30_total }}</td>
                             <td></td>
                             <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
+                            <td>{{ $ebay_kw_sold_L30_total }}</td>
                             <td></td>
                         </tr>
 
@@ -170,12 +170,12 @@
                             <td></td>
                             <td></td>
                             <td></td>
+                            <td>{{ $ebay_pmt_spend_L30_total }}</td>
+                            <td>{{ $ebay_pmt_clicks_L30_total }}</td>
+                            <td>{{ $ebay_pmt_sales_L30_total }}</td>
                             <td></td>
                             <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
+                            <td>{{ $ebay_pmt_sold_L30_total }}</td>
                             <td></td>
                         </tr>
 
