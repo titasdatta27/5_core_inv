@@ -197,45 +197,6 @@ class FaireController extends Controller
         }
     }
 
-    // Save NR value for a SKU
-    // public function saveNrToDatabase(Request $request)
-    // {
-    //     $sku = $request->input('sku');
-    //     $nr = $request->input('nr');
-
-    //     if (!$sku || $nr === null) {
-    //         return response()->json(['error' => 'SKU and nr are required.'], 400);
-    //     }
-
-    //     $dataView = FaireDataView::firstOrNew(['sku' => $sku]);
-    //     $value = is_array($dataView->value) ? $dataView->value : (json_decode($dataView->value, true) ?: []);
-    //     $value['NR'] = filter_var($nr, FILTER_VALIDATE_BOOLEAN);
-    //     $dataView->value = $value;
-    //     $dataView->save();
-
-    //     return response()->json(['success' => true, 'data' => $dataView]);
-    // }
-
-
-    // public function saveNrToDatabase(Request $request)
-    // {
-    //     $sku = $request->input('sku');
-    //     $nr = $request->input('nr');
-
-    //     if (!$sku || $nr === null) {
-    //         return response()->json(['error' => 'SKU and nr are required.'], 400);
-    //     }
-
-    //     $dataView = FaireDataView::firstOrNew(['sku' => $sku]);
-    //     $value = is_array($dataView->value) ? $dataView->value : (json_decode($dataView->value, true) ?: []);
-    //     if ($nr !== null) {
-    //         $value["NR"] = $nr;
-    //     }
-    //     $dataView->value = $value;
-    //     $dataView->save();
-
-    //     return response()->json(['success' => true, 'data' => $dataView]);
-    // }
 
     public function saveNrToDatabase(Request $request)
     {
@@ -246,7 +207,7 @@ class FaireController extends Controller
             return response()->json(['error' => 'SKU and nr are required.'], 400);
         }
 
-        // ✅ Flatten properly
+        // Flatten properly
         $nrValue = is_array($nr) && isset($nr['NR']) ? $nr['NR'] : $nr;
 
         $dataView = FaireDataView::firstOrNew(['sku' => $sku]);
@@ -254,7 +215,7 @@ class FaireController extends Controller
             ? $dataView->value
             : (json_decode($dataView->value, true) ?: []);
 
-        // ✅ Save correctly
+        // Save correctly
         $value['NR'] = $nrValue;
 
         $dataView->value = $value;

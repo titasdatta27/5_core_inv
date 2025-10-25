@@ -339,7 +339,7 @@ class EbayZeroController extends Controller
             // Skip parent SKUs
             if (stripos($sku, 'PARENT') !== false) continue;
 
-            // --- Amazon Listing Status ---
+            // --- eBay Listing Status ---
             $status = $ebayListingStatus[$sku]->value ?? null;
             if (is_string($status)) {
                 $status = json_decode($status, true);
@@ -391,8 +391,10 @@ class EbayZeroController extends Controller
             // Normalize $inv to numeric
             $inv = floatval($inv);
 
+            $hasNR = !empty($dataView['NR']) && strtoupper($dataView['NR']) === 'NR';
+
             // Count as zero-view if views are exactly 0 and inv > 0
-            if ($inv > 0 && $views === 0) {
+            if ($inv > 0 && $views === 0  && !$hasNR) {
                 $zeroViewCount++;
             }
 

@@ -1977,8 +1977,11 @@
             // Update the 0 view count using tableData directly (no Sess30 or views field needed)
             function updateZeroViewDiv() {
                 // Count all rows in tableData
-                const zeroCount = tableData.length;
-                $('#zero-view-div').html(`${zeroCount}`);
+                // const zeroCount = tableData.length;
+                // $('#zero-view-div').html(`${zeroCount}`);
+                const nrCount = tableData.filter(item => item.NR === 'NR').length;
+                const finalCount = tableData.length - nrCount;
+                $('#zero-view-div').html(`${finalCount}`);
             }
 
             // Initialize everything
@@ -2088,6 +2091,8 @@
                     success: function(response) {
                         if (response && response.data) {
                             tableData = response.data.map((item, index) => {
+                                console.log(item, 'sds');
+                                
                                 return {
                                     sl_no: index + 1,
                                     'SL No.': item['SL No.'] || index + 1,
@@ -2096,12 +2101,12 @@
                                     'sku': item['sku'] || '',
                                     'R&A': item['R&A'] !== undefined ? item['R&A'] :
                                     '', // Get R&A value from server data
-                                    INV: item.INV || 0,
-                                    L30: item.L30 || 0,
+                                    INV: item.inv || 0,
+                                    L30: item.ov_l30 || 0,
                                     'Dil%': item['Dil%'] || 0,
                                     'W L30': item['W L30'] || 0,
                                     'W Dil%': item['W Dil%'] || 0,
-                                    Sess30: item.Sess30 || 0,
+                                    Sess30: item.views || 0,
                                     'Wayfair Price': Number(item['Wayfair Price']) || 0,
                                     COMP: item.COMP || 0,
                                     min_price: item.scout_data ? item.scout_data.min_price : 0,
@@ -2116,7 +2121,7 @@
                                     is_parent: item['sku'] ? item['sku']
                                         .toUpperCase().includes("PARENT") : false,
                                     raw_data: item || {}, // Ensure raw_data always exists
-                                    NR: item.NR !== undefined ? item.NR : '',
+                                    // NR: item.NR !== undefined ? item.NR : '',
                                     A_Z_Reason: item.A_Z_Reason || '',
                                     A_Z_ActionRequired: item.A_Z_ActionRequired || '',
                                     A_Z_ActionTaken: item.A_Z_ActionTaken || '',
@@ -2167,9 +2172,9 @@
                     if (item.is_parent) {
                         $row.addClass('parent-row');
                     }
-                    if(item.NR === 'NR'){
-                        $row.addClass('nr-hide');
-                    }
+                    // if(item.NR === 'NR'){
+                    //     $row.addClass('nr-hide');
+                    // }
 
                     // Helper functions for color coding
                     const getDilColor = (value) => {
@@ -2293,7 +2298,7 @@
 
                     // Sess30 with tooltip icon (no color coding)
                     $row.append($('<td>').html(
-                        `<span>${Math.round(item.Sess30)}%</span>
+                        `<span>${Math.round(item.Sess30)}</span>
                      <span class="text-info tooltip-icon ad-view-trigger" 
                            data-bs-toggle="tooltip" 
                            data-bs-placement="left" 

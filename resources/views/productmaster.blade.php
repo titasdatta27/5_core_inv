@@ -3737,15 +3737,15 @@
                                     .then(data => {
                                         if (data.success) {
                                             showToast('success', data.message ||
-                                                'Product deleted successfully!');
+                                                'Product archived successfully!');
                                             loadData();
                                         } else {
                                             showToast('danger', data.message ||
-                                                'Delete failed');
+                                                'Archive failed');
                                         }
                                     })
                                     .catch(() => {
-                                        showToast('danger', 'Delete failed');
+                                        showToast('danger', 'Archive failed');
                                     })
                                     .finally(() => {
                                         modal.hide();
