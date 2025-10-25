@@ -3911,7 +3911,29 @@ class AdsMasterController extends Controller
             }
         }
 
-        /*** End Ebay Code  ***/
+        /** End Ebay Code  */
+
+        
+        $ebay_SALES_L30_total = round($ebay_SALES_L30_total);
+        $ebay_kw_sales_L30_total = round($ebay_kw_sales_L30_total);
+        $ebay_pmt_sales_L30_total = round($ebay_pmt_sales_L30_total);
+        $ebay_SPEND_L30_total = round($ebay_SPEND_L30_total);
+        $ebay_kw_spend_L30_total = round($ebay_kw_spend_L30_total);
+        $ebay_pmt_spend_L30_total = round($ebay_pmt_spend_L30_total);
+        $ebay_CLICKS_L30_total = round($ebay_CLICKS_L30_total);
+        $ebay_kw_clicks_L30_total = round($ebay_kw_clicks_L30_total);
+        $ebay_pmt_clicks_L30_total = round($ebay_pmt_clicks_L30_total);
+        $ebay_SOLD_L30_total = round($ebay_SOLD_L30_total);
+        $ebay_kw_sold_L30_total = round($ebay_kw_sold_L30_total);
+        $ebay_pmt_sold_L30_total = round($ebay_pmt_sold_L30_total);
+        $SPEND_L30_total = round($SPEND_L30_total);
+        $kw_spend_L30_total = round($kw_spend_L30_total);
+        $pt_spend_L30_total = round($pt_spend_L30_total);
+        $hl_spend_L30_total = round($hl_spend_L30_total);
+        $CLICKS_L30_total = round($CLICKS_L30_total);
+        $kw_clicks_L30_total = round($kw_clicks_L30_total);
+        $pt_clicks_L30_total = round($pt_clicks_L30_total);
+        $hl_clicks_L30_total = round($hl_clicks_L30_total);
 
         return view('channels.adv-masters', compact('kw_spend_L30_total', 'pt_spend_L30_total', 'hl_spend_L30_total', 'kw_clicks_L30_total', 'pt_clicks_L30_total', 'hl_clicks_L30_total', 'SPEND_L30_total', 'CLICKS_L30_total', 'ebay_SALES_L30_total', 'ebay_kw_sales_L30_total', 'ebay_pmt_sales_L30_total', 'ebay_SPEND_L30_total', 'ebay_kw_spend_L30_total', 'ebay_pmt_spend_L30_total', 'ebay_CLICKS_L30_total', 'ebay_kw_clicks_L30_total', 'ebay_pmt_clicks_L30_total', 'ebay_SOLD_L30_total', 'ebay_kw_sold_L30_total', 'ebay_pmt_sold_L30_total'));
     }
