@@ -207,17 +207,18 @@ class ForecastAnalysisController extends Controller
                 $item->{'MSL_Four'} = round($msl / 4, 2);
 
                 $item->{'MSL_SP'} = floor($shopifyb2c_price * $effectiveMsl / 4);
-
-                $cp = (float)($item->{'CP'} ?? 0);
-                $orderQty = (float)($item->order_given ?? 0);
-                $readyToShipQty = (float)($item->readyToShipQty ?? 0);
-                $transit = (float)($item->transit ?? 0);
-
-                $item->MIP_Value = round($cp * $orderQty, 2);
-                $item->R2S_Value = round($lp * $readyToShipQty, 2);
-                $item->Transit_Value = round($lp * $transit, 2);
-
             }
+
+            $cp = (float)($item->{'CP'} ?? 0);
+            $orderQty = (float)($item->order_given ?? 0);
+            $readyToShipQty = (float)($item->readyToShipQty ?? 0);
+            $transit = (float)($transitContainer[$normalizeSku($prodData->sku)]->transit ?? 0);
+            $rate = (float)($transitContainer[$normalizeSku($prodData->sku)]->rate ?? 0);
+            $mipRate = (float)($mfrg->get($sheetSku)->rate ?? 0);
+            $r2SRate = (float)($readyToShipMap->get($sheetSku)->rate ?? 0);
+            $item->MIP_Value = round($mipRate * $orderQty, 2);
+            $item->R2S_Value = round($r2SRate * $readyToShipQty, 2);
+            $item->Transit_Value = round($rate * $transit, 2);
 
             $processedData[] = $item;
         }
