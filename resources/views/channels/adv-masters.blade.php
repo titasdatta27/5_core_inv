@@ -77,7 +77,8 @@
                             <th>ACOS</th>
                             <th>TACOS</th>     
                             <th>AD SOLD</th>        
-                            <th>CVR</th>          
+                            <th>CVR</th>     
+                            <th>MISSING ADS</th>     
                         </tr>
                     </thead>
                     <tbody>
@@ -93,10 +94,11 @@
                             <td></td>
                             <td></td>
                             <td></td>
+                            <td></td>
                         </tr>
 
                          <tr class="accordion-body">
-                            <td>AMZ KW</td>
+                            <td><a href="{{ route('amazon.kw.ads') }}" target="_blank" style="text-decoration:none; color:#000000;">AMZ KW</a></td>
                             <td></td>
                             <td></td>
                             <td></td>
@@ -107,10 +109,11 @@
                             <td></td>
                             <td></td>
                             <td></td>
+                            <td></td>
                         </tr>
 
                          <tr class="accordion-body">
-                            <td>AMZ PT</td>
+                            <td><a href="{{ route('amazon.pt.ads') }}" target="_blank" style="text-decoration:none; color:#000000;">AMZ PT</a></td>
                             <td></td>
                             <td></td>
                             <td></td>
@@ -121,15 +124,17 @@
                             <td></td>
                             <td></td>
                             <td></td>
+                            <td></td>
                         </tr>
 
                         <tr class="accordion-body">
-                            <td>AMZ HL</td>
+                            <td><a href="{{ route('amazon.hl.ads') }}" target="_blank" style="text-decoration:none; color:#000000;">AMZ HL</a></td>
                             <td></td>
                             <td></td>
                             <td></td>
                             <td>{{ $hl_spend_L30_total }}</td>
                             <td>{{ $hl_clicks_L30_total }}</td>
+                            <td></td>
                             <td></td>
                             <td></td>
                             <td></td>
@@ -149,10 +154,11 @@
                             <td></td>
                             <td>{{ $ebay_SOLD_L30_total }}</td>
                             <td></td>
+                            <td></td>
                         </tr>
 
                         <tr class="accordion-body">
-                            <td>EB KW</td>
+                            <td><a href="{{ route('ebay.keywords.ads') }}" target="_blank" style="text-decoration:none; color:#000000;">EB KW</a></td>
                             <td></td>
                             <td></td>
                             <td></td>
@@ -163,10 +169,11 @@
                             <td></td>
                             <td>{{ $ebay_kw_sold_L30_total }}</td>
                             <td></td>
+                            <td></td>
                         </tr>
 
                         <tr class="accordion-body">
-                            <td>EB PMT</td>
+                            <td><a href="{{ route('ebay.pmp.ads') }}" target="_blank" style="text-decoration:none; color:#000000;">EB PMT</a></td>
                             <td></td>
                             <td></td>
                             <td></td>
@@ -177,10 +184,12 @@
                             <td></td>
                             <td>{{ $ebay_pmt_sold_L30_total }}</td>
                             <td></td>
+                            <td></td>
                         </tr>
 
                         <tr style="background-color:#cfe2f3;" class="accordion-header">
                             <td><b>WALMART</b></td>
+                            <td></td>
                             <td></td>
                             <td></td>
                             <td></td>
@@ -205,10 +214,12 @@
                             <td></td>
                             <td></td>
                             <td></td>
+                            <td></td>
                         </tr>
 
                          <tr class="accordion-body">
                             <td>G SHOPPING</td>
+                            <td></td>
                             <td></td>
                             <td></td>
                             <td></td>
@@ -233,10 +244,12 @@
                             <td></td>
                             <td></td>
                             <td></td>
+                            <td></td>
                         </tr>
 
                         <tr class="accordion-body">
                             <td>FB CARAOUSAL</td>
+                            <td></td>
                             <td></td>
                             <td></td>
                             <td></td>
@@ -261,10 +274,12 @@
                             <td></td>
                             <td></td>
                             <td></td>
+                            <td></td>
                         </tr>
 
                         <tr class="accordion-body">
                             <td>INSTA CARAOUSAL</td>
+                            <td></td>
                             <td></td>
                             <td></td>
                             <td></td>
@@ -289,6 +304,7 @@
                             <td></td>
                             <td></td>
                             <td></td>
+                            <td></td>
                         </tr>
 
                         <tr class="accordion-body">
@@ -303,10 +319,12 @@
                             <td></td>
                             <td></td>
                             <td></td>
+                            <td></td>
                         </tr>
 
                         <tr style="background-color:#cfe2f3;" class="accordion-header">
                             <td><b>TIKTOK</b></td>
+                            <td></td>
                             <td></td>
                             <td></td>
                             <td></td>
