@@ -14,6 +14,29 @@
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 
+    <style>
+        .chart-icon {
+            cursor: pointer;
+            color: #007bff;
+            font-size: 18px;
+        }
+        .chart-icon:hover {
+            color: #0056b3;
+        }
+        .modal-lg {
+            max-width: 800px;
+        }
+        .date-filter-container {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .date-filter-container input {
+            flex: 1;
+        }
+    </style>
+
 @endsection
 
 @section('content')
@@ -54,6 +77,32 @@
 
       
     </div>
+
+    <!-- Chart Modal -->
+    <div class="modal fade" id="chartModal" tabindex="-1" aria-labelledby="chartModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="chartModalLabel">Live Pending Trend - <span id="channelNameDisplay"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info" id="chartSummary" style="display: none;">
+                        <strong>Summary:</strong> <span id="summaryText"></span>
+                    </div>
+                    <div class="date-filter-container">
+                        <label>Start Date:</label>
+                        <input type="date" id="startDateFilter" class="form-control">
+                        <label>End Date:</label>
+                        <input type="date" id="endDateFilter" class="form-control">
+                        <button class="btn btn-primary" onclick="applyDateFilter()">Apply Filter</button>
+                        <button class="btn btn-secondary" onclick="clearDateFilter()">Clear</button>
+                    </div>
+                    <canvas id="livePendingChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('script')
@@ -65,6 +114,11 @@
 
     <!-- 3. Then load other dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js Data Labels Plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 
     <script>
         window.totalSkuCount = {{ $totalSkuCount }};
@@ -276,6 +330,14 @@
                         formatter: function(cell) {
                             return `<span class="live-pending" data-row="${cell.getRow().getPosition()}">${cell.getValue() ?? 0}</span>`;
                         }
+                    },
+                    {
+                        title: "Trend",
+                        headerSort: false,
+                        formatter: function(cell) {
+                            const channel = cell.getRow().getData()['Channel '];
+                            return `<i class="fas fa-chart-line chart-icon" onclick="showChart('${channel}')"></i>`;
+                        }
                     }
                 ]
             });
@@ -364,6 +426,219 @@
         // });
 
         window.csrfToken = '{{ csrf_token() }}';
+
+        // Chart related variables
+        let currentChart = null;
+        let currentChannelName = '';
+        let chartModal = null;
+
+        // Show chart function
+        window.showChart = function(channelName) {
+            currentChannelName = channelName;
+            jq('#channelNameDisplay').text(channelName);
+            
+            // Clear date filters
+            jq('#startDateFilter').val('');
+            jq('#endDateFilter').val('');
+            
+            // Load chart data
+            loadChartData(channelName);
+            
+            // Show modal
+            if (!chartModal) {
+                chartModal = new bootstrap.Modal(document.getElementById('chartModal'));
+            }
+            chartModal.show();
+        };
+
+        // Load chart data
+        function loadChartData(channelName, startDate = null, endDate = null) {
+            console.log('Loading chart data for:', channelName);
+            const params = new URLSearchParams({
+                channel: channelName
+            });
+            
+            if (startDate) params.append('start_date', startDate);
+            if (endDate) params.append('end_date', endDate);
+
+            const url = `/api/channel-chart-data?${params.toString()}`;
+            console.log('Fetching from URL:', url);
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Received data:', data);
+                    if (!data.dates || data.dates.length === 0) {
+                        jq('#chartSummary').html('<strong>No data available for this channel</strong>').show();
+                        return;
+                    }
+                    renderChart(data.dates, data.counts);
+                })
+                .catch(error => {
+                    console.error('Error loading chart data:', error);
+                    jq('#chartSummary').html('<strong class="text-danger">Error loading chart data</strong>').show();
+                });
+        }
+
+        // Render chart
+        function renderChart(dates, counts) {
+            console.log('Rendering chart with dates:', dates, 'and counts:', counts);
+            const ctx = document.getElementById('livePendingChart').getContext('2d');
+            
+            // Calculate summary
+            if (dates.length > 0) {
+                const firstCount = counts[0];
+                const lastCount = counts[counts.length - 1];
+                const difference = lastCount - firstCount;
+                const percentChange = firstCount !== 0 ? ((difference / firstCount) * 100).toFixed(2) : 0;
+                const changeText = difference >= 0 ? `increased by ${difference}` : `decreased by ${Math.abs(difference)}`;
+                const arrow = difference >= 0 ? '↑' : '↓';
+                const colorClass = difference >= 0 ? 'text-success' : 'text-danger';
+                
+                jq('#summaryText').html(
+                    `From <strong>${dates[0]}</strong> (${firstCount}) to <strong>${dates[dates.length - 1]}</strong> (${lastCount}): ` +
+                    `<span class="${colorClass}">${arrow} ${changeText} (${percentChange}%)</span>`
+                );
+                jq('#chartSummary').show();
+            } else {
+                jq('#chartSummary').hide();
+            }
+            
+            // Destroy previous chart if exists
+            if (currentChart) {
+                currentChart.destroy();
+            }
+            
+            console.log('Creating new chart...');
+            currentChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [{
+                        label: 'Live Pending Count',
+                        data: counts,
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        tension: 0.1,
+                        fill: true,
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        pointBackgroundColor: 'rgb(75, 192, 192)',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    layout: {
+                        padding: {
+                            top: 35
+                        }
+                    },
+                    plugins: {
+                        datalabels: {
+                            display: true,
+                            align: function(context) {
+                                return 'top';
+                            },
+                            offset: 10,
+                            backgroundColor: function(context) {
+                                if (context.dataIndex === 0) {
+                                    return 'rgba(75, 192, 192, 0.9)';
+                                }
+                                const currentValue = context.dataset.data[context.dataIndex];
+                                const prevValue = context.dataset.data[context.dataIndex - 1];
+                                const diff = currentValue - prevValue;
+                                return diff >= 0 ? 'rgba(40, 167, 69, 0.9)' : 'rgba(220, 53, 69, 0.9)';
+                            },
+                            borderRadius: 5,
+                            color: 'white',
+                            font: {
+                                weight: 'bold',
+                                size: 11
+                            },
+                            padding: 8,
+                            formatter: function(value, context) {
+                                if (context.dataIndex === 0) {
+                                    // First point - only show count
+                                    return value;
+                                }
+                                // Subsequent points - show count and difference
+                                const prevValue = context.dataset.data[context.dataIndex - 1];
+                                const diff = value - prevValue;
+                                const arrow = diff >= 0 ? '↑' : '↓';
+                                return value + '\n' + arrow + Math.abs(diff);
+                            }
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Count: ' + context.parsed.y;
+                                },
+                                afterLabel: function(context) {
+                                    if (context.dataIndex > 0) {
+                                        const prevCount = context.dataset.data[context.dataIndex - 1];
+                                        const currentCount = context.parsed.y;
+                                        const diff = currentCount - prevCount;
+                                        return diff >= 0 ? `↑ +${diff} from previous day` : `↓ ${diff} from previous day`;
+                                    }
+                                    return '';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: {
+                                display: true,
+                                text: 'Count'
+                            },
+                            ticks: {
+                                precision: 0
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        }
+                    }
+                }
+            });
+            console.log('Chart created successfully');
+        }
+
+        // Apply date filter
+        window.applyDateFilter = function() {
+            const startDate = jq('#startDateFilter').val();
+            const endDate = jq('#endDateFilter').val();
+            
+            if (!startDate || !endDate) {
+                alert('Please select both start and end dates');
+                return;
+            }
+            
+            if (startDate > endDate) {
+                alert('Start date must be before end date');
+                return;
+            }
+            
+            loadChartData(currentChannelName, startDate, endDate);
+        };
+
+        // Clear date filter
+        window.clearDateFilter = function() {
+            jq('#startDateFilter').val('');
+            jq('#endDateFilter').val('');
+            loadChartData(currentChannelName);
+        };
 
         // Initialize when DOM is ready
         jq(document).ready(function() {
