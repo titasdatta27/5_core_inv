@@ -1396,7 +1396,20 @@
                             </a>
                             <div class="collapse" id="sidebarSecondLevel">
                                 <ul class="side-nav-third-level">
-
+                                    <li>
+                                        <a data-bs-toggle="collapse" href="#amazonSubmenu" aria-expanded="false"
+                                            aria-controls="amazonSubmenu">
+                                            <span>AD CVR</span>
+                                            <span class="menu-arrow"></span>
+                                        </a>
+                                        <div class="collapse" id="amazonSubmenu">
+                                            <ul class="side-nav-fourth-level">
+                                                <li>
+                                                    <a href="{{ route('adcvr.amazon') }}">PRICING</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </li>
                                     <li>
                                         <a data-bs-toggle="collapse" href="#amazonSubmenu" aria-expanded="false"
                                             aria-controls="amazonSubmenu">
