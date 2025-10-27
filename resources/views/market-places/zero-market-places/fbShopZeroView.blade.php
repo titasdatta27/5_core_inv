@@ -1,4 +1,4 @@
-@extends('layouts.vertical', ['title' => 'Doba Zero View', 'mode' => $mode ?? '', 'demo' => $demo ?? ''])
+@extends('layouts.vertical', ['title' => 'FB Shop Zero View', 'mode' => $mode ?? '', 'demo' => $demo ?? ''])
 
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -1009,7 +1009,7 @@
 @endsection
 
 @section('content')
-    @include('layouts.shared/page-title', ['page_title' => 'Doba Zero View', 'sub_title' => 'Doba'])
+    @include('layouts.shared/page-title', ['page_title' => 'FB Shop Zero View', 'sub_title' => 'FB Shop'])
 
     <div class="row">
         <div class="col-12">
@@ -2131,9 +2131,9 @@
                     if (item.is_parent) {
                         $row.addClass('parent-row');
                     }
-                    if (item.NR === 'NR') {
-                        $row.addClass('nr-hide');
-                    }
+                    // if (item.NR === 'NR') {
+                    //     $row.addClass('nr-hide');
+                    // }
                     // Helper functions for color coding
                     const getDilColor = (value) => {
                         const percent = parseFloat(value) * 100;
@@ -2406,31 +2406,31 @@
                 });
             }
 
-            $(document).on('change', '.nr-select', function() {
-                const sku = $(this).data('sku');
-                const nrValue = $(this).val();
-                console.log(nrValue, 'nrrr');
+            // $(document).on('change', '.nr-select', function() {
+            //     const sku = $(this).data('sku');
+            //     const nrValue = $(this).val();
+            //     console.log(nrValue, 'nrrr');
 
 
-                $.ajax({
-                    // url: '/doba/save-nr',
-                    type: 'POST',
-                    data: {
-                        sku: sku,
-                        nr: JSON.stringify({
-                            NR: nrValue
-                        }),
-                        _token: $('meta[name="csrf-token"]').attr('content') // CSRF protection
-                    },
-                    success: function(res) {
-                        showNotification('success', 'NR updated successfully');
-                    },
-                    error: function(err) {
-                        console.error('Error saving NR:', err);
-                        showNotification('danger', 'Failed to update NR');
-                    }
-                });
-            });
+            //     $.ajax({
+            //         // url: '/doba/save-nr',
+            //         type: 'POST',
+            //         data: {
+            //             sku: sku,
+            //             nr: JSON.stringify({
+            //                 NR: nrValue
+            //             }),
+            //             _token: $('meta[name="csrf-token"]').attr('content') // CSRF protection
+            //         },
+            //         success: function(res) {
+            //             showNotification('success', 'NR updated successfully');
+            //         },
+            //         error: function(err) {
+            //             console.error('Error saving NR:', err);
+            //             showNotification('danger', 'Failed to update NR');
+            //         }
+            //     });
+            // });
 
 
             function initNREditHandlers() {
@@ -2446,13 +2446,11 @@
                     }
 
                     $.ajax({
-                        // url: '/amazon/save-nr',
+                        url: '/fbshop/save-nr',
                         type: 'POST',
                         data: {
                             sku: sku,
-                            nr: JSON.stringify({
-                                NR: nrValue
-                            }),
+                            nr: { NR: nrValue },
                             _token: $('meta[name="csrf-token"]').attr('content') // CSRF protection
                         },
                         success: function(res) {
@@ -2479,6 +2477,7 @@
                     });
                 });
             }
+
 
             window.openModal = function(selectedItem, type) {
                 try {

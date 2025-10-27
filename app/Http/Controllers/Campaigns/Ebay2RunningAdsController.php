@@ -30,7 +30,7 @@ class Ebay2RunningAdsController extends Controller
 
         $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy(fn($item) => $normalizeSku($item->sku));
 
-        $ebayMetricData = DB::connection('apicentral')->table('ebay_one_metrics')
+        $ebayMetricData = DB::connection('apicentral')->table('ebay2_metrics')
             ->select('sku', 'ebay_price', 'item_id')
             ->whereIn('sku', $skus)
             ->get()

@@ -4,45 +4,15 @@ namespace App\Http\Controllers\MarketingMaster;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\ApiController;
-use App\Http\Controllers\MarketPlace\AmazonZeroController;
-use App\Http\Controllers\MarketPlace\EbayZeroController;
-use App\Http\Controllers\MarketPlace\ListingMarketPlace\ListingAmazonController;
-use App\Http\Controllers\MarketPlace\ListingMarketPlace\ListingEbayController;
-use App\Http\Controllers\MarketPlace\ListingMarketPlace\ListingTemuController;
-use App\Http\Controllers\MarketPlace\MacyZeroController;
-use App\Http\Controllers\MarketPlace\Neweggb2cZeroController;
-use App\Http\Controllers\MarketPlace\Shopifyb2cZeroController;
-use App\Http\Controllers\MarketPlace\TemuZeroController;
-use App\Http\Controllers\MarketPlace\WayfairZeroController;
-use App\Http\Controllers\MarketPlace\ZeroViewMarketPlace\AliexpressZeroController;
-use App\Http\Controllers\MarketPlace\ZeroViewMarketPlace\DobaZeroController;
-use App\Http\Controllers\MarketPlace\ZeroViewMarketPlace\Ebay2ZeroController;
-use App\Http\Controllers\MarketPlace\ZeroViewMarketPlace\Ebay3ZeroController;
-use App\Http\Controllers\MarketPlace\ZeroViewMarketPlace\SheinZeroController;
-use App\Http\Controllers\MarketPlace\ZeroViewMarketPlace\TiktokShopZeroController;
-use App\Http\Controllers\MarketPlace\ZeroViewMarketPlace\WalmartZeroController;
-use App\Models\AliexpressDataView;
-use App\Models\AmazonDataView;
-use App\Models\DobaDataView;
-use App\Models\EbayDataView;
-use App\Models\EbayThreeDataView;
-use App\Models\EbayTwoDataView;
-use App\Models\MacyDataView;
+
 use App\Models\MarketplacePercentage;
 use App\Models\ZeroVisibilityMaster;
 use App\Models\ProductMaster;
 use App\Models\SheinDataView;
-use App\Models\Shopifyb2cDataView;
 use App\Models\ShopifySku;
-use App\Models\TemuDataView;
-use App\Models\TiktokShopDataView;
-use App\Models\TiktokVideoAd;
-use App\Models\WalmartDataView;
-use App\Models\WayfairDataView;
+use App\Models\ChannelDailyCount;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\DB;
+
 
 
 class ZeroVisibilityMasterController extends Controller
@@ -97,7 +67,7 @@ class ZeroVisibilityMasterController extends Controller
             'fbmarketplace' => 'FBMarketplaceZeroController',
             'faire'         => 'FaireZeroController',
             'business5core' => 'Business5CoreZeroController',
-            // Add more mappings as needed
+
         ];
 
         foreach ($channels as $channel) {
@@ -134,11 +104,6 @@ class ZeroVisibilityMasterController extends Controller
 
         return view('marketing-masters.zero-visibility-master', compact('totalSkuCount', 'zeroInvCount','channels'));
     }
-
-
-
-
-
 
 
 
@@ -216,34 +181,48 @@ class ZeroVisibilityMasterController extends Controller
             $livePendingData[$channelName] = $livePending;
         }
 
-        $data = array_map(function($channelName) use ($livePendingData) {
+        // Save today's counts for each channel
+        $today = now()->toDateString();
+        $yesterday = now()->subDay()->toDateString();
+        $todayUpdates = 0;
+        $channelUpdateData = [];
+        
+        foreach ($livePendingData as $channel => $count) {
+            $record = ChannelDailyCount::firstOrNew(['channel_name' => $channel]);
+            $counts = $record->counts ?? [];
+            
+            // Get yesterday's count
+            $yesterdayCount = $counts[$yesterday] ?? 0;
+            $todayCount = $count ?? 0;
+            
+            // Calculate difference (today - yesterday)
+            $difference = $todayCount - $yesterdayCount;
+            $todayUpdates += $difference;
+            
+            // Store update status for each channel
+            $channelUpdateData[$channel] = [
+                'updated' => $difference != 0,
+                'diff' => $difference
+            ];
+            
+            $counts[$today] = $todayCount;
+            $record->counts = $counts;
+            $record->save();
+        }
+
+        $data = array_map(function($channelName) use ($livePendingData, $channelUpdateData) {
             return [
                 'Channel ' => $channelName,
                 'R&A' => false, // placeholder
                 'Live Pending' => $livePendingData[$channelName] ?? 0,
+                'Updated Today' => $channelUpdateData[$channelName]['updated'] ?? false,
+                'Diff' => $channelUpdateData[$channelName]['diff'] ?? 0,
             ];
         }, $channels);
 
-        return view('marketing-masters.live-pending-masters', compact('data', 'totalSkuCount', 'zeroInvCount'));
+        return view('marketing-masters.live-pending-masters', compact('data', 'totalSkuCount', 'zeroInvCount', 'todayUpdates'));
     }
 
-
-
-
-
-
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $data = $request->all();
@@ -273,38 +252,11 @@ class ZeroVisibilityMasterController extends Controller
 
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
         $row = ZeroVisibilityMaster::findOrFail($request->id);
         $row->update($request->except('id'));
         return response()->json(['status' => true]);
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
     }
 
 
@@ -387,267 +339,51 @@ class ZeroVisibilityMasterController extends Controller
     }
 
 
-    public function exportCsv()
+    public function getChannelChartData(Request $request)
     {
-        $sheetResponse = (new ApiController)->fetchDataFromChannelMasterGoogleSheet();
-        if ($sheetResponse->getStatusCode() !== 200) {
-            return response()->json(['error' => 'Failed to fetch Google Sheet'], 500);
+        $channelName = $request->input('channel');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+
+        $record = ChannelDailyCount::where('channel_name', $channelName)->first();
+
+        if (!$record || !$record->counts) {
+            return response()->json(['dates' => [], 'counts' => []]);
         }
 
-        $sheetData = $sheetResponse->getData()->data ?? [];
-        $dbRecords = ZeroVisibilityMaster::all()->keyBy(fn($row) => strtolower(trim($row->channel_name)));
+        $counts = $record->counts;
+        ksort($counts); // Sort by date
 
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="zero_visibility_master_data.csv"',
-        ];
-
-        $columns = [
-            'SL',
-            'Channel Name',
-            'R&A',
-            'URL LINK',
-            'Total SKU',
-            'NR',
-            'Listed Req',
-            'Listed',
-            'Listing Pending',
-            'Zero Inv',
-            'Live Req',
-            'Active & Live',
-            'Live Pending',
-            'Zero Visibility SKU Count',
-            'Reason',
-            'Step Taken',
-        ];
-
-        $callback = function () use ($sheetData, $dbRecords, $columns) {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, $columns);
-
-            $sl = 1;
-            foreach ($sheetData as $item) {
-                $channelName = trim($item->{'Channel '} ?? '');
-                if (!$channelName)
-                    continue;
-
-                $lower = strtolower($channelName);
-                $dbRow = $dbRecords[$lower] ?? null;
-
-                fputcsv($file, [
-                    $sl++,
-                    $channelName,
-                    trim($item->{'R&A'} ?? ''),
-                    // trim($item->{'URL LINK'} ?? ''),
-                    $dbRow->sheet_link ?? '',
-                    $dbRow->total_sku ?? '',
-                    $dbRow->nr ?? '',
-                    $dbRow->listed_req ?? '',
-                    $dbRow->listed ?? '',
-                    $dbRow->listing_pending ?? '',
-                    $dbRow->zero_inv ?? '',
-                    $dbRow->live_req ?? '',
-                    $dbRow->active_and_live ?? '',
-                    $dbRow->live_pending ?? '',
-                    $dbRow->zero_visibility_sku_count ?? '',
-                    $dbRow->reason ?? '',
-                    $dbRow->step_taken ?? '',
-                ]);
-            }
-
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
-    }
-
-
-    public function updateRaCheckbox(Request $request)
-    {
-        $channel = trim($request->input('channel'));
-        $checked = $request->input('checked') ? true : false;
-
-        Log::info('Received update-checkbox request', [
-            'channel' => $channel,
-            'checked' => $checked,
-        ]);
-
-        // Update Google Sheet
-        $url = 'https://script.google.com/macros/s/AKfycbzhlu7KV3dx3PS-9XPFBI9FMgI0JZIAgsuZY48Lchr_60gkSmx1hNAukKwFGZXgPwid/exec';
-
-        $response = Http::post($url, [
-            'channel' => $channel,
-            'checked' => $checked
-        ]);
-
-        if ($response->failed()) {
-            Log::error('Failed to send to GSheet:', [$response->body()]);
-            return response()->json(['success' => false, 'message' => 'Failed to update GSheet'], 500);
+        // Filter by date range
+        if ($startDate && $endDate) {
+            $counts = array_filter($counts, function($date) use ($startDate, $endDate) {
+                return $date >= $startDate && $date <= $endDate;
+            }, ARRAY_FILTER_USE_KEY);
+        } else {
+            // Default: Show last 7 days
+            $today = now()->toDateString();
+            $sevenDaysAgo = now()->subDays(6)->toDateString();
+            
+            $counts = array_filter($counts, function($date) use ($sevenDaysAgo, $today) {
+                return $date >= $sevenDaysAgo && $date <= $today;
+            }, ARRAY_FILTER_USE_KEY);
         }
 
-        Log::info("Google Sheet updated successfully");
+        $dates = array_keys($counts);
+        $values = array_values($counts);
 
-        // Update Laravel DB
-        ZeroVisibilityMaster::updateOrCreate(
-            ['channel_name' => $channel],
-            ['is_ra_checked' => $checked]
-        );
-
-        Log::info("Database updated for channel: $channel");
-
-        return response()->json(['success' => true, 'message' => 'Updated GSheet & DB']);
+        return response()->json([
+            'dates' => $dates,
+            'counts' => $values
+        ]);
     }
 
-
-    private function getNRCount($channel)
-    {
-        $channel = strtolower(trim($channel));
-
-        try {
-            switch ($channel) {
-                case 'amazon':
-                    return app(AmazonZeroController::class)->getNrReqCount()['NR'] ?? 0;
-
-                case 'ebay':
-                    return app(EbayZeroController::class)->getNrReqCount()['NR'] ?? 0;
-
-                case 'temu':
-                    return app(TemuZeroController::class)->getNrReqCount()['NR'] ?? 0;
-
-                case 'doba':
-                    return app(DobaZeroController::class)->getNrReqCount()['NR'] ?? 0;
-
-                case 'macys':
-                    return app(MacyZeroController::class)->getNrReqCount()['NR'] ?? 0;
-
-                // case 'walmart':
-                //     return app(ListingWalmartController::class)->getNrReqCount()['NR'] ?? 0;
-                
-                case 'wayfair':
-                    return app(WayfairZeroController::class)->getNrReqCount()['NR'] ?? 0;
-                
-                // case 'ebay 3':
-                //     return app(ListingEbayThreeController::class)->getNrReqCount()['NR'] ?? 0;
-
-                // case 'shopify b2c':
-                //     return app(ListingShopifyB2CController::class)->getNrReqCount()['NR'] ?? 0;
-
-                // case 'reverb':
-                //     return app(ListingReverbController::class)->getNrReqCount()['NR'] ?? 0;
-
-                // case 'aliexpress':
-                //     return app(ListingAliexpressController::class)->getNrReqCount()['NR'] ?? 0;
-
-                // case 'shein':
-                //     return app(ListingSheinController::class)->getNrReqCount()['NR'] ?? 0;
-
-                // case 'tiktok shop':
-                //     return app(ListingTiktokShopController::class)->getNrReqCount()['NR'] ?? 0;
-
-                // case 'shopify wholesale/ds':
-                //     return app(ListingShopifyWholesaleController::class)->getNrReqCount()['NR'] ?? 0;
-
-                // case 'faire':
-                //     return app(ListingFaireController::class)->getNrReqCount()['NR'] ?? 0;
-
-                // case 'ebay 2':
-                //     return app(ListingEbayTwoController::class)->getNrReqCount()['NR'] ?? 0;
-
-                // case 'mercari w ship':
-                //     return app(ListingMercariWShipController::class)->getNrReqCount()['NR'] ?? 0;
-
-                // case 'newegg b2c':
-                //     return app(ListingNeweggB2CController::class)->getNrReqCount()['NR'] ?? 0;
-
-                // case 'fb marketplace':
-                //     return app(ListingFBMarketplaceController::class)->getNrReqCount()['NR'] ?? 0;
-
-                // case 'syncee':
-                //     return app(ListingSynceeController::class)->getNrReqCount()['NR'] ?? 0;
-
-                // case 'auto ds':
-                //     return app(ListingAutoDSController::class)->getNrReqCount()['NR'] ?? 0;
-
-                // case 'mercari w/o ship':
-                //     return app(ListingMercariWoShipController::class)->getNrReqCount()['NR'] ?? 0;
-
-                // case 'business 5core':
-                //     return app(ListingBusiness5CoreController::class)->getNrReqCount()['NR'] ?? 0;
-
-                // case 'zendrop':
-                //     return app(ListingZendropController::class)->getNrReqCount()['NR'] ?? 0;
-
-                // case 'poshmark':
-                //     return app(ListingPoshmarkController::class)->getNrReqCount()['NR'] ?? 0;
-
-                // case 'appscenic':
-                //     return app(ListingAppscenicController::class)->getNrReqCount()['NR'] ?? 0;
-
-                // case 'tiendamia':
-                //     return app(ListingTiendamiaController::class)->getNrReqCount()['NR'] ?? 0;
-
-                // case 'spocket':
-                //     return app(ListingSpocketController::class)->getNrReqCount()['NR'] ?? 0;
-
-                // case 'offerup':
-                //     return app(ListingOfferupController::class)->getNrReqCount()['NR'] ?? 0;
-
-                // case 'newegg b2b':
-                //     return app(ListingNeweggB2BController::class)->getNrReqCount()['NR'] ?? 0;
-
-                // case 'fb shop':
-                //     return app(ListingFBShopController::class)->getNrReqCount()['NR'] ?? 0;
-
-                // case 'instagram shop':
-                //     return app(ListingInstagramShopController::class)->getNrReqCount()['NR'] ?? 0;
-
-                // case 'Yamibuy':
-                //     return app(ListingYamibuyController::class)->getNrReqCount()['NR'] ?? 0;
-
-                // case 'dhgate':
-                //     return app(ListingDHGateController::class)->getNrReqCount()['NR'] ?? 0;
-
-                // case 'bestbuy usa':
-                //     return app(ListingBestbuyUSAController::class)->getNrReqCount()['NR'] ?? 0;
-
-                // case 'sw gear exchange':
-                //     return app(ListingSWGearExchangeController::class)->getNrReqCount()['NR'] ?? 0;
-
-                // case 'dhgate':
-                //     return app(ListingDHGateController::class)->getNrReqCount()['NR'] ?? 0;
   
 
-                default:
-                    return 0;
-            }
-        } catch (\Throwable $e) {
-            return 0;
-        }
-    }
 
-    private function getModelForChannel($channel)
-    {
-        $modelMap = [
-            'amazon' => AmazonDataView::class,
-            'ebay' => EbayDataView::class,
-            'ebaytwo' => EbayTwoDataView::class,
-            'ebaythree' => EbayThreeDataView::class,
-            'ebayvariation' => EbayDataView::class,
-            'temu' => TemuDataView::class,
-            'macy' => MacyDataView::class,
-            'wayfair' => WayfairDataView::class,
-            'doba' => DobaDataView::class,
-            'walmart' => WalmartDataView::class,
-            'aliexpress' => AliexpressDataView::class,
-            'tiktokshop' => TiktokShopDataView::class,
-            'shein' => SheinDataView::class,
-        ];
+   
 
-        $key = strtolower(str_replace([' ', '&', '-', '/'], '', trim($channel)));
-        return $modelMap[$key] ?? null;
-    }
-
-
+   
 
 
 

@@ -2044,6 +2044,8 @@
                     success: function(response) {
                         if (response && response.data) {
                             tableData = response.data.map((item, index) => {
+                                console.log(item,'ddd');
+                                
                                 // Calculate A Dil% as (A L30 / INV), handle division by zero
                                 const inv = Number(item.inv) || 0;
                                 const aL30 = Number(item['A_L30']) || 0;
@@ -2056,7 +2058,7 @@
                                     'SL No.': item['SL No.'] || index + 1,
                                     Parent: item.Parent || item.parent || item.parent_asin ||
                                         item.Parent_ASIN || '(No Parent)',
-                                    'sku': item['sku'] || '',
+                                    'sku': item['Sku'] || '',
                                     'R&A': item['R&A'] !== undefined ? item['R&A'] : '',
                                     INV: inv,
                                     L30: item.ov_l30 || 0,
@@ -2406,33 +2408,7 @@
                 });
             }
 
-            // $(document).on('change', '.nr-select', function() {
-            //     const sku = $(this).data('sku');
-            //     const nrValue = $(this).val();
-            //     console.log(nrValue, 'nrrr');
-
-
-            //     $.ajax({
-            //         // url: '/doba/save-nr',
-            //         type: 'POST',
-            //         data: {
-            //             sku: sku,
-            //             nr: JSON.stringify({
-            //                 NR: nrValue
-            //             }),
-            //             _token: $('meta[name="csrf-token"]').attr('content') // CSRF protection
-            //         },
-            //         success: function(res) {
-            //             showNotification('success', 'NR updated successfully');
-            //         },
-            //         error: function(err) {
-            //             console.error('Error saving NR:', err);
-            //             showNotification('danger', 'Failed to update NR');
-            //         }
-            //     });
-            // });
-
-
+           
             function initNREditHandlers() {
                 $(document).on('change', '.nr-select', function() {
                     const $select = $(this);

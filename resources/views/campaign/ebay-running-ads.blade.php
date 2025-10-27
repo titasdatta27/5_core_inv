@@ -316,7 +316,7 @@
                         visible: false
                     },
                     {
-                        title: "SPEND L30",
+                        title: 'SPEND L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="spend-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "SPEND_L30",
                         formatter: function(cell) {
                             let SPEND_L30 = cell.getValue() || 0;
@@ -329,7 +329,7 @@
                         }
                     },
                     {
-                        title: "KW Spend L30",
+                        title: 'KW Spend L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="kw-spend-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "kw_spend_L30",
                         visible: false,
                         formatter: function(cell) {
@@ -340,7 +340,7 @@
                         }
                     },
                     {
-                        title: "PMT Spend L30",
+                        title: 'PMT Spend L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="pmt-spend-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "pmt_spend_L30",
                         visible: false,
                         formatter: function(cell) {
@@ -351,7 +351,7 @@
                         }
                     },
                     {
-                        title: "SPEND L7",
+                        title: 'SPEND L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="spend-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "SPEND_L7",
                         formatter: function(cell) {
                             let SPEND_L7 = cell.getValue() || 0;
@@ -364,7 +364,7 @@
                         }
                     },
                     {
-                        title: "KW Spend L7",
+                        title: 'KW Spend L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="kw-spend-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "kw_spend_L7",
                         visible: false,
                         formatter: function(cell) {
@@ -375,7 +375,7 @@
                         }
                     },
                     {
-                        title: "PMT Spend L7",
+                        title: 'PMT Spend L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="pmt-spend-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "pmt_spend_L7",
                         visible: false,
                         formatter: function(cell) {
@@ -386,7 +386,7 @@
                         }
                     },
                     {
-                        title: "SOLD L30",
+                        title: 'SOLD L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="sold-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "SOLD_L30",
                         formatter: function(cell) {
                             let SOLD_L30 = cell.getValue() || 0;
@@ -399,7 +399,7 @@
                         }
                     },
                     {
-                        title: "KW Sold L30",
+                        title: 'KW Sold L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="kw-sold-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "kw_sold_L30",
                         visible: false,
                         formatter: function(cell) {
@@ -410,7 +410,7 @@
                         }
                     },
                     {
-                        title: "PMT Sold L30",
+                        title: 'PMT Sold L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="pmt-sold-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "pmt_sold_L30",
                         visible: false,
                         formatter: function(cell) {
@@ -421,7 +421,7 @@
                         }
                     },
                     {
-                        title: "SOLD L7",
+                        title: 'SOLD L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="sold-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "SOLD_L7",
                         formatter: function(cell) {
                             let SOLD_L7 = cell.getValue() || 0;
@@ -434,7 +434,7 @@
                         }
                     },
                     {
-                        title: "KW Sold L7",
+                        title: 'KW Sold L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="kw-sold-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "kw_sold_L7",
                         visible: false,
                         formatter: function(cell) {
@@ -445,7 +445,7 @@
                         }
                     },
                     {
-                        title: "PMT Sold L7",
+                        title: 'PMT Sold L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="pmt-sold-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "pmt_sold_L7",
                         visible: false,
                         formatter: function(cell) {
@@ -456,7 +456,7 @@
                         }
                     },
                     {
-                        title: "SALES L30",
+                        title: 'SALES L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="sales-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "SALES_L30",
                         formatter: function(cell) {
                             let SALES_L30 = cell.getValue() || 0;
@@ -469,7 +469,7 @@
                         }
                     },
                     {
-                        title: "KW Sales L30",
+                        title: 'KW Sales L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="kw-sales-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "kw_sales_L30",
                         visible: false,
                         formatter: function(cell) {
@@ -480,7 +480,7 @@
                         }
                     },
                     {
-                        title: "PMT Sales L30",
+                        title: 'PMT Sales L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="pmt-sales-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "pmt_sales_L30",
                         visible: false,
                         formatter: function(cell) {
@@ -491,7 +491,7 @@
                         }
                     },
                     {
-                        title: "SALES L7",
+                        title: 'SALES L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="sales-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "SALES_L7",
                         formatter: function(cell) {
                             let SALES_L7 = cell.getValue() || 0;
@@ -504,7 +504,7 @@
                         }
                     },
                     {
-                        title: "KW Sales L7",
+                        title: 'KW Sales L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="kw-sales-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "kw_sales_L7",
                         visible: false,
                         formatter: function(cell) {
@@ -515,7 +515,7 @@
                         }
                     },
                     {
-                        title: "PMT Sales L7",
+                        title: 'PMT Sales L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="pmt-sales-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "pmt_sales_L7",
                         visible: false,
                         formatter: function(cell) {
@@ -526,7 +526,7 @@
                         }
                     },
                     {
-                        title: "CLICKS L30",
+                        title: 'CLICKS L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="clicks-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "CLICKS_L30",
                         formatter: function(cell) {
                             let CLICKS_L30 = cell.getValue() || 0;
@@ -539,7 +539,7 @@
                         }
                     },
                     {
-                        title: "KW Clicks L30",
+                        title: 'KW Clicks L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="kw-clicks-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "kw_clicks_L30",
                         visible: false,
                         formatter: function(cell) {
@@ -550,7 +550,7 @@
                         }
                     },
                     {
-                        title: "PMT Clicks L30",
+                        title: 'PMT Clicks L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="pmt-clicks-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "pmt_clicks_L30",
                         visible: false,
                         formatter: function(cell) {
@@ -561,7 +561,7 @@
                         }
                     },
                     {
-                        title: "CLICKS L7",
+                        title: 'CLICKS L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="clicks-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "CLICKS_L7",
                         formatter: function(cell) {
                             let CLICKS_L7 = cell.getValue() || 0;
@@ -574,7 +574,7 @@
                         }
                     },
                     {
-                        title: "KW Clicks L7",
+                        title: 'KW Clicks L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="kw-clicks-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "kw_clicks_L7",
                         visible: false,
                         formatter: function(cell) {
@@ -585,7 +585,7 @@
                         }
                     },
                     {
-                        title: "PMT Clicks L7",
+                        title: 'PMT Clicks L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="pmt-clicks-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "pmt_clicks_L7",
                         visible: false,
                         formatter: function(cell) {
@@ -596,7 +596,7 @@
                         }
                     },
                     {
-                        title: "IMP L30",
+                        title: 'IMP L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="imp-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "IMP_L30",
                         formatter: function(cell) {
                             let IMP_L30 = cell.getValue() || 0;
@@ -609,7 +609,7 @@
                         }
                     },
                     {
-                        title: "KW IMP L30",
+                        title: 'KW IMP L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="kw-imp-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "kw_impr_L30",
                         visible: false,
                         formatter: function(cell) {
@@ -620,7 +620,7 @@
                         }
                     },
                     {
-                        title: "PMT IMP L30",
+                        title: 'PMT IMP L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="pmt-imp-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "pmt_impr_L30",
                         visible: false,
                         formatter: function(cell) {
@@ -631,7 +631,7 @@
                         }
                     },
                     {
-                        title: "IMP L7",
+                        title: 'IMP L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="imp-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "IMP_L7",
                         formatter: function(cell) {
                             let IMP_L7 = cell.getValue() || 0;
@@ -644,7 +644,7 @@
                         }
                     },
                     {
-                        title: "KW IMP L7",
+                        title: 'KW IMP L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="kw-imp-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "kw_impr_L7",
                         visible: false,
                         formatter: function(cell) {
@@ -655,7 +655,7 @@
                         }
                     },
                     {
-                        title: "PMT IMP L7",
+                        title: 'PMT IMP L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="pmt-imp-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "pmt_impr_L7",
                         visible: false,
                         formatter: function(cell) {
@@ -664,7 +664,7 @@
                                 <span>${parseFloat(PMT_IMP_L7).toFixed(0)}</span>
                             `;
                         }
-                    },
+                    },                  
                     {
                         title: "START AD",
                         field: "start_ad",
@@ -854,10 +854,166 @@
                     let total = allRows.length;
                     let filtered = filteredRows.length;
 
-                    let percentage = total > 0 ? ((filtered / total) * 100).toFixed(0) : 0;
+                    // Improved helper function to handle both numbers and strings
+                    const calculateTotal = (field) => {
+                        return filteredRows.reduce((sum, row) => {
+                            const sku = (row.sku || "").toLowerCase().trim();
+                            if (!sku.includes("parent ")) {
+                                let value = row[field];
+                                // Ensure value is a number
+                                if (typeof value === 'string') {
+                                    value = parseFloat(value) || 0;
+                                }
+                                return sum + (value || 0);
+                            }
+                            return sum;
+                        }, 0);
+                    };
 
+                    //calculate all total
+                    let spendL30Total = calculateTotal('SPEND_L30');
+                    let kwSpendL30Total = calculateTotal('kw_spend_L30');
+                    let pmtSpendL30Total = calculateTotal('pmt_spend_L30');
+                    let spendL7Total = calculateTotal('SPEND_L7');
+                    let kwSpendL7Total = calculateTotal('kw_spend_L7');
+                    let pmtSpendL7Total = calculateTotal('pmt_spend_L7');
+                    let soldL30Total = calculateTotal('SOLD_L30');
+                    let kwSoldL30Total = calculateTotal('kw_sold_L30');
+                    let pmtSoldL30Total = calculateTotal('pmt_sold_L30');
+                    let soldL7Total = calculateTotal('SOLD_L7');
+                    let kwSoldL7Total = calculateTotal('kw_sold_L7');
+                    let pmtSoldL7Total = calculateTotal('pmt_sold_L7');
+                    let salesL30Total = calculateTotal('SALES_L30');
+                    let kwSalesL30Total = calculateTotal('kw_sales_L30');
+                    let pmtSalesL30Total = calculateTotal('pmt_sales_L30');
+                    let salesL7Total = calculateTotal('SALES_L7');
+                    let kwSalesL7Total = calculateTotal('kw_sales_L7');
+                    let pmtSalesL7Total = calculateTotal('pmt_sales_L7');
+                    let clicksL30Total = calculateTotal('CLICKS_L30');
+                    let kwClicksL30Total = calculateTotal('kw_clicks_L30');
+                    let pmtClicksL30Total = calculateTotal('pmt_clicks_L30');
+                    let clicksL7Total = calculateTotal('CLICKS_L7');
+                    let kwClicksL7Total = calculateTotal('kw_clicks_L7');
+                    let pmtClicksL7Total = calculateTotal('pmt_clicks_L7');
+                    let impL30Total = calculateTotal('IMP_L30');
+                    let kwImpL30Total = calculateTotal('kw_impr_L30');
+                    let pmtImpL30Total = calculateTotal('pmt_impr_L30');
+                    let impL7Total = calculateTotal('IMP_L7');
+                    let kwImpL7Total = calculateTotal('kw_impr_L7');
+                    let pmtImpL7Total = calculateTotal('pmt_impr_L7');
+
+
+                    document.getElementById("imp-l7-total").innerText = impL7Total > 0 ? ` (${impL7Total.toFixed(2)})` : "";
+                    document.getElementById("imp-l7-total").style.display = impL7Total > 0 ? "inline" : "none";
+
+                    document.getElementById("kw-imp-l7-total").innerText = kwImpL7Total > 0 ? ` (${kwImpL7Total.toFixed(2)})` : "";
+                    document.getElementById("kw-imp-l7-total").style.display = kwImpL7Total > 0 ? "inline" : "none";
+
+                    document.getElementById("pmt-imp-l7-total").innerText = pmtImpL7Total > 0 ? ` (${pmtImpL7Total.toFixed(2)})` : "";
+                    document.getElementById("pmt-imp-l7-total").style.display = pmtImpL7Total > 0 ? "inline" : "none";
+
+
+                    document.getElementById("imp-l30-total").innerText = impL30Total > 0 ? ` (${impL30Total.toFixed(2)})` : "";
+                    document.getElementById("imp-l30-total").style.display = impL30Total > 0 ? "inline" : "none";
+
+                    document.getElementById("kw-imp-l30-total").innerText = kwImpL30Total > 0 ? ` (${kwImpL30Total.toFixed(2)})` : "";
+                    document.getElementById("kw-imp-l30-total").style.display = kwImpL30Total > 0 ? "inline" : "none";
+
+
+                    document.getElementById("pmt-imp-l30-total").innerText = pmtImpL30Total > 0 ? ` (${pmtImpL30Total.toFixed(2)})` : "";
+                    document.getElementById("pmt-imp-l30-total").style.display = pmtImpL30Total > 0 ? "inline" : "none";
+                      
+
+                    document.getElementById("clicks-l7-total").innerText = clicksL7Total > 0 ? ` (${clicksL7Total.toFixed(2)})` : "";
+                    document.getElementById("clicks-l7-total").style.display = clicksL7Total > 0 ? "inline" : "none";
+
+                    document.getElementById("kw-clicks-l7-total").innerText = kwClicksL7Total > 0 ? ` (${kwClicksL7Total.toFixed(2)})` : "";
+                    document.getElementById("kw-clicks-l7-total").style.display = kwClicksL7Total > 0 ? "inline" : "none";
+
+
+                    document.getElementById("pmt-clicks-l7-total").innerText = pmtClicksL7Total > 0 ? ` (${pmtClicksL7Total.toFixed(2)})` : "";
+                    document.getElementById("pmt-clicks-l7-total").style.display = pmtClicksL7Total > 0 ? "inline" : "none";
+
+
+                    document.getElementById("clicks-l30-total").innerText = clicksL30Total > 0 ? ` (${clicksL30Total.toFixed(2)})` : "";
+                    document.getElementById("clicks-l30-total").style.display = clicksL30Total > 0 ? "inline" : "none";
+
+                    document.getElementById("kw-clicks-l30-total").innerText = kwClicksL30Total > 0 ? ` (${kwClicksL30Total.toFixed(2)})` : "";
+                    document.getElementById("kw-clicks-l30-total").style.display = kwClicksL30Total > 0 ? "inline" : "none";
+
+                    document.getElementById("pmt-clicks-l30-total").innerText = pmtClicksL30Total > 0 ? ` (${pmtClicksL30Total.toFixed(2)})` : "";
+                    document.getElementById("pmt-clicks-l30-total").style.display = pmtClicksL30Total > 0 ? "inline" : "none";
+
+
+                    document.getElementById("sales-l7-total").innerText = salesL7Total > 0 ? ` (${salesL7Total.toFixed(2)})` : "";
+                    document.getElementById("sales-l7-total").style.display = salesL7Total > 0 ? "inline" : "none";
+
+                    document.getElementById("kw-sales-l7-total").innerText = kwSalesL7Total > 0 ? ` (${kwSalesL7Total.toFixed(2)})` : "";
+                    document.getElementById("kw-sales-l7-total").style.display = kwSalesL7Total > 0 ? "inline" : "none";
+
+                    document.getElementById("pmt-sales-l7-total").innerText = pmtSalesL7Total > 0 ? ` (${pmtSalesL7Total.toFixed(2)})` : "";
+                    document.getElementById("pmt-sales-l7-total").style.display = pmtSalesL7Total > 0 ? "inline" : "none";
+
+
+                    document.getElementById("sales-l30-total").innerText = salesL30Total > 0 ? ` (${salesL30Total.toFixed(2)})` : "";
+                    document.getElementById("sales-l30-total").style.display = salesL30Total > 0 ? "inline" : "none";
+
+                    document.getElementById("kw-sales-l30-total").innerText = kwSalesL30Total > 0 ? ` (${kwSalesL30Total.toFixed(2)})` : "";
+                    document.getElementById("kw-sales-l30-total").style.display = kwSalesL30Total > 0 ? "inline" : "none";
+
+
+                    document.getElementById("pmt-sales-l30-total").innerText = pmtSalesL30Total > 0 ? ` (${pmtSalesL30Total.toFixed(2)})` : "";
+                    document.getElementById("pmt-sales-l30-total").style.display = pmtSalesL30Total > 0 ? "inline" : "none";
+
+
+                    document.getElementById("sold-l7-total").innerText = soldL7Total > 0 ? ` (${soldL7Total.toFixed(2)})` : "";
+                    document.getElementById("sold-l7-total").style.display = soldL7Total > 0 ? "inline" : "none";
+
+                    document.getElementById("kw-sold-l7-total").innerText = kwSoldL7Total > 0 ? ` (${kwSoldL7Total.toFixed(2)})` : "";
+                    document.getElementById("kw-sold-l7-total").style.display = kwSoldL7Total > 0 ? "inline" : "none";
+
+                    document.getElementById("pmt-sold-l7-total").innerText = pmtSoldL7Total > 0 ? ` (${pmtSoldL7Total.toFixed(2)})` : "";
+                    document.getElementById("pmt-sold-l7-total").style.display = pmtSoldL7Total > 0 ? "inline" : "none";
+
+
+                    document.getElementById("sold-l30-total").innerText = soldL30Total > 0 ? ` (${soldL30Total.toFixed(2)})` : "";
+                    document.getElementById("sold-l30-total").style.display = soldL30Total > 0 ? "inline" : "none";
+
+                    document.getElementById("kw-sold-l30-total").innerText = kwSoldL30Total > 0 ? ` (${kwSoldL30Total.toFixed(2)})` : "";
+                    document.getElementById("kw-sold-l30-total").style.display = kwSoldL30Total > 0 ? "inline" : "none";
+
+
+                    document.getElementById("pmt-sold-l30-total").innerText = pmtSoldL30Total > 0 ? ` (${pmtSoldL30Total.toFixed(2)})` : "";
+                    document.getElementById("pmt-sold-l30-total").style.display = pmtSoldL30Total > 0 ? "inline" : "none";
+
+
+                    document.getElementById("spend-l30-total").innerText = spendL30Total > 0 ? ` (${spendL30Total.toFixed(2)})` : "";
+                    document.getElementById("spend-l30-total").style.display = spendL30Total > 0 ? "inline" : "none";
+
+                    document.getElementById("kw-spend-l30-total").innerText = kwSpendL30Total > 0 ? ` (${kwSpendL30Total.toFixed(2)})` : "";
+                    document.getElementById("kw-spend-l30-total").style.display = kwSpendL30Total > 0 ? "inline" : "none";
+
+
+                    document.getElementById("pmt-spend-l30-total").innerText = pmtSpendL30Total > 0 ? ` (${pmtSpendL30Total.toFixed(2)})` : "";
+                    document.getElementById("pmt-spend-l30-total").style.display = pmtSpendL30Total > 0 ? "inline" : "none";
+
+
+                    document.getElementById("spend-l7-total").innerText = spendL7Total > 0 ? ` (${spendL7Total.toFixed(2)})` : "";
+                    document.getElementById("spend-l7-total").style.display = spendL7Total > 0 ? "inline" : "none";
+
+
+                    document.getElementById("kw-spend-l7-total").innerText = kwSpendL7Total > 0 ? ` (${kwSpendL7Total.toFixed(2)})` : "";
+                    document.getElementById("kw-spend-l7-total").style.display = kwSpendL7Total > 0 ? "inline" : "none";
+
+
+                    document.getElementById("pmt-spend-l7-total").innerText = pmtSpendL7Total > 0 ? ` (${pmtSpendL7Total.toFixed(2)})` : "";
+                    document.getElementById("pmt-spend-l7-total").style.display = pmtSpendL7Total > 0 ? "inline" : "none";
+
+                  
+                    let percentage = total > 0 ? ((filtered / total) * 100).toFixed(0) : 0;
                     document.getElementById("total-campaigns").innerText = filtered;
                     document.getElementById("percentage-campaigns").innerText = percentage + "%";
+
                 }
 
                 // 🔁 Update stats on relevant table events

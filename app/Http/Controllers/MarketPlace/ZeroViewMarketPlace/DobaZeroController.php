@@ -396,8 +396,10 @@ class DobaZeroController extends Controller
             // Normalize $inv to numeric
             $inv = floatval($inv);
 
+            $hasNR = !empty($dataView['NR']) && strtoupper($dataView['NR']) === 'NR';
+
             // Count as zero-view if views are exactly 0 and inv > 0
-            if ($inv > 0 && $views === 0) {
+            if ($inv > 0 && $views === 0 && !$hasNR) {
                 $zeroViewCount++;
             }
 

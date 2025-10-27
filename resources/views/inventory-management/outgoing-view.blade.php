@@ -221,6 +221,8 @@
                                                 <option value="Issue(Carrier)">Issue(Carrier)</option>
                                                 <option value="Issue(Lost)">Issue(Lost)</option>
                                                 <option value="Issue(WAC)">Issue(WAC)</option>
+                                                <option value="Issue(WAC)">Issue(listing)</option>
+                                                <option value="Issue(WAC)">Issue(pricing)</option>
                                                 <option value="Gift">Gift</option>
                                                 <option value="Promotion">Promotion</option>
                                                 <option value="Issue(Other)">Issue(Other)</option>

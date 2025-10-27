@@ -177,6 +177,7 @@ use App\Http\Controllers\Campaigns\Ebay3AcosController;
 use App\Http\Controllers\Campaigns\Ebay3KeywordAdsController;
 use App\Http\Controllers\Campaigns\Ebay3PinkDilAdController;
 use App\Http\Controllers\Campaigns\Ebay3PmtAdsController;
+use App\Http\Controllers\Campaigns\Ebay3RunningAdsController;
 use App\Http\Controllers\Campaigns\Ebay3UtilizedAdsController;
 use App\Http\Controllers\Campaigns\EbayKwAdsController;
 use App\Http\Controllers\Campaigns\EbayOverUtilizedBgtController;
@@ -203,6 +204,7 @@ use App\Http\Controllers\Channels\SetupAccountChannelController;
 use App\Http\Controllers\Channels\ShippingMasterController;
 use App\Http\Controllers\Channels\TrafficMasterController;
 use App\Http\Controllers\Campaigns\EbayMissingAdsController;
+use App\Http\Controllers\ChannelWiseReviewsController;
 use App\Http\Controllers\FbaDataController;
 use App\Http\Controllers\InventoryManagement\AutoStockBalanceController;
 use App\Http\Controllers\InventoryManagement\StockBalanceController;
@@ -1049,6 +1051,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
         Route::post('/update-link', 'updateLink')->name('update.rfq.link');
         Route::post('/mfrg-progresses/insert', 'storeMFRG')->name('mfrg.progresses.insert');
         Route::post('/save-to-order-review', 'storeToOrderReview')->name('save.to_order_review');
+        Route::post('/to-order-analysis/delete', 'deleteToOrderAnalysis')->name('delete.to_order_analysis');
     });
 
     //Movement Analysis
@@ -1198,8 +1201,12 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     // Pricing Master Views Roi Dashboard
 
     Route::get('/pricing-masters.pricing_masters', [PricingMasterViewsController::class, 'pricingMaster']);
+
     Route::get('/inventory-by-sales-value', [PricingMasterViewsController::class, 'inventoryBySalesValue'])->name('inventory.by.sales.value');
     Route::get('/pricing-master-data-views', [PricingMasterViewsController::class, 'getViewPricingAnalysisData']);
+    Route::get('/pricing-master/export', [PricingMasterViewsController::class, 'exportPricingMaster'])->name('pricing-master.export');
+    Route::post('/pricing-master/import-site-l90', [PricingMasterViewsController::class, 'importSiteL90Data'])->name('pricing-master.import-site-l90');
+    Route::get('/pricing-master/download-site-l90-sample', [PricingMasterViewsController::class, 'downloadSiteL90Sample'])->name('pricing-master.download-site-l90-sample');
     Route::get('/pricing-master/roi-dashboard', [PricingMasterViewsController::class, 'getViewPricingAnalysisROIDashboardData']);
     Route::post('/pricing-master/save', [PricingMasterViewsController::class, 'save']);
     Route::post('/pricing-master/save-image-url', [PricingMasterViewsController::class, 'saveImageUrl']);
@@ -1208,7 +1215,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::get('/calculate-wmp-masters', [PricingMasterViewsController::class, 'calculateWMPMasters']);
     Route::get('/pricing-master-incremental', [PricingMasterViewsController::class, 'pricingMasterIncR']);
     Route::post('/product-master/wmp-mark-as-done', [PricingMasterViewsController::class, 'wmpMarkAsDone']);
-
+    Route::get('/pricing-masters-l90.pricing_masters-l90', [PricingMasterViewsController::class, 'pricingMasterl90Data']);
 
 
 
@@ -2136,6 +2143,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
         Route::get('/ebay-3/under-utilized', 'ebay3UnderUtilizedAdsView')->name('ebay3.under.utilized');
         Route::get('/ebay-3/correctly-utilized', 'ebay3CorrectlyUtilizedAdsView')->name('ebay3.correctly.utilized');
         Route::get('/ebay-3/utilized/ads/data', 'getEbay3UtilizedAdsData');
+        Route::post('/update-ebay3-nr-data', 'updateEbay3NrData');
     });
 
     Route::controller(Ebay3KeywordAdsController::class)->group(function () {
@@ -2147,6 +2155,11 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
 
         Route::get('/ebay-3/make-new/kw-ads', 'ebay3MakeNewKwAdsView')->name('ebay3.make.new.kw.ads');
         Route::get('/ebay-3/make-new/kw-ads/data', 'getEbay3MMakeNewKwAdsData');
+    });
+
+    Route::controller(Ebay3RunningAdsController::class)->group(function () {
+        Route::get('/ebay-3/ad-running/list', 'index')->name('ebay3.running.ads');
+        Route::get('/ebay-3/ad-running/data', 'getEbay3RunningAdsData');
     });
 
     Route::controller(WalmartUtilisationController::class)->group(function () {
@@ -2206,7 +2219,11 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
         Route::get('/google/search/data', 'getGoogleSearchAdsData');
         Route::get('/google/search/report/data', 'getGoogleSearchAdsReportData');
 
+        Route::get('/google/shopping-missings/ads', 'googleMissingAdsView')->name('google.shopping.missing.ads');
+        Route::get('/google/shopping-missings/ads/data', 'googleShoppingAdsMissingAds');
+
         Route::post('/update-google-ads-bid-price', 'updateGoogleAdsCampaignSbid');
+        Route::post('/update-google-nr-data', 'updateGoogleNrData');
     });
 
     Route::controller(FbaDataController::class)->group(function () {
@@ -2222,6 +2239,12 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
 
     Route::get('product-market', [ProductMarketing::class, 'product_master']);
     Route::get('product-market/details', [ProductMarketing::class, 'product_market_details']);
+
+
+
+    Route::get('channels-reviews-master', [ChannelWiseReviewsController::class, 'reviews_dashboard']);
+    Route::get('channels-reviews/details', [ChannelWiseReviewsController::class, 'reviews_dashboard_details']);
+    Route::post('channels-reviews/save', [ChannelWiseReviewsController::class, 'saveReview']);
 
 
     Route::get('', [RoutingController::class, 'index'])->name('root');

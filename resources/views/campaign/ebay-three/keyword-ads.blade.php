@@ -1,6 +1,3 @@
-
-
-
 @extends('layouts.vertical', ['title' => 'EBAY 3 KEYWORDS ADS', 'mode' => $mode ?? '', 'demo' => $demo ?? ''])
 @section('css')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -937,7 +934,7 @@
                     let field = e.target.getAttribute("data-field");
                     let value = e.target.value;
 
-                    fetch('/update-ebay-nr-data', {
+                    fetch('/update-ebay3-nr-data', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',

@@ -1,4 +1,4 @@
-@extends('layouts.vertical', ['title' => 'Doba Zero View', 'mode' => $mode ?? '', 'demo' => $demo ?? ''])
+@extends('layouts.vertical', ['title' => 'Tiktok Shop Zero View', 'mode' => $mode ?? '', 'demo' => $demo ?? ''])
 
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -1009,13 +1009,12 @@
 @endsection
 
 @section('content')
-    @include('layouts.shared/page-title', ['page_title' => 'Doba Zero View', 'sub_title' => 'Doba'])
+    @include('layouts.shared/page-title', ['page_title' => 'Tiktok Shop Zero View', 'sub_title' => 'Tiktok Shop'])
 
     <div class="row">
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
-                    <h4 class="header-title">Amazon Zero View</h4>
 
                     <!-- Custom Dropdown Filters Row -->
                     <div class="d-flex flex-wrap gap-2 mb-3">

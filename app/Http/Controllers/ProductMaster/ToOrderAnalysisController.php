@@ -440,14 +440,33 @@ class ToOrderAnalysisController extends Controller
 
     public function deleteToOrderAnalysis(Request $request)
     {
-        $ids = $request->input('ids', []);
-        if(!empty($ids)){
-            ToOrderAnalysis::whereIn('id', $ids)->delete();
-            return response()->json(['success' => true]);
-        }
-        return response()->json(['success' => false], 400);
-    }
-    
+        try {
+            $ids = $request->input('ids', []);
 
+            if (!empty($ids)) {
+                $user = auth()->check() ? auth()->user()->name : 'System';
+
+                ToOrderAnalysis::whereIn('id', $ids)->update([
+                    'auth_user' => $user,
+                    'deleted_at' => now(),
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Records soft-deleted successfully by ' . $user,
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'No IDs provided',
+            ], 400);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error deleting records: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
 
 }

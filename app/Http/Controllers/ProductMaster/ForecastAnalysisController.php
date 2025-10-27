@@ -72,10 +72,11 @@ class ForecastAnalysisController extends Controller
 
         $forecastMap = DB::table('forecast_analysis')->get()->keyBy(fn($item) => $normalizeSku($item->sku));
         $movementMap = DB::table('movement_analysis')->get()->keyBy(fn($item) => $normalizeSku($item->sku));
-        $readyToShipMap = DB::table('ready_to_ship')->get()->keyBy(fn($item) => $normalizeSku($item->sku));
+        $readyToShipMap = DB::table('ready_to_ship')->where('transit_inv_status', 0)->whereNull('deleted_at')->get()->keyBy(fn($item) => $normalizeSku($item->sku));
         $mfrg = DB::table('mfrg_progress')->get()->keyBy(fn($item) => $normalizeSku($item->sku));
         $transitContainer = TransitContainerDetail::where('status', '')
-            ->select('our_sku', 'tab_name', 'no_of_units', 'total_ctn')
+            ->whereNull('deleted_at')
+            ->select('our_sku', 'tab_name', 'no_of_units', 'total_ctn', 'rate')
             ->get()
             ->groupBy(fn($item) => $normalizeSku($item->our_sku))
             ->map(function ($group) {
@@ -84,11 +85,13 @@ class ForecastAnalysisController extends Controller
                     $no_of_units = (float) $row->no_of_units;
                     $total_ctn = (float) $row->total_ctn;
                     $transitSum += $no_of_units * $total_ctn;
+                    $rate = (float) $row->rate;
                 }
 
                 return (object)[
                     'tab_name' => $group->pluck('tab_name')->unique()->implode(', '),
                     'transit' => $transitSum,
+                    'rate' => $rate,
                 ];
             })
             ->keyBy(fn($item, $key) => $key);
@@ -204,17 +207,18 @@ class ForecastAnalysisController extends Controller
                 $item->{'MSL_Four'} = round($msl / 4, 2);
 
                 $item->{'MSL_SP'} = floor($shopifyb2c_price * $effectiveMsl / 4);
-
-                $cp = (float)($item->{'CP'} ?? 0);
-                $orderQty = (float)($item->order_given ?? 0);
-                $readyToShipQty = (float)($item->readyToShipQty ?? 0);
-                $transit = (float)($item->transit ?? 0);
-
-                $item->MIP_Value = round($cp * $orderQty, 2);
-                $item->R2S_Value = round($lp * $readyToShipQty, 2);
-                $item->Transit_Value = round($lp * $transit, 2);
-
             }
+
+            $cp = (float)($item->{'CP'} ?? 0);
+            $orderQty = (float)($item->order_given ?? 0);
+            $readyToShipQty = (float)($item->readyToShipQty ?? 0);
+            $transit = (float)($transitContainer[$normalizeSku($prodData->sku)]->transit ?? 0);
+            $rate = (float)($transitContainer[$normalizeSku($prodData->sku)]->rate ?? 0);
+            $mipRate = (float)($mfrg->get($sheetSku)->rate ?? 0);
+            $r2SRate = (float)($readyToShipMap->get($sheetSku)->rate ?? 0);
+            $item->MIP_Value = round($mipRate * $orderQty, 2);
+            $item->R2S_Value = round($r2SRate * $readyToShipQty, 2);
+            $item->Transit_Value = round($rate * $transit, 2);
 
             $processedData[] = $item;
         }
@@ -315,8 +319,10 @@ class ForecastAnalysisController extends Controller
                             'approved_qty' => $orderQty,
                             'date_apprvl' => now()->toDateString(),
                             'stage' => '',
+                            'auth_user' => Auth::user()->name,
                             'updated_at' => now(),
                             'created_at' => now(),
+                            'deleted_at' => null,
                         ]
                     );
                 }
@@ -339,8 +345,10 @@ class ForecastAnalysisController extends Controller
                         [
                             'qty' => $orderQty,
                             'transit_inv_status' => 0,
+                            'auth_user' => Auth::user()->name,
                             'updated_at' => now(),
                             'created_at' => now(),
+                            'deleted_at' => null,
                         ]
                     );
                 }

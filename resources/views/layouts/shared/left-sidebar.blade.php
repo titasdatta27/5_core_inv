@@ -1,6 +1,6 @@
 <!-- ========== Left Sidebar Start ========== -->
 <div class="leftside-menu">
- 
+
     <!-- Brand Logo Light -->
     <a href="{{ route('any', 'index') }}" class="logo logo-light">
         <span class="logo">
@@ -12,9 +12,9 @@
         <!--</span>-->
     </a>
 
-     <div class="side-nav-title m-2">
-                <input type="text" placeholder="Search Menu" class="form-control form-control-sm" id="searchMenuItem"/>
-  </div>
+    <div class="side-nav-title m-2">
+        <input type="text" placeholder="Search Menu" class="form-control form-control-sm" id="searchMenuItem" />
+    </div>
 
 
     <!-- Brand Logo Dark -->
@@ -33,7 +33,7 @@
         <ul class="side-nav">
 
 
-          
+
             <li class="side-nav-title">Main</li>
 
 
@@ -82,7 +82,7 @@
                         <li>
                             <a href="{{ url('product-market') }}">Product Marketing</a>
                         </li>
-                  
+
                     </ul>
                 </div>
 
@@ -159,7 +159,7 @@
                         <li>
                             <a href="{{ route('arrived.container') }}">Arrived Container</a>
                         </li>
-                         <li>
+                        <li>
                             <a href="{{ route('container.summary') }}">Container Summary</a>
                         </li>
                         {{-- <li>
@@ -187,7 +187,7 @@
                 </div>
             </li>
 
-               <li class="side-nav-item">
+            <li class="side-nav-item">
                 <a data-bs-toggle="collapse" href="#prcmasterinc" aria-expanded="false" aria-controls="prcmasterinc"
                     class="side-nav-link">
                     <i class="ri-user-line"></i>
@@ -196,7 +196,7 @@
                 </a>
                 <div class="collapse" id="prcmasterinc">
                     <ul class="side-nav-second-level">
-                        
+
                         <li>
                             <a href="{{ url('/pricing-master-incremental') }}"> Prc Master IncR </a>
                         </li>
@@ -208,8 +208,8 @@
 
 
             <li class="side-nav-item">
-                <a data-bs-toggle="collapse" href="#fbaPricingMaster" aria-expanded="false" aria-controls="fbaPricingMaster"
-                    class="side-nav-link">
+                <a data-bs-toggle="collapse" href="#fbaPricingMaster" aria-expanded="false"
+                    aria-controls="fbaPricingMaster" class="side-nav-link">
                     <i class="ri-user-line"></i>
                     <span>FBA Sales </span>
                     <span class="menu-arrow"></span>
@@ -223,9 +223,27 @@
                 </div>
             </li>
 
-            <li class="side-nav-item">
-                <a data-bs-toggle="collapse" href="#sidebarPagess" aria-expanded="false" aria-controls="sidebarPagess"
+
+             <li class="side-nav-item">
+                <a data-bs-toggle="collapse" href="#sidebarPages22" aria-expanded="false" aria-controls="sidebarPages22"
                     class="side-nav-link">
+                    <i class="fa fa-comments"></i>
+                    <span>Channels Reviews </span>
+                    <span class="menu-arrow"></span>
+                </a>
+                <div class="collapse" id="sidebarPages22">
+                    <ul class="side-nav-second-level">
+                        <li>
+                            <a href="{{ url('channels-reviews-master') }}">Channels Reviews</a>
+                        </li>
+
+                    </ul>
+                </div>
+
+            </li>
+            <li class="side-nav-item">
+                <a data-bs-toggle="collapse" href="#sidebarPagess" aria-expanded="false"
+                    aria-controls="sidebarPagess" class="side-nav-link">
                     <i class="ri-pages-line"></i>
                     <span>Product Masters</span>
                     <span class="menu-arrow"></span>
@@ -245,9 +263,9 @@
                         </li>
 
 
-                       
 
-                         <li>
+
+                        <li>
                             <a href="{{ url('calculate-wmp-masters') }}">WMP Masters</a>
                         </li>
 
@@ -618,14 +636,14 @@
                                         <a href="{{ route('channel.master', ['channels', 'channel-masters']) }}"
                                             target="_blank">Active Channels</a>
                                     </li>
-                                <!-- Start Nikhil Code -->
+                                    <!-- Start Nikhil Code -->
                                     {{-- <li>
                                         <a href="{{ route('channel.ads.master') }}">AD Masters</a>
                                     </li> --}}
                                     <li>
                                         <a href="{{ route('channel.adv.master') }}">ADV Masters</a>
                                     </li>
-                                <!-- End Nikhil Code  -->
+                                    <!-- End Nikhil Code  -->
                                     <li>
                                         <a href="{{ route('opportunity.index') }}">Opportunities</a>
                                     </li>
@@ -781,22 +799,46 @@
                         <li>
                             <a href="{{ route('view.stock.mapping') }}">Stock Mapping</a>
                         </li>
-                   
+
 
                         <li>
                             <a href="{{ url('/live-pending-data') }}">Live Pending Masters</a>
                         </li>
 
-                         <li>
+                        <li>
                             <a href="{{ route('zero.visibility') }}">Zero Views Masters</a>
                         </li>
 
                         <li>
                             <a href="{{ url('listing-master-counts') }}">Low Visibility Masters</a>
                         </li>
-                         <li>
-                            <a href="{{ url('calculate-cvr-masters') }}">CVR Masters</a>
+
+
+
+
+
+
+
+                        <li class="side-nav-item">
+                            <a data-bs-toggle="collapse" href="#video-ads-master" aria-expanded="false"
+                                aria-controls="video-ads-master" class="side-nav-link">
+                                <span>CVR MASTERS</span>
+                                <span class="menu-arrow"></span>
+                            </a>
+                            <div class="collapse" id="video-ads-master">
+                                <ul class="side-nav-second-level">
+                                    <li>
+                                        <a href="{{ url('calculate-cvr-masters') }}">CVR Masters</a>
+                                    </li>
+                                    <li>
+                                        <a href="{{ url('pricing-masters-l90.pricing_masters-l90') }}">Listing CVR</a>
+                                    </li>
+
+                                </ul>
+                            </div>
                         </li>
+
+
                         <!--- Start Nikhil Code -->
                         <li class="side-nav-item">
                             <a data-bs-toggle="collapse" href="#video-ads-master" aria-expanded="false"
@@ -836,14 +878,14 @@
                             <a href="{{ route('listingMaster') }}">Listing Masters</a>
                         </li>
 
-                        
+
                         <li>
                             <a href="{{ route('listing.audit') }}">Listing Audit Masters</a>
                         </li>
 
-                          
 
-                       
+
+
                         <li>
                             <a href="{{ url('movement-pricing-master') }}"> Movement Analysis Master</a>
                         </li>
@@ -1108,7 +1150,8 @@
                                         <a href="{{ route('instagram.web.to.video') }}">Insta Video to Web</a>
                                     </li>
                                     <li>
-                                        <a href="{{ route('insta.img.caraousal.to.web') }}">Insta Img Caraousal to Web</a>
+                                        <a href="{{ route('insta.img.caraousal.to.web') }}">Insta Img Caraousal to
+                                            Web</a>
                                     </li>
                                 </ul>
                             </div>
@@ -1126,7 +1169,8 @@
                                         <a href="{{ route('youtube.web.to.video') }}">YouTube Video to Web</a>
                                     </li>
                                     <li>
-                                        <a href="{{ route('yt.img.caraousal.to.web') }}">YouTube Img Caraousal to Web</a>
+                                        <a href="{{ route('yt.img.caraousal.to.web') }}">YouTube Img Caraousal to
+                                            Web</a>
                                     </li>
                                 </ul>
                             </div>
@@ -1147,7 +1191,8 @@
                                         <a href="{{ route('tiktok.web.to.video') }}">Tiktok Video to Web</a>
                                     </li>
                                     <li>
-                                        <a href="{{ route('tk.img.caraousal.to.web') }}">Tiktok Img Caraousal to Web</a>
+                                        <a href="{{ route('tk.img.caraousal.to.web') }}">Tiktok Img Caraousal to
+                                            Web</a>
                                     </li>
                                 </ul>
                             </div>
@@ -1233,8 +1278,8 @@
             </li>
 
             {{-- Inventory Management --}}
-        
-            
+
+
             <li class="side-nav-item">
                 <a data-bs-toggle="collapse" href="#invsidebarPages" aria-expanded="false"
                     aria-controls="sidebarPages" class="side-nav-link">
@@ -1564,22 +1609,28 @@
                                         <div class="collapse" id="amazonFbaBudget">
                                             <ul class="side-nav-fourth-level">
                                                 <li>
-                                                    <a href=" {{ route('amazon.fba.over.kw.ads') }} ">Over Util. BGT KW</a>
+                                                    <a href=" {{ route('amazon.fba.over.kw.ads') }} ">Over Util. BGT
+                                                        KW</a>
                                                 </li>
                                                 <li>
-                                                    <a href=" {{ route('amazon.fba.over.pt.ads') }} ">Over Util. BGT PT</a>
+                                                    <a href=" {{ route('amazon.fba.over.pt.ads') }} ">Over Util. BGT
+                                                        PT</a>
                                                 </li>
                                                 <li>
-                                                    <a href=" {{ route('amazon.fba.under.kw.ads') }} ">Under Util. BGT KW</a>
+                                                    <a href=" {{ route('amazon.fba.under.kw.ads') }} ">Under Util.
+                                                        BGT KW</a>
                                                 </li>
                                                 <li>
-                                                    <a href=" {{ route('amazon.fba.under.pt.ads') }} ">Under Util. BGT PT</a>
+                                                    <a href=" {{ route('amazon.fba.under.pt.ads') }} ">Under Util.
+                                                        BGT PT</a>
                                                 </li>
                                                 <li>
-                                                    <a href="{{ route('amazon.fba.correct.kw.ads') }}">Correctly Utilized KW</a>
+                                                    <a href="{{ route('amazon.fba.correct.kw.ads') }}">Correctly
+                                                        Utilized KW</a>
                                                 </li>
                                                 <li>
-                                                    <a href="{{ route('amazon.fba.correct.pt.ads') }}">Correctly Utilized PT</a>
+                                                    <a href="{{ route('amazon.fba.correct.pt.ads') }}">Correctly
+                                                        Utilized PT</a>
                                                 </li>
                                             </ul>
                                         </div>
@@ -1593,10 +1644,12 @@
                                         <div class="collapse" id="amazonFbaACOS">
                                             <ul class="side-nav-fourth-level">
                                                 <li>
-                                                    <a href="{{ route('amazon.fba.acos.kw.control') }}">KW Control</a>
+                                                    <a href="{{ route('amazon.fba.acos.kw.control') }}">KW
+                                                        Control</a>
                                                 </li>
                                                 <li>
-                                                    <a href="{{ route('amazon.fba.acos.pt.control') }}">PT Control</a>
+                                                    <a href="{{ route('amazon.fba.acos.pt.control') }}">PT
+                                                        Control</a>
                                                 </li>
                                             </ul>
                                         </div>
@@ -2140,8 +2193,8 @@
                                         <a href="{{ url('ebayThreePricingCVR') }}">Ebay 3 Pricing - CVR</a>
                                     </li>
                                     <li>
-                                        <a data-bs-toggle="collapse" href="#ebay3AcosSubmenu" aria-expanded="false"
-                                            aria-controls="ebay3AcosSubmenu">
+                                        <a data-bs-toggle="collapse" href="#ebay3AcosSubmenu"
+                                            aria-expanded="false" aria-controls="ebay3AcosSubmenu">
                                             <span>ACOS Control</span>
                                             <span class="menu-arrow"></span>
                                         </a>
@@ -2161,15 +2214,15 @@
                                                 </li>
                                                 <li>
                                                     <a href="{{ route('ebay3-under-uti-acos-pink') }}">Under ACOS
-                                                            PINK</a>
+                                                        PINK</a>
                                                 </li>
                                                 <li>
                                                     <a href="{{ route('ebay3-under-uti-acos-green') }}">Under ACOS
-                                                            GREEN</a>
+                                                        GREEN</a>
                                                 </li>
                                                 <li>
                                                     <a href="{{ route('ebay3-under-uti-acos-red') }}">Under ACOS
-                                                            RED</a>
+                                                        RED</a>
                                                 </li>
                                             </ul>
                                         </div>
@@ -2196,8 +2249,11 @@
                                         <a href="{{ route('ebay3.keywords.ads.less-than-thirty') }}">Ads < $30</a>
                                     </li>
                                     <li>
-                                        <a href="{{ route('ebay3.make.new.kw.ads') }}">Make New KW Ads</a>
+                                        <a href="{{ route('ebay3.running.ads') }}">Running Ads</a>
                                     </li>
+                                    {{-- <li>
+                                        <a href="{{ route('ebay3.make.new.kw.ads') }}">Make New KW Ads</a>
+                                    </li> --}}
                                 </ul>
                             </div>
                         </li>
@@ -2249,7 +2305,8 @@
                                         <a href="{{ route('walmart.under.utilized') }}">Walmart Under Utili.</a>
                                     </li>
                                     <li>
-                                        <a href="{{ route('walmart.correctly.utilized') }}">Walmart Correctly Utili.</a>
+                                        <a href="{{ route('walmart.correctly.utilized') }}">Walmart Correctly
+                                            Utili.</a>
                                     </li>
                                     <li>
                                         <a href="{{ route('walmart.missing.ads') }}">Walmart Missing Ads</a>
@@ -2276,6 +2333,9 @@
                                     <li>
                                         <a href="{{ route('google.shopping.under.utilize') }}">G-Shopping Under
                                             Util.</a>
+                                    </li>
+                                    <li>
+                                        <a href="{{ route('google.shopping.missing.ads') }}">G-Shopping Missing Ads</a>
                                     </li>
                                     <li>
                                         <a href="{{ route('google.shopping.report') }}">G-Shopping Report</a>
@@ -2404,7 +2464,8 @@
                             </a>
                             <div class="collapse" id="sidebarFBMarketplace">
                                 <ul class="side-nav-third-level">
-                                    <li><a href="{{ url('fbmarketplaceAnalysis') }}">FB Marketplace Analytics</a></li>
+                                    <li><a href="{{ url('fbmarketplaceAnalysis') }}">FB Marketplace Analytics</a>
+                                    </li>
 
                                     <li>
                                         <a href="{{ route('zero.fbmarketplace') }}">FB Marketplace 0
@@ -2425,7 +2486,8 @@
                             </a>
                             <div class="collapse" id="sidebarBusiness5Core">
                                 <ul class="side-nav-third-level">
-                                    <li><a href="{{ url('business5coreAnalysis') }}">Business 5Core Analytics</a></li>
+                                    <li><a href="{{ url('business5coreAnalysis') }}">Business 5Core Analytics</a>
+                                    </li>
 
                                     <li>
                                         <a href="{{ route('zero.business5core') }}">Business 5Core 0
@@ -2467,7 +2529,8 @@
                             </a>
                             <div class="collapse" id="sidebarMercariWoShip">
                                 <ul class="side-nav-third-level">
-                                    <li><a href="{{ url('mercariwoshipAnalysis') }}">Mercari w/o Ship Analytics</a></li>
+                                    <li><a href="{{ url('mercariwoshipAnalysis') }}">Mercari w/o Ship Analytics</a>
+                                    </li>
 
                                     <li>
                                         <a href="{{ route('zero.mercariwoship') }}">Mercari w/o Ship 0

@@ -22,7 +22,6 @@ class EventServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        Log::info('EventServiceProvider booted');
         // Listen when cron job starts
         Event::listen(ScheduledTaskStarting::class, function ($event) {
             $this->postStatus([
@@ -71,7 +70,9 @@ class EventServiceProvider extends ServiceProvider
             $response = Http::withHeaders([
                 'X-TASKMANAGER-KEY' => $key,
                 'Accept' => 'application/json',
-            ])->timeout(10)->post($url, $payload);
+            ])->timeout(10)
+              ->retry(2, 1000) // retry twice with 1-second delay
+              ->post($url, $payload);
 
             if (!$response->successful()) {
                 Log::warning("TaskManager response ({$response->status()}): " . $response->body());

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\MarketPlace\ZeroViewMarketPlace;
 
 use App\Http\Controllers\Controller;
+use App\Models\MarketplacePercentage;
 use App\Models\ProductMaster;
 use App\Models\ShopifySku;
 use App\Models\WalmartDataView;
@@ -10,6 +11,7 @@ use App\Models\WalmartListingStatus;
 use App\Models\WalmartProductSheet;
 use App\Models\ZendropDataView;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class WalmartZeroController extends Controller
@@ -26,60 +28,224 @@ class WalmartZeroController extends Controller
 
     public function getViewWalmartZeroData(Request $request)
     {
-        // 1. Fetch all ProductMaster rows
-        $productMasters = ProductMaster::orderBy('parent', 'asc')
-            ->orderByRaw("CASE WHEN sku LIKE 'PARENT %' THEN 1 ELSE 0 END")
-            ->orderBy('sku', 'asc')
+        // Get percentage from cache or database
+        $percentage = Cache::remember('walmart_marketplace_percentage', now()->addDays(30), function () {
+            $marketplaceData = MarketplacePercentage::where('marketplace', 'Walmart')->first();
+            return $marketplaceData ? $marketplaceData->percentage : 100;
+        });
+        $percentageValue = $percentage / 100;
+
+        // Fetch ProductMaster records excluding PARENT rows (do as much filtering in DB as possible)
+        $productMasters = ProductMaster::whereNull('deleted_at')
+            ->whereNotNull('sku')
+            ->where('sku', 'NOT LIKE', 'PARENT %')
             ->get();
 
-        $skus = $productMasters->pluck('sku')->filter()->unique()->values()->all();
+        // Normalize SKUs (uppercase + trim) and unique
+        $skus = $productMasters->pluck('sku')
+            ->map(fn($s) => strtoupper(trim($s)))
+            ->filter() // remove empty
+            ->unique()
+            ->values()
+            ->toArray();
 
-        // 2. Fetch ShopifySku for those SKUs
-        $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy('sku');
+        if (empty($skus)) {
+            return response()->json([
+                'message' => 'No SKUs found',
+                'data' => [],
+                'status' => 200
+            ]);
+        }
 
-        // 3. Fetch DobaDataView for those SKUs
-        $walmartDataViews = WalmartDataView::whereIn('sku', $skus)->get()->keyBy('sku');
+        // Fetch related data keyed by normalized SKU
+        $shopifyData = ShopifySku::whereIn(DB::raw('UPPER(TRIM(sku))'), $skus)
+            ->get()
+            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
 
-        $result = [];
-        foreach ($productMasters as $pm) {
-            $sku = $pm->sku;
-            $parent = $pm->parent;
+        $temuMetrics = WalmartProductSheet::whereIn(DB::raw('UPPER(TRIM(sku))'), $skus)
+            ->get()
+            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
+
+        $temuDataViews = WalmartDataView::whereIn(DB::raw('UPPER(TRIM(sku))'), $skus)
+            ->get()
+            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
+
+        $processedData = [];
+        $slNo = 1;
+
+        foreach ($productMasters as $productMaster) {
+            $sku = strtoupper(trim($productMaster->sku));
+            if ($sku === '') continue; // safety
+
+            // Get Shopify data safely
             $shopify = $shopifyData[$sku] ?? null;
+            $inv = $shopify->inv ?? 0;
+            $quantity = $shopify->quantity ?? 0;
 
-            $inv = $shopify ? $shopify->inv : 0;
-            $ov_l30 = $shopify ? $shopify->quantity : 0;
-            $ov_dil = ($inv > 0) ? round($ov_l30 / $inv, 4) : 0;
+            // Skip items with no inventory
+            if ($inv <= 0) continue;
 
-            // Only include rows where inv > 0
-            if ($inv > 0) {
-                // Fetch DobaDataView values
-                $walmartView = $walmartDataViews[$sku] ?? null;
-                $value = $walmartView ? $walmartView->value : [];
-                if (is_string($value)) {
-                    $value = json_decode($value, true) ?: [];
+            // Determine views (clicks) strictly:
+            // - If metric->views exists (not null), cast to int and use it.
+            // - Else if metric->value has 'views', cast to int and use it.
+            // - Else: views is considered NULL => we must skip (we only want views === 0)
+            $metric = $temuMetrics[$sku] ?? null;
+            $views = null;
+
+            if ($metric) {
+                // prefer direct field if present and not null
+                if (isset($metric->views) && $metric->views !== null && $metric->views !== '') {
+                    // cast numeric-looking values to int; otherwise (non-numeric) attempt intval
+                    $views = is_numeric($metric->views) ? (int)$metric->views : intval($metric->views);
+                } else if (!empty($metric->value)) {
+                    $metricValue = json_decode($metric->value, true);
+                    if (is_array($metricValue) && array_key_exists('views', $metricValue)) {
+                        $views = is_numeric($metricValue['views']) ? (int)$metricValue['views'] : intval($metricValue['views']);
+                    }
                 }
-
-                $row = [
-                    'parent' => $parent,
-                    'sku' => $sku,
-                    'inv' => $inv,
-                    'ov_l30' => $ov_l30,
-                    'ov_dil' => $ov_dil,
-                    'NR' => isset($value['NR']) && in_array($value['NR'], ['REQ', 'NR']) ? $value['NR'] : 'REQ',
-                    'A_Z_Reason' => $value['A_Z_Reason'] ?? '',
-                    'A_Z_ActionRequired' => $value['A_Z_ActionRequired'] ?? '',
-                    'A_Z_ActionTaken' => $value['A_Z_ActionTaken'] ?? '',
-                ];
-                $result[] = $row;
             }
+
+            // Important: we only want views exactly equal to 0 (not null, not >0)
+            if (!is_int($views) || $views !== 0) {
+                // if views is null or not 0, skip this SKU
+                continue;
+            }
+
+            // Fetch NR and A-Z Reason fields from DataView (if present)
+            $dataViewRaw = $temuDataViews[$sku]->value ?? [];
+            if (is_string($dataViewRaw)) {
+                $dataView = json_decode($dataViewRaw, true) ?: [];
+            } else {
+                $dataView = is_array($dataViewRaw) ? $dataViewRaw : [];
+            }
+
+            $values = $productMaster->Values ?? [];
+
+            $processedItem = [
+                'Parent' => $productMaster->parent ?? null,
+                'SL No.' => $slNo++,
+                'Sku' => $sku,
+                'INV' => $inv,
+                'L30' => $quantity,
+                'views' => $views, // will be 0 here
+                'product_impressions_l30' => 0, // (not available in your snippet)
+                'LP' => $values['lp'] ?? 0,
+                'Ship' => $values['ship'] ?? 0,
+                'COGS' => $values['cogs'] ?? 0,
+                'NR' => $dataView['NR'] ?? 'REQ',
+                'A_Z_Reason' => $dataView['A_Z_Reason'] ?? null,
+                'A_Z_ActionRequired' => $dataView['A_Z_ActionRequired'] ?? null,
+                'A_Z_ActionTaken' => $dataView['A_Z_ActionTaken'] ?? null,
+                'percentage' => $percentageValue,
+            ];
+
+            $processedData[] = $processedItem;
         }
 
         return response()->json([
             'message' => 'Data fetched successfully',
-            'data' => $result,
+            'data' => array_values($processedData),
             'status' => 200
         ]);
     }
+
+
+    // public function getViewWalmartZeroData(Request $request)
+    // {
+    //     // Get percentage from cache or database
+    //     $percentage = Cache::remember('walmart_marketplace_percentage', now()->addDays(30), function () {
+    //         $marketplaceData = MarketplacePercentage::where('marketplace', 'Walmart')->first();
+    //         return $marketplaceData ? $marketplaceData->percentage : 100;
+    //     });
+    //     $percentageValue = $percentage / 100;
+
+    //     // Fetch all ProductMaster records
+    //     $productMasters = ProductMaster::whereNull('deleted_at')->get();
+
+    //     // Normalize SKUs
+    //     $skus = $productMasters->pluck('sku')->map(fn($s) => strtoupper(trim($s)))->unique()->toArray();
+
+    //     // Fetch related data
+    //     $shopifyData = ShopifySku::whereIn('sku', $skus)->get()
+    //         ->keyBy(fn($s) => strtoupper(trim($s->sku)));
+
+    //     $walmartMetrics = WalmartProductSheet::whereIn('sku', $skus)->get()
+    //         ->keyBy(fn($s) => strtoupper(trim($s->sku)));
+
+    //     $temuDataViews = WalmartDataView::whereIn('sku', $skus)->get()
+    //         ->keyBy(fn($s) => strtoupper(trim($s->sku)));
+
+    //     $processedData = [];
+    //     $slNo = 1;
+
+    //     foreach ($productMasters as $productMaster) {
+    //         $sku = strtoupper(trim($productMaster->sku));
+    //         $isParent = stripos($sku, 'PARENT') !== false;
+    //         if ($isParent) continue;
+
+    //         // Get inventory from ShopifySku
+    //         $inv = $shopifyData[$sku]->inv ?? 0;
+    //         $quantity = $shopifyData[$sku]->quantity ?? 0;
+
+    //         // Skip items with no inventory
+    //         if ($inv <= 0) {
+    //             continue;
+    //         }
+
+    //         // Get views  from WalmartMetric
+    //         $clicks = null;
+    //         // $impressions = null;
+    //         $metric = $walmartMetrics[$sku] ?? null;
+    //         if ($metric) {
+    //             $clicks = $metric->views ?? null;
+    //             // $impressions = $metric->product_impressions_l30 ?? null;
+    //             if ($clicks === null && !empty($metric->value)) {
+    //                 $metricValue = json_decode($metric->value, true);
+    //                 $clicks = $metricValue['views'] ?? null;
+    //                 // $impressions = $metricValue['product_impressions_l30'] ?? null;
+    //             }
+    //         }
+
+    //         // Skip items with clicks > 0 (only show zero-view items)
+    //         if (!is_null($clicks) && $clicks > 0) {
+    //             continue;
+    //         }
+
+    //         // Fetch NR and A-Z Reason fields
+    //         $dataView = $temuDataViews[$sku]->value ?? [];
+    //         if (is_string($dataView)) {
+    //             $dataView = json_decode($dataView, true);
+    //         }
+
+    //         $values = $productMaster->Values ?? [];
+
+    //         $processedItem = [
+    //             'Parent' => $productMaster->parent ?? null,
+    //             'SL No.' => $slNo++,
+    //             'Sku' => $sku,
+    //             'INV' => $inv,
+    //             'L30' => $quantity, // Use Shopify quantity for L30
+    //             'product_clicks_l30' => $clicks ?? 0,
+    //             'product_impressions_l30' => $impressions ?? 0,
+    //             'LP' => $values['lp'] ?? 0,
+    //             'Ship' => $values['ship'] ?? 0,
+    //             'COGS' => $values['cogs'] ?? 0,
+    //             'NR' => $dataView['NR'] ?? 'REQ',
+    //             'A_Z_Reason' => $dataView['A_Z_Reason'] ?? null,
+    //             'A_Z_ActionRequired' => $dataView['A_Z_ActionRequired'] ?? null,
+    //             'A_Z_ActionTaken' => $dataView['A_Z_ActionTaken'] ?? null,
+    //             'percentage' => $percentageValue,
+    //         ];
+
+    //         $processedData[] = $processedItem;
+    //     }
+
+    //     return response()->json([
+    //         'message' => 'Data fetched successfully',
+    //         'data' => array_values($processedData),
+    //         'status' => 200
+    //     ]);
+    // }
 
     public function updateReasonAction(Request $request)
     {
@@ -303,8 +469,11 @@ class WalmartZeroController extends Controller
             // Normalize $inv to numeric
             $inv = floatval($inv);
 
+            // Check NR status
+            $hasNR = !empty($dataView['NR']) && strtoupper($dataView['NR']) === 'NR';
+
             // Count as zero-view if views are exactly 0 and inv > 0
-            if ($inv > 0 && $views === 0) {
+            if ($inv > 0 && $views === 0 && !$hasNR) {
                 $zeroViewCount++;
             }
 
