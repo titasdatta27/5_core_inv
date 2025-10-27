@@ -74,18 +74,24 @@ class ForecastAnalysisController extends Controller
         $movementMap = DB::table('movement_analysis')->get()->keyBy(fn($item) => $normalizeSku($item->sku));
         $readyToShipMap = DB::table('ready_to_ship')->where('transit_inv_status', 0)->whereNull('deleted_at')->get()->keyBy(fn($item) => $normalizeSku($item->sku));
         $mfrg = DB::table('mfrg_progress')->get()->keyBy(fn($item) => $normalizeSku($item->sku));
-        $transitContainer = TransitContainerDetail::where('status', '')
-            ->whereNull('deleted_at')
+        $transitContainer = TransitContainerDetail::whereNull('deleted_at')
+            ->where(function ($q) {
+                $q->whereNull('status')
+                ->orWhere('status', '');
+            })
             ->select('our_sku', 'tab_name', 'no_of_units', 'total_ctn', 'rate')
             ->get()
-            ->groupBy(fn($item) => $normalizeSku($item->our_sku))
+            ->groupBy(fn($item) => strtoupper(trim($item->our_sku)))
             ->map(function ($group) {
                 $transitSum = 0;
+                $rate = 0;
                 foreach ($group as $row) {
                     $no_of_units = (float) $row->no_of_units;
                     $total_ctn = (float) $row->total_ctn;
                     $transitSum += $no_of_units * $total_ctn;
-                    $rate = (float) $row->rate;
+                    if (!empty($row->rate)) {
+                        $rate = (float) $row->rate;
+                    }
                 }
 
                 return (object)[
@@ -95,6 +101,7 @@ class ForecastAnalysisController extends Controller
                 ];
             })
             ->keyBy(fn($item, $key) => $key);
+
 
 
         $processedData = [];
@@ -138,9 +145,9 @@ class ForecastAnalysisController extends Controller
             $lp = is_numeric($item->{'LP'}) ? (float)$item->{'LP'} : 0;
             $item->lp_value = $lp * $item->INV;
 
-            if (!empty($item->Parent) && $jungleScoutData->has($item->Parent)) {
-                $item->scout_data = json_decode(json_encode($jungleScoutData[$item->Parent]), true);
-            }
+            // if (!empty($item->Parent) && $jungleScoutData->has($item->Parent)) {
+            //     $item->scout_data = json_decode(json_encode($jungleScoutData[$item->Parent]), true);
+            // }
 
             if ($forecastMap->has($sheetSku)) {
                 $forecast = $forecastMap->get($sheetSku);
