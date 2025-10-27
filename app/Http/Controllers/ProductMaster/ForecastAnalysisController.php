@@ -216,9 +216,9 @@ class ForecastAnalysisController extends Controller
             $rate = (float)($transitContainer[$normalizeSku($prodData->sku)]->rate ?? 0);
             $mipRate = (float)($mfrg->get($sheetSku)->rate ?? 0);
             $r2SRate = (float)($readyToShipMap->get($sheetSku)->rate ?? 0);
-            $item->MIP_Value = round($mipRate * $orderQty, 2);
-            $item->R2S_Value = round($r2SRate * $readyToShipQty, 2);
-            $item->Transit_Value = round($rate * $transit, 2);
+            $item->MIP_Value = round($cp * $orderQty, 2);
+            $item->R2S_Value = round($cp * $readyToShipQty, 2);
+            $item->Transit_Value = round($cp * $transit, 2);
 
             $processedData[] = $item;
         }
