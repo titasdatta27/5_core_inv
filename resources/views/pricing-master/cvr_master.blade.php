@@ -957,7 +957,7 @@
             const tiendamiaProfit = data.tiendamia_price ? ((parseFloat(data.tiendamia_price) * 0.83) - LP - SHIP) * (parseFloat(data
                 .tiendamia_l30) || 0) : 0;
 
-            const tiktokProfit = data.tiktok_price ? ((parseFloat(data.tiktok_price) * 0.64) - LP - SHIP) * (parseFloat(data
+            const tiktokProfit = data.tiktok_price ? ((parseFloat(data.tiktok_price) * 0.80) - LP - SHIP) * (parseFloat(data
                 .tiktok_l30) || 0) : 0;
 
             const aliexpressProfit = data.aliexpress_price ? ((parseFloat(data.aliexpress_price) * 0.89) - LP - SHIP) * (parseFloat(data
@@ -990,7 +990,7 @@
                 { name: "shein", price: data.shein_price, l30: data.shein_l30, percent: 0.89 },
                 { name: "tiendamia", price: data.tiendamia_price, l30: data.tiendamia_l30, percent: 0.83 },
                 { name: "bestbuy", price: data.bestbuy_price, l30: data.bestbuy_l30, percent: 0.80 },
-                { name: "tiktok", price: data.tiktok_price, l30: data.tiktok_l30, percent: 0.64 },
+                { name: "tiktok", price: data.tiktok_price, l30: data.tiktok_l30, percent: 0.80 },
                 { name: "aliexpress", price: data.aliexpress_price, l30: data.aliexpress_l30, percent: 0.89 }
             ];
 
@@ -1553,7 +1553,7 @@
                         const sheinProfit = ((sheinPrice * 0.89) - LP - SHIP) ;
                         const bestbuyProfit = ((bestbuyPrice * 0.80) - LP - SHIP) ;
                         const tiendamiaProfit = ((tiendamiaPrice * 0.83) - LP - SHIP) ;
-                        const tiktokProfit = ((tiktokPrice * 0.64) - LP - SHIP) ;
+                        const tiktokProfit = ((tiktokPrice * 0.80) - LP - SHIP) ;
                         const aliexpressProfit = ((aliexpressPrice * 0.89) - LP - SHIP) ;
 
  
@@ -1713,7 +1713,7 @@
                             const sheinProfit   = data.shein_price      ? ((parseFloat(data.shein_price) * 0.89) - LP - SHIP) * sheinL30 : 0;
                             const bestbuyProfit  = data.bestbuy_price    ? ((parseFloat(data.bestbuy_price) * 0.80) - LP - SHIP) * bestbuyL30 : 0;
                             const tiendamiaProfit = data.tiendamia_price ? ((parseFloat(data.tiendamia_price) * 0.83) - LP - SHIP) * tiendamiaL30 : 0;
-                            const tiktokProfit    = data.tiktok_price    ? ((parseFloat(data.tiktok_price) * 0.64) - LP - SHIP) * tiktokL30 : 0;
+                            const tiktokProfit    = data.tiktok_price    ? ((parseFloat(data.tiktok_price) * 0.80) - LP - SHIP) * tiktokL30 : 0;
                             const aliexpressProfit = data.aliexpress_price ? ((parseFloat(data.aliexpress_price) * 0.89) - LP - SHIP) * aliexpressL30 : 0;
                             // Total profit
                             const totalProfit = amzProfit + ebayProfit + shopifyProfit + macyProfit +
@@ -1970,7 +1970,7 @@
                         const sheinProfit = ((sheinPrice * 0.89) - LP - SHIP);
                         const bestbuyProfit = ((bestbuyPrice * 0.80) - LP - SHIP);
                         const tiendamiaProfit = ((tiendamiaPrice * 0.83) - LP - SHIP);
-                        const tiktokProfit = ((tiktokPrice * 0.64) - LP - SHIP);
+                        const tiktokProfit = ((tiktokPrice * 0.80) - LP - SHIP);
                         const aliexpressProfit = ((aliexpressPrice * 0.89) - LP - SHIP);
 
                         const totalProfit = amzProfit * amzL30 + ebayProfit * ebayL30 + shopifyProfit * shopifyL30 + macyProfit * macyL30 +
@@ -2085,7 +2085,7 @@
                             { price: parent.walmart_price, l30: parent.walmart_l30, factor: 0.80 },
                             { price: parent.shein_price, l30: parent.shein_l30, factor: 0.89 },
                             { price: parent.aliexpress_price, l30: parent.aliexpress_l30, factor: 0.89 },
-                            { price: parent.tiktok_price, l30: parent.tiktok_price, factor: 0.64 },
+                            { price: parent.tiktok_price, l30: parent.tiktok_price, factor: 0.80 },
                             { price: parent.bestbuy_price, l30: parent.bestbuy_price, factor: 0.80 },
                             { price: parent.tiendamia_price, l30: parent.tiendamia_price, factor: 0.83 },
                             { price: parent.aliexpress_price, l30: parent.aliexpress_price, factor: 0.89 }

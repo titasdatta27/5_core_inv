@@ -8,7 +8,10 @@ use App\Models\ShopifySku;
 use App\Models\FBMarketplaceDataView;
 use App\Models\FBMarketplaceListingStatus;
 use App\Models\FbMarketplaceSheetdata;
+use App\Models\MarketplacePercentage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class FBMarketplaceZeroController extends Controller
 {
@@ -22,52 +25,175 @@ class FBMarketplaceZeroController extends Controller
         ]);
     }
 
-    public function getViewFBMarketplaceZeroData(Request $request)
+    // public function getViewFBMarketplaceZeroData(Request $request)
+    // {
+    //     $productMasters = ProductMaster::orderBy('parent', 'asc')
+    //         ->orderByRaw("CASE WHEN sku LIKE 'PARENT %' THEN 1 ELSE 0 END")
+    //         ->orderBy('sku', 'asc')
+    //         ->get();
+
+    //     $skus = $productMasters->pluck('sku')->filter()->unique()->values()->all();
+    //     $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy('sku');
+    //     $fbMarketplaceDataViews = FBMarketplaceDataView::whereIn('sku', $skus)->get()->keyBy('sku');
+
+    //     $result = [];
+    //     foreach ($productMasters as $pm) {
+    //         $sku = $pm->sku;
+    //         $parent = $pm->parent;
+    //         $shopify = $shopifyData[$sku] ?? null;
+
+    //         $inv = $shopify ? $shopify->inv : 0;
+    //         $ov_l30 = $shopify ? $shopify->quantity : 0;
+    //         $ov_dil = ($inv > 0) ? round($ov_l30 / $inv, 4) : 0;
+
+    //         if ($inv > 0) {
+    //             $fbView = $fbMarketplaceDataViews[$sku] ?? null;
+    //             $value = $fbView ? $fbView->value : [];
+    //             if (is_string($value)) {
+    //                 $value = json_decode($value, true) ?: [];
+    //             }
+
+    //             $row = [
+    //                 'parent' => $parent,
+    //                 'sku' => $sku,
+    //                 'inv' => $inv,
+    //                 'ov_l30' => $ov_l30,
+    //                 'ov_dil' => $ov_dil,
+    //                 'NR' => isset($value['NR']) && in_array($value['NR'], ['REQ', 'NR']) ? $value['NR'] : 'REQ',
+    //                 'A_Z_Reason' => $value['A_Z_Reason'] ?? '',
+    //                 'A_Z_ActionRequired' => $value['A_Z_ActionRequired'] ?? '',
+    //                 'A_Z_ActionTaken' => $value['A_Z_ActionTaken'] ?? '',
+    //             ];
+    //             $result[] = $row;
+    //         }
+    //     }
+
+    //     return response()->json([
+    //         'message' => 'Data fetched successfully',
+    //         'data' => $result,
+    //         'status' => 200
+    //     ]);
+    // }
+
+     public function getViewFBMarketplaceZeroData(Request $request)
     {
-        $productMasters = ProductMaster::orderBy('parent', 'asc')
-            ->orderByRaw("CASE WHEN sku LIKE 'PARENT %' THEN 1 ELSE 0 END")
-            ->orderBy('sku', 'asc')
+        // Get percentage from cache or database
+        $percentage = Cache::remember('fb_marketplace_percentage', now()->addDays(30), function () {
+            $marketplaceData = MarketplacePercentage::where('marketplace', 'FBMarketplace')->first();
+            return $marketplaceData ? $marketplaceData->percentage : 100;
+        });
+        $percentageValue = $percentage / 100;
+
+        // Fetch ProductMaster records excluding PARENT rows (do as much filtering in DB as possible)
+        $productMasters = ProductMaster::whereNull('deleted_at')
+            ->whereNotNull('sku')
+            ->where('sku', 'NOT LIKE', 'PARENT %')
             ->get();
 
-        $skus = $productMasters->pluck('sku')->filter()->unique()->values()->all();
-        $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy('sku');
-        $fbMarketplaceDataViews = FBMarketplaceDataView::whereIn('sku', $skus)->get()->keyBy('sku');
+        // Normalize SKUs (uppercase + trim) and unique
+        $skus = $productMasters->pluck('sku')
+            ->map(fn($s) => strtoupper(trim($s)))
+            ->filter() // remove empty
+            ->unique()
+            ->values()
+            ->toArray();
 
-        $result = [];
-        foreach ($productMasters as $pm) {
-            $sku = $pm->sku;
-            $parent = $pm->parent;
+        if (empty($skus)) {
+            return response()->json([
+                'message' => 'No SKUs found',
+                'data' => [],
+                'status' => 200
+            ]);
+        }
+
+        // Fetch related data keyed by normalized SKU
+        $shopifyData = ShopifySku::whereIn(DB::raw('UPPER(TRIM(sku))'), $skus)
+            ->get()
+            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
+
+        $temuMetrics = FbMarketplaceSheetdata::whereIn(DB::raw('UPPER(TRIM(sku))'), $skus)
+            ->get()
+            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
+
+        $temuDataViews = FBMarketplaceDataView::whereIn(DB::raw('UPPER(TRIM(sku))'), $skus)
+            ->get()
+            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
+
+        $processedData = [];
+        $slNo = 1;
+
+        foreach ($productMasters as $productMaster) {
+            $sku = strtoupper(trim($productMaster->sku));
+            if ($sku === '') continue; // safety
+
+            // Get Shopify data safely
             $shopify = $shopifyData[$sku] ?? null;
+            $inv = $shopify->inv ?? 0;
+            $quantity = $shopify->quantity ?? 0;
 
-            $inv = $shopify ? $shopify->inv : 0;
-            $ov_l30 = $shopify ? $shopify->quantity : 0;
-            $ov_dil = ($inv > 0) ? round($ov_l30 / $inv, 4) : 0;
+            // Skip items with no inventory
+            if ($inv <= 0) continue;
 
-            if ($inv > 0) {
-                $fbView = $fbMarketplaceDataViews[$sku] ?? null;
-                $value = $fbView ? $fbView->value : [];
-                if (is_string($value)) {
-                    $value = json_decode($value, true) ?: [];
+            // Determine views (clicks) strictly:
+            // - If metric->views exists (not null), cast to int and use it.
+            // - Else if metric->value has 'views', cast to int and use it.
+            // - Else: views is considered NULL => we must skip (we only want views === 0)
+            $metric = $temuMetrics[$sku] ?? null;
+            $views = null;
+
+            if ($metric) {
+                // prefer direct field if present and not null
+                if (isset($metric->views) && $metric->views !== null && $metric->views !== '') {
+                    // cast numeric-looking values to int; otherwise (non-numeric) attempt intval
+                    $views = is_numeric($metric->views) ? (int)$metric->views : intval($metric->views);
+                } else if (!empty($metric->value)) {
+                    $metricValue = json_decode($metric->value, true);
+                    if (is_array($metricValue) && array_key_exists('views', $metricValue)) {
+                        $views = is_numeric($metricValue['views']) ? (int)$metricValue['views'] : intval($metricValue['views']);
+                    }
                 }
-
-                $row = [
-                    'parent' => $parent,
-                    'sku' => $sku,
-                    'inv' => $inv,
-                    'ov_l30' => $ov_l30,
-                    'ov_dil' => $ov_dil,
-                    'NR' => isset($value['NR']) && in_array($value['NR'], ['REQ', 'NR']) ? $value['NR'] : 'REQ',
-                    'A_Z_Reason' => $value['A_Z_Reason'] ?? '',
-                    'A_Z_ActionRequired' => $value['A_Z_ActionRequired'] ?? '',
-                    'A_Z_ActionTaken' => $value['A_Z_ActionTaken'] ?? '',
-                ];
-                $result[] = $row;
             }
+
+            // Important: we only want views exactly equal to 0 (not null, not >0)
+            if (!is_int($views) || $views !== 0) {
+                // if views is null or not 0, skip this SKU
+                continue;
+            }
+
+            // Fetch NR and A-Z Reason fields from DataView (if present)
+            $dataViewRaw = $temuDataViews[$sku]->value ?? [];
+            if (is_string($dataViewRaw)) {
+                $dataView = json_decode($dataViewRaw, true) ?: [];
+            } else {
+                $dataView = is_array($dataViewRaw) ? $dataViewRaw : [];
+            }
+
+            $values = $productMaster->Values ?? [];
+
+            $processedItem = [
+                'parent' => $productMaster->parent ?? null,
+                'SL No.' => $slNo++,
+                'sku' => $sku,
+                'inv' => $inv,
+                'ov_l30' => $quantity,
+                'views' => $views, // will be 0 here
+                'product_impressions_l30' => 0, // (not available in your snippet)
+                'LP' => $values['lp'] ?? 0,
+                'Ship' => $values['ship'] ?? 0,
+                'COGS' => $values['cogs'] ?? 0,
+                'NR' => $dataView['NR'] ?? 'REQ',
+                'A_Z_Reason' => $dataView['A_Z_Reason'] ?? null,
+                'A_Z_ActionRequired' => $dataView['A_Z_ActionRequired'] ?? null,
+                'A_Z_ActionTaken' => $dataView['A_Z_ActionTaken'] ?? null,
+                'percentage' => $percentageValue,
+            ];
+
+            $processedData[] = $processedItem;
         }
 
         return response()->json([
             'message' => 'Data fetched successfully',
-            'data' => $result,
+            'data' => array_values($processedData),
             'status' => 200
         ]);
     }
@@ -191,8 +317,10 @@ class FBMarketplaceZeroController extends Controller
             // Normalize $inv to numeric
             $inv = floatval($inv);
 
+            $hasNR = !empty($dataView['NR']) && strtoupper($dataView['NR']) === 'NR';
+
             // Count as zero-view if views are exactly 0 and inv > 0
-            if ($inv > 0 && $views === 0) {
+            if ($inv > 0 && $views === 0 && !$hasNR) {
                 $zeroViewCount++;
             }
         }
