@@ -833,6 +833,7 @@
                                 'bestbuyusa': '/zero-bestbuyusa',
                                 'swgearexchange': '/zero-swgearexchange',
                                 'shopifywholesale/ds': '/zero-shopifywholesale',
+                                'amazonfba': '/fba-view-page',
                             };
 
                             const routeUrl = routeMap[channelName];
