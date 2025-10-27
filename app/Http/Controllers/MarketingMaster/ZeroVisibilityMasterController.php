@@ -298,7 +298,9 @@ class ZeroVisibilityMasterController extends Controller
             $zeroViews = 0;
 
             $key = strtolower(str_replace([' ', '-', '&', '/'], '', trim($channel)));
-            if (isset($controllerMap[$key])) {
+             if ($key === 'amazonfba') {
+                $controllerClass = "App\\Http\\Controllers\\FbaDataController";
+            } else if (isset($controllerMap[$key])) {
                 $controllerName = $controllerMap[$key];
                 if ($controllerName === 'EbayZeroController') {
                     $controllerClass = "App\\Http\\Controllers\\MarketPlace\\{$controllerName}";
@@ -311,6 +313,13 @@ class ZeroVisibilityMasterController extends Controller
 
             if (class_exists($controllerClass)) {
                 $controller = app($controllerClass);
+
+                if ($key === 'amazonfba' && method_exists($controller, 'getFbaListedLiveAndViewsData')) {
+                    $counts = $controller->getFbaListedLiveAndViewsData();
+                    $livePending = $counts['live'] ?? 0;
+                    $zeroViews = $counts['views'] ?? 0;
+                }
+                
                 // Try getLivePendingAndZeroViewCounts (preferred, returns both counts)
                 if (method_exists($controller, 'getLivePendingAndZeroViewCounts')) {
                     $counts = $controller->getLivePendingAndZeroViewCounts();
