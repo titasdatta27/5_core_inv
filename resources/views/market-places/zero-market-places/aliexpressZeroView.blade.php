@@ -2457,7 +2457,7 @@
                         },
                         success: function(res) {
                             showNotification('success', 'NR updated successfully');
-                            // ✅ Update tableData and filteredData correctly
+                            // Update tableData and filteredData correctly
                             tableData.forEach(item => {
                                 if (item['sku'] === sku) {
                                     item.NR = nrValue;
@@ -2468,7 +2468,7 @@
                                     item.NR = nrValue;
                                 }
                             });
-                            // ✅ Recalculate & re-render
+                            // Recalculate & re-render
                             updateZeroViewDiv();
                             renderTable();
                         },

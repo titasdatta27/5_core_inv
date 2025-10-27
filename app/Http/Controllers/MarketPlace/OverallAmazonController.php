@@ -366,8 +366,7 @@ class OverallAmazonController extends Controller
     }
 
 
-    public function saveNrToDatabase(Request $request)
-    {
+    public function saveNrToDatabase(Request $request) {
         $sku = $request->input('sku');
         $nrInput = $request->input('nr');     
         $fbaInput = $request->input('fba');   
@@ -385,7 +384,7 @@ class OverallAmazonController extends Controller
         // Decode existing value JSON
         $existing = is_array($amazonDataView->value)
             ? $amazonDataView->value
-            : (json_decode($amazonDataView->value, true) ?? []);
+            : (json_decode($amazonDataView->value ?? '{}', true));
 
         // Handle NR
         if ($nrInput) {
@@ -394,9 +393,9 @@ class OverallAmazonController extends Controller
                 return response()->json(['error' => 'Invalid NR format.'], 400);
             }
 
-            foreach ($nr as $key => $val) {
-                if (in_array($key, ['NRL', 'NRA'])) {
-                    $existing[$key] = $val;
+            foreach (['NRL', 'NRA'] as $key) {
+                if (isset($nr[$key])) {
+                    $existing[$key] = $nr[$key];
                 }
             }
         }
@@ -425,8 +424,11 @@ class OverallAmazonController extends Controller
             $existing['Spend_L30'] = $spend_l30;
         }
 
-        $amazonDataView->value = $existing;
-        $amazonDataView->save();
+        $newValueJson = json_encode($existing);
+        if ($amazonDataView->value !== $newValueJson) {
+            $amazonDataView->value = $existing;
+            $amazonDataView->save();
+        }
 
         return response()->json(['success' => true, 'data' => $amazonDataView]);
     }
