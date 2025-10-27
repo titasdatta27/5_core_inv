@@ -171,10 +171,12 @@ use App\Http\Controllers\Campaigns\AmazonSpBudgetController;
 use App\Http\Controllers\Campaigns\AmzCorrectlyUtilizedController;
 use App\Http\Controllers\Campaigns\AmzUnderUtilizedBgtController;
 use App\Http\Controllers\Campaigns\CampaignImportController;
+use App\Http\Controllers\Campaigns\Ebay2MissingAdsController;
 use App\Http\Controllers\Campaigns\Ebay2PMTAdController;
 use App\Http\Controllers\Campaigns\Ebay2RunningAdsController;
 use App\Http\Controllers\Campaigns\Ebay3AcosController;
 use App\Http\Controllers\Campaigns\Ebay3KeywordAdsController;
+use App\Http\Controllers\Campaigns\Ebay3MissingAdsController;
 use App\Http\Controllers\Campaigns\Ebay3PinkDilAdController;
 use App\Http\Controllers\Campaigns\Ebay3PmtAdsController;
 use App\Http\Controllers\Campaigns\Ebay3RunningAdsController;
@@ -747,6 +749,8 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
 
 
     //Marketplace index view routes/
+    Route::get('/ad-cvr-amazon', action: [OverallAmazonController::class, 'adcvrAmazon'])->name('adcvr.amazon');
+    Route::get('/ad-cvr-amazon-data', action: [OverallAmazonController::class, 'adcvrAmazonData'])->name('adcvr.amazon.data');
     Route::get('/overall-amazon', action: [OverallAmazonController::class, 'overallAmazon'])->name('overall.amazon');
     Route::post('/overallAmazon/saveLowProfit', action: [OverallAmazonController::class, 'saveLowProfit']);
     Route::get('/amazon-pricing-cvr', action: [OverallAmazonController::class, 'amazonPricingCVR'])->name('amazon.pricing.cvr');
@@ -2107,11 +2111,17 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
         Route::get('/ebay-2/pmp/ads/data', 'getEbay2PmtAdsData');
         Route::post('/update-ebay-2-pmt-percentage', 'updateEbay2Percentage');
         Route::post('/update-ebay-2-pmt-sprice', 'saveEbay2PMTSpriceToDatabase');
+        Route::post('/update-ebay2-nr-data', 'updateEbay2NrData');
     });
 
     Route::controller(Ebay2RunningAdsController::class)->group(function () {
         Route::get('/ebay-2/ad-running/list', 'index')->name('ebay2.running.ads');
         Route::get('/ebay-2/ad-running/data', 'getEbay2RunningAdsData');
+    });
+
+    Route::controller(Ebay2MissingAdsController::class)->group(function () {
+        Route::get('/ebay2/ad-missing/list', 'index')->name('ebay2.missing.ads');
+        Route::get('/ebay2/ad-missing/data', 'getEbay2MissingAdsData');
     });
 
     // ebay 3 ads section
@@ -2160,6 +2170,11 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::controller(Ebay3RunningAdsController::class)->group(function () {
         Route::get('/ebay-3/ad-running/list', 'index')->name('ebay3.running.ads');
         Route::get('/ebay-3/ad-running/data', 'getEbay3RunningAdsData');
+    });
+
+    Route::controller(Ebay3MissingAdsController::class)->group(function () {
+        Route::get('/ebay-3/ad-missing/list', 'index')->name('ebay3.missing.ads');
+        Route::get('/ebay-3/ad-missing/data', 'getEbay3MissingAdsData');
     });
 
     Route::controller(WalmartUtilisationController::class)->group(function () {
