@@ -2146,6 +2146,9 @@
                                     <li>
                                         <a href="{{ route('ebay2.running.ads') }}">Running Ads</a>
                                     </li>
+                                    <li>
+                                        <a href="{{ route('ebay2.missing.ads') }}">Missing Ads</a>
+                                    </li>
                                 </ul>
                             </div>
                         </li>
@@ -2251,9 +2254,9 @@
                                     <li>
                                         <a href="{{ route('ebay3.running.ads') }}">Running Ads</a>
                                     </li>
-                                    {{-- <li>
-                                        <a href="{{ route('ebay3.make.new.kw.ads') }}">Make New KW Ads</a>
-                                    </li> --}}
+                                    <li>
+                                        <a href="{{ route('ebay3.missing.ads') }}">Missing Ads</a>
+                                    </li>
                                 </ul>
                             </div>
                         </li>

@@ -1,24 +1,24 @@
 <?php
 
-namespace App\Http\Controllers\Campaigns;
+namespace App\Http\Controllers\campaigns;
 
 use App\Http\Controllers\Controller;
-use App\Models\EbayDataView;
-use App\Models\EbayPriorityReport;
+use App\Models\Ebay3PriorityReport;
+use App\Models\EbayThreeDataView;
 use App\Models\ProductMaster;
 use App\Models\ShopifySku;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class EbayMissingAdsController extends Controller
+class Ebay3MissingAdsController extends Controller
 {
     public function index()
     {
-        return view('campaign.ebay-missing-ads');
+        return view('campaign.ebay-three.ebay3_missing_ads');
     }
 
-    public function getEbayMissingAdsData()
+    public function getEbay3MissingAdsData()
     {
         try {
             $normalizeSku = fn($sku) => strtoupper(trim($sku));
@@ -40,15 +40,15 @@ class EbayMissingAdsController extends Controller
 
             // Fetch all required data
             $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy(fn($item) => $normalizeSku($item->sku));
-            $nrValues = EbayDataView::whereIn('sku', $skus)->pluck('value', 'sku');
-            $ebayMetricData = DB::connection('apicentral')->table('ebay_one_metrics')
+            $nrValues = EbayThreeDataView::whereIn('sku', $skus)->pluck('value', 'sku');
+            $ebayMetricData = DB::table('ebay_3_metrics')
                 ->select('sku', 'ebay_price', 'item_id')
                 ->whereIn('sku', $skus)
                 ->get()
                 ->keyBy(fn($item) => $normalizeSku($item->sku));
 
             // Fetch campaign reports and create efficient lookup
-            $ebayCampaignReports = EbayPriorityReport::where(function ($q) use ($skus) {
+            $ebayCampaignReports = Ebay3PriorityReport::where(function ($q) use ($skus) {
                 foreach ($skus as $sku) {
                     $q->orWhere('campaign_name', 'LIKE', '%' . $sku . '%');
                 }
@@ -57,7 +57,8 @@ class EbayMissingAdsController extends Controller
             $campaignLookup = [];
             foreach ($ebayCampaignReports as $campaign) {
                 foreach ($skus as $sku) {
-                    if (strpos($campaign->campaign_name, $sku) !== false) {
+                    $normalizedCampaignName = strtoupper(trim($campaign->campaign_name)); 
+                    if (stripos($normalizedCampaignName, $sku) !== false) { 
                         if (!isset($campaignLookup[$sku])) {
                             $campaignLookup[$sku] = $campaign;
                         }
