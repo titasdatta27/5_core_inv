@@ -316,8 +316,8 @@ class ZeroVisibilityMasterController extends Controller
 
                 if ($key === 'amazonfba' && method_exists($controller, 'getFbaListedLiveAndViewsData')) {
                     $counts = $controller->getFbaListedLiveAndViewsData();
-                    $livePending = $counts['live'] ?? 0;
-                    $zeroViews = $counts['views'] ?? 0;
+                    $livePending = $counts['live_pending'] ?? 0;
+                    $zeroViews = $counts['zero_view'] ?? 0;
                 }
                 
                 // Try getLivePendingAndZeroViewCounts (preferred, returns both counts)

@@ -363,31 +363,30 @@ class FbaDataController extends Controller
 
    public function getFbaListedLiveAndViewsData()
    {
-      // --- Fetch all active product masters ---
+      // --- Fetch Product Master SKUs ---
       $productMasters = ProductMaster::whereNull('deleted_at')->get();
 
-      // Normalize SKUs (avoid case/space mismatch)
-      $skus = $productMasters->pluck('sku')
+      $normalizeSku = function ($sku) {
+         $sku = strtoupper(trim($sku));
+         // Remove trailing "FBA" (with or without spaces)
+         return preg_replace('/\s*FBA\s*$/i', '', $sku);
+      };
+
+      // Collect normalized SKUs from Product Master
+      $productSkus = $productMasters->pluck('sku')
          ->map(fn($s) => strtoupper(trim($s)))
          ->unique()
          ->toArray();
 
-      // Helper function: normalize FBA SKUs (remove "FBA" or " FBA" from end)
-      $normalizeSku = function ($sku) {
-         $sku = strtoupper(trim($sku));
-         // Remove trailing "FBA" with or without space
-         return preg_replace('/\s*FBA\s*$/i', '', $sku);
-      };
+      // --- Fetch FBA-related tables (no whereIn, since they contain FBA) ---
+      $fbaManualData = FbaManualData::all();
+      $fbaReports = FbaReportsMaster::all();
+      $fbaTables = FbaTable::all();
 
-      // --- Fetch related tables with normalized keys ---
-      $shopifyData = FbaTable::whereIn('seller_sku', $skus)->get()
-         ->keyBy(fn($s) => $normalizeSku($s->seller_sku ?? ''));
-
-      $fbaManualData = FbaManualData::whereIn('sku', $skus)->get()
-         ->keyBy(fn($s) => $normalizeSku($s->sku ?? ''));
-
-      $fbaReports = FbaReportsMaster::whereIn('seller_sku', $skus)->get()
-         ->keyBy(fn($s) => $normalizeSku($s->seller_sku ?? ''));
+      // Re-key each table by normalized SKU (without FBA)
+      $manualBySku = $fbaManualData->keyBy(fn($s) => $normalizeSku($s->sku ?? ''));
+      $reportsBySku = $fbaReports->keyBy(fn($s) => $normalizeSku($s->seller_sku ?? ''));
+      $inventoryBySku = $fbaTables->keyBy(fn($s) => $normalizeSku($s->seller_sku ?? ''));
 
       // --- Initialize counters ---
       $listedCount = 0;
@@ -405,17 +404,17 @@ class FbaDataController extends Controller
          // Skip parent SKUs
          if (stripos($sku, 'PARENT') !== false) continue;
 
-         // --- Inventory ---
-         $inv = floatval($shopifyData[$normalizedSku]->inv ?? 0);
+         // --- Get inventory ---
+         $inv = floatval($inventoryBySku[$normalizedSku]->inv ?? 0);
 
-         // --- FBA Manual Data ---
-         $manual = $fbaManualData[$normalizedSku]->data ?? null;
-         if (is_string($manual)) {
-               $manual = json_decode($manual, true);
+         // --- Get FBA Manual Data ---
+         $manualData = $manualBySku[$normalizedSku]->data ?? null;
+         if (is_string($manualData)) {
+               $manualData = json_decode($manualData, true);
          }
 
-         $listed = filter_var($manual['listed'] ?? false, FILTER_VALIDATE_BOOLEAN);
-         $live   = filter_var($manual['live'] ?? false, FILTER_VALIDATE_BOOLEAN);
+         $listed = filter_var($manualData['listed'] ?? false, FILTER_VALIDATE_BOOLEAN);
+         $live = filter_var($manualData['live'] ?? false, FILTER_VALIDATE_BOOLEAN);
 
          // --- Count Listed ---
          if ($listed === true) {
@@ -429,13 +428,10 @@ class FbaDataController extends Controller
                $liveSkus[] = $sku;
          }
 
-         // --- Views ---
-         $views = null;
-         if (isset($fbaReports[$normalizedSku])) {
-               $views = (int) ($fbaReports[$normalizedSku]->current_month_views ?? 0);
-         }
+         // --- Get Views ---
+         $views = (int) ($reportsBySku[$normalizedSku]->current_month_views ?? 0);
 
-         // --- Count Zero Views (only if inv > 0 and views == 0) ---
+         // --- Zero Views ---
          if ($inv > 0 && $views === 0) {
                $zeroViewCount++;
                $zeroViewSkus[] = $sku;
@@ -445,14 +441,16 @@ class FbaDataController extends Controller
       // --- Calculate Live Pending ---
       $livePending = max($listedCount - $liveCount, 0);
 
-      // Debug to verify matches
+      // --- Debugging (optional) ---
+      // dd($listedSkus, $liveSkus, $zeroViewCount, $livePending);
 
       // --- Return Final Counts ---
       return [
          'live_pending' => $livePending,
-         'zero_view_count' => $zeroViewCount,
+         'zero_view' => $zeroViewCount,
       ];
    }
+
 
 
 
