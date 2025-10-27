@@ -1,4 +1,4 @@
-@extends('layouts.vertical', ['title' => 'Doba Zero View', 'mode' => $mode ?? '', 'demo' => $demo ?? ''])
+@extends('layouts.vertical', ['title' => 'FB Marketplace Zero View', 'mode' => $mode ?? '', 'demo' => $demo ?? ''])
 
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -1009,13 +1009,12 @@
 @endsection
 
 @section('content')
-    @include('layouts.shared/page-title', ['page_title' => 'Doba Zero View', 'sub_title' => 'Doba'])
+    @include('layouts.shared/page-title', ['page_title' => 'FB Marketplace Zero View', 'sub_title' => 'FB Marketplace'])
 
     <div class="row">
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
-                    <h4 class="header-title">Amazon Zero View</h4>
 
                     <!-- Custom Dropdown Filters Row -->
                     <div class="d-flex flex-wrap gap-2 mb-3">
@@ -2131,9 +2130,9 @@
                     if (item.is_parent) {
                         $row.addClass('parent-row');
                     }
-                    if (item.NR === 'NR') {
-                        $row.addClass('nr-hide');
-                    }
+                    // if (item.NR === 'NR') {
+                    //     $row.addClass('nr-hide');
+                    // }
                     // Helper functions for color coding
                     const getDilColor = (value) => {
                         const percent = parseFloat(value) * 100;
@@ -2406,31 +2405,31 @@
                 });
             }
 
-            $(document).on('change', '.nr-select', function() {
-                const sku = $(this).data('sku');
-                const nrValue = $(this).val();
-                console.log(nrValue, 'nrrr');
+            // $(document).on('change', '.nr-select', function() {
+            //     const sku = $(this).data('sku');
+            //     const nrValue = $(this).val();
+            //     console.log(nrValue, 'nrrr');
 
 
-                $.ajax({
-                    // url: '/doba/save-nr',
-                    type: 'POST',
-                    data: {
-                        sku: sku,
-                        nr: JSON.stringify({
-                            NR: nrValue
-                        }),
-                        _token: $('meta[name="csrf-token"]').attr('content') // CSRF protection
-                    },
-                    success: function(res) {
-                        showNotification('success', 'NR updated successfully');
-                    },
-                    error: function(err) {
-                        console.error('Error saving NR:', err);
-                        showNotification('danger', 'Failed to update NR');
-                    }
-                });
-            });
+            //     $.ajax({
+            //         // url: '/doba/save-nr',
+            //         type: 'POST',
+            //         data: {
+            //             sku: sku,
+            //             nr: JSON.stringify({
+            //                 NR: nrValue
+            //             }),
+            //             _token: $('meta[name="csrf-token"]').attr('content') // CSRF protection
+            //         },
+            //         success: function(res) {
+            //             showNotification('success', 'NR updated successfully');
+            //         },
+            //         error: function(err) {
+            //             console.error('Error saving NR:', err);
+            //             showNotification('danger', 'Failed to update NR');
+            //         }
+            //     });
+            // });
 
 
             function initNREditHandlers() {
@@ -2446,18 +2445,16 @@
                     }
 
                     $.ajax({
-                        // url: '/amazon/save-nr',
+                        url: '/fbmarketplace/save-nr',
                         type: 'POST',
                         data: {
                             sku: sku,
-                            nr: JSON.stringify({
-                                NR: nrValue
-                            }),
+                            nr: { NR: nrValue },
                             _token: $('meta[name="csrf-token"]').attr('content') // CSRF protection
                         },
                         success: function(res) {
                             showNotification('success', 'NR updated successfully');
-                            // ✅ Update tableData and filteredData correctly
+                            // Update tableData and filteredData correctly
                             tableData.forEach(item => {
                                 if (item['sku'] === sku) {
                                     item.NR = nrValue;
@@ -2468,7 +2465,7 @@
                                     item.NR = nrValue;
                                 }
                             });
-                            // ✅ Recalculate & re-render
+                            // Recalculate & re-render
                             updateZeroViewDiv();
                             renderTable();
                         },
@@ -2479,6 +2476,7 @@
                     });
                 });
             }
+
 
             window.openModal = function(selectedItem, type) {
                 try {
