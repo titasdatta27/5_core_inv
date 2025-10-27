@@ -1640,6 +1640,8 @@
                                         <div class="d-flex align-items-center">
                                             Total Sales <span class="sort-arrow">↓</span>
                                         </div>
+                                        <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
+                                        <div class="metric-total" id="total-sales-total"></div>
                                     </div>
                                 </th>
                                 {{-- <th data-field="tpft" style="vertical-align: middle; white-space: nowrap;">
@@ -5514,7 +5516,8 @@
                         totalSalesL30Sum: 0,
                         totalCogsSum: 0,
                         listedCount: 0,
-                        liveCount: 0
+                        liveCount: 0,
+                        totalSalesTotal : 0,
                     };
 
                     filteredData.forEach(item => {
@@ -5556,6 +5559,8 @@
                         metrics.scvrSum += parseFloat(item.SCVR) || 0;
                         metrics.rowCount++;
 
+
+                        
                         // Only sum for child rows (not parent rows)
                         if (
                             item['(Child) sku'] &&
@@ -5592,7 +5597,7 @@
                     $('#al30-total').text(metrics.el30Total.toLocaleString());
                     $('#lDil-total').text(aDilTotalDisplay);
                     $('#views-total').text(metrics.viewsTotal.toLocaleString());
-
+                    $('#total-sales-total').text(metrics.totalSalesL30Sum.toLocaleString());
 
 
                     // --- Custom PFT TOTAL calculation  ---
