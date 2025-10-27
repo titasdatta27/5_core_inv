@@ -671,8 +671,8 @@ class PricingMasterViewsController extends Controller
                 'tiktok_l30' => $tiktok ? ($tiktok->shopify_tiktokl30 ?? 0) : 0,
                 'tiktok_l60' => $tiktok ? ($tiktok->shopify_tiktokl60 ?? 0) : 0,
                 'tiktok_views' => $tiktok ? ($tiktok->views ?? 0) : 0,
-                'tiktok_pft' => $tiktok && ($tiktok->price ?? 0) > 0 ? (($tiktok->price * 0.64 - $lp - $ship) / $tiktok->price) : 0,
-                'tiktok_roi' => $tiktok && $lp > 0 && ($tiktok->price ?? 0) > 0 ? (($tiktok->price * 0.64 - $lp - $ship) / $lp) : 0,
+                'tiktok_pft' => $tiktok && ($tiktok->price ?? 0) > 0 ? (($tiktok->price * 0.80 - $lp - $ship) / $tiktok->price) : 0,
+                'tiktok_roi' => $tiktok && $lp > 0 && ($tiktok->price ?? 0) > 0 ? (($tiktok->price * 0.80 - $lp - $ship) / $lp) : 0,
                 'tiktok_req_view' => $tiktok && $tiktok->views > 0 && $tiktok->shopify_tiktokl30 ? (($inv / 90) * 30) / (($tiktok->shopify_tiktokl30 / $tiktok->views)) : 0,
                 'tiktok_cvr' => $tiktok ? $this->calculateCVR($tiktok->shopify_tiktokl30 ?? 0, $tiktok->views ?? 0) : null,
                 'tiktok_buyer_link' => isset($tiktokListingData[$sku]) ? ($tiktokListingData[$sku]->value['buyer_link'] ?? null) : null,
@@ -1181,7 +1181,7 @@ class PricingMasterViewsController extends Controller
                     'reverb' => 0.84,
                     'macy' => 0.76,
                     'walmart' => 0.80,
-                    'tiktok' => 0.64,
+                    'tiktok' => 0.80,
                     'aliexpress' => 0.89
                 ];
 
