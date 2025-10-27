@@ -405,7 +405,7 @@ class FbaDataController extends Controller
          if (stripos($sku, 'PARENT') !== false) continue;
 
          // --- Get inventory ---
-         $inv = floatval($inventoryBySku[$normalizedSku]->inv ?? 0);
+         $inv = floatval($inventoryBySku[$normalizedSku]->quantity_available ?? 0);
 
          // --- Get FBA Manual Data ---
          $manualData = $manualBySku[$normalizedSku]->data ?? null;

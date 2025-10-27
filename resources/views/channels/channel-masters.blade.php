@@ -2078,24 +2078,24 @@
                         [
                             'Date', 
                             'L30 Sales', { role: 'tooltip', p: { html: true } },
-                            'L60 Sales', { role: 'tooltip', p: { html: true } },
+                            // 'L60 Sales', { role: 'tooltip', p: { html: true } },
                             'GProfit (%)', { role: 'tooltip', p: { html: true } }
                         ]
                     ];
 
                     chartDataFromAPI.forEach(row => {
                         const l30 = Math.round(row.l30_sales);
-                        const l60 = Math.round(row.l60_sales);
+                        // const l60 = Math.round(row.l60_sales);
                         const gprofit = Math.round(row.gprofit);
 
                         const tooltipL30 = `<div style="padding:5px"><strong>${row.date}</strong><br/>L30 Sales: ${l30}</div>`;
-                        const tooltipL60 = `<div style="padding:5px"><strong>${row.date}</strong><br/>L60 Sales: ${l60}</div>`;
+                        // const tooltipL60 = `<div style="padding:5px"><strong>${row.date}</strong><br/>L60 Sales: ${l60}</div>`;
                         const tooltipGProfit = `<div style="padding:5px"><strong>${row.date}</strong><br/>GProfit: ${gprofit}%</div>`;
 
                         chartArray.push([
                             row.date,
                             l30, tooltipL30,
-                            l60, tooltipL60,
+                            // l60, tooltipL60,
                             gprofit, tooltipGProfit
                         ]);
                     });
@@ -2105,7 +2105,7 @@
                         const data = google.visualization.arrayToDataTable(chartArray);
 
                         const options = {
-                            title: '📈 Daily Sales Trend (L30 vs L60 vs GProfit %)',
+                            title: '📈 Daily Sales Trend (L30 vs GProfit %)',
                             legend: { position: 'bottom', textStyle: { fontSize: 12 } },
                             focusTarget: 'datum',
                             tooltip: { isHtml: true },
@@ -2121,7 +2121,7 @@
                             },
                             series: {
                                 0: { targetAxisIndex: 0, color: '#1E88E5', lineWidth: 3, pointSize: 5, pointShape: 'circle' },
-                                1: { targetAxisIndex: 0, color: '#FF7043', lineWidth: 3, pointSize: 5, pointShape: 'circle', lineDashStyle: [4, 4] },
+                                // 1: { targetAxisIndex: 0, color: '#FF7043', lineWidth: 3, pointSize: 5, pointShape: 'circle', lineDashStyle: [4, 4] },
                                 2: { targetAxisIndex: 1, color: '#43A047', lineWidth: 3, pointSize: 5, pointShape: 'circle' }
                             },
                             chartArea: { left: 70, top: 50, width: '85%', height: '65%' },
