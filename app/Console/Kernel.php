@@ -46,7 +46,8 @@ class Kernel extends ConsoleKernel
         \App\Console\Commands\AutoUpdateAmazonFbaOverPtBids::class,
         \App\Console\Commands\AutoUpdateAmazonFbaUnderPtBids::class,
         \App\Console\Commands\GenerateMovementAnalysis::class,
-        \App\Console\Commands\UpdateEbaySuggestedBid::class
+        \App\Console\Commands\UpdateEbaySuggestedBid::class,
+        \App\Console\Commands\UpdateStockMappingDaily::class,
 
     ];
 
@@ -259,6 +260,13 @@ class Kernel extends ConsoleKernel
         $schedule->command('movement:generate')
             ->dailyAt('12:00')
             ->timezone('Asia/Kolkata');
+
+        // Stock Mapping Daily Update with ±1% tolerance (runs automatically for all platforms)
+        $schedule->command('stock:update-mapping-daily')
+            ->dailyAt('01:00')
+            ->timezone('America/Los_Angeles')
+            ->name('stock-mapping-daily-update')
+            ->withoutOverlapping();
 
             // test scheduler for task manager report
 //               $schedule->call(function () {
