@@ -84,12 +84,12 @@
                     <tbody>
                         <tr style="background-color:#cfe2f3;" class="accordion-header">
                             <td><b>AMAZON</b></td>
-                            <td></td>
+                            <td>{{ $totalSales }}</td>
                             <td></td>
                             <td></td>
                             <td>{{ $SPEND_L30_total }}</td>
                             <td>{{ $CLICKS_L30_total }}</td>
-                            <td>{{ $totalSales }}</td>
+                            <td></td>
                             <td></td>
                             <td></td>
                             <td></td>
@@ -144,7 +144,7 @@
 
                         <tr style="background-color:#cfe2f3;" class="accordion-header">
                             <td><b>EBAY</b></td>
-                            <td></td>
+                            <td>{{ $totalEbaySales }}</td>
                             <td></td>
                             <td></td>
                             <td>{{ $ebay_SPEND_L30_total }}</td>

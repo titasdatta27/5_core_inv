@@ -4100,7 +4100,7 @@ class AdsMasterController extends Controller
         foreach ($productMasters as $pm) {
             $sku = strtoupper($pm->sku);
             $shopify = $shopifyData->get($sku);
-            // $ebayMetric = $ebayMetricData->get($sku);
+            $ebayMetric = $ebayMetricData->get($sku);
             $campaignReport = $campaignLookup[$sku] ?? null;
                 
             $nrValue = $nrValues->get($sku);
@@ -4113,7 +4113,7 @@ class AdsMasterController extends Controller
                 'L30' => $shopify->quantity ?? 0,
                 'NRA' => $nrActual,
                 'kw_campaign_name' => $campaignReport->campaign_name ?? null,
-                // 'pmt_bid_percentage' => ($ebayMetric && isset($ebayMetric->item_id) && isset($campaignListings[$ebayMetric->item_id])) ? $campaignListings[$ebayMetric->item_id]->bid_percentage : null,
+                'pmt_bid_percentage' => ($ebayMetric && isset($ebayMetric->item_id) && isset($campaignListings[$ebayMetric->item_id])) ? $campaignListings[$ebayMetric->item_id]->bid_percentage : null,
                 'campaignStatus' => $campaignReport->campaignStatus ?? null,
             ];
         }
@@ -4189,6 +4189,27 @@ class AdsMasterController extends Controller
 
         
         /** End Total Sales Data ***/
+            $productMasters = ProductMaster::orderBy("parent", "asc")
+                ->orderByRaw("CASE WHEN sku LIKE 'PARENT %' THEN 1 ELSE 0 END")
+                ->orderBy("sku", "asc")
+                ->get();
+
+            $skus = $productMasters->pluck("sku")
+                ->filter()
+                ->unique()
+                ->values()
+                ->all();
+
+            $ebayMetrics = DB::connection('apicentral')->table('ebay_one_metrics')->whereIn('sku', $skus)->get()->keyBy('sku');
+            $totalEbaySales = 0;
+            foreach ($productMasters as $pm) {
+                $eBay_L30 = $ebayMetric->ebay_l30 ?? 0;
+                $eBay_Price = $ebayMetric->ebay_price ?? 0;
+                $ebaySales = $eBay_L30 * $eBay_Price;
+                $totalEbaySales = $totalEbaySales + $ebaySales;
+            }
+
+        /** End Total Sales for Ebay **/
 
         $ebay_SALES_L30_total = round($ebay_SALES_L30_total);
         $ebay_kw_sales_L30_total = round($ebay_kw_sales_L30_total);
@@ -4210,8 +4231,10 @@ class AdsMasterController extends Controller
         $kw_clicks_L30_total = round($kw_clicks_L30_total);
         $pt_clicks_L30_total = round($pt_clicks_L30_total);
         $hl_clicks_L30_total = round($hl_clicks_L30_total);
+        $totalSales = round($totalSales);
+        $totalEbaySales = round($totalEbaySales);
 
-        return view('channels.adv-masters', compact('kw_spend_L30_total', 'pt_spend_L30_total', 'hl_spend_L30_total', 'kw_clicks_L30_total', 'pt_clicks_L30_total', 'hl_clicks_L30_total', 'SPEND_L30_total', 'CLICKS_L30_total', 'ebay_SALES_L30_total', 'ebay_kw_sales_L30_total', 'ebay_pmt_sales_L30_total', 'ebay_SPEND_L30_total', 'ebay_kw_spend_L30_total', 'ebay_pmt_spend_L30_total', 'ebay_CLICKS_L30_total', 'ebay_kw_clicks_L30_total', 'ebay_pmt_clicks_L30_total', 'ebay_SOLD_L30_total', 'ebay_kw_sold_L30_total', 'ebay_pmt_sold_L30_total', 'bothMissing', 'totalMissingAds', 'kwMissing', 'ptMissing', 'ebaytotalMissingAds', 'ebaykwMissing', 'ebayptMissing', 'totalSales'));
+        return view('channels.adv-masters', compact('kw_spend_L30_total', 'pt_spend_L30_total', 'hl_spend_L30_total', 'kw_clicks_L30_total', 'pt_clicks_L30_total', 'hl_clicks_L30_total', 'SPEND_L30_total', 'CLICKS_L30_total', 'ebay_SALES_L30_total', 'ebay_kw_sales_L30_total', 'ebay_pmt_sales_L30_total', 'ebay_SPEND_L30_total', 'ebay_kw_spend_L30_total', 'ebay_pmt_spend_L30_total', 'ebay_CLICKS_L30_total', 'ebay_kw_clicks_L30_total', 'ebay_pmt_clicks_L30_total', 'ebay_SOLD_L30_total', 'ebay_kw_sold_L30_total', 'ebay_pmt_sold_L30_total', 'bothMissing', 'totalMissingAds', 'kwMissing', 'ptMissing', 'ebaytotalMissingAds', 'ebaykwMissing', 'ebayptMissing', 'totalSales', 'totalEbaySales'));
     }
 
     public function combinedFilter($data, $filters) 
