@@ -63,3 +63,6 @@ Route::get('/l30-total-sales', [ApiController::class, 'l30totalsales']);
 
 // Channel chart data for live pending trends
 Route::get('/channel-chart-data', [ZeroVisibilityMasterController::class, 'getChannelChartData']);
+Route::get('/all-channels-chart-data', [ZeroVisibilityMasterController::class, 'getAllChannelsChartData']);
+Route::post('/save-channel-action', [ZeroVisibilityMasterController::class, 'saveChannelAction']);
+Route::get('/test-channel-data', [ZeroVisibilityMasterController::class, 'testChannelData']);

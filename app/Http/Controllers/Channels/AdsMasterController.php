@@ -3692,6 +3692,15 @@ class AdsMasterController extends Controller
         $kw_clicks_L30_total = 0;
         $pt_clicks_L30_total = 0;
         $hl_clicks_L30_total = 0;
+        $SOLD_L30_Total = 0;
+        $kw_sold_L30_Total = 0;
+        $pt_sold_L30_Total = 0;
+        $hl_sold_L30_Total = 0;
+        $SALES_L30_Total = 0;
+        $kw_sales_L30_Total = 0;
+        $pt_sales_L30_Total = 0;
+        $hl_sales_L30_Total = 0;
+
         foreach($result as $row) {
             $sku = strtolower(trim($row['sku'] ?? ''));
             if (strpos($sku, 'parent ') === false) {
@@ -3719,6 +3728,31 @@ class AdsMasterController extends Controller
 
                 $hl_clicks_L30_value = $row['hl_clicks_L30'] ?? 0;
                 $hl_clicks_L30_total += is_numeric($hl_clicks_L30_value) ? (float)$hl_clicks_L30_value : 0;
+
+                $SOLD_L30_value = $row['SOLD_L30'] ?? 0;  
+                $SOLD_L30_Total += is_numeric($SOLD_L30_value) ? (float)$SOLD_L30_value : 0;
+
+                $kw_sold_L30_value = $row['kw_sold_L30'] ?? 0;
+                $kw_sold_L30_Total += is_numeric($kw_sold_L30_value) ? (float)$kw_sold_L30_value : 0;
+
+                $pt_sold_L30_value = $row['pt_sold_L30'] ?? 0;
+                $pt_sold_L30_Total += is_numeric($pt_sold_L30_value) ? (float)$pt_sold_L30_value : 0;
+
+                $hl_sold_L30_value = $row['hl_sold_L30'] ?? 0;
+                $hl_sold_L30_Total += is_numeric($hl_sold_L30_value) ? (float)$hl_sold_L30_value : 0;
+
+                $SALES_L30_value = $row['SALES_L30'] ?? 0;
+                $SALES_L30_Total += is_numeric($SALES_L30_value) ? (float)$SALES_L30_value : 0;
+
+                $kw_sales_L30_value = $row['kw_sales_L30'] ?? 0;
+                $kw_sales_L30_Total += is_numeric($kw_sales_L30_value) ? (float)$kw_sales_L30_value : 0;
+
+                $pt_sales_L30_value = $row['pt_sales_L30'] ?? 0;
+                $pt_sales_L30_Total += is_numeric($pt_sales_L30_value) ? (float)$pt_sales_L30_value : 0;
+
+                $hl_sales_L30_value = $row['hl_sales_L30'] ?? 0;
+                $hl_sales_L30_Total += is_numeric($hl_sales_L30_value) ? (float)$hl_sales_L30_value : 0;
+
             }
         }
 
@@ -4233,8 +4267,16 @@ class AdsMasterController extends Controller
         $hl_clicks_L30_total = round($hl_clicks_L30_total);
         $totalSales = round($totalSales);
         $totalEbaySales = round($totalEbaySales);
+        $SOLD_L30_Total = round($SOLD_L30_Total);
+        $kw_sold_L30_Total = round($kw_sold_L30_Total);
+        $pt_sold_L30_Total = round($pt_sold_L30_Total);
+        $hl_sold_L30_Total = round($hl_sold_L30_Total);
+        $SALES_L30_Total = round($SALES_L30_Total);
+        $kw_sales_L30_Total = round($kw_sales_L30_Total);
+        $pt_sales_L30_Total = round($pt_sales_L30_Total);
+        $hl_sales_L30_Total = round($hl_sales_L30_Total);
 
-        return view('channels.adv-masters', compact('kw_spend_L30_total', 'pt_spend_L30_total', 'hl_spend_L30_total', 'kw_clicks_L30_total', 'pt_clicks_L30_total', 'hl_clicks_L30_total', 'SPEND_L30_total', 'CLICKS_L30_total', 'ebay_SALES_L30_total', 'ebay_kw_sales_L30_total', 'ebay_pmt_sales_L30_total', 'ebay_SPEND_L30_total', 'ebay_kw_spend_L30_total', 'ebay_pmt_spend_L30_total', 'ebay_CLICKS_L30_total', 'ebay_kw_clicks_L30_total', 'ebay_pmt_clicks_L30_total', 'ebay_SOLD_L30_total', 'ebay_kw_sold_L30_total', 'ebay_pmt_sold_L30_total', 'bothMissing', 'totalMissingAds', 'kwMissing', 'ptMissing', 'ebaytotalMissingAds', 'ebaykwMissing', 'ebayptMissing', 'totalSales', 'totalEbaySales'));
+        return view('channels.adv-masters', compact('kw_spend_L30_total', 'pt_spend_L30_total', 'hl_spend_L30_total', 'kw_clicks_L30_total', 'pt_clicks_L30_total', 'hl_clicks_L30_total', 'SPEND_L30_total', 'CLICKS_L30_total', 'ebay_SALES_L30_total', 'ebay_kw_sales_L30_total', 'ebay_pmt_sales_L30_total', 'ebay_SPEND_L30_total', 'ebay_kw_spend_L30_total', 'ebay_pmt_spend_L30_total', 'ebay_CLICKS_L30_total', 'ebay_kw_clicks_L30_total', 'ebay_pmt_clicks_L30_total', 'ebay_SOLD_L30_total', 'ebay_kw_sold_L30_total', 'ebay_pmt_sold_L30_total', 'bothMissing', 'totalMissingAds', 'kwMissing', 'ptMissing', 'ebaytotalMissingAds', 'ebaykwMissing', 'ebayptMissing', 'totalSales', 'totalEbaySales', 'SOLD_L30_Total', 'kw_sold_L30_Total', 'pt_sold_L30_Total', 'hl_sold_L30_Total', 'SALES_L30_Total', 'kw_sales_L30_Total', 'pt_sales_L30_Total', 'hl_sales_L30_Total'));
     }
 
     public function combinedFilter($data, $filters) 
