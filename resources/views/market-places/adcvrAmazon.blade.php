@@ -141,7 +141,7 @@
                         <!-- Title -->
                         <h4 class="fw-bold text-primary mb-3 d-flex align-items-center">
                             <i class="fa-solid fa-chart-line me-2"></i>
-                            ACOS CONTROL KW
+                            AD CVR
                         </h4>
 
                         <!-- Filters Row -->
@@ -150,9 +150,9 @@
                             <div class="col-md-6">
                                 <div class="d-flex gap-2">
                                     <select id="clicks-filter" class="form-select form-select-md" style="width: 175px;">
-                                        <option value="">Select CLICKS L30</option>
+                                        <option value="">Select CLICKS L90</option>
                                         <option value="ALL">ALL</option>
-                                        <option value="CLICKS_L30">CLICKS L30 > 25</option>
+                                        <option value="CLICKS_L90">CLICKS L90 > 25</option>
                                         <option value="OTHERS">OTHERS</option>
                                     </select>
 
@@ -314,8 +314,8 @@
                         visible: false
                     },
                     {
-                        title: "OV L30",
-                        field: "L30",
+                        title: "OV L90",
+                        field: "L90",
                         visible: false
                     },
                     {
@@ -323,11 +323,11 @@
                         field: "DIL %",
                         formatter: function(cell) {
                             const data = cell.getData();
-                            const l30 = parseFloat(data.L30);
+                            const l90 = parseFloat(data.L90);
                             const inv = parseFloat(data.INV);
 
                             if (!isNaN(l30) && !isNaN(inv) && inv !== 0) {
-                                const dilDecimal = (l30 / inv);
+                                const dilDecimal = (l90 / inv);
                                 const color = getDilColor(dilDecimal);
                                 return `<div class="text-center"><span class="dil-percent-value ${color}">${Math.round(dilDecimal * 100)}%</span></div>`;
                             }
@@ -336,8 +336,8 @@
                         visible: false
                     },
                     {
-                        title: "AL 30",
-                        field: "A_L30",
+                        title: "AL 90",
+                        field: "A_L90",
                         visible: false
                     },
                     {
@@ -345,11 +345,11 @@
                         field: "A DIL %",
                         formatter: function(cell) {
                             const data = cell.getData();
-                            const al30 = parseFloat(data.A_L30);
+                            const al90 = parseFloat(data.A_L90);
                             const inv = parseFloat(data.INV);
 
-                            if (!isNaN(al30) && !isNaN(inv) && inv !== 0) {
-                                const dilDecimal = (al30 / inv);
+                            if (!isNaN(al90) && !isNaN(inv) && inv !== 0) {
+                                const dilDecimal = (al90 / inv);
                                 const color = getDilColor(dilDecimal);
                                 return `<div class="text-center"><span class="dil-percent-value ${color}">${Math.round(dilDecimal * 100)}%</span></div>`;
                             }
@@ -458,8 +458,8 @@
                         formatter: (cell) => parseFloat(cell.getValue() || 0)
                     },
                     {
-                        title: "ACOS L30",
-                        field: "acos_L30",
+                        title: "ACOS L90",
+                        field: "acosL90",
                         hozAlign: "right",
                         formatter: function(cell) {
                             return `
@@ -469,8 +469,8 @@
                         }
                     },
                     {
-                        title: "SPEND L30",
-                        field: "spend_l30",
+                        title: "SPEND L90",
+                        field: "spend_l90",
                         hozAlign: "right",
                         formatter: function(cell) {
                             return `
@@ -479,8 +479,8 @@
                         }
                     },
                     {
-                        title: "SALES L30",
-                        field: "ad_sales_l30",
+                        title: "SALES L90",
+                        field: "ad_sales_l90",
                         hozAlign: "right",
                         formatter: function(cell) {
                             return `
@@ -489,8 +489,8 @@
                         }
                     },
                     {
-                        title: "CLK L30",
-                        field: "clicks_L30",
+                        title: "CLK L90",
+                        field: "clicks_L90",
                         hozAlign: "right",
                         formatter: function(cell) {
                             return `
@@ -498,103 +498,151 @@
                             `;
                         }
                     },
-                    {
-                        title: "L7 CPC",
-                        field: "l7_cpc",
-                        hozAlign: "center",
-                        formatter: function(cell) {
-                            var row = cell.getRow().getData();
-                            var l7_cpc = parseFloat(row.l7_cpc) || 0;
-                            return l7_cpc.toFixed(2);
-                        }
-                    },
-                    {
-                        title: "SBGT",
-                        field: "sbgt",
-                        formatter: function(cell) {
-                            var row = cell.getRow().getData();
-                            var acos = parseFloat(row.acos_L30) || 0;
-                            const tpft = parseFloat(row.TPFT) || 0;
-                            const clicks = parseFloat(row.clicks_L30) || 0;
-                            var tpftInt = Math.floor(tpft);
-                            var sbgt;
+                    // {
+                    //     title: "L7 CPC",
+                    //     field: "l7_cpc",
+                    //     hozAlign: "center",
+                    //     formatter: function(cell) {
+                    //         var row = cell.getRow().getData();
+                    //         var l7_cpc = parseFloat(row.l7_cpc) || 0;
+                    //         return l7_cpc.toFixed(2);
+                    //     }
+                    // },
+                    // {
+                    //     title: "SBGT",
+                    //     field: "sbgt",
+                    //     formatter: function(cell) {
+                    //         var row = cell.getRow().getData();
+                    //         var acos = parseFloat(row.acos_L30) || 0;
+                    //         const tpft = parseFloat(row.TPFT) || 0;
+                    //         const clicks = parseFloat(row.clicks_L30) || 0;
+                    //         var tpftInt = Math.floor(tpft);
+                    //         var sbgt;
                             
-                            if(clicks > 25){
-                                if(acos >= 100){
-                                    sbgt = 1;
-                                }else if(acos >= 50 && acos <= 100){
-                                    sbgt = 2;
-                                }else if(acos >= 40 && acos <= 50){
-                                    sbgt = 3;
-                                }else if(acos >= 35 && acos <= 40){
-                                    sbgt = 4;
-                                }else if(acos >= 30 && acos <= 35){
-                                    sbgt = 5;
-                                }else if(acos >= 25 && acos <= 30){
-                                    sbgt = 6;
-                                }else if(acos >= 20 && acos <= 25){
-                                    sbgt = 7;
-                                }else if(acos >= 15 && acos <= 20){
-                                    sbgt = 8;
-                                }else if(acos >= 10 && acos <= 15){
-                                    sbgt = 9;
-                                }else if(acos < 10 && acos > 0){
-                                    sbgt = 10;
-                                }else{
-                                    sbgt = 3;
-                                }
+                    //         if(clicks > 25){
+                    //             if(acos >= 100){
+                    //                 sbgt = 1;
+                    //             }else if(acos >= 50 && acos <= 100){
+                    //                 sbgt = 2;
+                    //             }else if(acos >= 40 && acos <= 50){
+                    //                 sbgt = 3;
+                    //             }else if(acos >= 35 && acos <= 40){
+                    //                 sbgt = 4;
+                    //             }else if(acos >= 30 && acos <= 35){
+                    //                 sbgt = 5;
+                    //             }else if(acos >= 25 && acos <= 30){
+                    //                 sbgt = 6;
+                    //             }else if(acos >= 20 && acos <= 25){
+                    //                 sbgt = 7;
+                    //             }else if(acos >= 15 && acos <= 20){
+                    //                 sbgt = 8;
+                    //             }else if(acos >= 10 && acos <= 15){
+                    //                 sbgt = 9;
+                    //             }else if(acos < 10 && acos > 0){
+                    //                 sbgt = 10;
+                    //             }else{
+                    //                 sbgt = 3;
+                    //             }
 
-                                const l30 = parseFloat(row.L30);
-                                const inv = parseFloat(row.INV);
-                                let dilColor = "";
-                                if (!isNaN(l30) && !isNaN(inv) && inv !== 0) {
-                                    const dilDecimal = l30 / inv;
-                                    dilColor = getDilColor(dilDecimal);
-                                }
+                    //             const l30 = parseFloat(row.L30);
+                    //             const inv = parseFloat(row.INV);
+                    //             let dilColor = "";
+                    //             if (!isNaN(l30) && !isNaN(inv) && inv !== 0) {
+                    //                 const dilDecimal = l30 / inv;
+                    //                 dilColor = getDilColor(dilDecimal);
+                    //             }
 
-                                if ((dilColor === "red" && tpftInt > 10) ||
-                                    (dilColor === "yellow" && tpftInt > 22) ||
-                                    (dilColor === "green" && tpftInt > 26) ||
-                                    (dilColor === "pink" && tpftInt > 30)) {
-                                    sbgt = sbgt * 2;
-                                }
-                            }else{
-                                sbgt = 5;
-                            }
+                    //             if ((dilColor === "red" && tpftInt > 10) ||
+                    //                 (dilColor === "yellow" && tpftInt > 22) ||
+                    //                 (dilColor === "green" && tpftInt > 26) ||
+                    //                 (dilColor === "pink" && tpftInt > 30)) {
+                    //                 sbgt = sbgt * 2;
+                    //             }
+                    //         }else{
+                    //             sbgt = 5;
+                    //         }
 
-                            return `
-                                <input type="number" class="form-control form-control-sm text-center sbgt-input"  value="${sbgt}" min="1" max="10"  data-campaign-id="${row.campaign_id}">
-                            `;
-                        },
+                    //         return `
+                    //             <input type="number" class="form-control form-control-sm text-center sbgt-input"  value="${sbgt}" min="1" max="10"  data-campaign-id="${row.campaign_id}">
+                    //         `;
+                    //     },
+                    // },
+                    // {
+                    //     title: "APR BGT",
+                    //     field: "apr_bgt",
+                    //     hozAlign: "center",
+                    //     formatter: function(cell, formatterParams, onRendered) {
+                    //         var value = cell.getValue() || 0;
+                    //         return `
+                    //             <div style="align-items:center; gap:5px;">
+                    //                 <button class="btn btn-primary update-row-btn">APR BGT</button>
+                    //             </div>
+                    //         `;
+                    //     },
+                    //     cellClick: function(e, cell) {
+                    //         if (e.target.classList.contains("update-row-btn")) {
+                    //             var rowData = cell.getRow().getData();
+                    //             var acos = parseFloat(rowData.acos_L30) || 0;  
+
+                    //             if(acos > 0){   
+                    //                 var sbgtInput = cell.getRow().getElement().querySelector('.sbgt-input');
+                    //                 var sbgtValue = parseFloat(sbgtInput.value) || 0;
+
+                    //                 updateBid(sbgtValue, rowData.campaign_id);
+                    //             } else {
+                    //                 console.log("Skipped because acos_L30 = 0 for campaign:", rowData.campaign_id);
+                    //             }
+                    //         }
+                    //     }
+
+                    // },
+                    {
+                        title: "Price",
+                        field: "price"
                     },
                     {
-                        title: "APR BGT",
-                        field: "apr_bgt",
+                        title: "PFT",
+                        field: "PFT_percentage",
                         hozAlign: "center",
-                        formatter: function(cell, formatterParams, onRendered) {
-                            var value = cell.getValue() || 0;
+                        formatter: function(cell){
                             return `
-                                <div style="align-items:center; gap:5px;">
-                                    <button class="btn btn-primary update-row-btn">APR BGT</button>
-                                </div>
+                                <span class="dil-percent-value ${getPftColor(item['PFT_percentage'])}">
+                                    ${Math.round(item['PFT_percentage'])}%
+                                </span>
                             `;
-                        },
-                        cellClick: function(e, cell) {
-                            if (e.target.classList.contains("update-row-btn")) {
-                                var rowData = cell.getRow().getData();
-                                var acos = parseFloat(rowData.acos_L30) || 0;  
-
-                                if(acos > 0){   
-                                    var sbgtInput = cell.getRow().getElement().querySelector('.sbgt-input');
-                                    var sbgtValue = parseFloat(sbgtInput.value) || 0;
-
-                                    updateBid(sbgtValue, rowData.campaign_id);
-                                } else {
-                                    console.log("Skipped because acos_L30 = 0 for campaign:", rowData.campaign_id);
-                                }
-                            }
                         }
+                    },
+                    {
+                        title: "GPFT",
+                        field: "gpft",
+                        hozAlign: "center",
+                        formatter: function(cell){
+                            let ship = Number(data.SHIP) || 0;
+                            let lp = Number(data.LP) || 0;
 
+                            const spend = parseFloat(data['Spend']) || 0;
+                            const aL90 = Number(data['A L90']) || 0;
+                            const price = Number(data.price) || 0;
+                            const amazonAdUpdates = {{ $amazonAdUpdates ?? 0 }};
+
+                            let percentage = {{ $amazonPercentage ?? 0 }};
+                            let costPercentage = (percentage + amazonAdUpdates) / 100; 
+                            let netPft = (price * costPercentage) - ship - lp - (spend / aL30);
+                            
+                            const totalAmazonPercentage = (percentage - amazonAdUpdates) / 100;
+                            const netGpft = (price * totalAmazonPercentage) - ship - lp;
+                            let gPft = (netGpft / price) * 100;
+
+                            if(isNaN(gPft) || !isFinite(gPft)) {
+                                gPft = 0;
+                            }
+
+                            return `
+                                <span class="dil-percent-value ${getPftColor(gPft)}">
+                                    ${gPft.toFixed(0)}%
+                                </span>
+                            `;
+                        }
                     },
                     {
                         title: "TPFT%",
@@ -623,7 +671,15 @@
                                 </span>
                             `;
                         }
-                    }
+                    },
+                    {
+                        title: "ADS SOLD",
+                        field: "A_L90",
+                    },
+                    {
+                        title: "CVR%",
+                        field: "cvr_l90",
+                    },
                 ],
                 ajaxResponse: function(url, params, response) {
                     return response.data;
@@ -679,18 +735,18 @@
                     }
 
                     let clicksFilterVal = $("#clicks-filter").val();
-                    let clicks_L30 = parseFloat(data.clicks_L30) || 0;
+                    let clicks_L90 = parseFloat(data.clicks_L90) || 0;
 
                     if (!clicksFilterVal) {
-                        if (clicks_L30 <= 25) return false;
+                        if (clicks_L90 <= 25) return false;
                     } else {
                         // When user selects a filter from dropdown
-                        if (clicksFilterVal === "CLICKS_L30") {
-                            if (clicks_L30 <= 25) return false;
+                        if (clicksFilterVal === "CLICKS_L90") {
+                            if (clicks_L90 <= 25) return false;
                         } else if (clicksFilterVal === "ALL") {
                             // Show all rows
                         } else if (clicksFilterVal === "OTHERS") {
-                            if (clicks_L30 > 25) return false;
+                            if (clicks_L90 > 25) return false;
                         }
                     }
 
@@ -773,7 +829,7 @@
                 if (e.target.classList.contains("toggle-cols-btn")) {
                     let btn = e.target;
 
-                    let colsToToggle = ["INV", "L30", "DIL %", "A_L30", "A DIL %", "NRL", "NRA", "FBA"];
+                    let colsToToggle = ["INV", "L90", "DIL %", "A_L90", "A DIL %", "NRL", "NRA", "FBA"];
 
                     colsToToggle.forEach(colName => {
                         let col = table.getColumn(colName);
@@ -824,7 +880,7 @@
                     var rowEl = row.getElement();
                     if(rowEl && rowEl.offsetParent !== null){  
                         var rowData = row.getData();
-                        var acos = parseFloat(rowData.acos_L30) || 0;
+                        var acos = parseFloat(rowData.acos_L90) || 0;
 
                         if(acos > 0){
                             var sbgtInput = rowEl.querySelector('.sbgt-input');

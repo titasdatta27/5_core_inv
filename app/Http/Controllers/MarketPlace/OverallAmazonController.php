@@ -43,11 +43,18 @@ class OverallAmazonController extends Controller
     }
 
     public function adcvrAmazon(){
-        return view('market-places.adcvrAmazon');
+        $marketplaceData = MarketplacePercentage::where('marketplace', 'Amazon')->first();
+
+        $percentage = $marketplaceData ? $marketplaceData->percentage : 100;
+        $adUpdates = $marketplaceData ? $marketplaceData->ad_updates : 0;
+        
+        return view('market-places.adcvrAmazon', [
+            'amazonPercentage' => $percentage,
+            'amazonAdUpdates' => $adUpdates
+        ]);
     }
 
-    public function adcvrAmazonData(){
-
+    public function adcvrAmazonData() {
         $productMasters = ProductMaster::orderBy('parent', 'asc')
             ->orderByRaw("CASE WHEN sku LIKE 'PARENT %' THEN 1 ELSE 0 END")
             ->orderBy('sku', 'asc')
@@ -55,16 +62,57 @@ class OverallAmazonController extends Controller
 
         $skus = $productMasters->pluck('sku')->filter()->unique()->values()->all();
 
+        $marketplaceData = MarketplacePercentage::where('marketplace', 'Amazon')->first();
+
+        $percentage = $marketplaceData ? ($marketplaceData->percentage / 100) : 1;
+
         $amazonDatasheetsBySku = AmazonDatasheet::whereIn('sku', $skus)->get()->keyBy(function ($item) {
             return strtoupper($item->sku);
         });
 
         $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy('sku');
 
+        $parents = $productMasters->pluck('parent')->filter()->unique()->map('strtoupper')->values()->all();
+
+        $jungleScoutData = JungleScoutProductData::whereIn('parent', $parents)
+        ->get()
+        ->groupBy(function ($item) {
+            return strtoupper(trim($item->parent));
+        })
+        ->map(function ($group) {
+            $validPrices = $group->filter(function ($item) {
+                $data = is_array($item->data) ? $item->data : [];
+                $price = $data['price'] ?? null;
+                return is_numeric($price) && $price > 0;
+            })->pluck('data.price');
+
+            return [
+                'scout_parent' => $group->first()->parent,
+                'min_price' => $validPrices->isNotEmpty() ? $validPrices->min() : null,
+                'product_count' => $group->count(),
+                'all_data' => $group->map(function ($item) {
+                    $data = is_array($item->data) ? $item->data : [];
+                    if (isset($data['price'])) {
+                        $data['price'] = is_numeric($data['price']) ? (float) $data['price'] : null;
+                    }
+                    return $data;
+                })->toArray()
+            ];
+        });
+
         $nrValues = AmazonDataView::whereIn('sku', $skus)->pluck('value', 'sku');
 
         $amazonSpCampaignReportsL30 = AmazonSpCampaignReport::where('ad_type', 'SPONSORED_PRODUCTS')
             ->where('report_date_range', 'L30')
+            ->where(function ($q) use ($skus) {
+                foreach ($skus as $sku) $q->orWhere('campaignName', 'LIKE', '%' . $sku . '%');
+            })
+            ->where('campaignName', 'NOT LIKE', '%PT')
+            ->where('campaignName', 'NOT LIKE', '%PT.')
+            ->get();
+
+        $amazonSpCampaignReportsL90 = AmazonSpCampaignReport::where('ad_type', 'SPONSORED_PRODUCTS')
+            ->where('report_date_range', 'L90')
             ->where(function ($q) use ($skus) {
                 foreach ($skus as $sku) $q->orWhere('campaignName', 'LIKE', '%' . $sku . '%');
             })
@@ -96,6 +144,12 @@ class OverallAmazonController extends Controller
                 return $campaignName === $cleanSku;
             });
 
+            $matchedCampaignL90 = $amazonSpCampaignReportsL90->first(function ($item) use ($sku) {
+                $campaignName = strtoupper(trim(rtrim($item->campaignName, '.')));
+                $cleanSku = strtoupper(trim(rtrim($sku, '.')));
+                return $campaignName === $cleanSku;
+            });
+
             $matchedCampaignL7 = $amazonSpCampaignReportsL7->first(function ($item) use ($sku) {
                 $campaignName = strtoupper(trim(rtrim($item->campaignName, '.')));
                 $cleanSku = strtoupper(trim(rtrim($sku, '.')));
@@ -109,26 +163,56 @@ class OverallAmazonController extends Controller
             $row['L30']    = $shopify->quantity ?? 0;
             $row['fba']    = $pm->fba ?? null;
             $row['A_L30']  = $amazonSheet->units_ordered_l30 ?? 0;
-            $row['campaign_id'] = $matchedCampaignL30->campaign_id ??  '';
-            $row['campaignName'] = $matchedCampaignL30->campaignName ?? '';
-            $row['campaignStatus'] = $matchedCampaignL30->campaignStatus ?? '';
-            $row['campaignBudgetAmount'] = $matchedCampaignL30->campaignBudgetAmount ?? 0;
+            $row['A_L90']  = $amazonSheet->units_ordered_l90 ?? 0;
+            $row['campaign_id'] = $matchedCampaignL90->campaign_id ??  '';
+            $row['campaignName'] = $matchedCampaignL90->campaignName ?? '';
+            $row['campaignStatus'] = $matchedCampaignL90->campaignStatus ?? '';
+            $row['campaignBudgetAmount'] = $matchedCampaignL90->campaignBudgetAmount ?? 0;
             $row['l7_cpc'] = $matchedCampaignL7->costPerClick ?? 0;
-            $row['spend_l30'] = $matchedCampaignL30->spend ?? 0;
-            $row['ad_sales_l30'] = $matchedCampaignL30->sales30d ?? 0;
+            $row['spend_l90'] = $matchedCampaignL90->spend ?? 0;
+            $row['ad_sales_l90'] = $matchedCampaignL90->sales30d ?? 0;
 
-            $sales = $matchedCampaignL30->sales30d ?? 0;
-            $spend = $matchedCampaignL30->spend ?? 0;
-
-            if ($sales > 0) {
-                $row['acos_L30'] = round(($spend / $sales) * 100, 2);
-            } elseif ($spend > 0) {
-                $row['acos_L30'] = 100;
-            } else {
-                $row['acos_L30'] = 0;
+            if ($amazonSheet) {
+                $row['A_L30'] = $amazonSheet->units_ordered_l30;
+                $row['A_L90']  = $amazonSheet->units_ordered_l90;
+                $row['Sess30'] = $amazonSheet->sessions_l30;
+                $row['price'] = $amazonSheet->price;
+                $row['price_lmpa'] = $amazonSheet->price_lmpa;
+                $row['sessions_l60'] = $amazonSheet->sessions_l60;
+                $row['units_ordered_l60'] = $amazonSheet->units_ordered_l60;
             }
 
-            $row['clicks_L30'] = $matchedCampaignL30->clicks ?? 0;
+            $values = is_array($pm->Values) ? $pm->Values : (is_string($pm->Values) ? json_decode($pm->Values, true) : []);
+
+            $lp = 0;
+            foreach ($values as $k => $v) {
+                if (strtolower($k) === 'lp') {
+                    $lp = floatval($v);
+                    break;
+                }
+            }
+            if ($lp === 0 && isset($pm->lp)) {
+                $lp = floatval($pm->lp);
+            }
+            $ship = isset($values['ship']) ? floatval($values['ship']) : (isset($pm->ship) ? floatval($pm->ship) : 0);
+            $price = isset($row['price']) ? floatval($row['price']) : 0;
+            
+            $row['PFT_percentage'] = round($price > 0 ? ((($price * $percentage) - $lp - $ship) / $price) * 100 : 0, 2);
+
+            $sales = $matchedCampaignL90->sales30d ?? 0;
+            $spend = $matchedCampaignL90->spend ?? 0;
+
+            if ($sales > 0) {
+                $row['acos_L90'] = round(($spend / $sales) * 100, 2);
+            } elseif ($spend > 0) {
+                $row['acos_L90'] = 100;
+            } else {
+                $row['acos_L90'] = 0;
+            }
+
+            $row['clicks_L90'] = $matchedCampaignL90->clicks ?? 0;
+
+            $row['cvr_l90'] = $row['clicks_L90'] == 0 ? NULL : number_format(($row['A_L90'] / $row['clicks_L90']) * 100, 2);
 
             $row['NRL']  = '';
             $row['NRA'] = '';
