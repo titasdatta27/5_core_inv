@@ -17,12 +17,6 @@ class SyncCpMasterToSheet extends Command
     protected $signature = 'app:sync-cp-master-to-sheet';
     protected $description = 'Sync cp_master table with App_data Sheet daily';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Sync cp_master table with App_data Sheet daily';
 
     /**
      * Execute the console command.
