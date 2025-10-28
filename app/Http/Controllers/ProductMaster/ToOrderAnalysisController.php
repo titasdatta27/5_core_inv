@@ -398,6 +398,7 @@ class ToOrderAnalysisController extends Controller
                 $record->qty = $request->order_qty;
                 $record->supplier = $request->supplier;
                 $record->adv_date = $request->adv_date;
+                $record->ready_to_ship = 'No';
                 $record->save();
             } else {
                 // Create new record
@@ -407,6 +408,7 @@ class ToOrderAnalysisController extends Controller
                     'qty' => $request->order_qty,
                     'supplier' => $request->supplier,
                     'adv_date' => $request->adv_date,
+                    'ready_to_ship' => 'No',
                 ]);
             }
 

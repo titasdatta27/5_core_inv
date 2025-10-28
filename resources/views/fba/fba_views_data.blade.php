@@ -105,6 +105,28 @@
                         hozAlign: "center"
                     },
                     {
+                        title: "Listed",
+                        field: "Listed",
+                        formatter: "tickCross",
+                        hozAlign: "center",
+                        editor: true,
+                        cellClick: function(e, cell) {
+                            var currentValue = cell.getValue();
+                            cell.setValue(!currentValue);
+                        }
+                    },
+                    {
+                        title: "Live",
+                        field: "Live",
+                        formatter: "tickCross",
+                        hozAlign: "center",
+                        editor: true,
+                        cellClick: function(e, cell) {
+                            var currentValue = cell.getValue();
+                            cell.setValue(!currentValue);
+                        }
+                    },
+                    {
                         title: "FBA Fee",
                         field: "Fulfillment_Fee",
                         hozAlign: "center"
@@ -287,7 +309,7 @@
                 var field = cell.getColumn().getField();
                 var value = cell.getValue();
 
-                if (field === 'Barcode' || field === 'Done' || field === 'Dispatch_Date' || field === 'Weight' || field === 'Quantity_in_each_box' || field === 'Total_quantity_sent' || field === 'Send_Cost' || field === 'IN_Charges' || field === 'Warehouse_INV_Reduction' || field === 'Shipping_Amount' || field === 'Inbound_Quantity' || field === 'FBA_Send' || field === 'Dimensions') {
+                if (field === 'Barcode' || field === 'Done' || field === 'Listed' || field === 'Live' || field === 'Dispatch_Date' || field === 'Weight' || field === 'Quantity_in_each_box' || field === 'Total_quantity_sent' || field === 'Send_Cost' || field === 'IN_Charges' || field === 'Warehouse_INV_Reduction' || field === 'Shipping_Amount' || field === 'Inbound_Quantity' || field === 'FBA_Send' || field === 'Dimensions') {
                     $.ajax({
                         url: '/update-fba-manual-data',
                         method: 'POST',

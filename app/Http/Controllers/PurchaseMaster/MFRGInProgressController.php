@@ -258,6 +258,7 @@ class MFRGInProgressController extends Controller
                 'cbm' => $request->totalCbm,
                 'qty' => $request->qty,
                 'rate' => $request->rate,
+                'transit_inv_status' => 0,
             ];
 
             $readyToShip = ReadyToShip::where('parent', $request->parent)

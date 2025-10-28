@@ -126,9 +126,13 @@ class FetchAmazonListings extends Command
         $l60End = $l30Start->copy()->subDay(2)->endOfDay();
         $l60Start = $l60End->copy()->subDays(30)->startOfDay();
 
+        $l90End = $l60Start->copy()->subDay(2)->endOfDay();
+        $l90Start = $l90End->copy()->subDays(30)->startOfDay();
+
         $dateRanges = [
             'l30' => [$l30Start->toIso8601ZuluString(), $l30End->toIso8601ZuluString()],
             'l60' => [$l60Start->toIso8601ZuluString(), $l60End->toIso8601ZuluString()],
+            'l90' => [$l90Start->toIso8601ZuluString(), $l90End->toIso8601ZuluString()],
         ];
 
         info('$dateRanges', [$dateRanges]);

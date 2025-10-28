@@ -89,12 +89,12 @@
                             <td></td>
                             <td>{{ $SPEND_L30_total }}</td>
                             <td>{{ $CLICKS_L30_total }}</td>
+                            <td>{{ $totalSales }}</td>
                             <td></td>
                             <td></td>
                             <td></td>
                             <td></td>
-                            <td></td>
-                            <td></td>
+                            <td>{{ $totalMissingAds }}</td>
                         </tr>
 
                          <tr class="accordion-body">
@@ -109,7 +109,7 @@
                             <td></td>
                             <td></td>
                             <td></td>
-                            <td></td>
+                            <td>{{ $kwMissing }}</td>
                         </tr>
 
                          <tr class="accordion-body">
@@ -124,7 +124,7 @@
                             <td></td>
                             <td></td>
                             <td></td>
-                            <td></td>
+                            <td>{{ $ptMissing }}</td>
                         </tr>
 
                         <tr class="accordion-body">
@@ -154,7 +154,7 @@
                             <td></td>
                             <td>{{ $ebay_SOLD_L30_total }}</td>
                             <td></td>
-                            <td></td>
+                            <td>{{ $ebaytotalMissingAds }}</td>
                         </tr>
 
                         <tr class="accordion-body">
@@ -169,7 +169,7 @@
                             <td></td>
                             <td>{{ $ebay_kw_sold_L30_total }}</td>
                             <td></td>
-                            <td></td>
+                            <td>{{ $ebaykwMissing }}</td>
                         </tr>
 
                         <tr class="accordion-body">
@@ -184,7 +184,7 @@
                             <td></td>
                             <td>{{ $ebay_pmt_sold_L30_total }}</td>
                             <td></td>
-                            <td></td>
+                            <td>{{ $ebayptMissing }}</td>
                         </tr>
 
                         <tr style="background-color:#cfe2f3;" class="accordion-header">

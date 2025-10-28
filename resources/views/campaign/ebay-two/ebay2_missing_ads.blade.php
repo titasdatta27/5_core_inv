@@ -1,4 +1,4 @@
-@extends('layouts.vertical', ['title' => 'Ebay Missing Ads', 'mode' => $mode ?? '', 'demo' => $demo ?? ''])
+@extends('layouts.vertical', ['title' => 'Ebay2 Missing Ads', 'mode' => $mode ?? '', 'demo' => $demo ?? ''])
 @section('css')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator.min.css" rel="stylesheet">
@@ -160,8 +160,8 @@
 @endsection
 @section('content')
     @include('layouts.shared.page-title', [
-        'page_title' => 'Ebay Missing Ads',
-        'sub_title' => 'Ebay Missing Ads',
+        'page_title' => 'Ebay2 Missing Ads',
+        'sub_title' => 'Ebay2 Missing Ads',
     ])
     <div class="row">
         <div class="col-12">
@@ -171,7 +171,7 @@
                         <!-- Title -->
                         <h4 class="fw-bold text-primary mb-3 d-flex align-items-center">
                             <i class="fa-solid fa-chart-line me-2"></i>
-                            Ebay Missing Ads - <span class="text-danger ms-1 fs-3" id="total-missing-ads"></span>
+                            Ebay2 Missing Ads - <span class="text-danger ms-1 fs-3" id="total-missing-ads"></span>
                         </h4>
 
                         <!-- Filters Row -->
@@ -224,10 +224,8 @@
                                                     class="form-select" 
                                                     style="width: 150px; height: 38px;">
                                                 <option value="">select missing</option>
-                                                <option value="Both Running">Both Running</option>
-                                                <option value="KW Missing">KW Missing</option>
+                                                <option value="PMT Running">PMT Running</option>
                                                 <option value="PMT Missing">PMT Missing</option>
-                                                <option value="Both Missing">KW & PMT Missing</option>
                                             </select>
 
                                             <button id="all-missing-btn" class="btn btn-primary text-black fw-bold" 
@@ -253,30 +251,12 @@
                                             <div id="total-nra" class="stats-value danger">0</div>
                                         </div>
                                         <div class="stats-box">
-                                            <div class="stats-label">Kw Missing <br/> PMT Missing</div>
-                                            <div id="both-missing" class="stats-value danger">0</div>
-                                        </div>
-
-                                        <div class="stats-box">
-                                            <div class="stats-label">KW Missing</div> 
-                                            <div id="kw-missing" class="stats-value danger">0</div>
-                                        </div>
-
-                                        <div class="stats-box">
                                             <div class="stats-label">PMT Missing</div>
                                             <div id="pt-missing" class="stats-value danger">0</div>
-                                        </div>
-                                        <div class="stats-box">
-                                            <div class="stats-label">KW Running</div>
-                                            <div id="kw-running" class="stats-value success">0</div>
                                         </div>
                                          <div class="stats-box">
                                             <div class="stats-label">PMT Running</div>
                                             <div id="pt-running" class="stats-value success">0</div>
-                                        </div>
-                                        <div class="stats-box">
-                                            <div class="stats-label">Both Ads Running</div>
-                                            <div id="both-running" class="stats-value success">0</div>
                                         </div>
                                     </div>
                                 </div>
@@ -314,7 +294,7 @@
 
             var table = new Tabulator("#budget-under-table", {
                 index: "sku",
-                ajaxURL: "/ebay/ad-missing/data",
+                ajaxURL: "/ebay2/ad-missing/data",
                 layout: "fitData",
                 movableColumns: true,
                 resizableColumns: true,
@@ -414,17 +394,16 @@
                         field: "missing_ads",
                         formatter: function(cell){
                             var row = cell.getRow().getData();
-                            var kwCampaign = row.kw_campaign_name || '';
                             var ptCampaign = row.pmt_bid_percentage || '';
                             var nra = row.NRA || '';
                             var sku = row.sku || '';
                             const isParent = sku.toUpperCase().includes("PARENT");
 
                             if(!isParent){
-                                if(kwCampaign && ptCampaign){
+                                if(ptCampaign){
                                     if(nra !== 'NRA'){
                                         return `
-                                            <span style="color: green;">Both Running</span>
+                                            <span style="color: green;">PMT Running</span>
                                             <i class="fa fa-info-circle text-primary toggle-missingAds-btn" 
                                                 style="cursor:pointer; margin-left:8px;">
                                             </i>
@@ -437,49 +416,11 @@
                                             </i>
                                         `;
                                     }
-                                } else if(kwCampaign){
+                                }
+                                else{
                                     if(nra !== 'NRA'){
                                         return `
                                             <span style="color: red;">PMT Missing</span>
-                                            <i class="fa fa-info-circle text-primary toggle-missingAds-btn" 
-                                                style="cursor:pointer; margin-left:8px;">
-                                            </i>
-                                        `;
-                                    }else{
-                                        return `
-                                            <span style="color: red;">NRA</span>
-                                            <i class="fa fa-info-circle text-primary toggle-missingAds-btn" 
-                                                style="cursor:pointer; margin-left:8px;">
-                                            </i>
-                                        `;
-                                    }
-                                } else if(ptCampaign){
-                                    if(nra !== 'NRA'){
-                                        return `
-                                            <span style="color: red;">KW Missing</span>
-                                            <i class="fa fa-info-circle text-primary toggle-missingAds-btn" 
-                                                style="cursor:pointer; margin-left:8px;">
-                                            </i>
-                                        `;
-                                    }else{
-                                        return `
-                                            <span style="color: red;">NRA</span>
-                                            <i class="fa fa-info-circle text-primary toggle-missingAds-btn" 
-                                                style="cursor:pointer; margin-left:8px;">
-                                            </i>
-                                        `;
-                                    }
-                                } else {
-                                    if(nra !== 'NRA'){
-                                        return `
-                                            <span style="color: red;">KW Missing </br> PMT Missing</span>
-                                            <i class="fa fa-info-circle text-primary toggle-missingAds-btn" 
-                                                style="cursor:pointer; margin-left:8px;">
-                                            </i>
-                                        `;
-                                    }else{
-                                        return `
-                                            <span style="color: red;">NRA</span>
                                             <i class="fa fa-info-circle text-primary toggle-missingAds-btn" 
                                                 style="cursor:pointer; margin-left:8px;">
                                             </i>
@@ -498,11 +439,6 @@
                             }
                             
                         }
-                    },
-                    {
-                        title: "KW Campaign",
-                        field: "kw_campaign_name",
-                        visible: false
                     },
                     {
                         title: "PMT Bid %",
@@ -532,7 +468,7 @@
                         e.target.style.color = "#000";
                     }
 
-                    fetch('/update-ebay-nr-data', {
+                    fetch('/update-ebay2-nr-data', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -566,7 +502,6 @@
                         let fieldsToSearch = [
                             data.sku,
                             data.parent,
-                            data.kw_campaign_name,
                             data.pmt_bid_percentage
                         ].map(f => (f || "").toLowerCase());
 
@@ -600,19 +535,12 @@
                     
                     // 🔹 Missing Ads Filter
                     let missingVal = $("#missingAds-filter").val();
-                    let kw = data.kw_campaign_name || "";
                     let pt = data.pmt_bid_percentage || "";
 
-                    if (missingVal === "Both Running" && !(kw && pt)) return false;
-                    if (missingVal === "KW Missing" && (!pt || kw)) {
-                        if (pt && !kw) return true;
-                        else return false;
+                    if (missingVal) {
+                        if (missingVal === "PMT Running" && !pt) return false;
+                        if (missingVal === "PMT Missing" && pt) return false;
                     }
-                    if (missingVal === "PMT Missing" && (!kw || pt)) {
-                        if (kw && !pt) return true;
-                        else return false;
-                    }
-                    if (missingVal === "Both Missing" && (kw || pt)) return false;
 
                     return true;
                 }
@@ -624,38 +552,29 @@
                 function updateCampaignStats() {
                     let visibleData = table.getData("active");
 
-                    let bothMissing = 0;
-                    let kwMissing = 0;
                     let ptMissing = 0;
-                    let bothRunning = 0;
-                    let kwRunning = 0;
                     let ptRunning = 0;
                     let totalMissingAds = 0;
                     let totalNRA = 0;
                     let totalRA = 0;
 
                     visibleData.forEach(row => {
-                        let kw = row.kw_campaign_name || "";
                         let pt = row.pmt_bid_percentage || "";
                         let nra = (row.NRA || "").trim();
 
                         // Existing counts
                         if(nra !== "NRA") {
-                            if (kw && pt) bothRunning++;
-                            else if (kw && !pt) ptMissing++;
-                            else if (!kw && pt) kwMissing++;
-                            else bothMissing++;
+                            if (!pt) ptMissing++;
                         }
 
                         // New running counts
                         if(nra !== "NRA") {
-                            if (kw) kwRunning++;
                             if (pt) ptRunning++;
                         }
 
                         // Total Missing Ads Count
                         if(nra !== "NRA") {
-                            totalMissingAds = `( ${ptMissing + kwMissing + (bothMissing)} ) `;
+                            totalMissingAds = `( ${ptMissing} ) `;
                         }
 
                         // Total NRA Count
@@ -671,14 +590,10 @@
 
                     // Update HTML
                     $("#total-campaigns").text(visibleData.length);
-                    $("#both-missing").text(bothMissing);
-                    $("#kw-missing").text(kwMissing);
                     $("#pt-missing").text(ptMissing);
-                    $("#both-running").text(bothRunning);
                     $("#total-missing-ads").text(totalMissingAds);
 
                     // New stats
-                    $("#kw-running").text(kwRunning);
                     $("#pt-running").text(ptRunning);
 
                     $("#total-nra").text(totalNRA);

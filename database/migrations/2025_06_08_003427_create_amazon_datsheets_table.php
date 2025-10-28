@@ -15,8 +15,10 @@ return new class extends Migration
             $table->id();
             $table->integer('units_ordered_l30')->nullable();
             $table->integer('units_ordered_l60')->nullable();
+            $table->integer('units_ordered_l90')->nullable();
             $table->integer('sessions_l30')->nullable();
             $table->integer('sessions_l60')->nullable();
+            $table->integer('sessions_l90')->nullable();
             $table->string('asin')->unique(); 
             $table->decimal('price', 10, 2)->nullable(); 
             $table->timestamps();

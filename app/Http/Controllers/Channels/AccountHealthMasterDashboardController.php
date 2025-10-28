@@ -332,6 +332,7 @@ class AccountHealthMasterDashboardController extends Controller
             'Amazon',
             'units_ordered_l30',
             'units_ordered_l60',
+            'units_ordered_l90',
             'price',
             'Amazon'
         );

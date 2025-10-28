@@ -291,4 +291,26 @@ class Ebay2PMTAdController extends Controller
             ], 500);
         }
     }
+
+    public function updateEbay2NrData(Request $request)
+    {
+        $sku   = $request->input('sku');
+        $field = $request->input('field');
+        $value = $request->input('value');
+
+        $ebayDataView = EbayTwoDataView::firstOrNew(['sku' => $sku]);
+
+        $jsonData = $ebayDataView->value ?? [];
+
+        $jsonData[$field] = $value;
+
+        $ebayDataView->value = $jsonData;
+        $ebayDataView->save();
+
+        return response()->json([
+            'status' => 200,
+            'message' => "Field updated successfully",
+            'updated_json' => $jsonData
+        ]);
+    }
 }

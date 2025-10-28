@@ -1,4 +1,4 @@
-@extends('layouts.vertical', ['title' => 'Ebay Missing Ads', 'mode' => $mode ?? '', 'demo' => $demo ?? ''])
+@extends('layouts.vertical', ['title' => 'Ebay3 Missing Ads', 'mode' => $mode ?? '', 'demo' => $demo ?? ''])
 @section('css')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator.min.css" rel="stylesheet">
@@ -160,8 +160,8 @@
 @endsection
 @section('content')
     @include('layouts.shared.page-title', [
-        'page_title' => 'Ebay Missing Ads',
-        'sub_title' => 'Ebay Missing Ads',
+        'page_title' => 'Ebay3 Missing Ads',
+        'sub_title' => 'Ebay3 Missing Ads',
     ])
     <div class="row">
         <div class="col-12">
@@ -171,7 +171,7 @@
                         <!-- Title -->
                         <h4 class="fw-bold text-primary mb-3 d-flex align-items-center">
                             <i class="fa-solid fa-chart-line me-2"></i>
-                            Ebay Missing Ads - <span class="text-danger ms-1 fs-3" id="total-missing-ads"></span>
+                            Ebay3 Missing Ads - <span class="text-danger ms-1 fs-3" id="total-missing-ads"></span>
                         </h4>
 
                         <!-- Filters Row -->
@@ -314,7 +314,7 @@
 
             var table = new Tabulator("#budget-under-table", {
                 index: "sku",
-                ajaxURL: "/ebay/ad-missing/data",
+                ajaxURL: "/ebay-3/ad-missing/data",
                 layout: "fitData",
                 movableColumns: true,
                 resizableColumns: true,
@@ -532,7 +532,7 @@
                         e.target.style.color = "#000";
                     }
 
-                    fetch('/update-ebay-nr-data', {
+                    fetch('/update-ebay3-nr-data', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
