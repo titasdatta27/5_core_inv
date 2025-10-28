@@ -4,75 +4,82 @@ namespace App\Console\Commands;
 
 use App\Models\ProductMaster;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class SyncCpMasterToSheet extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'app:sync-cp-master-to-sheet';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Sync cp_master table with App_data Sheet daily';
 
-    /**
-     * Execute the console command.
-     */
     public function handle()
     {
+        $sheetUrl = "https://script.google.com/macros/s/AKfycbzRIN8W1lR34BojgJIXJM1pGFAhdm3U1ySpWVz6nfvEGX80pMXSThpABopxJsJYRDSDmw/exec";
+
         $rows = ProductMaster::select('*', 'Values as values')->get();
+        $total = $rows->count();
+        $batchSize = 400;
+        $batches = ceil($total / $batchSize);
 
-        $formatted = [];
-        foreach ($rows as $row) {
-            $values = json_decode($row->values, true);
+        Log::info("Starting sync to Google Sheet: {$total} rows in {$batches} batches");
 
-            $formatted[] = [
-                "parent"     => $row->parent,
-                "sku"        => $row->sku,
-                "status"     => $values['status'] ?? '',
-                "lp"         => $values['lp'] ?? 0,
-                "cp"         => $values['cp'] ?? 0,
-                "frght"      => $values['frght'] ?? 0,
-                "ship"       => $values['ship'] ?? 0,
-                "label_qty"  => $values['label_qty'] ?? '',
-                "wt_act"     => $values['wt_act'] ?? 0,
-                "wt_decl"    => $values['wt_decl'] ?? 0,
-                "l"          => $values['l'] ?? 0,
-                "w"          => $values['w'] ?? 0,
-                "h"          => $values['h'] ?? 0,
-                "cbm"        => $values['cbm'] ?? 0,
-                "l2_url"     => $values['l2_url'] ?? '',
-                "pcs_per_box" => $values['pcs_per_box'] ?? null,
-                "dc"         => $values['dc'] ?? null,
-                "l1"         => $values['l1'] ?? null,
-                "b"          => $values['b'] ?? null,
-                "h1"         => $values['h1'] ?? null,
-                "weight"     => $values['weight'] ?? null,
-                "msrp"       => $values['msrp'] ?? null,
-                "map"       => $values['map'] ?? null,
-                "upc"        => $values['upc'] ?? null,
+        $chunked = $rows->chunk($batchSize);
+        $inserted = 0;
 
+        foreach ($chunked as $index => $chunk) {
+            $formatted = [];
 
-            ];
+            foreach ($chunk as $row) {
+                $values = json_decode($row->values, true);
+
+                $formatted[] = [
+                    "parent" => $row->parent,
+                    "sku" => $row->sku,
+                    "status" => $values['status'] ?? '',
+                    "lp" => $values['lp'] ?? 0,
+                    "cp" => $values['cp'] ?? 0,
+                    "frght" => $values['frght'] ?? 0,
+                    "ship" => $values['ship'] ?? 0,
+                    "temu_ship" => $values['temu_ship'] ?? 0,
+                    "ebay2_ship" => $values['ebay2_ship'] ?? 0,
+                    "initial_quantity" => $values['initial_quantity'] ?? '',
+                    "label_qty" => $values['label_qty'] ?? '',
+                    "wt_act" => $values['wt_act'] ?? 0,
+                    "wt_decl" => $values['wt_decl'] ?? 0,
+                    "l" => $values['l'] ?? 0,
+                    "w" => $values['w'] ?? 0,
+                    "h" => $values['h'] ?? 0,
+                    "cbm" => $values['cbm'] ?? 0,
+                    "l2_url" => $values['l2_url'] ?? '',
+                    "dc" => $values['dc'] ?? '',
+                    "pcs_per_box" => $values['pcs_per_box'] ?? '',
+                    "l1" => $values['l1'] ?? '',
+                    "b" => $values['b'] ?? '',
+                    "h1" => $values['h1'] ?? '',
+                    "weight" => $values['weight'] ?? '',
+                    "msrp" => $values['msrp'] ?? '',
+                    "map" => $values['map'] ?? '',
+                    "upc" => $values['upc'] ?? '',
+                ];
+            }
+
+            try {
+                $response = Http::timeout(60)->post($sheetUrl, ['data' => $formatted]);
+                $body = $response->json();
+
+                if ($response->successful() && ($body['success'] ?? false)) {
+                    $inserted += count($formatted);
+                    Log::info("Batch " . ($index + 1) . "/{$batches} synced: " . count($formatted) . " rows inserted.");
+                } else {
+                    Log::error("Batch " . ($index + 1) . " failed: " . $response->body());
+                }
+
+                sleep(2);
+            } catch (\Exception $e) {
+                Log::error("Batch " . ($index + 1) . " exception: " . $e->getMessage());
+            }
         }
 
-        // Send to Google Apps Script
-        $url = "https://script.google.com/macros/s/AKfycby0mWJXO0ljHBZoN0CHUgbnhXAs2Hxl4xHNLkPSa-ebDMIOgB_2j-Pg4zd7QGvjf_BSrg/exec";
-        $response = Http::post($url, [
-            "task" => "sync_cp_master",
-            "data" => $formatted
-        ]);
-
-        $this->info("Sync complete: " . $response->body());
-    
+        Log::info("Sync completed: {$inserted} / {$total} rows inserted.");
     }
 }

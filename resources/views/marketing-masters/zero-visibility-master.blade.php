@@ -763,7 +763,7 @@
                 searching: true,
                 pageLength: 50,
                 order: [
-                    [1, 'asc']
+                    [4, 'desc']
                 ],
                 ajax: {
                     url: '/show-zero-visibility-data',
@@ -782,6 +782,10 @@
                         if (!originalChannelData.length) {
                             originalChannelData = json.data;
                         }
+                        setTimeout(() => {
+                            const table = jq('#channelTable').DataTable();
+                            table.order([4, 'desc']).draw(false);
+                        }, 300);
                         return json.data;
                     },
                     error: function(xhr, error, thrown) {
@@ -833,6 +837,7 @@
                                 'bestbuyusa': '/zero-bestbuyusa',
                                 'swgearexchange': '/zero-swgearexchange',
                                 'shopifywholesale/ds': '/zero-shopifywholesale',
+                                'amazonfba': '/fba-view-page',
                             };
 
                             const routeUrl = routeMap[channelName];

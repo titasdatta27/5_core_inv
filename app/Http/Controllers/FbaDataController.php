@@ -120,6 +120,8 @@ class FbaDataController extends Controller
             'l60_units' => $monthlySales ? ($monthlySales->l60_units ?? 0) : 0,
             'FBA_Quantity' => $fba->quantity_available,
             'Current_Month_Views' => $fbaReportsInfo ? ($fbaReportsInfo->current_month_views ?? 0) : 0,
+            'Listed' => $manual ? ($manual->data['listed'] ?? false) : false,
+            'Live' => $manual ? ($manual->data['live'] ?? false) : false,
             'Fulfillment_Fee' => $fbaReportsInfo ? round(($fbaReportsInfo->fulfillment_fee ?? 0), 2) : 0,
             'ASIN' => $fba->asin,
             'Shopify_INV' => $shopifyInfo ? ($shopifyInfo->quantity ?? 0) : 0,
@@ -174,6 +176,8 @@ class FbaDataController extends Controller
       
             'FBA_Quantity' => $children->sum('FBA_Quantity'),
             'Current_Month_Views' => $children->sum('Current_Month_Views'),
+            'Listed' => false,
+            'Live' => false,
             'Fulfillment_Fee' => round($children->sum('Fulfillment_Fee'), 2),
             'ASIN' => '',
             'Shopify_INV' => $children->sum('Shopify_INV'),
@@ -273,4 +277,183 @@ class FbaDataController extends Controller
 
       return response()->json(['success' => true]);
    }
+
+
+   // public function getFbaListedLiveAndViewsData()
+   // {
+   //    $productMasters = ProductMaster::whereNull('deleted_at')->get();
+
+   //    // Normalize SKUs (avoid case/space mismatch)
+   //    $skus = $productMasters->pluck('sku')->map(fn($s) => strtoupper(trim($s)))->unique()->toArray();
+
+   //    // Fetch all required tables
+   //    $shopifyData = FbaTable::whereIn('seller_sku', $skus)->get()
+   //       ->keyBy(fn($s) => strtoupper(trim($s->seller_sku)));
+
+   //    $fbaManualData = FbaManualData::whereIn('sku', $skus)->get()
+   //       ->keyBy(fn($s) => strtoupper(trim($s->sku)));
+
+   //    $fbaReports = FbaReportsMaster::whereIn('seller_sku', $skus)->get()
+   //       ->keyBy(fn($s) => strtoupper(trim($s->seller_sku)));
+
+   //    // Initialize counters
+   //    $listedCount = 0;
+   //    $liveCount = 0;
+   //    $zeroViewCount = 0;
+
+   //    $listedSkus = [];
+   //    $liveSkus = [];
+   //    $zeroViewSkus = [];
+
+   //    foreach ($productMasters as $item) {
+   //       $sku = strtoupper(trim($item->sku));
+
+   //       // Skip parent SKUs
+   //       if (stripos($sku, 'PARENT') !== false) continue;
+
+   //       // --- Inventory ---
+   //       $inv = floatval($shopifyData[$sku]->inv ?? 0);
+
+   //       // --- FBA Manual Data ---
+   //       $manual = $fbaManualData[$sku]->data ?? null;
+   //       if (is_string($manual)) {
+   //             $manual = json_decode($manual, true);
+   //       }
+
+   //       $listed = filter_var($manual['listed'] ?? false, FILTER_VALIDATE_BOOLEAN);
+   //       $live   = filter_var($manual['live'] ?? false, FILTER_VALIDATE_BOOLEAN);
+
+   //       // --- Count Listed ---
+   //       if ($listed === true) {
+   //             $listedCount++;
+   //             $listedSkus[] = $sku;
+   //       }
+
+   //       // --- Count Live ---
+   //       if ($live === true) {
+   //             $liveCount++;
+   //             $liveSkus[] = $sku;
+   //       }
+
+   //       // --- Views ---
+   //       $views = null;
+   //       if (isset($fbaReports[$sku])) {
+   //             $views = (int) ($fbaReports[$sku]->current_month_views ?? 0);
+   //       }
+
+   //       // --- Count Zero Views (only if inv > 0 and views == 0) ---
+   //       if ($inv > 0 && $views === 0) {
+   //             $zeroViewCount++;
+   //             $zeroViewSkus[] = $sku;
+   //       }
+   //    }
+
+   //    $livePending = $listedCount - $liveCount;
+   //    dd($listedSkus, $liveSkus, $zeroViewSkus,$livePending);
+
+   //    return [
+   //       // 'listed_count' => $listedCount,
+   //       // 'live_count' => $liveCount,
+   //       'live_pending' => $livePending,
+   //       'zero_view_count' => $zeroViewCount,
+
+   //       ];
+   // }
+
+
+   public function getFbaListedLiveAndViewsData()
+   {
+      // --- Fetch Product Master SKUs ---
+      $productMasters = ProductMaster::whereNull('deleted_at')->get();
+
+      $normalizeSku = function ($sku) {
+         $sku = strtoupper(trim($sku));
+         // Remove trailing "FBA" (with or without spaces)
+         return preg_replace('/\s*FBA\s*$/i', '', $sku);
+      };
+
+      // Collect normalized SKUs from Product Master
+      $productSkus = $productMasters->pluck('sku')
+         ->map(fn($s) => strtoupper(trim($s)))
+         ->unique()
+         ->toArray();
+
+      // --- Fetch FBA-related tables (no whereIn, since they contain FBA) ---
+      $fbaManualData = FbaManualData::all();
+      $fbaReports = FbaReportsMaster::all();
+      $fbaTables = FbaTable::all();
+
+      // Re-key each table by normalized SKU (without FBA)
+      $manualBySku = $fbaManualData->keyBy(fn($s) => $normalizeSku($s->sku ?? ''));
+      $reportsBySku = $fbaReports->keyBy(fn($s) => $normalizeSku($s->seller_sku ?? ''));
+      $inventoryBySku = $fbaTables->keyBy(fn($s) => $normalizeSku($s->seller_sku ?? ''));
+
+      // --- Initialize counters ---
+      $listedCount = 0;
+      $liveCount = 0;
+      $zeroViewCount = 0;
+
+      $listedSkus = [];
+      $liveSkus = [];
+      $zeroViewSkus = [];
+
+      foreach ($productMasters as $item) {
+         $sku = strtoupper(trim($item->sku));
+         $normalizedSku = $normalizeSku($sku);
+
+         // Skip parent SKUs
+         if (stripos($sku, 'PARENT') !== false) continue;
+
+         // --- Get inventory ---
+         $inv = floatval($inventoryBySku[$normalizedSku]->quantity_available ?? 0);
+
+         // --- Get FBA Manual Data ---
+         $manualData = $manualBySku[$normalizedSku]->data ?? null;
+         if (is_string($manualData)) {
+               $manualData = json_decode($manualData, true);
+         }
+
+         $listed = filter_var($manualData['listed'] ?? false, FILTER_VALIDATE_BOOLEAN);
+         $live = filter_var($manualData['live'] ?? false, FILTER_VALIDATE_BOOLEAN);
+
+         // --- Count Listed ---
+         if ($listed === true) {
+               $listedCount++;
+               $listedSkus[] = $sku;
+         }
+
+         // --- Count Live ---
+         if ($live === true) {
+               $liveCount++;
+               $liveSkus[] = $sku;
+         }
+
+         // --- Get Views ---
+         $views = (int) ($reportsBySku[$normalizedSku]->current_month_views ?? 0);
+
+         // --- Zero Views ---
+         if ($inv > 0 && $views === 0) {
+               $zeroViewCount++;
+               $zeroViewSkus[] = $sku;
+         }
+      }
+
+      // --- Calculate Live Pending ---
+      $livePending = max($listedCount - $liveCount, 0);
+
+      // --- Debugging (optional) ---
+      // dd($listedSkus, $liveSkus, $zeroViewCount, $livePending);
+
+      // --- Return Final Counts ---
+      return [
+         'live_pending' => $livePending,
+         'zero_view' => $zeroViewCount,
+      ];
+   }
+
+
+
+
+
+   
 }
