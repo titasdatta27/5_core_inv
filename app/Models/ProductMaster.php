@@ -20,6 +20,7 @@ class ProductMaster extends Model
         'remark',
         'sales',
         'views',
+        'deleted_by'
     ];
 
     public function setTemuShipAttribute($value)
