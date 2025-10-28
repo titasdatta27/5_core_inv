@@ -333,6 +333,8 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::get('/zero-visibility-master', [ZeroVisibilityMasterController::class, 'index'])->name('zero.visibility');
     Route::get('/live-pending-data', [ZeroVisibilityMasterController::class, 'Zeroviewmasters']);
     Route::post('/store-zero-visibility', [ZeroVisibilityMasterController::class, 'store']);
+    Route::post('/save-channel-action', [ZeroVisibilityMasterController::class, 'saveChannelAction'])
+    ->name('save.channel.action');
     Route::get('/show-zero-visibility-data', [ZeroVisibilityMasterController::class, 'getMergedChannelData']);
     Route::get('/export-zero-visibility-csv', [ZeroVisibilityMasterController::class, 'exportCsv'])->name('zero.export.csv');
     Route::post('/update-ra-checkbox', [ZeroVisibilityMasterController::class, 'updateRaCheckbox']);

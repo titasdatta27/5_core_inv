@@ -471,6 +471,33 @@
                         }
                     },
                     {
+                        title: "Action",
+                        field: "Action",
+                        editor: "input",
+                        headerSort: false,
+                        cellEdited: function(cell) {
+                            const rowData = cell.getRow().getData();
+                            const channel = rowData['Channel '];
+                            const actionVal = rowData['Action'] || '';
+                            const correctionVal = rowData['Correction action'] || '';
+                            saveChannelAction(channel, actionVal, correctionVal, rowData);
+                        }
+                    }
+                    ,
+                    {
+                        title: "Correction action",
+                        field: "Correction action",
+                        editor: "input",
+                        headerSort: false,
+                        cellEdited: function(cell) {
+                            const rowData = cell.getRow().getData();
+                            const channel = rowData['Channel '];
+                            const actionVal = rowData['Action'] || '';
+                            const correctionVal = rowData['Correction action'] || '';
+                            saveChannelAction(channel, actionVal, correctionVal, rowData);
+                        }
+                    },
+                    {
                         title: "Trend",
                         headerSort: false,
                         formatter: function(cell) {
@@ -559,12 +586,6 @@
             populateExecDropdown(val); // Pass the search term to sort dropdown
         });
 
-
-        // jq('#execSearchInput').on('focus', function() {
-        //     populateChannelDropdown(jq(this).val().trim());
-        // });
-
-        window.csrfToken = '{{ csrf_token() }}';
 
         // Chart related variables
         let currentChart = null;
