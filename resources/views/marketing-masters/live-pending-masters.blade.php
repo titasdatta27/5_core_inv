@@ -35,17 +35,7 @@
         .date-filter-container input {
             flex: 1;
         }
-        
-        /* Sticky Header */
-        .row.mb-4 {
-            position: sticky;
-            top: 70px;
-            z-index: 999;
-            background: #f8f9fa;
-            padding: 15px 0;
-            margin-left: 0;
-            margin-right: 0;
-        }
+    
         
         /* Beautiful Cards Styling */
         .stats-card {
@@ -128,6 +118,83 @@
         .stats-card.card-success.negative .card-icon {
             color: #f45c43;
         }
+        
+        /* All Channels Chart Styling */
+        .chart-container {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            border: 1px solid #e9ecef;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .chart-controls .btn {
+            border-radius: 6px;
+            font-weight: 500;
+        }
+        
+        .chart-controls .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        #allChannelsChart {
+            background: white;
+            border-radius: 6px;
+            padding: 10px;
+        }
+        
+        .card-title {
+            color: #495057;
+            font-weight: 600;
+        }
+        
+        /* Fix table visibility */
+        .table-container {
+            position: relative;
+            z-index: 10;
+            background: white;
+        }
+        
+        /* Channel color legend */
+        .channel-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .channel-color-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .color-square {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .channel-color-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 8px;
+            background: rgba(255,255,255,0.8);
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+        }
     </style>
 
 @endsection
@@ -157,6 +224,151 @@
                     <span class="badge" id="todayUpdatesBadge">
                         {{ ($todayUpdates ?? 0) >= 0 ? '+' : '' }}{{ $todayUpdates ?? 0 }}
                     </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- All Channels Chart Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card stats-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-chart-line text-primary me-2"></i>
+                            Daily Changes - All Channels
+                        </h5>
+                        <div class="chart-controls">
+                            <button class="btn btn-sm btn-success me-2" onclick="refreshAllChannelsChart()">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                            <button class="btn btn-sm btn-warning" onclick="openFullscreenChart()">
+                                <i class="fas fa-expand"></i> Fullscreen
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Date Filter Controls -->
+                    <div class="date-filter-container mb-3">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold">Start Date:</label>
+                                <input type="date" id="allChannelsStartDate" class="form-control">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold">End Date:</label>
+                                <input type="date" id="allChannelsEndDate" class="form-control">
+                            </div>
+                            <div class="col-md-3 d-flex align-items-end">
+                                <button class="btn btn-primary me-2" onclick="applyAllChannelsDateFilter()">
+                                    <i class="fas fa-filter"></i> Apply
+                                </button>
+                                <button class="btn btn-outline-secondary" onclick="clearAllChannelsDateFilter()">
+                                    <i class="fas fa-times"></i> Clear
+                                </button>
+                            </div>
+                          
+                        </div>
+                    </div>
+                    
+                    <!-- Channel Color Legend -->
+                    <div class="channel-legend" id="channelLegend" style="display: none;">
+                        <!-- Color squares will be populated by JavaScript -->
+                    </div>
+                    
+                    <div class="chart-container" style="position: relative; height: 500px; background: #f8f9fa; border-radius: 10px; padding: 20px;">
+                        <canvas id="allChannelsChart"></canvas>
+                    </div>
+                    
+                    <!-- Summary Cards -->
+                    <div class="row mt-3" id="allChannelsChartSummary" style="display: none;">
+                        <div class="col-md-4">
+                            <div class="card bg-success text-white">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title">Increases</h6>
+                                    <h4 id="positiveChanges">0</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-danger text-white">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title">Decreases</h6>
+                                    <h4 id="negativeChanges">0</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-secondary text-white">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title">No Change</h6>
+                                    <h4 id="zeroChanges">0</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fullscreen Chart Modal -->
+    <div class="modal fade" id="fullscreenChartModal" tabindex="-1" aria-labelledby="fullscreenChartModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-fullscreen">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="fullscreenChartModalLabel">
+                        <i class="fas fa-chart-line me-2"></i>
+                        Daily Changes - All Channels (Fullscreen)
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="chart-container" style="position: relative; height: 80vh; background: #f8f9fa; border-radius: 10px; padding: 20px;">
+                        <canvas id="fullscreenChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action & Correction Modal -->
+    <div class="modal fade" id="actionModal" tabindex="-1" aria-labelledby="actionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="actionModalLabel">
+                        <i class="fas fa-edit me-2"></i>
+                        Action & Correction - <span id="modalChannelName"></span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="actionForm">
+                        <div class="mb-3">
+                            <label for="actionInput" class="form-label fw-bold">
+                                <i class="fas fa-tasks me-1"></i> Action
+                            </label>
+                            <textarea class="form-control" id="actionInput" rows="3" placeholder="Enter action details..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="correctionInput" class="form-label fw-bold">
+                                <i class="fas fa-wrench me-1"></i> Correction Action
+                            </label>
+                            <textarea class="form-control" id="correctionInput" rows="3" placeholder="Enter correction action details..."></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i> Cancel
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="saveActionData()">
+                        <i class="fas fa-save me-1"></i> Save Changes
+                    </button>
                 </div>
             </div>
         </div>
@@ -471,6 +683,33 @@
                         }
                     },
                     {
+                        title: "Action & Correction",
+                        field: "Action",
+                        headerSort: false,
+                        hozAlign: "center",
+                        formatter: function(cell) {
+                            const rowData = cell.getRow().getData();
+                            const channel = rowData['Channel '];
+                            const actionVal = rowData['Action'] || '';
+                            const correctionVal = rowData['Correction action'] || '';
+                            
+                            let displayText = '';
+                            if (actionVal && correctionVal) {
+                                displayText = `Action: ${actionVal} | Correction: ${correctionVal}`;
+                            } else if (actionVal) {
+                                displayText = `Action: ${actionVal}`;
+                            } else if (correctionVal) {
+                                displayText = `Correction: ${correctionVal}`;
+                            } else {
+                                displayText = 'Click to add action';
+                            }
+                            
+                            return `<button class="btn btn-sm btn-outline-primary" onclick="openActionModal('${channel}', '${actionVal}', '${correctionVal}')" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;">
+                                ${displayText}
+                            </button>`;
+                        }
+                    },
+                    {
                         title: "Trend",
                         headerSort: false,
                         formatter: function(cell) {
@@ -560,16 +799,12 @@
         });
 
 
-        // jq('#execSearchInput').on('focus', function() {
-        //     populateChannelDropdown(jq(this).val().trim());
-        // });
-
-        window.csrfToken = '{{ csrf_token() }}';
-
         // Chart related variables
         let currentChart = null;
         let currentChannelName = '';
         let chartModal = null;
+        let allChannelsChart = null;
+        let fullscreenChart = null;
 
         // Show chart function
         window.showChart = function(channelName) {
@@ -778,6 +1013,485 @@
             loadChartData(currentChannelName);
         };
 
+        // All Channels Chart Functions
+        function loadAllChannelsChartData(startDate = null, endDate = null) {
+            console.log('Loading all channels chart data...');
+            
+            const params = new URLSearchParams();
+            if (startDate) params.append('start_date', startDate);
+            if (endDate) params.append('end_date', endDate);
+            
+            const url = `/api/all-channels-chart-data?${params.toString()}`;
+            console.log('Fetching from URL:', url);
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Received all channels data:', data);
+                    if (!data.dates || data.dates.length === 0) {
+                        jq('#allChannelsChartSummary').html('<strong>No data available for any channels</strong>').show();
+                        return;
+                    }
+                    renderAllChannelsChart(data.dates, data.datasets);
+                })
+                .catch(error => {
+                    console.error('Error loading all channels chart data:', error);
+                    jq('#allChannelsChartSummary').html('<strong class="text-danger">Error loading chart data</strong>').show();
+                });
+        }
+
+        function renderAllChannelsChart(dates, datasets) {
+            console.log('Rendering all channels chart with dates:', dates, 'and datasets:', datasets);
+            const ctx = document.getElementById('allChannelsChart').getContext('2d');
+            
+            // Filter datasets to show only channels with data updates (non-zero differences)
+            const filteredDatasets = datasets.filter(dataset => {
+                return dataset.data.some(value => value !== 0);
+            });
+            
+            // Create color legend
+            createColorLegend(filteredDatasets);
+            
+            // Calculate summary for differences
+            if (filteredDatasets.length > 0 && dates.length > 0) {
+                let channelsWithData = 0;
+                let totalPositiveChanges = 0;
+                let totalNegativeChanges = 0;
+                let totalZeroChanges = 0;
+                
+                filteredDatasets.forEach(dataset => {
+                    if (dataset.data.length > 0) {
+                        channelsWithData++;
+                        dataset.data.forEach(value => {
+                            if (value > 0) totalPositiveChanges++;
+                            else if (value < 0) totalNegativeChanges++;
+                            else totalZeroChanges++;
+                        });
+                    }
+                });
+                
+                // Update summary cards
+                jq('#positiveChanges').text(totalPositiveChanges);
+                jq('#negativeChanges').text(totalNegativeChanges);
+                jq('#zeroChanges').text(totalZeroChanges);
+                jq('#allChannelsChartSummary').show();
+            } else {
+                jq('#allChannelsChartSummary').hide();
+            }
+            
+            // Destroy previous chart if exists
+            if (allChannelsChart) {
+                allChannelsChart.destroy();
+            }
+            
+            console.log('Creating new all channels chart...');
+            allChannelsChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: filteredDatasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            top: 20,
+                            bottom: 20,
+                            left: 10,
+                            right: 10
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false // Hide legend since we have color squares at top
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(0,0,0,0.95)',
+                            titleColor: 'white',
+                            bodyColor: 'white',
+                            borderColor: '#FF0000',
+                            borderWidth: 3,
+                            cornerRadius: 10,
+                            displayColors: true,
+                            titleFont: {
+                                size: 14,
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                size: 13,
+                                weight: 'bold'
+                            },
+                            callbacks: {
+                                title: function(context) {
+                                    return '📅 ' + context[0].label;
+                                },
+                                label: function(context) {
+                                    const value = context.parsed.y;
+                                    const symbol = value > 0 ? '📈' : value < 0 ? '📉' : '➡️';
+                                    return symbol + ' ' + context.dataset.label + ': ' + (value > 0 ? '+' : '') + value;
+                                },
+                                filter: function(tooltipItem) {
+                                    // Only show channels with data updates (non-zero values)
+                                    return tooltipItem.parsed.y !== 0;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: {
+                                display: true,
+                                text: 'Daily Change',
+                                font: {
+                                    size: 13,
+                                    weight: 'bold',
+                                    color: '#2C3E50'
+                                }
+                            },
+                            ticks: {
+                                precision: 0,
+                                font: {
+                                    size: 11,
+                                    weight: '500',
+                                    color: '#34495E'
+                                },
+                                callback: function(value) {
+                                    return value > 0 ? '↗️ +' + value : value < 0 ? '↘️ ' + value : '➡️ ' + value;
+                                },
+                                maxTicksLimit: 8
+                            },
+                            grid: {
+                                color: function(context) {
+                                    return context.tick.value === 0 ? '#FF0000' : '#F0F0F0';
+                                },
+                                lineWidth: function(context) {
+                                    return context.tick.value === 0 ? 3 : 1;
+                                }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Date',
+                                font: {
+                                    size: 13,
+                                    weight: 'bold',
+                                    color: '#2C3E50'
+                                }
+                            },
+                            ticks: {
+                                font: {
+                                    size: 10,
+                                    weight: '500',
+                                    color: '#34495E'
+                                },
+                                maxTicksLimit: 7
+                            },
+                            grid: {
+                                color: '#ECF0F1',
+                                lineWidth: 1
+                            }
+                        }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false
+                    }
+                }
+            });
+        }
+
+        // Refresh all channels chart
+        window.refreshAllChannelsChart = function() {
+            const startDate = jq('#allChannelsStartDate').val();
+            const endDate = jq('#allChannelsEndDate').val();
+            loadAllChannelsChartData(startDate, endDate);
+        };
+
+        // Apply date filter for all channels chart
+        window.applyAllChannelsDateFilter = function() {
+            const startDate = jq('#allChannelsStartDate').val();
+            const endDate = jq('#allChannelsEndDate').val();
+            
+            if (!startDate || !endDate) {
+                alert('Please select both start and end dates');
+                return;
+            }
+            
+            if (startDate > endDate) {
+                alert('Start date must be before end date');
+                return;
+            }
+            
+            loadAllChannelsChartData(startDate, endDate);
+        };
+
+        // Clear date filter for all channels chart
+        window.clearAllChannelsDateFilter = function() {
+            jq('#allChannelsStartDate').val('');
+            jq('#allChannelsEndDate').val('');
+            loadAllChannelsChartData();
+        };
+
+        // Create color legend for channels
+        function createColorLegend(datasets) {
+            const legendContainer = jq('#channelLegend');
+            legendContainer.empty();
+            
+            if (datasets.length === 0) {
+                legendContainer.hide();
+                return;
+            }
+            
+            datasets.forEach(dataset => {
+                const legendItem = jq(`
+                    <div class="channel-color-item">
+                        <div class="color-square" style="background-color: ${dataset.borderColor}"></div>
+                        <span>${dataset.label}</span>
+                    </div>
+                `);
+                legendContainer.append(legendItem);
+            });
+            
+            legendContainer.show();
+        }
+
+        // Global variables for action modal
+        let currentChannelForAction = '';
+        let currentActionData = {};
+
+        // Open action modal
+        window.openActionModal = function(channel, actionVal, correctionVal) {
+            currentChannelForAction = channel;
+            currentActionData = {
+                action: actionVal,
+                correction: correctionVal
+            };
+            
+            // Set modal title
+            jq('#modalChannelName').text(channel);
+            
+            // Fill form with existing values
+            jq('#actionInput').val(actionVal);
+            jq('#correctionInput').val(correctionVal);
+            
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('actionModal'));
+            modal.show();
+        };
+
+        // Save action data
+        window.saveActionData = function() {
+            const actionVal = jq('#actionInput').val().trim();
+            const correctionVal = jq('#correctionInput').val().trim();
+            
+            // Update the table data
+            if (table) {
+                const rows = table.getRows();
+                rows.forEach(row => {
+                    const data = row.getData();
+                    if (data['Channel '] === currentChannelForAction) {
+                        data['Action'] = actionVal;
+                        data['Correction action'] = correctionVal;
+                        row.update(data);
+                    }
+                });
+            }
+            
+            // Save to server (you can implement this API call)
+            saveChannelAction(currentChannelForAction, actionVal, correctionVal);
+            
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('actionModal'));
+            modal.hide();
+            
+            // Show success message
+            alert('Action and Correction data saved successfully!');
+        };
+
+        // Save channel action to server
+        function saveChannelAction(channel, actionVal, correctionVal) {
+            // You can implement API call here
+            console.log('Saving action data:', {
+                channel: channel,
+                action: actionVal,
+                correction: correctionVal
+            });
+            
+            // Example API call (uncomment and modify as needed)
+        
+            fetch('/api/save-channel-action', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    channel: channel,
+                    action: actionVal,
+                    correction: correctionVal
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Action saved:', data);
+            })
+            .catch(error => {
+                console.error('Error saving action:', error);
+            });
+       
+        }
+
+        // Open fullscreen chart
+        window.openFullscreenChart = function() {
+            const modal = new bootstrap.Modal(document.getElementById('fullscreenChartModal'));
+            modal.show();
+            
+            // Load data for fullscreen chart
+            const startDate = jq('#allChannelsStartDate').val();
+            const endDate = jq('#allChannelsEndDate').val();
+            loadFullscreenChartData(startDate, endDate);
+        };
+
+        // Load fullscreen chart data
+        function loadFullscreenChartData(startDate = null, endDate = null) {
+            const params = new URLSearchParams();
+            if (startDate) params.append('start_date', startDate);
+            if (endDate) params.append('end_date', endDate);
+            
+            const url = `/api/all-channels-chart-data?${params.toString()}`;
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.dates || data.dates.length === 0) {
+                        return;
+                    }
+                    renderFullscreenChart(data.dates, data.datasets);
+                })
+                .catch(error => {
+                    console.error('Error loading fullscreen chart data:', error);
+                });
+        }
+
+        // Render fullscreen chart
+        function renderFullscreenChart(dates, datasets) {
+            const ctx = document.getElementById('fullscreenChart').getContext('2d');
+            
+            // Destroy previous chart if exists
+            if (fullscreenChart) {
+                fullscreenChart.destroy();
+            }
+            
+            fullscreenChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            top: 40,
+                            bottom: 30
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20,
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(0,0,0,0.9)',
+                            titleColor: 'white',
+                            bodyColor: 'white',
+                            borderColor: '#007bff',
+                            borderWidth: 3,
+                            callbacks: {
+                                title: function(context) {
+                                    return '📅 ' + context[0].label;
+                                },
+                                label: function(context) {
+                                    const value = context.parsed.y;
+                                    const symbol = value > 0 ? '📈' : value < 0 ? '📉' : '➡️';
+                                    return symbol + ' ' + context.dataset.label + ': ' + (value > 0 ? '+' : '') + value;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: {
+                                display: true,
+                                text: 'Daily Change',
+                                font: {
+                                    size: 16,
+                                    weight: 'bold'
+                                }
+                            },
+                            ticks: {
+                                precision: 0,
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                },
+                                callback: function(value) {
+                                    return value > 0 ? '↗️ +' + value : value < 0 ? '↘️ ' + value : '➡️ ' + value;
+                                }
+                            },
+                            grid: {
+                                color: function(context) {
+                                    return context.tick.value === 0 ? '#ff4757' : '#ddd';
+                                },
+                                lineWidth: function(context) {
+                                    return context.tick.value === 0 ? 4 : 2;
+                                }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Date',
+                                font: {
+                                    size: 16,
+                                    weight: 'bold'
+                                }
+                            },
+                            ticks: {
+                                font: {
+                                    size: 13,
+                                    weight: 'bold'
+                                }
+                            }
+                        }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false
+                    }
+                }
+            });
+        }
+
         // Initialize when DOM is ready
         jq(document).ready(function() {
             // Set data
@@ -789,6 +1503,9 @@
             // Hide loader and show table
             $('#customLoader').hide();
             $('#channelTableWrapper').show();
+            
+            // Load all channels chart
+            loadAllChannelsChartData();
             
             // Update totals when table data is loaded
             table.on('tableBuilt', function() {

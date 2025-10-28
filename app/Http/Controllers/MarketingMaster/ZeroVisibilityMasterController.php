@@ -11,9 +11,13 @@ use App\Models\ProductMaster;
 use App\Models\SheinDataView;
 use App\Models\ShopifySku;
 use App\Models\ChannelDailyCount;
+use App\Models\ChannelAction;
+use App\Models\SkuAction;
 use Illuminate\Http\Request;
-
-
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\FacadesLog;
 
 class ZeroVisibilityMasterController extends Controller
 {
@@ -102,12 +106,12 @@ class ZeroVisibilityMasterController extends Controller
             $channel->zero_view = $zeroView;
         }
 
-        return view('marketing-masters.zero-visibility-master', compact('totalSkuCount', 'zeroInvCount','channels'));
+        return view('marketing-masters.zero-visibility-master', compact('totalSkuCount', 'zeroInvCount', 'channels'));
     }
 
 
 
-     public function Zeroviewmasters()
+    public function Zeroviewmasters()
     {
         $productSKUs = ProductMaster::where('sku', 'NOT LIKE', '%PARENT%')
             ->pluck('sku')
@@ -170,15 +174,27 @@ class ZeroVisibilityMasterController extends Controller
             }
 
             if (class_exists($controllerClass)) {
-                $controller = app($controllerClass);
-                if (method_exists($controller, 'getLivePendingAndZeroViewCounts')) {
-                    $counts = $controller->getLivePendingAndZeroViewCounts();
-                    $livePending = $counts['live_pending'] ?? null;
-                    $zeroView = $counts['zero_view'] ?? null;
+                try {
+                    $controller = app($controllerClass);
+                    if (method_exists($controller, 'getLivePendingAndZeroViewCounts')) {
+                        $counts = $controller->getLivePendingAndZeroViewCounts();
+                        $livePending = $counts['live_pending'] ?? null;
+                        $zeroView = $counts['zero_view'] ?? null;
+                        
+                        // Debug logging
+                        Log::info("Channel: {$channelName}, Live Pending: {$livePending}, Zero View: {$zeroView}");
+                    } else {
+                        Log::warning("Method getLivePendingAndZeroViewCounts not found for controller: {$controllerClass}");
+                    }
+                } catch (\Exception $e) {
+                    Log::error("Error fetching data for channel {$channelName}: " . $e->getMessage());
                 }
+            } else {
+                Log::warning("Controller class not found: {$controllerClass}");
             }
 
-            $livePendingData[$channelName] = $livePending;
+            // Use 0 as fallback if livePending is null
+            $livePendingData[$channelName] = $livePending ?? 0;
         }
 
         // Save today's counts for each channel
@@ -186,71 +202,95 @@ class ZeroVisibilityMasterController extends Controller
         $yesterday = now()->subDay()->toDateString();
         $todayUpdates = 0;
         $channelUpdateData = [];
-        
+
         foreach ($livePendingData as $channel => $count) {
             $record = ChannelDailyCount::firstOrNew(['channel_name' => $channel]);
-            $counts = $record->counts ?? [];
-            
-            // Get yesterday's count
-            $yesterdayCount = $counts[$yesterday] ?? 0;
+            // Decode counts safely — handle string/int/null
+            $countsRaw = $record->counts;
+
+            if (is_string($countsRaw)) {
+                $decoded = json_decode($countsRaw, true);
+                $counts = is_array($decoded) ? $decoded : [];
+            } elseif (is_array($countsRaw)) {
+                $counts = $countsRaw;
+            } else {
+                $counts = [];
+            }
+
             $todayCount = $count ?? 0;
             
-            // Calculate difference (today - yesterday)
-            $difference = $todayCount - $yesterdayCount;
-            $todayUpdates += $difference;
-            
+            // Debug logging
+            Log::info("Saving channel data - Channel: {$channel}, Today Count: {$todayCount}, Existing Counts: " . json_encode($counts));
+
+            // Find the most recent previous date (strictly before today) in stored counts
+            $previousDate = null;
+            $previousValue = null;
+
+            if (!empty($counts)) {
+                $dates = array_keys($counts);
+                // Keep only dates strictly less than today
+                $priorDates = array_filter($dates, function ($d) use ($today) {
+                    return $d < $today;
+                });
+
+                if (!empty($priorDates)) {
+                    // Sort prior dates descending to get the latest available
+                    rsort($priorDates);
+                    $previousDate = $priorDates[0];
+                    $previousValue = $counts[$previousDate] ?? 0;
+                }
+            }
+
+            if ($previousDate !== null) {
+                // Compute diff against the most recent prior value
+                $difference = $todayCount - $previousValue;
+                $updatedFlag = ($difference != 0);
+                $todayUpdates += $difference;
+            } else {
+                // No prior data available -> don't mark as updated and diff is 0
+                $difference = 0;
+                $updatedFlag = false;
+            }
+
             // Store update status for each channel
             $channelUpdateData[$channel] = [
-                'updated' => $difference != 0,
+                'updated' => $updatedFlag,
                 'diff' => $difference
             ];
-            
+
+            // Save today's value (ensures future comparisons)
             $counts[$today] = $todayCount;
             $record->counts = $counts;
             $record->save();
+            
+            // Debug logging for final save
+            Log::info("Final save - Channel: {$channel}, Updated Counts: " . json_encode($counts));
         }
 
-        $data = array_map(function($channelName) use ($livePendingData, $channelUpdateData) {
+        // Get action data for all channels
+        $actionData = ChannelAction::whereIn('channel_name', $channels)
+            ->pluck('action', 'channel_name')
+            ->toArray();
+        
+        $correctionData = ChannelAction::whereIn('channel_name', $channels)
+            ->pluck('correction', 'channel_name')
+            ->toArray();
+
+        $data = array_map(function ($channelName) use ($livePendingData, $channelUpdateData, $actionData, $correctionData) {
             return [
                 'Channel ' => $channelName,
                 'R&A' => false, // placeholder
                 'Live Pending' => $livePendingData[$channelName] ?? 0,
                 'Updated Today' => $channelUpdateData[$channelName]['updated'] ?? false,
                 'Diff' => $channelUpdateData[$channelName]['diff'] ?? 0,
+                'Action' => $actionData[$channelName] ?? '',
+                'Correction action' => $correctionData[$channelName] ?? '',
             ];
         }, $channels);
 
         return view('marketing-masters.live-pending-masters', compact('data', 'totalSkuCount', 'zeroInvCount', 'todayUpdates'));
     }
 
-    public function store(Request $request)
-    {
-        $data = $request->all();
-
-        // Store or update based on channel name
-        $record = ZeroVisibilityMaster::updateOrCreate(
-            ['channel_name' => $data['channel_name']],
-            [
-                'sheet_link' => $data['sheet_link'] ?? null,
-                'is_ra_checked' => $data['is_ra_checked'] ?? false,
-                'total_sku' => $data['total_sku'] ?? 0,
-                'nr' => $data['nr'] ?? 0,
-                'listed_req' => $data['listed_req'] ?? 0,
-                'listed' => $data['listed'] ?? 0,
-                'listing_pending' => $data['listing_pending'] ?? 0,
-                'zero_inv' => $data['zero_inv'] ?? 0,
-                'live_req' => $data['live_req'] ?? 0,
-                'active_and_live' => $data['active_and_live'] ?? 0,
-                'live_pending' => $data['live_pending'] ?? 0,
-                'zero_visibility_sku_count' => $data['zero_visibility_sku_count'] ?? 0,
-                'reason' => $data['reason'] ?? '',
-                'step_taken' => $data['step_taken'] ?? '',
-            ]
-        );
-
-        return response()->json(['message' => 'Saved successfully']);
-
-    }
 
     public function update(Request $request, string $id)
     {
@@ -365,15 +405,15 @@ class ZeroVisibilityMasterController extends Controller
 
         // Filter by date range
         if ($startDate && $endDate) {
-            $counts = array_filter($counts, function($date) use ($startDate, $endDate) {
+            $counts = array_filter($counts, function ($date) use ($startDate, $endDate) {
                 return $date >= $startDate && $date <= $endDate;
             }, ARRAY_FILTER_USE_KEY);
         } else {
             // Default: Show last 7 days
             $today = now()->toDateString();
             $sevenDaysAgo = now()->subDays(6)->toDateString();
-            
-            $counts = array_filter($counts, function($date) use ($sevenDaysAgo, $today) {
+
+            $counts = array_filter($counts, function ($date) use ($sevenDaysAgo, $today) {
                 return $date >= $sevenDaysAgo && $date <= $today;
             }, ARRAY_FILTER_USE_KEY);
         }
@@ -387,14 +427,177 @@ class ZeroVisibilityMasterController extends Controller
         ]);
     }
 
-  
+    public function getAllChannelsChartData(Request $request)
+    {
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
 
+        // Get all channels from DB
+        $channels = MarketplacePercentage::pluck('marketplace')->toArray();
+        
+        // Default: Show last 7 days
+        $today = now()->toDateString();
+        $sevenDaysAgo = now()->subDays(6)->toDateString();
+        
+        if ($startDate && $endDate) {
+            $filterStartDate = $startDate;
+            $filterEndDate = $endDate;
+        } else {
+            $filterStartDate = $sevenDaysAgo;
+            $filterEndDate = $today;
+        }
 
-   
+        $allChannelsData = [];
+        $allDates = [];
 
-   
+        foreach ($channels as $channel) {
+            $record = ChannelDailyCount::where('channel_name', $channel)->first();
+            
+            if ($record && $record->counts) {
+                $counts = $record->counts;
+                ksort($counts); // Sort by date
 
+                // Filter by date range
+                $filteredCounts = array_filter($counts, function ($date) use ($filterStartDate, $filterEndDate) {
+                    return $date >= $filterStartDate && $date <= $filterEndDate;
+                }, ARRAY_FILTER_USE_KEY);
 
+                if (!empty($filteredCounts)) {
+                    $allChannelsData[$channel] = $filteredCounts;
+                    $allDates = array_merge($allDates, array_keys($filteredCounts));
+                }
+            }
+        }
 
+        // Get unique dates and sort them
+        $allDates = array_unique($allDates);
+        sort($allDates);
 
+        // Calculate differences for each channel
+        $datasets = [];
+        $colors = [
+            '#FF0000', '#00FF00', '#FF6B00', '#00BFFF', '#FF1493',
+            '#32CD32', '#FF4500', '#00CED1', '#FF69B4', '#00FA9A',
+            '#DC143C', '#00FF7F', '#FF8C00', '#20B2AA', '#FF6347',
+            '#00FF00', '#FF0000', '#00BFFF', '#FF1493', '#32CD32'
+        ];
+
+        $colorIndex = 0;
+        foreach ($allChannelsData as $channel => $counts) {
+            $differences = [];
+            $previousValue = null;
+            
+            foreach ($allDates as $date) {
+                $currentValue = $counts[$date] ?? 0;
+                
+                if ($previousValue === null) {
+                    // First day - no difference
+                    $differences[] = 0;
+                } else {
+                    // Calculate difference from previous day
+                    $difference = $currentValue - $previousValue;
+                    $differences[] = $difference;
+                }
+                
+                $previousValue = $currentValue;
+            }
+
+            $datasets[] = [
+                'label' => $channel,
+                'data' => $differences,
+                'borderColor' => $colors[$colorIndex % count($colors)],
+                'backgroundColor' => $colors[$colorIndex % count($colors)] . '30',
+                'tension' => 0.1,
+                'fill' => false,
+                'pointRadius' => 6,
+                'pointHoverRadius' => 8,
+                'borderWidth' => 3,
+                'pointBorderWidth' => 3,
+                'pointBackgroundColor' => $colors[$colorIndex % count($colors)],
+                'pointBorderColor' => '#fff'
+            ];
+            $colorIndex++;
+        }
+
+        return response()->json([
+            'dates' => $allDates,
+            'datasets' => $datasets
+        ]);
+    }
+
+    public function saveChannelAction(Request $request)
+    {
+        try {
+            $channel = $request->input('channel');
+            $action = $request->input('action');
+            $correction = $request->input('correction');
+
+            // Save to channel_actions table
+            ChannelAction::updateOrCreate(
+                ['channel_name' => $channel],
+                [
+                    'action' => $action,
+                    'correction' => $correction,
+                    'updated_at' => now()
+                ]
+            );
+
+            Log::info("Action data saved - Channel: {$channel}, Action: {$action}, Correction: {$correction}");
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Action data saved successfully',
+                'data' => [
+                    'channel' => $channel,
+                    'action' => $action,
+                    'correction' => $correction
+                ]
+            ]);
+        } catch (\Exception $e) {
+            Log::error("Error saving action data: " . $e->getMessage());
+            return response()->json([
+                'status' => false,
+                'message' => 'Error saving action data: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function testChannelData()
+    {
+        try {
+            // Get all channels from DB
+            $channels = MarketplacePercentage::pluck('marketplace')->toArray();
+            
+            $livePendingData = [];
+            
+            // Test with sample data for debugging
+            foreach ($channels as $channel) {
+                $livePendingData[$channel] = rand(10, 100); // Random test data
+            }
+            
+            // Save test data
+            $today = now()->toDateString();
+            
+            foreach ($livePendingData as $channel => $count) {
+                $record = ChannelDailyCount::firstOrNew(['channel_name' => $channel]);
+                $counts = $record->counts ?? [];
+                $counts[$today] = $count;
+                $record->counts = $counts;
+                $record->save();
+                
+                Log::info("Test save - Channel: {$channel}, Count: {$count}, Date: {$today}");
+            }
+            
+            return response()->json([
+                'status' => true,
+                'message' => 'Test data saved successfully',
+                'data' => $livePendingData
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

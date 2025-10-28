@@ -9,12 +9,24 @@ use Illuminate\Support\Facades\Log;
 
 class SyncCpMasterToSheet extends Command
 {
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
     protected $signature = 'app:sync-cp-master-to-sheet';
-    protected $description = 'Sync cp_master table with App_data Sheet daily';
-
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Sync CP Master data to Google Sheet via Web App';
+    /**
+     * Execute the console command.
+     */
     public function handle()
     {
-        $sheetUrl = "https://script.google.com/macros/s/AKfycbzRIN8W1lR34BojgJIXJM1pGFAhdm3U1ySpWVz6nfvEGX80pMXSThpABopxJsJYRDSDmw/exec";
+        $sheetUrl = "https://script.google.com/macros/s/AKfycbwSNEsMmMN6mEZ_4Jav55-4YsSErtHtGcDqo-1-ObGlotiRFDddgio_mu-onlc2dFEMKA/exec";
 
         $rows = ProductMaster::select('*', 'Values as values')->get();
         $total = $rows->count();

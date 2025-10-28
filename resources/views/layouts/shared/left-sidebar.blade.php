@@ -2327,6 +2327,9 @@
                                     <li>
                                         <a href="{{ route('walmart.missing.ads') }}">Walmart Missing Ads</a>
                                     </li>
+                                    <li>
+                                        <a href="{{ route('walmart.running.ads') }}">Walmart Running Ads</a>
+                                    </li>
                                 </ul>
                             </div>
                         </li>

@@ -2998,6 +2998,9 @@
                 return;
             }
 
+            const $pushBtn = $('#topPushBtn');
+            $pushBtn.prop('disabled', true).css('opacity', '0.6');
+            
             $.ajax({
                 url: '/pricing-master/save-sprice',
                 type: 'POST',
@@ -3013,13 +3016,19 @@
                 success: function(res) {
                     if (res.status === 200) {
                         alert('Price saved to all marketplaces successfully');
+                        // Set a 7-second timer to re-enable the push button
+                        setTimeout(function() {
+                            $pushBtn.prop('disabled', false).css('opacity', '1');
+                        }, 7000);
                     } else {
                         alert('Failed to save price');
+                        $pushBtn.prop('disabled', false).css('opacity', '1');
                     }
                 },
                 error: function(err) {
                     console.error('Error saving price:', err);
                     alert('Error saving price');
+                    $pushBtn.prop('disabled', false).css('opacity', '1');
                 }
             });
         });

@@ -206,6 +206,7 @@ use App\Http\Controllers\Channels\SetupAccountChannelController;
 use App\Http\Controllers\Channels\ShippingMasterController;
 use App\Http\Controllers\Channels\TrafficMasterController;
 use App\Http\Controllers\Campaigns\EbayMissingAdsController;
+use App\Http\Controllers\Campaigns\WalmartRunningAdsController;
 use App\Http\Controllers\ChannelWiseReviewsController;
 use App\Http\Controllers\FbaDataController;
 use App\Http\Controllers\InventoryManagement\AutoStockBalanceController;
@@ -335,6 +336,8 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::get('/zero-visibility-master', [ZeroVisibilityMasterController::class, 'index'])->name('zero.visibility');
     Route::get('/live-pending-data', [ZeroVisibilityMasterController::class, 'Zeroviewmasters']);
     Route::post('/store-zero-visibility', [ZeroVisibilityMasterController::class, 'store']);
+    Route::post('/save-channel-action', [ZeroVisibilityMasterController::class, 'saveChannelAction'])
+    ->name('save.channel.action');
     Route::get('/show-zero-visibility-data', [ZeroVisibilityMasterController::class, 'getMergedChannelData']);
     Route::get('/export-zero-visibility-csv', [ZeroVisibilityMasterController::class, 'exportCsv'])->name('zero.export.csv');
     Route::post('/update-ra-checkbox', [ZeroVisibilityMasterController::class, 'updateRaCheckbox']);
@@ -2190,6 +2193,10 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
         Route::get('/walmart/missing/ads/data', 'getWalmartMissingAdsData');
     });
 
+    Route::controller(WalmartRunningAdsController::class)->group(function () {
+        Route::get('/walmart/running/ads', 'index')->name('walmart.running.ads');
+        Route::get('/walmart/running/ads/data', 'getWalmartRunningAdsData');
+    });
     // stock missing listing
     Route::controller(MissingListingController::class)->group(function () {
         Route::get('/stock/missing/listing', 'index')->name('view.missing.listing');

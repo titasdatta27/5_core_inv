@@ -84,17 +84,37 @@
                     <tbody>
                         <tr style="background-color:#cfe2f3;" class="accordion-header">
                             <td><b>AMAZON</b></td>
-                            <td></td>
+                            <td>{{ $totalSales }}</td>
                             <td></td>
                             <td></td>
                             <td>{{ $SPEND_L30_total }}</td>
                             <td>{{ $CLICKS_L30_total }}</td>
+                            <td>{{ $SALES_L30_Total }}</td>
+                            <td>
+                                @php
+                                    if($SALES_L30_Total > 0){
+                                        $acos = $SPEND_L30_total/$SALES_L30_Total;
+                                        $acos = number_format($acos, 2);
+                                    }else{
+                                        $acos = 0;
+                                    }
+                                @endphp
+                                {{ '('.$acos.') %'  }}
+                            </td>
                             <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
+                            <td>{{ $SOLD_L30_Total }}</td>
+                            <td>
+                                @php
+                                    if($CLICKS_L30_total > 0){
+                                        $cvr = $SOLD_L30_Total/$CLICKS_L30_total;
+                                        $cvr = number_format($cvr, 2);
+                                    }else{
+                                        $cvr = 0;
+                                    }
+                                @endphp
+                                {{ '('.$cvr.') %' }}
+                            </td>
+                            <td>{{ $totalMissingAds }}</td>
                         </tr>
 
                          <tr class="accordion-body">
@@ -104,12 +124,32 @@
                             <td></td>
                             <td>{{ $kw_spend_L30_total }}</td>
                             <td>{{ $kw_clicks_L30_total }}</td>
+                            <td>{{ $kw_sales_L30_Total }}</td>
+                            <td>
+                                @php
+                                    if($kw_sales_L30_Total > 0){
+                                        $acos = $kw_spend_L30_total/$kw_sales_L30_Total;
+                                        $acos = number_format($acos, 2);
+                                    }else{
+                                        $acos = 0;
+                                    }
+                                @endphp
+                                {{ '('.$acos.') %'  }}
+                            </td>
                             <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
+                            <td>{{ $kw_sold_L30_Total }}</td>
+                            <td>
+                                @php
+                                    if($kw_clicks_L30_total > 0){
+                                        $cvr = $kw_sold_L30_Total/$kw_clicks_L30_total;
+                                        $cvr = number_format($cvr, 2);
+                                    }else{
+                                        $cvr = 0;
+                                    }
+                                @endphp
+                                {{ '('.$cvr.') %' }}
+                            </td>
+                            <td>{{ $kwMissing }}</td>
                         </tr>
 
                          <tr class="accordion-body">
@@ -119,12 +159,32 @@
                             <td></td>
                             <td>{{ $pt_spend_L30_total }}</td>
                             <td>{{ $pt_clicks_L30_total }}</td>
+                            <td>{{ $pt_sales_L30_Total }}</td>
+                            <td>
+                                @php
+                                    if($pt_sales_L30_Total > 0){
+                                        $acos = $pt_spend_L30_total/$pt_sales_L30_Total;
+                                        $acos = number_format($acos, 2);
+                                    }else{
+                                        $acos = 0;
+                                    }
+                                @endphp
+                                {{ '('.$acos.') %'  }}
+                            </td>
                             <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
+                            <td>{{ $pt_sold_L30_Total }}</td>
+                            <td>
+                                @php
+                                    if($pt_clicks_L30_total > 0){
+                                        $cvr = $pt_sold_L30_Total/$pt_clicks_L30_total;
+                                        $cvr = number_format($cvr, 2);
+                                    }else{
+                                        $cvr = 0;
+                                    }
+                                @endphp
+                                {{ '('.$cvr.') %' }}
+                            </td>
+                            <td>{{ $ptMissing }}</td>
                         </tr>
 
                         <tr class="accordion-body">
@@ -134,27 +194,67 @@
                             <td></td>
                             <td>{{ $hl_spend_L30_total }}</td>
                             <td>{{ $hl_clicks_L30_total }}</td>
+                            <td>{{ $hl_sales_L30_Total }}</td>
+                            <td>
+                                @php
+                                    if($hl_sales_L30_Total > 0){
+                                        $acos = $hl_spend_L30_total/$hl_sales_L30_Total;
+                                        $acos = number_format($acos, 2);
+                                    }else{
+                                        $acos = 0;
+                                    }
+                                @endphp
+                                {{ '('.$acos.') %'  }}
+                            </td>
                             <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
+                            <td>{{ $hl_sold_L30_Total }}</td>
+                            <td>
+                                @php
+                                    if($hl_clicks_L30_total > 0){
+                                        $cvr = $hl_sold_L30_Total/$hl_clicks_L30_total;
+                                        $cvr = number_format($cvr, 2); 
+                                    }else{
+                                        $cvr = 0;
+                                    }
+                                @endphp
+                                {{ '('.$cvr.') %' }}
+                            </td>
                             <td></td>
                         </tr>
 
                         <tr style="background-color:#cfe2f3;" class="accordion-header">
                             <td><b>EBAY</b></td>
-                            <td></td>
+                            <td>{{ $totalEbaySales }}</td>
                             <td></td>
                             <td></td>
                             <td>{{ $ebay_SPEND_L30_total }}</td>
                             <td>{{ $ebay_CLICKS_L30_total }}</td>
                             <td>{{ $ebay_SALES_L30_total }}</td>
-                            <td></td>
+                            <td>
+                                @php
+                                    if($ebay_SALES_L30_total > 0){
+                                        $acos = $ebay_SPEND_L30_total/$ebay_SALES_L30_total;
+                                        $acos = number_format($acos, 2);
+                                    }else{
+                                        $acos = 0;
+                                    }
+                                @endphp
+                                {{ '('.$acos.') %'  }}
+                            </td>
                             <td></td>
                             <td>{{ $ebay_SOLD_L30_total }}</td>
-                            <td></td>
-                            <td></td>
+                            <td>
+                                @php
+                                    if($ebay_CLICKS_L30_total > 0){
+                                        $cvr = $ebay_SOLD_L30_total/$ebay_CLICKS_L30_total;
+                                        $cvr = number_format($cvr, 2);
+                                    }else{
+                                        $cvr = 0;
+                                    }
+                                @endphp
+                                {{ '('.$cvr.') %' }}
+                            </td>
+                            <td>{{ $ebaytotalMissingAds }}</td>
                         </tr>
 
                         <tr class="accordion-body">
@@ -165,11 +265,31 @@
                             <td>{{ $ebay_kw_spend_L30_total }}</td>
                             <td>{{ $ebay_kw_clicks_L30_total }}</td>
                             <td>{{ $ebay_kw_sales_L30_total }}</td>
-                            <td></td>
+                            <td>
+                                @php
+                                    if($ebay_kw_sales_L30_total > 0){
+                                        $acos = $ebay_kw_spend_L30_total/$ebay_kw_sales_L30_total;
+                                        $acos = number_format($acos, 2);
+                                    }else{
+                                        $acos = 0;
+                                    }
+                                @endphp
+                                {{ '('.$acos.') %'  }}
+                            </td>
                             <td></td>
                             <td>{{ $ebay_kw_sold_L30_total }}</td>
-                            <td></td>
-                            <td></td>
+                            <td>
+                                @php
+                                    if($ebay_kw_clicks_L30_total > 0){
+                                        $cvr = $ebay_kw_sold_L30_total/$ebay_kw_clicks_L30_total;
+                                        $cvr = number_format($cvr, 2);
+                                    }else{
+                                        $cvr = 0;
+                                    }
+                                @endphp
+                                {{ '('.$cvr.') %' }}
+                            </td>
+                            <td>{{ $ebaykwMissing }}</td>
                         </tr>
 
                         <tr class="accordion-body">
@@ -180,11 +300,31 @@
                             <td>{{ $ebay_pmt_spend_L30_total }}</td>
                             <td>{{ $ebay_pmt_clicks_L30_total }}</td>
                             <td>{{ $ebay_pmt_sales_L30_total }}</td>
-                            <td></td>
+                            <td>
+                                @php
+                                    if($ebay_pmt_sales_L30_total > 0){
+                                        $acos = $ebay_pmt_spend_L30_total/$ebay_pmt_sales_L30_total;
+                                        $acos = number_format($acos, 2);
+                                    }else{
+                                        $acos = 0;
+                                    }
+                                @endphp
+                                {{ '('.$acos.') %'  }}
+                            </td>
                             <td></td>
                             <td>{{ $ebay_pmt_sold_L30_total }}</td>
-                            <td></td>
-                            <td></td>
+                            <td>
+                                @php
+                                    if($ebay_pmt_clicks_L30_total > 0){
+                                        $cvr = $ebay_pmt_sold_L30_total/$ebay_pmt_clicks_L30_total;
+                                        $cvr = number_format($cvr, 2);
+                                    }else{
+                                        $cvr = 0;
+                                    }
+                                @endphp
+                                {{ '('.$cvr.') %' }}
+                            </td>
+                            <td>{{ $ebayptMissing }}</td>
                         </tr>
 
                         <tr style="background-color:#cfe2f3;" class="accordion-header">

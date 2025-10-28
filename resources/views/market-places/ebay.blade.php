@@ -1667,6 +1667,15 @@
                                             <div class="metric-total" id="pft-total">0%</div>
                                         </div>
                                     </th>
+                                    <th data-field="salesTotal" style="vertical-align: middle; white-space: nowrap;">
+                                        <div class="d-flex flex-column align-items-center" style="gap: 4px">
+                                            <div class="d-flex align-items-center">
+                                                TOTAL SALES <span class="sort-arrow">↓</span>
+                                            </div>
+                                            <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
+                                            <div class="metric-total" id="sale-total">0</div>
+                                        </div>
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -2464,6 +2473,7 @@
                                         .SPFT))) ? parseFloat(item.SPFT) : 0,
                                     SROI: (item.SROI !== null && !isNaN(parseFloat(item
                                         .SROI))) ? parseFloat(item.SROI) : 0,
+
                                     LP: item.LP_productmaster || 0,
                                     SHIP: item.Ship_productmaster || 0,
                                     spend_l30: item.spend_l30 || 0,
@@ -3030,7 +3040,9 @@
                         </span>` : ''
                     ));
 
-
+                    $row.append($('<td>').attr('id', `total-sales`).html(
+                        ((item['eBay L30']) * (parseFloat(item['eBay Price']) || 0).toFixed(2))
+                    ));
 
                     $tbody.append($row);
                 });
@@ -5130,7 +5142,8 @@
                         scvrSum: 0,
                         rowCount: 0,
                         listedCount: 0,
-                        liveCount: 0
+                        liveCount: 0,
+                        totalSalesTotal: 0,
                     };
 
                     filteredData.forEach(item => {
@@ -5175,6 +5188,7 @@
                         }
                         metrics.roiSum += parseFloat(item.Roi) || 0;
                         metrics.tacosTotal += parseFloat(item.Tacos30) || 0;
+                        metrics.totalSalesTotal += ((item['eBay L30']) * (parseFloat(item['eBay Price']) || 0));
                         metrics.scvrSum += (Number(item['views']) > 0) ?
                             (Number(item['eBay L30']) / Number(item['views'])) :
                             0;
@@ -5197,6 +5211,7 @@
                     $('#views-total').text(metrics.viewsTotal.toLocaleString());
                     $('#listed-total').text(metrics.listedCount.toLocaleString());
                     $('#live-total').text(metrics.liveCount.toLocaleString());
+                    $('#sale-total').text(metrics.totalSalesTotal.toLocaleString());
 
                     // Calculate and display averages
                     let pftTotal = 0;
