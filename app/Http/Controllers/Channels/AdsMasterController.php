@@ -4223,6 +4223,168 @@ class AdsMasterController extends Controller
 
         
         /** End Total Sales Data ***/
+
+            // 1. Base ProductMaster fetch
+            $productMasters = ProductMaster::orderBy("parent", "asc")
+                ->orderByRaw("CASE WHEN sku LIKE 'PARENT %' THEN 1 ELSE 0 END")
+                ->orderBy("sku", "asc")
+                ->get();
+
+            // 2. SKU list
+            $skus = $productMasters->pluck("sku")
+                ->filter()
+                ->unique()
+                ->values()
+                ->all();
+
+            // 3. Related Models
+            $shopifyData = ShopifySku::whereIn("sku", $skus)
+                ->get()
+                ->keyBy("sku");
+
+            $ebayMetrics = DB::connection('apicentral')->table('ebay_one_metrics')->whereIn('sku', $skus)->get()->keyBy('sku');
+
+            $nrValues = EbayDataView::whereIn("sku", $skus)->pluck("value", "sku");
+
+            $lmpLookup = collect();
+            try {
+                $lmpLookup = DB::connection('repricer')
+                    ->table('lmp_data')
+                    ->select('sku', DB::raw('MIN(price) as lowest_price'))
+                    ->where('price', '>', 0)
+                    ->whereIn('sku', $skus)
+                    ->groupBy('sku')
+                    ->get()
+                    ->keyBy('sku');
+            } catch (Exception $e) {
+                Log::warning('Could not fetch LMP data from repricer database: ' . $e->getMessage());
+            }
+
+            // 5. Marketplace percentage
+            $marketplaceData = MarketplacePercentage::where('marketplace', 'Ebay')->first();
+
+            $percentage = $marketplaceData ? ($marketplaceData->percentage / 100) : 1; 
+            $adUpdates  = $marketplaceData ? $marketplaceData->ad_updates : 0;   
+
+            // 6. Build Result
+            $result = [];
+            $totalEbaySales = 0;
+            foreach ($productMasters as $pm) {
+                $sku = strtoupper($pm->sku);
+                $parent = $pm->parent;
+
+                $shopify = $shopifyData[$pm->sku] ?? null;
+                $ebayMetric = $ebayMetrics[$pm->sku] ?? null;
+
+                $row = [];
+                $row["Parent"] = $parent;
+                $row["(Child) sku"] = $pm->sku;
+                $row['fba'] = $pm->fba;
+
+                // Shopify
+                $row["INV"] = $shopify->inv ?? 0;
+                $row["L30"] = $shopify->quantity ?? 0;
+
+                // eBay Metrics
+                $row["eBay L30"] = $ebayMetric->ebay_l30 ?? 0;
+                $row["eBay L60"] = $ebayMetric->ebay_l60 ?? 0;
+                $row["eBay Price"] = $ebayMetric->ebay_price ?? 0;
+                $row['price_lmpa'] = $ebayMetric->price_lmpa ?? null;
+                $row['eBay_item_id'] = $ebayMetric->item_id ?? null;
+                $row['views'] = $ebayMetric->views ?? 0;
+
+                // LMP data from api_central with link
+                $lmpData = $lmpLookup[$pm->sku] ?? null;
+                $row['lmp_price'] = $lmpData ? $lmpData->lowest_price : null;
+                $row['lmp_link'] = $lmpData ? "https://example.com/lmp/" . $pm->sku : null;
+
+                $row["E Dil%"] = ($row["eBay L30"] && $row["INV"] > 0)
+                    ? round(($row["eBay L30"] / $row["INV"]), 2)
+                    : 0;
+
+                // Initialize ad metrics with zero values since we're using EbayMetric data
+                foreach (['L60', 'L30', 'L7'] as $range) {
+                    foreach (['Imp', 'Clk', 'Ctr', 'Sls', 'GENERAL_SPENT', 'PRIORITY_SPENT'] as $suffix) {
+                        $key = "Pmt{$suffix}{$range}";
+                        $row[$key] = 0;
+                    }
+                }
+
+                // Values: LP & Ship
+                $values = is_array($pm->Values) ? $pm->Values : (is_string($pm->Values) ? json_decode($pm->Values, true) : []);
+                $lp = 0;
+                foreach ($values as $k => $v) {
+                    if (strtolower($k) === "lp") {
+                        $lp = floatval($v);
+                        break;
+                    }
+                }
+                if ($lp === 0 && isset($pm->lp)) {
+                    $lp = floatval($pm->lp);
+                }
+
+                $ship = isset($values["ship"]) ? floatval($values["ship"]) : (isset($pm->ship) ? floatval($pm->ship) : 0);
+
+                // Price and units for calculations
+                $price = floatval($row["eBay Price"] ?? 0);
+
+                $units_ordered_l30 = floatval($row["eBay L30"] ?? 0);
+
+                // Simplified Tacos Formula (no ad spend since using EbayMetric)
+                $row["TacosL30"] = 0;
+
+                // Profit/Sales
+                $row["Total_pft"] = round(($price * $percentage - $lp - $ship) * $units_ordered_l30, 2);
+                $row["T_Sale_l30"] = round($price * $units_ordered_l30, 2);
+                $row["PFT %"] = round(
+                    $price > 0 ? (($price * $percentage - $lp - $ship) / $price) : 0,
+                    2
+                );
+                $row["ROI%"] = round(
+                    $lp > 0 ? (($price * $percentage - $lp - $ship) / $lp) : 0,
+                    2
+                );
+                $row["percentage"] = $percentage;
+                $row['ad_updates'] = $adUpdates;
+                $row["LP_productmaster"] = $lp;
+                $row["Ship_productmaster"] = $ship;
+
+                // NR & Hide
+                $row['NR'] = "";
+                $row['SPRICE'] = null;
+                $row['SPFT'] = null;
+                $row['SROI'] = null;
+                $row['Listed'] = null;
+                $row['Live'] = null;
+                $row['APlus'] = null;
+                $row['spend_l30'] = null;
+                if (isset($nrValues[$pm->sku])) {
+                    $raw = $nrValues[$pm->sku];
+                    if (!is_array($raw)) {
+                        $raw = json_decode($raw, true);
+                    }
+                    if (is_array($raw)) {
+                        $row['NR'] = $raw['NR'] ?? null;
+                        $row['SPRICE'] = $raw['SPRICE'] ?? null;
+                        $row['SPFT'] = $raw['SPFT'] ?? null;
+                        $row['SROI'] = $raw['SROI'] ?? null;
+                        $row['spend_l30'] = $raw['Spend_L30'] ?? null;
+                        $row['Listed'] = isset($raw['Listed']) ? filter_var($raw['Listed'], FILTER_VALIDATE_BOOLEAN) : null;
+                        $row['Live'] = isset($raw['Live']) ? filter_var($raw['Live'], FILTER_VALIDATE_BOOLEAN) : null;
+                        $row['APlus'] = isset($raw['APlus']) ? filter_var($raw['APlus'], FILTER_VALIDATE_BOOLEAN) : null;
+                    }
+                }
+
+                // Image
+                $row["image_path"] = $shopify->image_src ?? ($values["image_path"] ?? ($pm->image_path ?? null));
+
+                $result[] = (object) $row;
+
+                $ebaySales = $row["eBay L30"] * $row["eBay Price"];
+                $totalEbaySales = $totalEbaySales + $ebaySales;
+            }
+
+            /*
             $productMasters = ProductMaster::orderBy("parent", "asc")
                 ->orderByRaw("CASE WHEN sku LIKE 'PARENT %' THEN 1 ELSE 0 END")
                 ->orderBy("sku", "asc")
@@ -4242,6 +4404,7 @@ class AdsMasterController extends Controller
                 $ebaySales = $eBay_L30 * $eBay_Price;
                 $totalEbaySales = $totalEbaySales + $ebaySales;
             }
+            */
 
         /** End Total Sales for Ebay **/
 
