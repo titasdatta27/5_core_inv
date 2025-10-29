@@ -28,6 +28,14 @@
 @section('content')
 @include('layouts.shared.page-title', ['page_title' => 'Purchase', 'sub_title' => 'Purchase'])
 
+@if (Session::has('flash_message'))
+    <div class="alert alert-primary bg-primary text-white alert-dismissible fade show" role="alert"
+        style="background-color: #169e28 !important; color: #fff !important;">
+        {{ Session::get('flash_message') }}
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+@endif
+
 <div class="row">
     <div class="col-12">
         <div class="card shadow-sm">

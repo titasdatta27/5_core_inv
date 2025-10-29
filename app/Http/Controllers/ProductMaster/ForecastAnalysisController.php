@@ -74,7 +74,7 @@ class ForecastAnalysisController extends Controller
         $movementMap = DB::table('movement_analysis')->get()->keyBy(fn($item) => $normalizeSku($item->sku));
         $readyToShipMap = DB::table('ready_to_ship')->where('transit_inv_status', 0)->whereNull('deleted_at')->get()->keyBy(fn($item) => $normalizeSku($item->sku));
         $mfrg = DB::table('mfrg_progress')->get()->keyBy(fn($item) => $normalizeSku($item->sku));
-        $purchases = DB::table('purchases')
+        $purchases = DB::table('purchases')->whereNull('deleted_at')
             ->select('items')
             ->get()
             ->flatMap(function ($row) {

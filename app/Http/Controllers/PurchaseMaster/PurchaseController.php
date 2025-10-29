@@ -10,6 +10,7 @@ use App\Models\Supplier;
 use App\Models\Warehouse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class PurchaseController extends Controller
@@ -23,7 +24,7 @@ class PurchaseController extends Controller
 
     public function store(Request $request)
     {
-        // ✅ Build items array
+        // Build items array
         $items = [];
         $count = count($request->sku ?? []);
 
@@ -36,10 +37,10 @@ class PurchaseController extends Controller
             ];
         }
 
-        // ✅ If id exists → UPDATE
+        // If id exists → UPDATE
         if ($request->purchase_id) {
 
-            $purchase = Purchase::findOrFail($request->id);
+            $purchase = Purchase::findOrFail($request->purchase_id);
 
             $purchase->update([
                 'vo_number'     => $request->vo_number,
@@ -49,10 +50,10 @@ class PurchaseController extends Controller
                 'items'         => json_encode($items),
             ]);
 
-            return redirect()->back()->with('success', 'Purchase updated successfully ✅');
+            return redirect()->back()->with('flash_message', 'Purchase updated successfully ✅');
         }
 
-        // ✅ Else → CREATE new
+        // Else → CREATE new
         Purchase::create([
             'vo_number'     => $request->vo_number,
             'purchase_date' => now()->toDateString(),
@@ -61,10 +62,8 @@ class PurchaseController extends Controller
             'items'         => json_encode($items),
         ]);
 
-        return redirect()->back()->with('success', 'Purchase saved successfully ✅');
+        return redirect()->back()->with('flash_message', 'Purchase saved successfully ✅');
     }
-
-
 
     function generateVoucherNumber()
     {
@@ -140,9 +139,19 @@ class PurchaseController extends Controller
     public function deletePurchase(Request $request)
     {
         $ids = $request->ids;
+
+        $userName = Auth::user()->name;
+
+        Purchase::whereIn('id', $ids)
+            ->update(['deleted_by' => $userName]);
+
         Purchase::whereIn('id', $ids)->delete();
 
-        return response()->json(['success' => true, 'message' => 'Deleted successfully.']);
+        return response()->json([
+            'success' => true,
+            'message' => 'Deleted successfully.'
+        ]);
     }
+
 
 }
