@@ -61,7 +61,6 @@ class FbaDataController extends Controller
             return strtoupper(trim($base));
          });
 
-
          $fbaMonthlySales = FbaMonthlySale::whereRaw("seller_sku LIKE '%FBA%' OR seller_sku LIKE '%fba%'")
          ->get()
          ->keyBy(function ($item) {
@@ -108,8 +107,20 @@ class FbaDataController extends Controller
          $fbaReportsInfo = $fbaReportsData->get($sku);
          $shopifyInfo = $shopifyData->get($sku);
          $product = $productData->get($sku);
+         // dd($product->Values['lp']);
          $monthlySales = $fbaMonthlySales->get($sku);
          $manual = $fbaManualData->get(strtoupper(trim($fba->seller_sku)));
+
+         $PRICE = $fbaPriceInfo ? floatval($fbaPriceInfo->price ?? 0) : 0;
+         $LP = $product ? floatval($product->Values['lp'] ?? 0) : 0;
+         $FBA_SHIP = $fbaReportsInfo ? floatval($fbaReportsInfo->fulfillment_fee ?? 0) : 0;
+         $S_PRICE = $manual ? floatval($manual->data['s_price'] ?? 0) : 0;
+
+         // --- Calculate all profit & ROI metrics ---
+         $pft = ($PRICE > 0) ? (($PRICE * 0.7) - $LP - $FBA_SHIP) / $PRICE : 0;
+         $roi = ($LP > 0) ? (($PRICE * 0.7) - $LP - $FBA_SHIP) / $LP : 0;
+         $spft = ($S_PRICE > 0) ? (($S_PRICE * 0.7) - $LP - $FBA_SHIP) / $S_PRICE : 0;
+         $sroi = ($LP > 0) ? (($S_PRICE * 0.7) - $LP - $FBA_SHIP) / $LP : 0;
 
          return [
             'Parent' => $product ? ($product->parent ?? '') : '',
@@ -122,6 +133,11 @@ class FbaDataController extends Controller
             'Current_Month_Views' => $fbaReportsInfo ? ($fbaReportsInfo->current_month_views ?? 0) : 0,
             'Listed' => $manual ? ($manual->data['listed'] ?? false) : false,
             'Live' => $manual ? ($manual->data['live'] ?? false) : false,
+            'Pft%' => round($pft * 100, 2),
+            'ROI%' => round($roi * 100, 2),
+            'S_Price' => round($S_PRICE, 2),
+            'SPft%' => round($spft * 100, 2),
+            'SROI%' => round($sroi * 100, 2),
             'Fulfillment_Fee' => $fbaReportsInfo ? round(($fbaReportsInfo->fulfillment_fee ?? 0), 2) : 0,
             'ASIN' => $fba->asin,
             'Shopify_INV' => $shopifyInfo ? ($shopifyInfo->quantity ?? 0) : 0,
@@ -440,9 +456,6 @@ class FbaDataController extends Controller
 
       // --- Calculate Live Pending ---
       $livePending = max($listedCount - $liveCount, 0);
-
-      // --- Debugging (optional) ---
-      // dd($listedSkus, $liveSkus, $zeroViewCount, $livePending);
 
       // --- Return Final Counts ---
       return [
