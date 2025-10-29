@@ -9,36 +9,24 @@ use Illuminate\Support\Facades\Log;
 
 class SyncCpMasterToSheet extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'app:sync-cp-master-to-sheet';
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Sync CP Master data to Google Sheet via Web App';
-    /**
-     * Execute the console command.
-     */
+
     public function handle()
     {
-        $sheetUrl = "https://script.google.com/macros/s/AKfycbwSNEsMmMN6mEZ_4Jav55-4YsSErtHtGcDqo-1-ObGlotiRFDddgio_mu-onlc2dFEMKA/exec";
+        $sheetUrl = "https://script.google.com/macros/s/AKfycbypyTELRP5TTc-SD3ZXl6nT0BhD1yzdeubcVXBTrZgKvheKuUY2PfuLgDwdLc8Bz5AtYg/exec";   // ✅ Change
 
         $rows = ProductMaster::select('*', 'Values as values')->get();
         $total = $rows->count();
         $batchSize = 400;
         $batches = ceil($total / $batchSize);
 
-        Log::info("Starting sync to Google Sheet: {$total} rows in {$batches} batches");
+        Log::info("✅ Starting sync: {$total} rows → {$batches} batches");
 
-        $chunked = $rows->chunk($batchSize);
         $inserted = 0;
 
-        foreach ($chunked as $index => $chunk) {
+        foreach ($rows->chunk($batchSize) as $index => $chunk) {
+
             $formatted = [];
 
             foreach ($chunk as $row) {
@@ -75,23 +63,65 @@ class SyncCpMasterToSheet extends Command
                 ];
             }
 
+            /* ✅ Log sample request for first batch */
+            if ($index === 0) {
+                Log::info("✅ Sample SEND Payload", [
+                    "sample" => array_slice($formatted, 0, 3)
+                ]);
+            }
+
             try {
-                $response = Http::timeout(60)->post($sheetUrl, ['data' => $formatted]);
+
+                $response = Http::withHeaders([
+                    "Content-Type" => "application/json"
+                ])->timeout(90)
+                ->post($sheetUrl, [
+                    "data" => $formatted
+                ]);
+
+                Log::info("📥 Raw Batch Response", [
+                    "batch"  => $index + 1,
+                    "status" => $response->status(),
+                    "raw"    => $response->body()
+                ]);
+
                 $body = $response->json();
 
-                if ($response->successful() && ($body['success'] ?? false)) {
-                    $inserted += count($formatted);
-                    Log::info("Batch " . ($index + 1) . "/{$batches} synced: " . count($formatted) . " rows inserted.");
-                } else {
-                    Log::error("Batch " . ($index + 1) . " failed: " . $response->body());
+                if (!$body) {
+                    Log::error("❌ Invalid JSON Received", [
+                        "batch" => $index + 1,
+                        "raw"   => $response->body()
+                    ]);
                 }
 
-                sleep(2);
-            } catch (\Exception $e) {
-                Log::error("Batch " . ($index + 1) . " exception: " . $e->getMessage());
+                if ($response->successful() && ($body['success'] ?? false)) {
+
+                    Log::info("✅ Batch " . ($index + 1) . " / $batches success", [
+                        "received" => $body["received"] ?? 0,
+                        "updated" => $body["updated"] ?? 0,
+                        "inserted" => $body["inserted"] ?? 0
+                    ]);
+
+                    $inserted += count($formatted);
+
+                } else {
+                    Log::error("❌ Batch " . ($index + 1) . " FAILED", [
+                        "status" => $response->status(),
+                        "json"   => $body,
+                        "raw"    => $response->body()
+                    ]);
+                }
+
+                sleep(1);
+
+            } catch (\Throwable $e) {
+                Log::error("❌ Batch Exception", [
+                    "batch" => $index + 1,
+                    "msg" => $e->getMessage(),
+                ]);
             }
         }
 
-        Log::info("Sync completed: {$inserted} / {$total} rows inserted.");
+        Log::info("✅ Final Result: {$inserted} / {$total} uploaded.");
     }
 }
