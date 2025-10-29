@@ -2156,14 +2156,7 @@
 
         // Marketplace table generator
         function buildOVL30Table(data) {
-            console.log('Data LMP:', data.lmp, 'Data Link:', data.link);
-            console.log('Channel Links:', {
-                amz: data.link_amz,
-                ebay: data.link_ebay,
-                shein: data.link_shein,
-                tiktok: data.link_tiktok,
-                aliexpress: data.link_aliexpress
-            });
+         
           const rows = [
                 { label: "Amazon", prefix: "amz", logo: "{{ asset('uploads/amazon.png') }}" },
                 { label: "eBay", prefix: "ebay", logo:  "{{ asset('uploads/1.png') }}" },
@@ -2395,28 +2388,43 @@
                     <td>
                         <div class="value-indicator d-flex align-items-center">
                             ${(() => {
-                                let priceValue = r.prefix === 'amz' ? data.price_lmpa 
-                                    : r.prefix === 'ebay' ? data.ebay_price_lmpa 
-                                    : r.prefix === 'shein' ? data.lmp 
-                                    : r.prefix === 'tiktok' ? data.tiktok_price_lmpa 
-                                    : r.prefix === 'aliexpress' ? data.aliexpress_price_lmpa 
-                                    : r.prefix === 'walmart' ? data.walmart_price_lmpa 
-                                    : '-';
-                                let link = r.prefix === 'amz' ? data.link_amz 
-                                    : r.prefix === 'ebay' ? data.link_ebay 
-                                    : r.prefix === 'shein' ? data.link_shein 
-                                    : r.prefix === 'tiktok' ? data.link_tiktok 
-                                    : r.prefix === 'aliexpress' ? data.link_aliexpress 
-                                    : r.prefix === 'walmart' ? data.link_walmart : null;
-
-                                // show LMP value + link + eye button to open LMP history modal
-                                return `
-                                    <div>${fmtMoney(priceValue)}</div>
-                                    ${link && priceValue !== '-' ? `<a href="${link}" target="_blank" class="ms-1"><i class="bi bi-link"></i></a>` : ''}
-                                    <button class="btn btn-link btn-sm p-0 ms-2" onclick="event.stopPropagation(); showLmpData('${data.SKU}', '${r.prefix}')" title="View LMP History">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                `;
+                                // Only show LMP for specific channels with their rightful sources
+                                if (r.prefix === 'amz') {
+                                    const priceValue = data.price_lmpa;
+                                    const link = data.link_amz;
+                                    if (priceValue && Number(priceValue) > 0) {
+                                        return `
+                                            <div>${fmtMoney(priceValue)}</div>
+                                            ${link ? `<a href="${link}" target="_blank" class="ms-1"><i class=\"bi bi-link\"></i></a>` : ''}
+                                            <button class="btn btn-link btn-sm p-0 ms-2" onclick="event.stopPropagation(); showLmpData('${data.SKU}', 'amz')" title="View LMP History"><i class="fas fa-eye"></i></button>
+                                        `;
+                                    }
+                                    return '-';
+                                }
+                                if (r.prefix === 'ebay') {
+                                    const priceValue = data.ebay_price_lmpa;
+                                    const link = data.link_ebay;
+                                    if (priceValue && Number(priceValue) > 0) {
+                                        return `
+                                            <div>${fmtMoney(priceValue)}</div>
+                                            ${link ? `<a href="${link}" target="_blank" class="ms-1"><i class=\"bi bi-link\"></i></a>` : ''}
+                                            <button class="btn btn-link btn-sm p-0 ms-2" onclick="event.stopPropagation(); showLmpData('${data.SKU}', 'ebay')" title="View LMP History"><i class="fas fa-eye"></i></button>
+                                        `;
+                                    }
+                                    return '-';
+                                }
+                                if (r.prefix === 'shein') {
+                                    const priceValue = data.lmp;
+                                    const link = data.link_shein;
+                                    if (priceValue && Number(priceValue) > 0) {
+                                        return `
+                                            <div>${fmtMoney(priceValue)}</div>
+                                            ${link ? `<a href="${link}" target="_blank" class="ms-1"><i class=\"bi bi-link\"></i></a>` : ''}
+                                        `; // No eye button for Shein (sheet-based, not repricer history)
+                                    }
+                                    return '-';
+                                }
+                                return '-';
                             })()}
                         </div>
                     </td>
