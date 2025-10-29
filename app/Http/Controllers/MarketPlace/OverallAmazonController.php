@@ -156,12 +156,6 @@ class OverallAmazonController extends Controller
                 return $campaignName === $cleanSku;
             });
 
-            $lowestPrice = DB::connection('repricer_5core')
-                ->table('lmpa_data')
-                ->where('sku', $sku)
-                ->where('price', '>', 0)
-                ->min('price');
-
             $row = [];
             $row['parent'] = $parent;
             $row['sku']    = $pm->sku;
@@ -186,12 +180,6 @@ class OverallAmazonController extends Controller
                 $row['price_lmpa'] = $amazonSheet->price_lmpa;
                 $row['sessions_l60'] = $amazonSheet->sessions_l60;
                 $row['units_ordered_l60'] = $amazonSheet->units_ordered_l60;
-            }
-
-            if ($lowestPrice) {
-                $row['lmp'] = $lowestPrice;
-            } else {
-                $row['lmp'] = 0;
             }
 
             $values = is_array($pm->Values) ? $pm->Values : (is_string($pm->Values) ? json_decode($pm->Values, true) : []);
@@ -243,6 +231,22 @@ class OverallAmazonController extends Controller
                     $row['NRA'] = $raw['NRA'] ?? null;
                     $row['FBA'] = $raw['FBA'] ?? null;
                     $row['TPFT'] = $raw['TPFT'] ?? null;
+                }
+            }
+
+            $prices = DB::connection('repricer')
+                ->table('lmpa_data')
+                ->where('sku', $sku)
+                ->where('price', '>', 0)
+                ->orderBy('price', 'asc')
+                ->pluck('price')
+                ->toArray();
+
+            for ($i = 0; $i <= 11; $i++) {
+                if ($i == 0) {
+                    $row['lmp'] = $prices[$i] ?? 0;
+                } else {
+                    $row['lmp_' . $i] = $prices[$i] ?? 0;
                 }
             }
 

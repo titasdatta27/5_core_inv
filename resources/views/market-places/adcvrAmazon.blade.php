@@ -729,6 +729,70 @@
                     {
                         title: "LMP",
                         field: "lmp",
+                        formatter: function(cell) {
+                            let lmp = cell.getValue();
+                            return `
+                                <span>${lmp}</span>
+                                <i class="fa fa-info-circle text-primary toggle-lmp-cols-btn" 
+                                data-lmp="${lmp}" 
+                                style="cursor:pointer; margin-left:8px;"></i>
+                            `;
+                        }
+                    },
+                    {
+                        title: "LMP 1",
+                        field: "lmp_1",
+                        visible: false
+                    },
+                    {
+                        title: "LMP 2",
+                        field: "lmp_2",
+                        visible: false
+                    },
+                    {
+                        title: "LMP 3",
+                        field: "lmp_3",
+                        visible: false
+                    },
+                    {
+                        title: "LMP 4",
+                        field: "lmp_4",
+                        visible: false
+                    },
+                    {
+                        title: "LMP 5",
+                        field: "lmp_5",
+                        visible: false
+                    },
+                    {
+                        title: "LMP 6",
+                        field: "lmp_6",
+                        visible: false
+                    },
+                    {
+                        title: "LMP 7",
+                        field: "lmp_7",
+                        visible: false
+                    },
+                    {
+                        title: "LMP 8",
+                        field: "lmp_8",
+                        visible: false
+                    },
+                    {
+                        title: "LMP 9",
+                        field: "lmp_9",
+                        visible: false
+                    },
+                    {
+                        title: "LMP 10",
+                        field: "lmp_10",
+                        visible: false
+                    },
+                    {
+                        title: "LMP 11",
+                        field: "lmp_11",
+                        visible: false
                     },
                 ],
                 ajaxResponse: function(url, params, response) {
@@ -880,6 +944,21 @@
                     let btn = e.target;
 
                     let colsToToggle = ["INV", "L30", "DIL %", "A_L90", "A DIL %", "NRL", "NRA", "FBA"];
+
+                    colsToToggle.forEach(colName => {
+                        let col = table.getColumn(colName);
+                        if (col) {
+                            col.toggle();
+                        }
+                    });
+                }
+            });
+
+            document.addEventListener("click", function(e) {
+                if (e.target.classList.contains("toggle-lmp-cols-btn")) {
+                    let btn = e.target;
+
+                    let colsToToggle = ["lmp_1", "lmp_2", "lmp_3", "lmp_4", "lmp_5", "lmp_6", "lmp_7", "lmp_8", "lmp_9", "lmp_10", "lmp_11"];
 
                     colsToToggle.forEach(colName => {
                         let col = table.getColumn(colName);
