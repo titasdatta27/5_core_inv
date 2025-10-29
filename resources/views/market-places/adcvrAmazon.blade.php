@@ -326,7 +326,7 @@
                             const l90 = parseFloat(data.L90);
                             const inv = parseFloat(data.INV);
 
-                            if (!isNaN(l30) && !isNaN(inv) && inv !== 0) {
+                            if (!isNaN(l90) && !isNaN(inv) && inv !== 0) {
                                 const dilDecimal = (l90 / inv);
                                 const color = getDilColor(dilDecimal);
                                 return `<div class="text-center"><span class="dil-percent-value ${color}">${Math.round(dilDecimal * 100)}%</span></div>`;
@@ -605,9 +605,12 @@
                         field: "PFT_percentage",
                         hozAlign: "center",
                         formatter: function(cell){
+                            let value = parseFloat(cell.getValue()) || 0;
+                            let pft = value.toFixed(0);
+
                             return `
-                                <span class="dil-percent-value ${getPftColor(item['PFT_percentage'])}">
-                                    ${Math.round(item['PFT_percentage'])}%
+                                <span class="dil-percent-value">
+                                    ${pft}%
                                 </span>
                             `;
                         }
@@ -617,17 +620,17 @@
                         field: "gpft",
                         hozAlign: "center",
                         formatter: function(cell){
-                            let ship = Number(data.SHIP) || 0;
-                            let lp = Number(data.LP) || 0;
+                            let ship = Number(cell.getRow().getData().SHIP) || 0;
+                            let lp = Number(cell.getRow().getData().LP) || 0;
 
-                            const spend = parseFloat(data['Spend']) || 0;
-                            const aL90 = Number(data['A L90']) || 0;
-                            const price = Number(data.price) || 0;
+                            const spend = parseFloat(cell.getRow().getData()['spend_l90']) || 0;
+                            const aL90 = Number(cell.getRow().getData()['A_L90']) || 0;
+                            const price = Number(cell.getRow().getData().price) || 0;
                             const amazonAdUpdates = {{ $amazonAdUpdates ?? 0 }};
 
                             let percentage = {{ $amazonPercentage ?? 0 }};
                             let costPercentage = (percentage + amazonAdUpdates) / 100; 
-                            let netPft = (price * costPercentage) - ship - lp - (spend / aL30);
+                            let netPft = (price * costPercentage) - ship - lp - (spend / aL90);
                             
                             const totalAmazonPercentage = (percentage - amazonAdUpdates) / 100;
                             const netGpft = (price * totalAmazonPercentage) - ship - lp;
@@ -638,7 +641,7 @@
                             }
 
                             return `
-                                <span class="dil-percent-value ${getPftColor(gPft)}">
+                                <span class="dil-percent-value">
                                     ${gPft.toFixed(0)}%
                                 </span>
                             `;
