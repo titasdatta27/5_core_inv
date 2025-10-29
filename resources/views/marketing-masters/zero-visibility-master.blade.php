@@ -583,7 +583,6 @@
                         <th>SL</th>
                         <th>Channel</th>
                         <th>R&A</th>
-                        <th>Live Pending</th>
                         <th>Zero Visibility SKU Count</th>
                     </tr>
                 </thead>
@@ -862,15 +861,6 @@
                    
                     
                     {
-                        data: 'Live Pending',
-                        title: 'Live Pending',
-                        render: function(data, type, row, meta) {
-                            if (type === 'sort' || type === 'type') return data;
-                            return `<span class="live-pending" data-row="${meta.row}">${data ?? 0}</span>`;
-                           
-                        }
-                    },
-                    {
                         data: 'Zero Visibility SKU Count',
                         title: 'Zero Visibility SKU Count',
                         render: function(data, type, row, meta) {
@@ -891,17 +881,10 @@
                     });
 
                      // Calculate totals for Live Pending & Zero Visibility SKU Count
-                    let livePendingTotal = api.column(3, { search: 'applied' }).data()
+                    let zeroVisibilityTotal = api.column(3, { search: 'applied' }).data()
                         .reduce((a, b) => (parseInt(a) || 0) + (parseInt(b) || 0), 0);
-
-                    let zeroVisibilityTotal = api.column(4, { search: 'applied' }).data()
-                        .reduce((a, b) => (parseInt(a) || 0) + (parseInt(b) || 0), 0);
-
-                    // Insert totals into header cells (the blank red boxes)
-                    let livePendingHeader = api.column(3).header();
-                    let zeroVisibilityHeader = api.column(4).header();
-
-                    jq(livePendingHeader).html('Live Pending<br><span style="color:white; font-weight:bold; font-size:1rem;">' + livePendingTotal + '</span>');
+                    // Insert totals into header cell
+                    let zeroVisibilityHeader = api.column(3).header();
                     jq(zeroVisibilityHeader).html('Zero Visibility SKU Count<br><span style="color:white; font-weight:bold; font-size:1rem;">' + zeroVisibilityTotal + '</span>');
                 },
                 responsive: true,
