@@ -156,6 +156,12 @@ class OverallAmazonController extends Controller
                 return $campaignName === $cleanSku;
             });
 
+            $lowestPrice = DB::connection('repricer_5core')
+                ->table('lmpa_data')
+                ->where('sku', $sku)
+                ->where('price', '>', 0)
+                ->min('price');
+
             $row = [];
             $row['parent'] = $parent;
             $row['sku']    = $pm->sku;
@@ -180,6 +186,12 @@ class OverallAmazonController extends Controller
                 $row['price_lmpa'] = $amazonSheet->price_lmpa;
                 $row['sessions_l60'] = $amazonSheet->sessions_l60;
                 $row['units_ordered_l60'] = $amazonSheet->units_ordered_l60;
+            }
+
+            if ($lowestPrice) {
+                $row['lmp'] = $lowestPrice;
+            } else {
+                $row['lmp'] = 0;
             }
 
             $values = is_array($pm->Values) ? $pm->Values : (is_string($pm->Values) ? json_decode($pm->Values, true) : []);

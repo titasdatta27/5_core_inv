@@ -726,6 +726,10 @@
                             `;
                         }
                     },
+                    {
+                        title: "LMP",
+                        field: "lmp",
+                    },
                 ],
                 ajaxResponse: function(url, params, response) {
                     return response.data;
