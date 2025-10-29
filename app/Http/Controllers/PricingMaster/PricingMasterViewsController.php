@@ -2069,12 +2069,6 @@ class PricingMasterViewsController extends Controller
         }
     }
 
-    /**
-     * Return LMP history for a given SKU and channel from repricer DB.
-     * - For Amazon (channel: amz) we read from lmpa_data
-     * - For other channels we read from lmp_data
-     * Only non-zero prices are returned, ordered by price ASC
-     */
     public function getLmpHistory(Request $request)
     {
         $request->validate([
