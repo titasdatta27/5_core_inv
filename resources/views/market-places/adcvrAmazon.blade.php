@@ -1,4 +1,4 @@
-@extends('layouts.vertical', ['title' => 'Amazon - ACOS CONTROL KW', 'mode' => $mode ?? '', 'demo' => $demo ?? ''])
+@extends('layouts.vertical', ['title' => 'Amazon - AD CVR', 'mode' => $mode ?? '', 'demo' => $demo ?? ''])
 @section('css')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator.min.css" rel="stylesheet">
@@ -608,8 +608,20 @@
                             let value = parseFloat(cell.getValue()) || 0;
                             let pft = value.toFixed(0);
 
+                            if (pft < 10) {
+                                color = "red";
+                            } else if (pft >= 10 && pft < 15) {
+                                color = "yellow";
+                            } else if (pft >= 15 && pft < 20) {
+                                color = "blue";
+                            } else if (pft >= 20 && pft <= 40) {
+                                color = "green";
+                            } else if (pft > 40) {
+                                color = "pink";
+                            }
+
                             return `
-                                <span class="dil-percent-value">
+                                <span class="dil-percent-value ${color}">
                                     ${pft}%
                                 </span>
                             `;
@@ -640,8 +652,20 @@
                                 gPft = 0;
                             }
 
+                            if (gPft < 10) {
+                                color = "red";
+                            } else if (gPft >= 10 && gPft < 15) {
+                                color = "yellow";
+                            } else if (gPft >= 15 && gPft < 20) {
+                                color = "blue";
+                            } else if (gPft >= 20 && gPft <= 40) {
+                                color = "green";
+                            } else if (gPft > 40) {
+                                color = "pink";
+                            }
+
                             return `
-                                <span class="dil-percent-value">
+                                <span class="dil-percent-value ${color}">
                                     ${gPft.toFixed(0)}%
                                 </span>
                             `;
@@ -682,6 +706,25 @@
                     {
                         title: "CVR%",
                         field: "cvr_l90",
+                        formatter: function(cell){
+                            let value = parseFloat(cell.getValue()) || 0;
+                            let cvr = value.toFixed(0);
+                            let color = "";
+
+                            if (value < 5) {
+                                color = "red";
+                            } else if (value >= 5 && value <= 10) {
+                                color = "green";
+                            } else if (value > 10) {
+                                color = "pink";
+                            }
+
+                            return `
+                                <span class="dil-percent-value ${color}">
+                                    ${cvr}%
+                                </span>
+                            `;
+                        }
                     },
                 ],
                 ajaxResponse: function(url, params, response) {
