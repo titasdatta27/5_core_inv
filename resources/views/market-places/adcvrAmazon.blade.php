@@ -314,8 +314,8 @@
                         visible: false
                     },
                     {
-                        title: "OV L90",
-                        field: "L90",
+                        title: "OV L30",
+                        field: "L30",
                         visible: false
                     },
                     {
@@ -323,11 +323,11 @@
                         field: "DIL %",
                         formatter: function(cell) {
                             const data = cell.getData();
-                            const l90 = parseFloat(data.L90);
+                            const l30 = parseFloat(data.L30);
                             const inv = parseFloat(data.INV);
 
-                            if (!isNaN(l90) && !isNaN(inv) && inv !== 0) {
-                                const dilDecimal = (l90 / inv);
+                            if (!isNaN(l30) && !isNaN(inv) && inv !== 0) {
+                                const dilDecimal = (l30 / inv);
                                 const color = getDilColor(dilDecimal);
                                 return `<div class="text-center"><span class="dil-percent-value ${color}">${Math.round(dilDecimal * 100)}%</span></div>`;
                             }
@@ -459,7 +459,7 @@
                     },
                     {
                         title: "ACOS L90",
-                        field: "acosL90",
+                        field: "acos_L90",
                         hozAlign: "right",
                         formatter: function(cell) {
                             return `
@@ -832,7 +832,7 @@
                 if (e.target.classList.contains("toggle-cols-btn")) {
                     let btn = e.target;
 
-                    let colsToToggle = ["INV", "L90", "DIL %", "A_L90", "A DIL %", "NRL", "NRA", "FBA"];
+                    let colsToToggle = ["INV", "L30", "DIL %", "A_L90", "A DIL %", "NRL", "NRA", "FBA"];
 
                     colsToToggle.forEach(colName => {
                         let col = table.getColumn(colName);
