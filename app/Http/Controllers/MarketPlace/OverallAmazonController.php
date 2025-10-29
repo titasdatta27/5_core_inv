@@ -234,6 +234,22 @@ class OverallAmazonController extends Controller
                 }
             }
 
+            $prices = DB::connection('repricer')
+                ->table('lmpa_data')
+                ->where('sku', $sku)
+                ->where('price', '>', 0)
+                ->orderBy('price', 'asc')
+                ->pluck('price')
+                ->toArray();
+
+            for ($i = 0; $i <= 11; $i++) {
+                if ($i == 0) {
+                    $row['lmp'] = $prices[$i] ?? 0;
+                } else {
+                    $row['lmp_' . $i] = $prices[$i] ?? 0;
+                }
+            }
+
             if ($row['NRA'] !== 'NRA' && $row['campaignName'] !== '') {
                 $result[] = (object) $row;
             }
