@@ -740,57 +740,57 @@
                         }
                     },
                     {
-                        title: "LMP 1",
+                        title: "PRICE 1",
                         field: "lmp_1",
                         visible: false
                     },
                     {
-                        title: "LMP 2",
+                        title: "PRICE 2",
                         field: "lmp_2",
                         visible: false
                     },
                     {
-                        title: "LMP 3",
+                        title: "PRICE 3",
                         field: "lmp_3",
                         visible: false
                     },
                     {
-                        title: "LMP 4",
+                        title: "PRICE 4",
                         field: "lmp_4",
                         visible: false
                     },
                     {
-                        title: "LMP 5",
+                        title: "PRICE 5",
                         field: "lmp_5",
                         visible: false
                     },
                     {
-                        title: "LMP 6",
+                        title: "PRICE 6",
                         field: "lmp_6",
                         visible: false
                     },
                     {
-                        title: "LMP 7",
+                        title: "PRICE 7",
                         field: "lmp_7",
                         visible: false
                     },
                     {
-                        title: "LMP 8",
+                        title: "PRICE 8",
                         field: "lmp_8",
                         visible: false
                     },
                     {
-                        title: "LMP 9",
+                        title: "PRICE 9",
                         field: "lmp_9",
                         visible: false
                     },
                     {
-                        title: "LMP 10",
+                        title: "PRICE 10",
                         field: "lmp_10",
                         visible: false
                     },
                     {
-                        title: "LMP 11",
+                        title: "PRICE 11",
                         field: "lmp_11",
                         visible: false
                     },
