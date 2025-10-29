@@ -409,12 +409,12 @@
                                 <i class="fas fa-plus me-1"></i> ADD PRODUCT
                             </button>
 
-                        <button id="missingImagesBtn" class="btn btn-warning ms-2">
-                            <i class="bi bi-image"></i> Show Missing Data
-                        </button>
-
                         <button type="button" class="btn btn-success ms-2" id="downloadExcel">
                             <i class="fas fa-file-excel me-1"></i> Download Excel
+                        </button>
+
+                        <button id="missingImagesBtn" class="btn btn-success ms-2">
+                            <i class="bi bi-image"></i> Show Missing Data
                         </button>
 
                         <button type="button" class="btn btn-success ms-2" id="viewArchivedBtn">
@@ -436,6 +436,15 @@
                                 </h5>
                                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
+                            <!-- Search Bar -->
+                            <div class="px-4 pt-3 pb-2 bg-light border-bottom">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-success border-0">
+                                        <i class="fas fa-search"></i>
+                                    </span>
+                                    <input type="text" id="archivedSearch" class="form-control border-0 shadow-none" placeholder="Search by SKU...">
+                                </div>
+                            </div>
                             <div class="modal-body p-0">
                                 <div class="table-responsive">
                                 <table class="table table-striped table-hover mb-0" id="archivedProductsTable">
@@ -444,6 +453,7 @@
                                         <th>ID</th>
                                         <th>SKU</th>
                                         {{-- <th>Product Name</th> --}}
+                                        <th>Archived By</th>
                                         <th>Archived At</th>
                                         <th>Actions</th>
                                     </tr>
@@ -2092,11 +2102,14 @@
                             return;
                         }
 
+                        res.data.sort((a, b) => new Date(b.deleted_at) - new Date(a.deleted_at));
+
                         res.data.forEach(product => {
                             tableBody.append(`
                                 <tr>
                                     <td>${product.id}</td>
                                     <td>${product.sku}</td>
+                                    <td>${product.deleted_by_name || '-'}</td> 
                                     <td>${product.deleted_at ? new Date(product.deleted_at).toLocaleString() : '-'}</td>
                                     <td>
                                         <button class="btn btn-sm btn-success restore-btn" data-id="${product.id}">
@@ -2141,6 +2154,17 @@
                 const modal = new bootstrap.Modal(document.getElementById('archivedProductsModal'));
                 modal.show();
             });
+
+            // Live search for archived products
+            $(document).on('keyup', '#archivedSearch', function() {
+                const searchValue = $(this).val().toLowerCase().trim();
+
+                $('#archivedProductsTable tbody tr').each(function() {
+                    const sku = $(this).find('td:nth-child(2)').text().toLowerCase();
+                    $(this).toggle(sku.includes(searchValue));
+                });
+            });
+
 
 
             function setupSelectFilter(){

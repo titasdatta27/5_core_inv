@@ -105,6 +105,50 @@
                         hozAlign: "center"
                     },
                     {
+                        title: "Pft%",
+                        field: "Pft%",
+                        hozAlign: "center"
+                    },
+                    {
+                        title: "ROI%",
+                        field: "ROI%",
+                        hozAlign: "center"
+                    },
+                    {
+                        title: "S Price",
+                        field: "S_Price",
+                        hozAlign: "center",
+                        editor: "input",
+                        cellEdited: function(cell) {
+                            var data = cell.getRow().getData();
+                            var value = cell.getValue();
+
+                            $.ajax({
+                            url: '/update-fba-manual-data',
+                            method: 'POST',
+                            data: {
+                                sku: data.FBA_SKU,
+                                field: 's_price',
+                                value: value,
+                                _token: '{{ csrf_token() }}'
+                            },
+                            success: function() {
+                                table.replaceData(); // reload to recalc PFT, ROI etc.
+                            }
+                            });
+                        }
+                    },
+                    {
+                        title: "SPft%",
+                        field: "SPft%",
+                        hozAlign: "center"
+                    },
+                    {
+                        title: "SROI%",
+                        field: "SROI%",
+                        hozAlign: "center"
+                    },
+                    {
                         title: "Listed",
                         field: "Listed",
                         formatter: "tickCross",

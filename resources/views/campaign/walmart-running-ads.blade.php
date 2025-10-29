@@ -1,4 +1,4 @@
-@extends('layouts.vertical', ['title' => 'Ebay3 Running Ads', 'mode' => $mode ?? '', 'demo' => $demo ?? ''])
+@extends('layouts.vertical', ['title' => 'Walmart Running Ads', 'mode' => $mode ?? '', 'demo' => $demo ?? ''])
 @section('css')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator.min.css" rel="stylesheet">
@@ -121,8 +121,8 @@
 @endsection
 @section('content')
     @include('layouts.shared.page-title', [
-        'page_title' => 'Ebay3 Running Ads',
-        'sub_title' => 'Ebay3 Running Ads',
+        'page_title' => 'Walmart Running Ads',
+        'sub_title' => 'Walmart Running Ads',
     ])
     <div class="row">
         <div class="col-12">
@@ -219,7 +219,7 @@
 
             var table = new Tabulator("#budget-under-table", {
                 index: "sku",
-                ajaxURL: "/ebay-3/ad-running/data",
+                ajaxURL: "/walmart/running/ads/data",
                 layout: "fitDataFill",
                 movableColumns: true,
                 resizableColumns: true,
@@ -336,18 +336,8 @@
                             return `
                                 <span>${parseFloat(KW_SPEND_L30).toFixed(0)}</span>
                             `;
-                        }
-                    },
-                    {
-                        title: 'PMT Spend L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="pmt-spend-l30-total" style="display:inline-block; margin-top:2px;"></span>',
-                        field: "pmt_spend_L30",
-                        visible: false,
-                        formatter: function(cell) {
-                            let PMT_SPEND_L30 = cell.getValue() || 0;
-                            return `
-                                <span>${parseFloat(PMT_SPEND_L30).toFixed(0)}</span>
-                            `;
-                        }
+                        },
+                        visible: false
                     },
                     {
                         title: 'SPEND L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="spend-l7-total" style="display:inline-block; margin-top:2px;"></span>',
@@ -371,18 +361,8 @@
                             return `
                                 <span>${parseFloat(KW_SPEND_L7).toFixed(0)}</span>
                             `;
-                        }
-                    },
-                    {
-                        title: 'PMT Spend L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="pmt-spend-l7-total" style="display:inline-block; margin-top:2px;"></span>',
-                        field: "pmt_spend_L7",
-                        visible: false,
-                        formatter: function(cell) {
-                            let PMT_SPEND_L7 = cell.getValue() || 0;
-                            return `
-                                <span>${parseFloat(PMT_SPEND_L7).toFixed(0)}</span>
-                            `;
-                        }
+                        },
+                        visible: false
                     },
                     {
                         title: 'SOLD L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="sold-l30-total" style="display:inline-block; margin-top:2px;"></span>',
@@ -406,18 +386,8 @@
                             return `
                                 <span>${parseFloat(KW_SOLD_L30).toFixed(0)}</span>
                             `;
-                        }
-                    },
-                    {
-                        title: 'PMT Sold L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="pmt-sold-l30-total" style="display:inline-block; margin-top:2px;"></span>',
-                        field: "pmt_sold_L30",
-                        visible: false,
-                        formatter: function(cell) {
-                            let PMT_SOLD_L30 = cell.getValue() || 0;
-                            return `
-                                <span>${parseFloat(PMT_SOLD_L30).toFixed(0)}</span>
-                            `;
-                        }
+                        },
+                        visible: false
                     },
                     {
                         title: 'SOLD L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="sold-l7-total" style="display:inline-block; margin-top:2px;"></span>',
@@ -441,18 +411,8 @@
                             return `
                                 <span>${parseFloat(KW_SOLD_L7).toFixed(0)}</span>
                             `;
-                        }
-                    },
-                    {
-                        title: 'PMT Sold L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="pmt-sold-l7-total" style="display:inline-block; margin-top:2px;"></span>',
-                        field: "pmt_sold_L7",
-                        visible: false,
-                        formatter: function(cell) {
-                            let PMT_SOLD_L7 = cell.getValue() || 0;
-                            return `
-                                <span>${parseFloat(PMT_SOLD_L7).toFixed(0)}</span>
-                            `;
-                        }
+                        },
+                        visible: false
                     },
                     {
                         title: 'SALES L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="sales-l30-total" style="display:inline-block; margin-top:2px;"></span>',
@@ -476,18 +436,8 @@
                             return `
                                 <span>${parseFloat(KW_SALES_L30).toFixed(0)}</span>
                             `;
-                        }
-                    },
-                    {
-                        title: 'PMT Sales L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="pmt-sales-l30-total" style="display:inline-block; margin-top:2px;"></span>',
-                        field: "pmt_sales_L30",
-                        visible: false,
-                        formatter: function(cell) {
-                            let PMT_SALES_L30 = cell.getValue() || 0;
-                            return `
-                                <span>${parseFloat(PMT_SALES_L30).toFixed(0)}</span>
-                            `;
-                        }
+                        },
+                        visible: false
                     },
                     {
                         title: 'SALES L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="sales-l7-total" style="display:inline-block; margin-top:2px;"></span>',
@@ -511,18 +461,8 @@
                             return `
                                 <span>${parseFloat(KW_SALES_L7).toFixed(0)}</span>
                             `;
-                        }
-                    },
-                    {
-                        title: 'PMT Sales L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="pmt-sales-l7-total" style="display:inline-block; margin-top:2px;"></span>',
-                        field: "pmt_sales_L7",
-                        visible: false,
-                        formatter: function(cell) {
-                            let PMT_SALES_L7 = cell.getValue() || 0;
-                            return `
-                                <span>${parseFloat(PMT_SALES_L7).toFixed(0)}</span>
-                            `;
-                        }
+                        },
+                        visible: false
                     },
                     {
                         title: 'CLICKS L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="clicks-l30-total" style="display:inline-block; margin-top:2px;"></span>',
@@ -546,18 +486,8 @@
                             return `
                                 <span>${parseFloat(KW_CLICKS_L30).toFixed(0)}</span>
                             `;
-                        }
-                    },
-                    {
-                        title: 'PMT Clicks L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="pmt-clicks-l30-total" style="display:inline-block; margin-top:2px;"></span>',
-                        field: "pmt_clicks_L30",
-                        visible: false,
-                        formatter: function(cell) {
-                            let PMT_CLICKS_L30 = cell.getValue() || 0;
-                            return `
-                                <span>${parseFloat(PMT_CLICKS_L30).toFixed(0)}</span>
-                            `;
-                        }
+                        },
+                        visible: false
                     },
                     {
                         title: 'CLICKS L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="clicks-l7-total" style="display:inline-block; margin-top:2px;"></span>',
@@ -581,18 +511,8 @@
                             return `
                                 <span>${parseFloat(KW_CLICKS_L7).toFixed(0)}</span>
                             `;
-                        }
-                    },
-                    {
-                        title: 'PMT Clicks L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="pmt-clicks-l7-total" style="display:inline-block; margin-top:2px;"></span>',
-                        field: "pmt_clicks_L7",
-                        visible: false,
-                        formatter: function(cell) {
-                            let PMT_CLICKS_L7 = cell.getValue() || 0;
-                            return `
-                                <span>${parseFloat(PMT_CLICKS_L7).toFixed(0)}</span>
-                            `;
-                        }
+                        },
+                        visible: false
                     },
                     {
                         title: 'IMP L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="imp-l30-total" style="display:inline-block; margin-top:2px;"></span>',
@@ -616,18 +536,8 @@
                             return `
                                 <span>${parseFloat(KW_IMP_L30).toFixed(0)}</span>
                             `;
-                        }
-                    },
-                    {
-                        title: 'PMT IMP L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="pmt-imp-l30-total" style="display:inline-block; margin-top:2px;"></span>',
-                        field: "pmt_impr_L30",
-                        visible: false,
-                        formatter: function(cell) {
-                            let PMT_IMP_L30 = cell.getValue() || 0;
-                            return `
-                                <span>${parseFloat(PMT_IMP_L30).toFixed(0)}</span>
-                            `;
-                        }
+                        },
+                        visible: false
                     },
                     {
                         title: 'IMP L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="imp-l7-total" style="display:inline-block; margin-top:2px;"></span>',
@@ -651,19 +561,9 @@
                             return `
                                 <span>${parseFloat(KW_IMP_L7).toFixed(0)}</span>
                             `;
-                        }
-                    },
-                    {
-                        title: 'PMT IMP L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="pmt-imp-l7-total" style="display:inline-block; margin-top:2px;"></span>',
-                        field: "pmt_impr_L7",
-                        visible: false,
-                        formatter: function(cell) {
-                            let PMT_IMP_L7 = cell.getValue() || 0;
-                            return `
-                                <span>${parseFloat(PMT_IMP_L7).toFixed(0)}</span>
-                            `;
-                        }
-                    },                  
+                        },
+                        visible: false
+                    },                 
                     {
                         title: "START AD",
                         field: "start_ad",
@@ -725,90 +625,76 @@
 
                 ],
                 ajaxResponse: function(url, params, response) {
-                    if (response.data && Array.isArray(response.data)) {
-                        response.data = response.data.map(row => {
-                            // List of fields that should be numbers
-                            const numericFields = [
-                                'SPEND_L30', 'kw_spend_L30', 'pmt_spend_L30',
-                                'SPEND_L7', 'kw_spend_L7', 'pmt_spend_L7',
-                                'CLICKS_L30', 'kw_clicks_L30', 'pmt_clicks_L30',
-                                'CLICKS_L7', 'kw_clicks_L7', 'pmt_clicks_L7',
-                                'IMP_L30', 'kw_impr_L30', 'pmt_impr_L30', 
-                                'IMP_L7', 'kw_impr_L7', 'pmt_impr_L7',
-                                'INV', 'L30', 'A_L30'
-                            ];
-                            
-                            numericFields.forEach(field => {
-                                if (row[field] !== undefined && row[field] !== null) {
-                                    // Convert to number, if conversion fails keep original value
-                                    const numValue = parseFloat(row[field]);
-                                    row[field] = isNaN(numValue) ? 0 : numValue;
-                                }
-                            });
-                            
-                            return row;
-                        });
-                    }
                     return response.data;
                 }
             });
 
-            document.addEventListener("change", function(e) {
-                if (e.target.classList.contains("editable-select")) {
-                    let sku = e.target.getAttribute("data-sku");
-                    let field = e.target.getAttribute("data-field");
-                    let value = e.target.value;
+            $(document).on("change", ".editable-select", function () {
+                let select = this;
+                let sku = select.getAttribute("data-sku");
+                let field = select.getAttribute("data-field");
+                let value = select.value;
 
-                    fetch('/update-ebay3-nr-data', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
-                                    .getAttribute('content')
-                            },
-                            body: JSON.stringify({
-                                sku: sku,
-                                field: field,
-                                value: value
-                            })
-                        })
-                        .then(res => res.json())
-                        .then(data => {
-                            console.log(data);
-                        })
-                        .catch(err => console.error(err));
-                }
+                console.log(`SKU: ${sku}, Field: ${field}, Value: ${value}`);
+
+                fetch('/walmart/save-nr', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ sku, nr: value })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        let bgColor = "";
+                        if (value === "NRA") {
+                            bgColor = "background-color:#dc3545;color:#fff;"; 
+                        } else if (value === "RA") {
+                            bgColor = "background-color:#28a745;color:#fff;";
+                        } else if (value === "LATER") {
+                            bgColor = "background-color:#ffc107;color:#000;";
+                        }
+                        select.style = `width: 100px; ${bgColor}`;
+                    } else {
+                        console.error('Failed to update status');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
             });
 
             let initialSpendL30Data = {};
 
-            table.on("dataLoaded", function(data) {
-                data.forEach(row => {
-                if (row.SPEND_L30 !== undefined) {
-                    initialSpendL30Data[row.sku] = row.SPEND_L30;
+            // table.on("dataLoaded", function(data) {
+            //     data.forEach(row => {
+            //     if (row.SPEND_L30 !== undefined) {
+            //         initialSpendL30Data[row.sku] = row.SPEND_L30;
 
-                    fetch('/update-ebay3-nr-data', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    },
-                    body: JSON.stringify({
-                        sku: row.sku,
-                        field: 'Spend_L30', 
-                        value: row.SPEND_L30
-                    })
-                    })
-                    .then(res => res.json())
-                    .then(data => {
-                    console.log('SPEND_L30 saved for SKU:', row.sku);
-                    })
-                    .catch(err => {
-                    console.error('Error saving SPEND_L30:', err);
-                    });
-                }
-                });
-            });
+            //         fetch('/update-walmart-nr-data', {
+            //         method: 'POST',
+            //         headers: {
+            //             'Content-Type': 'application/json',
+            //             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            //         },
+            //         body: JSON.stringify({
+            //             sku: row.sku,
+            //             field: 'Spend_L30', 
+            //             value: row.SPEND_L30
+            //         })
+            //         })
+            //         .then(res => res.json())
+            //         .then(data => {
+            //         console.log('SPEND_L30 saved for SKU:', row.sku);
+            //         })
+            //         .catch(err => {
+            //         console.error('Error saving SPEND_L30:', err);
+            //         });
+            //     }
+            //     });
+            // });
 
             table.on("tableBuilt", function () {
 
@@ -894,34 +780,24 @@
                     //calculate all total
                     let spendL30Total = calculateTotal('SPEND_L30');
                     let kwSpendL30Total = calculateTotal('kw_spend_L30');
-                    let pmtSpendL30Total = calculateTotal('pmt_spend_L30');
                     let spendL7Total = calculateTotal('SPEND_L7');
                     let kwSpendL7Total = calculateTotal('kw_spend_L7');
-                    let pmtSpendL7Total = calculateTotal('pmt_spend_L7');
                     let soldL30Total = calculateTotal('SOLD_L30');
                     let kwSoldL30Total = calculateTotal('kw_sold_L30');
-                    let pmtSoldL30Total = calculateTotal('pmt_sold_L30');
                     let soldL7Total = calculateTotal('SOLD_L7');
                     let kwSoldL7Total = calculateTotal('kw_sold_L7');
-                    let pmtSoldL7Total = calculateTotal('pmt_sold_L7');
                     let salesL30Total = calculateTotal('SALES_L30');
                     let kwSalesL30Total = calculateTotal('kw_sales_L30');
-                    let pmtSalesL30Total = calculateTotal('pmt_sales_L30');
                     let salesL7Total = calculateTotal('SALES_L7');
                     let kwSalesL7Total = calculateTotal('kw_sales_L7');
-                    let pmtSalesL7Total = calculateTotal('pmt_sales_L7');
                     let clicksL30Total = calculateTotal('CLICKS_L30');
                     let kwClicksL30Total = calculateTotal('kw_clicks_L30');
-                    let pmtClicksL30Total = calculateTotal('pmt_clicks_L30');
                     let clicksL7Total = calculateTotal('CLICKS_L7');
                     let kwClicksL7Total = calculateTotal('kw_clicks_L7');
-                    let pmtClicksL7Total = calculateTotal('pmt_clicks_L7');
                     let impL30Total = calculateTotal('IMP_L30');
                     let kwImpL30Total = calculateTotal('kw_impr_L30');
-                    let pmtImpL30Total = calculateTotal('pmt_impr_L30');
                     let impL7Total = calculateTotal('IMP_L7');
                     let kwImpL7Total = calculateTotal('kw_impr_L7');
-                    let pmtImpL7Total = calculateTotal('pmt_impr_L7');
 
 
                     document.getElementById("imp-l7-total").innerText = impL7Total > 0 ? ` (${impL7Total.toFixed(0)})` : "";
@@ -930,41 +806,23 @@
                     document.getElementById("kw-imp-l7-total").innerText = kwImpL7Total > 0 ? ` (${kwImpL7Total.toFixed(0)})` : "";
                     document.getElementById("kw-imp-l7-total").style.display = kwImpL7Total > 0 ? "inline" : "none";
 
-                    document.getElementById("pmt-imp-l7-total").innerText = pmtImpL7Total > 0 ? ` (${pmtImpL7Total.toFixed(0)})` : "";
-                    document.getElementById("pmt-imp-l7-total").style.display = pmtImpL7Total > 0 ? "inline" : "none";
-
-
                     document.getElementById("imp-l30-total").innerText = impL30Total > 0 ? ` (${impL30Total.toFixed(0)})` : "";
                     document.getElementById("imp-l30-total").style.display = impL30Total > 0 ? "inline" : "none";
 
                     document.getElementById("kw-imp-l30-total").innerText = kwImpL30Total > 0 ? ` (${kwImpL30Total.toFixed(0)})` : "";
                     document.getElementById("kw-imp-l30-total").style.display = kwImpL30Total > 0 ? "inline" : "none";
 
-
-                    document.getElementById("pmt-imp-l30-total").innerText = pmtImpL30Total > 0 ? ` (${pmtImpL30Total.toFixed(0)})` : "";
-                    document.getElementById("pmt-imp-l30-total").style.display = pmtImpL30Total > 0 ? "inline" : "none";
-                      
-
                     document.getElementById("clicks-l7-total").innerText = clicksL7Total > 0 ? ` (${clicksL7Total.toFixed(0)})` : "";
                     document.getElementById("clicks-l7-total").style.display = clicksL7Total > 0 ? "inline" : "none";
 
                     document.getElementById("kw-clicks-l7-total").innerText = kwClicksL7Total > 0 ? ` (${kwClicksL7Total.toFixed(0)})` : "";
                     document.getElementById("kw-clicks-l7-total").style.display = kwClicksL7Total > 0 ? "inline" : "none";
-
-
-                    document.getElementById("pmt-clicks-l7-total").innerText = pmtClicksL7Total > 0 ? ` (${pmtClicksL7Total.toFixed(0)})` : "";
-                    document.getElementById("pmt-clicks-l7-total").style.display = pmtClicksL7Total > 0 ? "inline" : "none";
-
-
+                    
                     document.getElementById("clicks-l30-total").innerText = clicksL30Total > 0 ? ` (${clicksL30Total.toFixed(0)})` : "";
                     document.getElementById("clicks-l30-total").style.display = clicksL30Total > 0 ? "inline" : "none";
 
                     document.getElementById("kw-clicks-l30-total").innerText = kwClicksL30Total > 0 ? ` (${kwClicksL30Total.toFixed(0)})` : "";
                     document.getElementById("kw-clicks-l30-total").style.display = kwClicksL30Total > 0 ? "inline" : "none";
-
-                    document.getElementById("pmt-clicks-l30-total").innerText = pmtClicksL30Total > 0 ? ` (${pmtClicksL30Total.toFixed(0)})` : "";
-                    document.getElementById("pmt-clicks-l30-total").style.display = pmtClicksL30Total > 0 ? "inline" : "none";
-
 
                     document.getElementById("sales-l7-total").innerText = salesL7Total > 0 ? ` (${salesL7Total.toFixed(0)})` : "";
                     document.getElementById("sales-l7-total").style.display = salesL7Total > 0 ? "inline" : "none";
@@ -972,20 +830,11 @@
                     document.getElementById("kw-sales-l7-total").innerText = kwSalesL7Total > 0 ? ` (${kwSalesL7Total.toFixed(0)})` : "";
                     document.getElementById("kw-sales-l7-total").style.display = kwSalesL7Total > 0 ? "inline" : "none";
 
-                    document.getElementById("pmt-sales-l7-total").innerText = pmtSalesL7Total > 0 ? ` (${pmtSalesL7Total.toFixed(0)})` : "";
-                    document.getElementById("pmt-sales-l7-total").style.display = pmtSalesL7Total > 0 ? "inline" : "none";
-
-
                     document.getElementById("sales-l30-total").innerText = salesL30Total > 0 ? ` (${salesL30Total.toFixed(0)})` : "";
                     document.getElementById("sales-l30-total").style.display = salesL30Total > 0 ? "inline" : "none";
 
                     document.getElementById("kw-sales-l30-total").innerText = kwSalesL30Total > 0 ? ` (${kwSalesL30Total.toFixed(0)})` : "";
                     document.getElementById("kw-sales-l30-total").style.display = kwSalesL30Total > 0 ? "inline" : "none";
-
-
-                    document.getElementById("pmt-sales-l30-total").innerText = pmtSalesL30Total > 0 ? ` (${pmtSalesL30Total.toFixed(0)})` : "";
-                    document.getElementById("pmt-sales-l30-total").style.display = pmtSalesL30Total > 0 ? "inline" : "none";
-
 
                     document.getElementById("sold-l7-total").innerText = soldL7Total > 0 ? ` (${soldL7Total.toFixed(0)})` : "";
                     document.getElementById("sold-l7-total").style.display = soldL7Total > 0 ? "inline" : "none";
@@ -993,17 +842,11 @@
                     document.getElementById("kw-sold-l7-total").innerText = kwSoldL7Total > 0 ? ` (${kwSoldL7Total.toFixed(0)})` : "";
                     document.getElementById("kw-sold-l7-total").style.display = kwSoldL7Total > 0 ? "inline" : "none";
 
-                    document.getElementById("pmt-sold-l7-total").innerText = pmtSoldL7Total > 0 ? ` (${pmtSoldL7Total.toFixed(0)})` : "";
-                    document.getElementById("pmt-sold-l7-total").style.display = pmtSoldL7Total > 0 ? "inline" : "none";
-
                     document.getElementById("sold-l30-total").innerText = soldL30Total > 0 ? ` (${soldL30Total.toFixed(0)})` : "";
                     document.getElementById("sold-l30-total").style.display = soldL30Total > 0 ? "inline" : "none";
 
                     document.getElementById("kw-sold-l30-total").innerText = kwSoldL30Total > 0 ? ` (${kwSoldL30Total.toFixed(0)})` : "";
                     document.getElementById("kw-sold-l30-total").style.display = kwSoldL30Total > 0 ? "inline" : "none";
-
-                    document.getElementById("pmt-sold-l30-total").innerText = pmtSoldL30Total > 0 ? ` (${pmtSoldL30Total.toFixed(0)})` : "";
-                    document.getElementById("pmt-sold-l30-total").style.display = pmtSoldL30Total > 0 ? "inline" : "none";
 
                     document.getElementById("spend-l30-total").innerText = spendL30Total > 0 ? ` (${spendL30Total.toFixed(0)})` : "";
                     document.getElementById("spend-l30-total").style.display = spendL30Total > 0 ? "inline" : "none";
@@ -1011,22 +854,11 @@
                     document.getElementById("kw-spend-l30-total").innerText = kwSpendL30Total > 0 ? ` (${kwSpendL30Total.toFixed(0)})` : "";
                     document.getElementById("kw-spend-l30-total").style.display = kwSpendL30Total > 0 ? "inline" : "none";
 
-
-                    document.getElementById("pmt-spend-l30-total").innerText = pmtSpendL30Total > 0 ? ` (${pmtSpendL30Total.toFixed(0)})` : "";
-                    document.getElementById("pmt-spend-l30-total").style.display = pmtSpendL30Total > 0 ? "inline" : "none";
-
-
                     document.getElementById("spend-l7-total").innerText = spendL7Total > 0 ? ` (${spendL7Total.toFixed(0)})` : "";
                     document.getElementById("spend-l7-total").style.display = spendL7Total > 0 ? "inline" : "none";
 
-
                     document.getElementById("kw-spend-l7-total").innerText = kwSpendL7Total > 0 ? ` (${kwSpendL7Total.toFixed(0)})` : "";
                     document.getElementById("kw-spend-l7-total").style.display = kwSpendL7Total > 0 ? "inline" : "none";
-
-
-                    document.getElementById("pmt-spend-l7-total").innerText = pmtSpendL7Total > 0 ? ` (${pmtSpendL7Total.toFixed(0)})` : "";
-                    document.getElementById("pmt-spend-l7-total").style.display = pmtSpendL7Total > 0 ? "inline" : "none";
-
                   
                     let percentage = total > 0 ? ((filtered / total) * 100).toFixed(0) : 0;
                     document.getElementById("total-campaigns").innerText = filtered;
@@ -1071,7 +903,7 @@
 
             document.addEventListener("click", function(e) {
                 if (e.target.classList.contains("toggle-spendL30-btn")) {
-                    let colsToToggle = ["kw_spend_L30", "pmt_spend_L30"];
+                    let colsToToggle = ["kw_spend_L30"];
 
                     colsToToggle.forEach(colField => {
                         let col = table.getColumn(colField);
@@ -1081,7 +913,7 @@
                     });
                 }
                 if (e.target.classList.contains("toggle-spendL7-btn")) {
-                    let colsToToggle = ["kw_spend_L7", "pmt_spend_L7"];
+                    let colsToToggle = ["kw_spend_L7"];
 
                     colsToToggle.forEach(colField => {
                         let col = table.getColumn(colField);
@@ -1091,7 +923,7 @@
                     });
                 }
                 if (e.target.classList.contains("toggle-soldL30-btn")) {
-                    let colsToToggle = ["kw_sold_L30", "pmt_sold_L30"];
+                    let colsToToggle = ["kw_sold_L30"];
 
                     colsToToggle.forEach(colField => {
                         let col = table.getColumn(colField);
@@ -1101,7 +933,7 @@
                     });
                 }
                 if (e.target.classList.contains("toggle-soldL7-btn")) {
-                    let colsToToggle = ["kw_sold_L7", "pmt_sold_L7"];
+                    let colsToToggle = ["kw_sold_L7"];
 
                     colsToToggle.forEach(colField => {
                         let col = table.getColumn(colField);
@@ -1111,7 +943,7 @@
                     });
                 }
                 if (e.target.classList.contains("toggle-salesL30-btn")) {
-                    let colsToToggle = ["kw_sales_L30", "pmt_sales_L30"];
+                    let colsToToggle = ["kw_sales_L30"];
 
                     colsToToggle.forEach(colField => {
                         let col = table.getColumn(colField);
@@ -1121,7 +953,7 @@
                     });
                 }
                 if (e.target.classList.contains("toggle-salesL7-btn")) {
-                    let colsToToggle = ["kw_sales_L7", "pmt_sales_L7"];
+                    let colsToToggle = ["kw_sales_L7"];
 
                     colsToToggle.forEach(colField => {
                         let col = table.getColumn(colField);
@@ -1131,7 +963,7 @@
                     });
                 }
                 if (e.target.classList.contains("toggle-clicksL30-btn")) {
-                    let colsToToggle = ["kw_clicks_L30", "pmt_clicks_L30"];
+                    let colsToToggle = ["kw_clicks_L30"];
 
                     colsToToggle.forEach(colField => {
                         let col = table.getColumn(colField);
@@ -1141,7 +973,7 @@
                     });
                 }
                 if (e.target.classList.contains("toggle-clicksL7-btn")) {
-                    let colsToToggle = ["kw_clicks_L7", "pmt_clicks_L7"];
+                    let colsToToggle = ["kw_clicks_L7"];
 
                     colsToToggle.forEach(colField => {
                         let col = table.getColumn(colField);
@@ -1151,7 +983,7 @@
                     });
                 }
                 if (e.target.classList.contains("toggle-impL30-btn")) {
-                    let colsToToggle = ["kw_impr_L30", "pmt_impr_L30"];
+                    let colsToToggle = ["kw_impr_L30"];
 
                     colsToToggle.forEach(colField => {
                         let col = table.getColumn(colField);
@@ -1161,7 +993,7 @@
                     });
                 }
                 if (e.target.classList.contains("toggle-impL7-btn")) {
-                    let colsToToggle = ["kw_impr_L7", "pmt_impr_L7"];
+                    let colsToToggle = ["kw_impr_L7"];
 
                     colsToToggle.forEach(colField => {
                         let col = table.getColumn(colField);

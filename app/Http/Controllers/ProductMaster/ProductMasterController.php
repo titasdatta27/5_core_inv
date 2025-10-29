@@ -442,10 +442,15 @@ class ProductMasterController extends Controller
             }
 
             foreach ($products as $product) {
+
                 // Delete image if exists
                 if ($product->image && File::exists(public_path($product->image))) {
                     File::delete(public_path($product->image));
                 }
+                
+                //Log the user who is deleting
+                $product->deleted_by = auth()->id();
+                $product->save();
 
                 // Hard delete the product
                 $product->delete();
@@ -683,54 +688,14 @@ class ProductMasterController extends Controller
     }
 
 
-    // public function archive(Request $request)
-    // {
-    //     try {
-    //         $productIds = $request->input('ids');
-
-    //         if (empty($productIds)) {
-    //             return response()->json([
-    //                 'success' => false,
-    //                 'message' => 'No products selected for archiving.',
-    //             ], 400);
-    //         }
-
-    //         if (!is_array($productIds)) {
-    //             $productIds = [$productIds];
-    //         }
-
-    //         $products = ProductMaster::whereIn('id', $productIds)->get();
-
-    //         if ($products->isEmpty()) {
-    //             return response()->json([
-    //                 'success' => false,
-    //                 'message' => 'No matching products found.',
-    //             ], 404);
-    //         }
-
-    //         foreach ($products as $product) {
-    //             $product->archived_at = now();
-    //             $product->save();
-    //         }
-
-    //         return response()->json([
-    //             'success' => true,
-    //             'message' => count($productIds) . ' product(s) archived successfully.',
-    //         ]);
-    //     } catch (\Exception $e) {
-    //         Log::error('Error archiving product(s): ' . $e->getMessage());
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Failed to archive product(s). Please try again.',
-    //         ], 500);
-    //     }
-    // }
-
-
     public function getArchived()
     {
         try {
-            $archived = ProductMaster::onlyTrashed()->get();
+            $archived = ProductMaster::onlyTrashed()
+            ->leftJoin('users', 'product_master.deleted_by', '=', 'users.id') 
+            ->select('product_master.*','users.name as deleted_by_name')
+            ->orderBy('product_master.deleted_at', 'desc')
+            ->get();
 
             return response()->json([
                 'success' => true,
