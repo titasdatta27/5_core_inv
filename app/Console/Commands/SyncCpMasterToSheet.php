@@ -26,7 +26,7 @@ class SyncCpMasterToSheet extends Command
      */
     public function handle()
     {
-        $sheetUrl = "https://script.google.com/macros/s/AKfycbwSNEsMmMN6mEZ_4Jav55-4YsSErtHtGcDqo-1-ObGlotiRFDddgio_mu-onlc2dFEMKA/exec";
+        $sheetUrl = "https://script.google.com/macros/s/AKfycbzzd8-PZsPFyEYxntB9Xuq6yiMq69Uqw2TwEml1ZFH8A--WDbpUuOzcqnGYgge8Jy_fig/exec";
 
         $rows = ProductMaster::select('*', 'Values as values')->get();
         $total = $rows->count();
@@ -76,12 +76,20 @@ class SyncCpMasterToSheet extends Command
             }
 
             try {
-                $response = Http::timeout(60)->post($sheetUrl, ['data' => $formatted]);
+                $response = Http::withHeaders([
+                    "Content-Type" => "application/json"
+                ])
+                ->timeout(60)
+                ->post($sheetUrl, [
+                    "data" => $formatted
+                ]);
+
                 $body = $response->json();
 
                 if ($response->successful() && ($body['success'] ?? false)) {
+                    Log::info("Batch " . ($index + 1) . "/{$batches} synced | Updated: {$body['updated']} | Inserted: {$body['inserted']}");
+
                     $inserted += count($formatted);
-                    Log::info("Batch " . ($index + 1) . "/{$batches} synced: " . count($formatted) . " rows inserted.");
                 } else {
                     Log::error("Batch " . ($index + 1) . " failed: " . $response->body());
                 }
@@ -90,6 +98,7 @@ class SyncCpMasterToSheet extends Command
             } catch (\Exception $e) {
                 Log::error("Batch " . ($index + 1) . " exception: " . $e->getMessage());
             }
+
         }
 
         Log::info("Sync completed: {$inserted} / {$total} rows inserted.");

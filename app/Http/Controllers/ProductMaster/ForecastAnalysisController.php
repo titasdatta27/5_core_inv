@@ -74,6 +74,20 @@ class ForecastAnalysisController extends Controller
         $movementMap = DB::table('movement_analysis')->get()->keyBy(fn($item) => $normalizeSku($item->sku));
         $readyToShipMap = DB::table('ready_to_ship')->where('transit_inv_status', 0)->whereNull('deleted_at')->get()->keyBy(fn($item) => $normalizeSku($item->sku));
         $mfrg = DB::table('mfrg_progress')->get()->keyBy(fn($item) => $normalizeSku($item->sku));
+        $purchases = DB::table('purchases')
+            ->select('items')
+            ->get()
+            ->flatMap(function ($row) {
+                $items = json_decode($row->items);
+
+                if (!is_array($items)) return [];
+                
+                return collect($items)->mapWithKeys(function ($item) {
+                    if (!isset($item->sku)) return [];
+                    return [$item->sku => $item];
+                });
+            });
+
         $transitContainer = TransitContainerDetail::whereNull('deleted_at')
             ->where(function ($q) {
                 $q->whereNull('status')
@@ -177,12 +191,20 @@ class ForecastAnalysisController extends Controller
 
             $order_given = 0;
             if($mfrg->has($sheetSku)){
-                $order_given = $mfrg->get($sheetSku)->qty ?? 0;
                 $isReadyToShip = $mfrg->get($sheetSku)->ready_to_ship ?? 'No';
                 if($isReadyToShip === 'No' || $isReadyToShip === ''){
-                    $item->order_given = $order_given;
+                    $order_given = (float) ($mfrg->get($sheetSku)->qty ?? 0);
                 }
             }
+
+            if ($purchases->has($sheetSku)) {
+                $p = $purchases->get($sheetSku);
+                $purchase_qty = (float)($p->qty ?? 0);
+                if ($purchase_qty > 0) {
+                    $order_given = $purchase_qty;
+                }
+            }
+            $item->order_given = $order_given;
 
             if ($movementMap->has($sheetSku)) {
                 $months = json_decode($movementMap->get($sheetSku)->months ?? '{}', true);
@@ -220,9 +242,7 @@ class ForecastAnalysisController extends Controller
             $orderQty = (float)($item->order_given ?? 0);
             $readyToShipQty = (float)($item->readyToShipQty ?? 0);
             $transit = (float)($transitContainer[$normalizeSku($prodData->sku)]->transit ?? 0);
-            $rate = (float)($transitContainer[$normalizeSku($prodData->sku)]->rate ?? 0);
-            $mipRate = (float)($mfrg->get($sheetSku)->rate ?? 0);
-            $r2SRate = (float)($readyToShipMap->get($sheetSku)->rate ?? 0);
+
             $item->MIP_Value = round($cp * $orderQty, 2);
             $item->R2S_Value = round($cp * $readyToShipQty, 2);
             $item->Transit_Value = round($cp * $transit, 2);
