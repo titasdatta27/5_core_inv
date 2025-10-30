@@ -48,6 +48,7 @@ class Kernel extends ConsoleKernel
         \App\Console\Commands\GenerateMovementAnalysis::class,
         \App\Console\Commands\UpdateEbaySuggestedBid::class,
         \App\Console\Commands\UpdateStockMappingDaily::class,
+        \App\Console\Commands\SyncShopifyAllChannelsData::class,
 
     ];
 

@@ -83,6 +83,10 @@
                             <a href="{{ url('product-market') }}">Product Marketing</a>
                         </li>
 
+                        <li></li>
+                            <a href="{{ url('shopify-all-channels') }}"> All Product Marketing</a>
+                        </li>
+
                     </ul>
                 </div>
 
