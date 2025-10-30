@@ -253,6 +253,15 @@
     <!-- SheetJS for Excel Export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
+        function fmtPct(v) {
+            if (v === null || v === undefined || v === "") return "-";
+            const num = parseFloat(v);
+            if (isNaN(num)) return "-";
+
+            
+            return Math.round(num * 100) + "%";
+        }
+
         document.addEventListener("DOMContentLoaded", function() {
 
             const getDilColor = (value) => {
@@ -597,8 +606,103 @@
 
                     // },
                     {
+                        title: "ADS SOLD",
+                        field: "A_L90",
+                    },
+                    {
+                        title: "CVR%",
+                        field: "cvr_l90",
+                        formatter: function(cell){
+                            let value = parseFloat(cell.getValue()) || 0;
+                            let cvr = value.toFixed(0);
+                            let color = "";
+
+                            if (value < 5) {
+                                color = "red";
+                            } else if (value >= 5 && value <= 10) {
+                                color = "green";
+                            } else if (value > 10) {
+                                color = "pink";
+                            }
+
+                            return `
+                                <span class="dil-percent-value ${color}">
+                                    ${cvr}%
+                                </span>
+                            `;
+                        }
+                    },
+                    {
                         title: "Price",
                         field: "price"
+                    },
+                    {
+                        title: "LMP",
+                        field: "lmp",
+                        formatter: function(cell) {
+                            let lmp = cell.getValue();
+                            return `
+                                <span>${lmp}</span>
+                                <i class="fa fa-info-circle text-primary toggle-lmp-cols-btn" 
+                                data-lmp="${lmp}" 
+                                style="cursor:pointer; margin-left:8px;"></i>
+                            `;
+                        }
+                    },
+                    {
+                        title: "PRICE 1",
+                        field: "lmp_1",
+                        visible: false
+                    },
+                    {
+                        title: "PRICE 2",
+                        field: "lmp_2",
+                        visible: false
+                    },
+                    {
+                        title: "PRICE 3",
+                        field: "lmp_3",
+                        visible: false
+                    },
+                    {
+                        title: "PRICE 4",
+                        field: "lmp_4",
+                        visible: false
+                    },
+                    {
+                        title: "PRICE 5",
+                        field: "lmp_5",
+                        visible: false
+                    },
+                    {
+                        title: "PRICE 6",
+                        field: "lmp_6",
+                        visible: false
+                    },
+                    {
+                        title: "PRICE 7",
+                        field: "lmp_7",
+                        visible: false
+                    },
+                    {
+                        title: "PRICE 8",
+                        field: "lmp_8",
+                        visible: false
+                    },
+                    {
+                        title: "PRICE 9",
+                        field: "lmp_9",
+                        visible: false
+                    },
+                    {
+                        title: "PRICE 10",
+                        field: "lmp_10",
+                        visible: false
+                    },
+                    {
+                        title: "PRICE 11",
+                        field: "lmp_11",
+                        visible: false
                     },
                     {
                         title: "PFT",
@@ -700,99 +804,72 @@
                         }
                     },
                     {
-                        title: "ADS SOLD",
-                        field: "A_L90",
-                    },
-                    {
-                        title: "CVR%",
-                        field: "cvr_l90",
+                        title: "SPRICE",
+                        field: "amz_price",
                         formatter: function(cell){
                             let value = parseFloat(cell.getValue()) || 0;
-                            let cvr = value.toFixed(0);
-                            let color = "";
-
-                            if (value < 5) {
-                                color = "red";
-                            } else if (value >= 5 && value <= 10) {
-                                color = "green";
-                            } else if (value > 10) {
-                                color = "pink";
-                            }
+                            let sprice = value.toFixed(0);
 
                             return `
-                                <span class="dil-percent-value ${color}">
-                                    ${cvr}%
+                                <span class="dil-percent-value">
+                                    $${sprice}
                                 </span>
                             `;
                         }
                     },
                     {
-                        title: "LMP",
-                        field: "lmp",
+                        title: "SPFT",
+                        field: "amz_pft",
                         formatter: function(cell) {
-                            let lmp = cell.getValue();
+                            let value = parseFloat(cell.getValue()) || 0;
+                            let spft = value.toFixed(0);
+                            const pftClass = spft > 20 ? 'positive' : spft < 10 ? 'negative' : 'neutral';
+
+                            const val = Number(spft);
+                            let color = '#000000';
+
+                            if (isFinite(val) && !isNaN(val)) {
+                                if (val <= 0) color = '#ff0000';
+                                else if (val > 0 && val <= 10) color = '#ff0000';
+                                else if (val > 10 && val <= 14) color = '#fd7e14';
+                                else if (val > 14 && val <= 19) color = '#0d6efd';
+                                else if (val > 19 && val <= 40) color = '#198754';
+                                else if (val > 40) color = '#800080';
+                            }
+
                             return `
-                                <span>${lmp}</span>
-                                <i class="fa fa-info-circle text-primary toggle-lmp-cols-btn" 
-                                data-lmp="${lmp}" 
-                                style="cursor:pointer; margin-left:8px;"></i>
+                                <div class="value-indicator ${pftClass}" style="color: ${color};">
+                                    ${fmtPct(spft)}
+                                </div>
                             `;
                         }
                     },
                     {
-                        title: "PRICE 1",
-                        field: "lmp_1",
-                        visible: false
-                    },
-                    {
-                        title: "PRICE 2",
-                        field: "lmp_2",
-                        visible: false
-                    },
-                    {
-                        title: "PRICE 3",
-                        field: "lmp_3",
-                        visible: false
-                    },
-                    {
-                        title: "PRICE 4",
-                        field: "lmp_4",
-                        visible: false
-                    },
-                    {
-                        title: "PRICE 5",
-                        field: "lmp_5",
-                        visible: false
-                    },
-                    {
-                        title: "PRICE 6",
-                        field: "lmp_6",
-                        visible: false
-                    },
-                    {
-                        title: "PRICE 7",
-                        field: "lmp_7",
-                        visible: false
-                    },
-                    {
-                        title: "PRICE 8",
-                        field: "lmp_8",
-                        visible: false
-                    },
-                    {
-                        title: "PRICE 9",
-                        field: "lmp_9",
-                        visible: false
-                    },
-                    {
-                        title: "PRICE 10",
-                        field: "lmp_10",
-                        visible: false
-                    },
-                    {
-                        title: "PRICE 11",
-                        field: "lmp_11",
-                        visible: false
+                        title: "SROI",
+                        field: "amz_roi",
+                        formatter: function(cell){
+                            let value = parseFloat(cell.getValue()) || 0;
+                            let sroi = value.toFixed(0);
+                            const roiClass = sroi > 30 ? 'positive' : sroi < 15 ? 'negative' : 'neutral';
+
+                            const val = Number(sroi);
+                            let color = '#000000';
+
+                            if (isFinite(val) && !isNaN(val)) {
+                                if (val <= 0) color = '#ff0000';
+                                else if (val > 0 && val <= 10) color = '#ff0000';
+                                else if (val > 10 && val <= 14) color = '#fd7e14';
+                                else if (val > 14 && val <= 19) color = '#0d6efd';
+                                else if (val > 19 && val <= 40) color = '#198754';
+                                else if (val > 40) color = '#800080';
+                            }
+
+                            return `
+                                <div class="value-indicator ${roiClass}" style="color: ${color};">
+                                    ${fmtPct(sroi)}
+                                </div>
+                            `;
+                        }
                     },
                 ],
                 ajaxResponse: function(url, params, response) {
