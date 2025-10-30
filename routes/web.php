@@ -247,6 +247,7 @@ use App\Http\Controllers\MarketingMaster\InstagramAdsManagerController;
 use App\Http\Controllers\MarketingMaster\YoutubeAdsManagerController;
 use App\Http\Controllers\MarketingMaster\TiktokAdsManagerController;
 use App\Http\Controllers\MarketingMaster\MovementPricingMaster;
+use App\Http\Controllers\MarketingMaster\OrganicViewsController;
 use App\Http\Controllers\MarketingMaster\OverallCvrLqsController;
 use App\Http\Controllers\MarketPlace\Business5coreController;
 use App\Http\Controllers\MarketPlace\FaireController;
@@ -1236,6 +1237,11 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::get('/ads-pricing-master', [AdsMasterController::class, 'adsMaster']);
     Route::get('/ads-pricing-analysis-data-views', [AdsMasterController::class, 'getViewPricingAnalysisData']);
     Route::post('/pricing-master/save', [AdsMasterController::class, 'save']);
+
+
+    //organic views routes
+    Route::get('/organic-views-amazon-data', action: [OrganicViewsController::class, 'getOrganicViewsData'])->name('organicviews.amazon.data');
+    Route::get('/organicviews-amazon', action: [OrganicViewsController::class, 'amazonOrganicViews'])->name('organicviews.amazon');
 
 
 

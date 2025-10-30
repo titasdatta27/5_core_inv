@@ -809,15 +809,38 @@
                             <a href="{{ route('zero.visibility') }}">Zero Views Masters</a>
                         </li>
 
-                        <li>
+                        {{-- <li>
                             <a href="{{ url('listing-master-counts') }}">Low Visibility Masters</a>
+                        </li> --}}
+
+                        <li class="side-nav-item">
+                            <a data-bs-toggle="collapse" href="#sidebarlowvisibilitymaster" aria-expanded="false"
+                                aria-controls="sidebarlowvisibilitymaster">
+                                <span>Low Visibility Masters</span>
+                                <span class="menu-arrow"></span>
+                            </a>
+                            <div class="collapse" id="sidebarlowvisibilitymaster">
+                                <ul class="side-nav-third-level">
+                                    <li class="side-nav-item">
+                                        <a data-bs-toggle="collapse" href="#lowvisibilitySubmenu" aria-expanded="false"
+                                            aria-controls="lowvisibilitySubmenu">
+                                            <span>Organic Views</span>
+                                            <span class="menu-arrow"></span>
+                                        </a>
+                                        <div class="collapse" id="lowvisibilitySubmenu">
+                                            <ul class="side-nav-third-level">
+                                                <li>
+                                                    <a href="{{ route('organicviews.amazon') }}">Amazon</a>
+                                                </li>
+                                                {{-- <li>
+                                                    <a href="#"> Ebay</a>
+                                                </li> --}}
+                                            </ul>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
                         </li>
-
-
-
-
-
-
 
                         <li class="side-nav-item">
                             <a data-bs-toggle="collapse" href="#video-ads-master" aria-expanded="false"
@@ -837,7 +860,6 @@
                                 </ul>
                             </div>
                         </li>
-
 
                         <!--- Start Nikhil Code -->
                         <li class="side-nav-item">
@@ -870,10 +892,6 @@
                         <!-- End Nikhil Code  -->
 
 
-
-
-
-
                         <li>
                             <a href="{{ route('listingMaster') }}">Listing Masters</a>
                         </li>
@@ -882,9 +900,6 @@
                         <li>
                             <a href="{{ route('listing.audit') }}">Listing Audit Masters</a>
                         </li>
-
-
-
 
                         <li>
                             <a href="{{ url('movement-pricing-master') }}"> Movement Analysis Master</a>

@@ -762,7 +762,7 @@
                 searching: true,
                 pageLength: 50,
                 order: [
-                    [4, 'desc']
+                    [3, 'desc']
                 ],
                 ajax: {
                     url: '/show-zero-visibility-data',
@@ -783,7 +783,7 @@
                         }
                         setTimeout(() => {
                             const table = jq('#channelTable').DataTable();
-                            table.order([4, 'desc']).draw(false);
+                            table.order([3, 'desc']).draw(false);
                         }, 300);
                         return json.data;
                     },
@@ -858,7 +858,6 @@
                             </div>`;
                         }
                     },
-                   
                     
                     {
                         data: 'Zero Visibility SKU Count',
@@ -874,19 +873,21 @@
                 ],
                 drawCallback: function(settings) {
                     let api = this.api();
-                    api.column(0, {
-                        page: 'current'
-                    }).nodes().each(function(cell, i) {
+                    api.column(0, { page: 'current' }).nodes().each(function(cell, i) {
                         cell.innerHTML = i + 1;
                     });
 
-                     // Calculate totals for Live Pending & Zero Visibility SKU Count
+                    // ✅ Only calculate zero-visibility total now
                     let zeroVisibilityTotal = api.column(3, { search: 'applied' }).data()
                         .reduce((a, b) => (parseInt(a) || 0) + (parseInt(b) || 0), 0);
-                    // Insert totals into header cell
+
                     let zeroVisibilityHeader = api.column(3).header();
-                    jq(zeroVisibilityHeader).html('Zero Visibility SKU Count<br><span style="color:white; font-weight:bold; font-size:1rem;">' + zeroVisibilityTotal + '</span>');
-                },
+                    
+                    jq(zeroVisibilityHeader).html(
+                        'Zero Visibility SKU Count<br><span style="color:white; font-weight:bold; font-size:1rem;">' +
+                        zeroVisibilityTotal + '</span>'
+                    );
+                },                
                 responsive: true,
                 language: {
                     processing: "Loading data, please wait...",
@@ -1103,8 +1104,8 @@
             });
 
             // Initial sort
-            jq('#sortMetric').val('4'); // Default to L-60 Sales (column index 4)
-            table.order([4, sortDirection]).draw();
+            jq('#sortMetric').val('3'); // Default to L-60 Sales (column index 3)
+            table.order([3, sortDirection]).draw();
         }
 
         // Dropdown functionality
