@@ -1,4 +1,4 @@
-@extends('layouts.vertical', ['title' => 'Amazon - ACOS CONTROL KW', 'mode' => $mode ?? '', 'demo' => $demo ?? ''])
+@extends('layouts.vertical', ['title' => 'Amazon - AD CVR', 'mode' => $mode ?? '', 'demo' => $demo ?? ''])
 @section('css')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator.min.css" rel="stylesheet">
@@ -608,8 +608,20 @@
                             let value = parseFloat(cell.getValue()) || 0;
                             let pft = value.toFixed(0);
 
+                            if (pft < 10) {
+                                color = "red";
+                            } else if (pft >= 10 && pft < 15) {
+                                color = "yellow";
+                            } else if (pft >= 15 && pft < 20) {
+                                color = "blue";
+                            } else if (pft >= 20 && pft <= 40) {
+                                color = "green";
+                            } else if (pft > 40) {
+                                color = "pink";
+                            }
+
                             return `
-                                <span class="dil-percent-value">
+                                <span class="dil-percent-value ${color}">
                                     ${pft}%
                                 </span>
                             `;
@@ -640,8 +652,20 @@
                                 gPft = 0;
                             }
 
+                            if (gPft < 10) {
+                                color = "red";
+                            } else if (gPft >= 10 && gPft < 15) {
+                                color = "yellow";
+                            } else if (gPft >= 15 && gPft < 20) {
+                                color = "blue";
+                            } else if (gPft >= 20 && gPft <= 40) {
+                                color = "green";
+                            } else if (gPft > 40) {
+                                color = "pink";
+                            }
+
                             return `
-                                <span class="dil-percent-value">
+                                <span class="dil-percent-value ${color}">
                                     ${gPft.toFixed(0)}%
                                 </span>
                             `;
@@ -682,6 +706,93 @@
                     {
                         title: "CVR%",
                         field: "cvr_l90",
+                        formatter: function(cell){
+                            let value = parseFloat(cell.getValue()) || 0;
+                            let cvr = value.toFixed(0);
+                            let color = "";
+
+                            if (value < 5) {
+                                color = "red";
+                            } else if (value >= 5 && value <= 10) {
+                                color = "green";
+                            } else if (value > 10) {
+                                color = "pink";
+                            }
+
+                            return `
+                                <span class="dil-percent-value ${color}">
+                                    ${cvr}%
+                                </span>
+                            `;
+                        }
+                    },
+                    {
+                        title: "LMP",
+                        field: "lmp",
+                        formatter: function(cell) {
+                            let lmp = cell.getValue();
+                            return `
+                                <span>${lmp}</span>
+                                <i class="fa fa-info-circle text-primary toggle-lmp-cols-btn" 
+                                data-lmp="${lmp}" 
+                                style="cursor:pointer; margin-left:8px;"></i>
+                            `;
+                        }
+                    },
+                    {
+                        title: "PRICE 1",
+                        field: "lmp_1",
+                        visible: false
+                    },
+                    {
+                        title: "PRICE 2",
+                        field: "lmp_2",
+                        visible: false
+                    },
+                    {
+                        title: "PRICE 3",
+                        field: "lmp_3",
+                        visible: false
+                    },
+                    {
+                        title: "PRICE 4",
+                        field: "lmp_4",
+                        visible: false
+                    },
+                    {
+                        title: "PRICE 5",
+                        field: "lmp_5",
+                        visible: false
+                    },
+                    {
+                        title: "PRICE 6",
+                        field: "lmp_6",
+                        visible: false
+                    },
+                    {
+                        title: "PRICE 7",
+                        field: "lmp_7",
+                        visible: false
+                    },
+                    {
+                        title: "PRICE 8",
+                        field: "lmp_8",
+                        visible: false
+                    },
+                    {
+                        title: "PRICE 9",
+                        field: "lmp_9",
+                        visible: false
+                    },
+                    {
+                        title: "PRICE 10",
+                        field: "lmp_10",
+                        visible: false
+                    },
+                    {
+                        title: "PRICE 11",
+                        field: "lmp_11",
+                        visible: false
                     },
                 ],
                 ajaxResponse: function(url, params, response) {
@@ -833,6 +944,21 @@
                     let btn = e.target;
 
                     let colsToToggle = ["INV", "L30", "DIL %", "A_L90", "A DIL %", "NRL", "NRA", "FBA"];
+
+                    colsToToggle.forEach(colName => {
+                        let col = table.getColumn(colName);
+                        if (col) {
+                            col.toggle();
+                        }
+                    });
+                }
+            });
+
+            document.addEventListener("click", function(e) {
+                if (e.target.classList.contains("toggle-lmp-cols-btn")) {
+                    let btn = e.target;
+
+                    let colsToToggle = ["lmp_1", "lmp_2", "lmp_3", "lmp_4", "lmp_5", "lmp_6", "lmp_7", "lmp_8", "lmp_9", "lmp_10", "lmp_11"];
 
                     colsToToggle.forEach(colName => {
                         let col = table.getColumn(colName);

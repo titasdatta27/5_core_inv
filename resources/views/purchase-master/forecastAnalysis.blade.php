@@ -736,7 +736,7 @@
                    
                 },
                 {
-                    title: "Appr. QTY",
+                    title: "Odr. Qty",
                     field: "Approved QTY",
                     accessor: row => row?.["Approved QTY"] ?? null,
                     headerSort: false,

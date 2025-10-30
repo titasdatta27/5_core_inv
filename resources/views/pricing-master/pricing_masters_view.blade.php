@@ -295,6 +295,8 @@
             border-radius: 8px;
         }
 
+        /* (Removed resizable styles per request) */
+
         .modal-header.bg-gradient {
             background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             color: white;
@@ -668,6 +670,23 @@
                         </div>
                     </div>
                 </div>
+    
+                            <!-- LMP Data Modal -->
+                            <div class="modal fade" id="lmpDataModal" tabindex="-1" aria-labelledby="lmpDataModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header bg-gradient">
+                                            <h5 class="modal-title" id="lmpDataModalLabel">LMP History</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div id="lmpDataContent">
+                                                <!-- Rows inserted via JS -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
             </div>
         </div>
     </div>
@@ -2137,14 +2156,7 @@
 
         // Marketplace table generator
         function buildOVL30Table(data) {
-            console.log('Data LMP:', data.lmp, 'Data Link:', data.link);
-            console.log('Channel Links:', {
-                amz: data.link_amz,
-                ebay: data.link_ebay,
-                shein: data.link_shein,
-                tiktok: data.link_tiktok,
-                aliexpress: data.link_aliexpress
-            });
+         
           const rows = [
                 { label: "Amazon", prefix: "amz", logo: "{{ asset('uploads/amazon.png') }}" },
                 { label: "eBay", prefix: "ebay", logo:  "{{ asset('uploads/1.png') }}" },
@@ -2153,6 +2165,7 @@
                 { label: "Reverb", prefix: "reverb", logo: "{{ asset('uploads/reverb.png') }}" },
                 { label: "Temu", prefix: "temu", logo: "{{ asset('uploads/temu.jpeg') }}" },
                 { label: "Walmart", prefix: "walmart", logo: "{{ asset('uploads/walmart.png') }}" },
+                { label: "Wayfair", prefix: "wayfair", logo: "{{ asset('uploads/wayfair.png') }}" },
                 { label: "eBay2", prefix: "ebay2", logo: "{{ asset('uploads/2.png') }}" },
                 { label: "eBay3", prefix: "ebay3", logo: "{{ asset('uploads/3.png') }}" },
                 { label: "Shopify B2C", prefix: "shopifyb2c", logo: "{{ asset('uploads/shopify.png') }}" },
@@ -2205,7 +2218,7 @@
                 const hasAny = price != null || l30 != null || l60 != null || pft != null || roi != null;
                 if (!hasAny) return;
 
-               const getColor = (value) => {
+                const getColor = (value) => {
                     // Convert to number and handle percentage values
                     const val = typeof value === 'string' ? parseFloat(value.replace('%', '')) : Number(value);
                     console.log('Color value:', value, 'Parsed:', val); // Debug log
@@ -2214,7 +2227,8 @@
                     if (!isFinite(val) || isNaN(val)) return '#000000'; // default black
                     
                     // Handle percentage ranges
-                    if (val >= 0 && val <= 10) return '#ff0000';        // red
+                    if (val <= 0) return '#ff0000';                     // red for 0 or negative
+                    if (val > 0 && val <= 10) return '#ff0000';         // red (<=10)
                     if (val > 10 && val <= 14) return '#fd7e14';       // orange
                     if (val > 14 && val <= 19) return '#0d6efd';       // blue
                     if (val > 19 && val <= 40) return '#198754';       // green
@@ -2337,6 +2351,7 @@
                                 : r.prefix === 'shein' ? (data.views_clicks ?? "-")
                                 : r.prefix === 'reverb' ? (data.reverb_views ?? "-")
                                 : r.prefix === 'temu' ? (data.temu_views ?? "-")
+                                : r.prefix === 'wayfair' ? (data.wayfair_views ?? "-")
                                 : r.prefix === 'tiktok' ? (data.tiktok_views ?? "-")
                                 : r.prefix === 'aliexpress' ? (data.aliexpress_views ?? "-")
                                 : "-" }
@@ -2373,19 +2388,43 @@
                     <td>
                         <div class="value-indicator d-flex align-items-center">
                             ${(() => {
-                                let priceValue = r.prefix === 'amz' ? data.price_lmpa 
-                                    : r.prefix === 'ebay' ? data.ebay_price_lmpa 
-                                    : r.prefix === 'shein' ? data.lmp 
-                                    : r.prefix === 'tiktok' ? data.tiktok_price_lmpa 
-                                    : r.prefix === 'aliexpress' ? data.aliexpress_price_lmpa 
-                                    : '-';
-                                let link = r.prefix === 'amz' ? data.link_amz 
-                                    : r.prefix === 'ebay' ? data.link_ebay 
-                                    : r.prefix === 'shein' ? data.link_shein 
-                                    : r.prefix === 'tiktok' ? data.link_tiktok 
-                                    : r.prefix === 'aliexpress' ? data.link_aliexpress 
-                                    : null;
-                                return `${fmtMoney(priceValue)} ${link && priceValue !== '-' ? `<a href="${link}" target="_blank" class="ms-1"><i class="bi bi-link"></i></a>` : ''}`;
+                                // Only show LMP for specific channels with their rightful sources
+                                if (r.prefix === 'amz') {
+                                    const priceValue = data.price_lmpa;
+                                    const link = data.link_amz;
+                                    if (priceValue && Number(priceValue) > 0) {
+                                        return `
+                                            <div>${fmtMoney(priceValue)}</div>
+                                            ${link ? `<a href="${link}" target="_blank" class="ms-1"><i class=\"bi bi-link\"></i></a>` : ''}
+                                            <button class="btn btn-link btn-sm p-0 ms-2" onclick="event.stopPropagation(); showLmpData('${data.SKU}', 'amz')" title="View LMP History"><i class="fas fa-eye"></i></button>
+                                        `;
+                                    }
+                                    return '-';
+                                }
+                                if (r.prefix === 'ebay') {
+                                    const priceValue = data.ebay_price_lmpa;
+                                    const link = data.link_ebay;
+                                    if (priceValue && Number(priceValue) > 0) {
+                                        return `
+                                            <div>${fmtMoney(priceValue)}</div>
+                                            ${link ? `<a href="${link}" target="_blank" class="ms-1"><i class=\"bi bi-link\"></i></a>` : ''}
+                                            <button class="btn btn-link btn-sm p-0 ms-2" onclick="event.stopPropagation(); showLmpData('${data.SKU}', 'ebay')" title="View LMP History"><i class="fas fa-eye"></i></button>
+                                        `;
+                                    }
+                                    return '-';
+                                }
+                                if (r.prefix === 'shein') {
+                                    const priceValue = data.lmp;
+                                    const link = data.link_shein;
+                                    if (priceValue && Number(priceValue) > 0) {
+                                        return `
+                                            <div>${fmtMoney(priceValue)}</div>
+                                            ${link ? `<a href="${link}" target="_blank" class="ms-1"><i class=\"bi bi-link\"></i></a>` : ''}
+                                        `; // No eye button for Shein (sheet-based, not repricer history)
+                                    }
+                                    return '-';
+                                }
+                                return '-';
                             })()}
                         </div>
                     </td>
@@ -2477,7 +2516,9 @@
                             }
 
                             if (value !== undefined) {
-                                if (value < 11) {
+                                if (value <= 0) {
+                                    textColor = '#ff0000';
+                                } else if (value < 11) {
                                     textColor = '#ff0000';
                                 } else if (value >= 10 && value < 15) {
                                     bgColor = 'yellow';
@@ -2536,7 +2577,9 @@
 
 
                             if (value !== undefined) {
-                                if (value < 11) {
+                                if (value <= 0) {
+                                    textColor = '#ff0000';
+                                } else if (value < 11) {
                                     textColor = '#ff0000';
                                 } else if (value >= 10 && value < 15) {
                                     bgColor = 'yellow';
@@ -2725,32 +2768,33 @@
             let xOffset = 0;
             let yOffset = 0;
 
-            dialogEl.addEventListener('mousedown', dragStart);
-            document.addEventListener('mousemove', drag);
-            document.addEventListener('mouseup', dragEnd);
-
-            function dragStart(e) {
+            dialogEl.addEventListener('mousedown', function dragStart(e) {
+                if (!(e.target.closest('.modal-header') && !e.target.closest('button'))) return;
+                e.preventDefault();
+                e.stopPropagation();
                 if (e.target.closest('.modal-header') && !e.target.closest('button')) {
                     isDragging = true;
                     initialX = e.clientX - xOffset;
                     initialY = e.clientY - yOffset;
-                }
-            }
 
-            function drag(e) {
-                if (isDragging) {
-                    e.preventDefault();
-                    currentX = e.clientX - initialX;
-                    currentY = e.clientY - initialY;
-                    xOffset = currentX;
-                    yOffset = currentY;
-                    dialogEl.style.transform = `translate(${currentX}px, ${currentY}px)`;
+                    const onMove = (me) => {
+                        if (!isDragging) return;
+                        me.preventDefault();
+                        currentX = me.clientX - initialX;
+                        currentY = me.clientY - initialY;
+                        xOffset = currentX;
+                        yOffset = currentY;
+                        dialogEl.style.transform = `translate(${currentX}px, ${currentY}px)`;
+                    };
+                    const onUp = () => {
+                        isDragging = false;
+                        document.removeEventListener('mousemove', onMove);
+                        document.removeEventListener('mouseup', onUp);
+                    };
+                    document.addEventListener('mousemove', onMove);
+                    document.addEventListener('mouseup', onUp);
                 }
-            }
-
-            function dragEnd() {
-                isDragging = false;
-            }
+            });
 
             // Reset position when modal is hidden
             modalEl.addEventListener('hidden.bs.modal', function() {
@@ -2883,24 +2927,27 @@
             header.style.cursor = "move";
 
             header.addEventListener("mousedown", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 isDragging = true;
                 const rect = modal.getBoundingClientRect();
                 offsetX = e.clientX - rect.left;
                 offsetY = e.clientY - rect.top;
                 modal.style.position = "absolute";
                 modal.style.margin = "0";
-            });
 
-            document.addEventListener("mousemove", (e) => {
-                if (isDragging) {
-                    modal.style.left = e.clientX - offsetX + "px";
-                    modal.style.top = e.clientY - offsetY + "px";
-                }
-            });
-
-
-            document.addEventListener("mouseup", () => {
-                isDragging = false;
+                const onMove = (me) => {
+                    if (!isDragging) return;
+                    modal.style.left = me.clientX - offsetX + "px";
+                    modal.style.top = me.clientY - offsetY + "px";
+                };
+                const onUp = () => {
+                    isDragging = false;
+                    document.removeEventListener("mousemove", onMove);
+                    document.removeEventListener("mouseup", onUp);
+                };
+                document.addEventListener("mousemove", onMove);
+                document.addEventListener("mouseup", onUp);
             });
 
             // Reset position when modal is closed
@@ -2910,6 +2957,54 @@
                 modal.style.top = "";
                 modal.style.margin = "";
             });
+        });
+
+        // Draggable Modal for LMP Data
+        document.addEventListener("DOMContentLoaded", function () {
+            const lmpModal = document.querySelector("#lmpDataModal .modal-dialog");
+            const lmpHeader = document.querySelector("#lmpDataModal .modal-header");
+
+            if (!lmpModal || !lmpHeader) return;
+
+            let isDragging = false;
+            let offsetX, offsetY;
+
+            lmpHeader.style.cursor = "move";
+
+            lmpHeader.addEventListener("mousedown", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                isDragging = true;
+                const rect = lmpModal.getBoundingClientRect();
+                offsetX = e.clientX - rect.left;
+                offsetY = e.clientY - rect.top;
+                lmpModal.style.position = "absolute";
+                lmpModal.style.margin = "0";
+
+                const onMove = (me) => {
+                    if (!isDragging) return;
+                    lmpModal.style.left = me.clientX - offsetX + "px";
+                    lmpModal.style.top = me.clientY - offsetY + "px";
+                };
+                const onUp = () => {
+                    isDragging = false;
+                    document.removeEventListener("mousemove", onMove);
+                    document.removeEventListener("mouseup", onUp);
+                };
+                document.addEventListener("mousemove", onMove);
+                document.addEventListener("mouseup", onUp);
+            });
+
+            // Reset position when modal is closed
+            const lmpModalEl = document.getElementById("lmpDataModal");
+            if (lmpModalEl) {
+                lmpModalEl.addEventListener("hidden.bs.modal", function () {
+                    lmpModal.style.position = "";
+                    lmpModal.style.left = "";
+                    lmpModal.style.top = "";
+                    lmpModal.style.margin = "";
+                });
+            }
         });
 
 
@@ -2952,7 +3047,9 @@
                         function getColoredSpan(value) {
                             let textColor, bgColor;
 
-                            if (value < 11) {
+                            if (value <= 0) {
+                                textColor = '#ff0000';
+                            } else if (value < 11) {
                                 textColor = '#ff0000';
                             } else if (value >= 10 && value < 15) {
                                 bgColor = 'yellow';
@@ -3389,6 +3486,55 @@ function hideTooltip(img) {
         tooltip.style.opacity = '0';
         tooltip.style.visibility = 'hidden';
     }
+}
+
+// Show LMP data modal for a SKU - shows all LMP values > 0 sorted desc
+function showLmpData(sku, channel) {
+    if (!sku) return;
+    // Ensure we get table instance
+    const tab = Tabulator.findTable("#forecast-table")[0];
+    if (!tab) {
+        console.warn('Tabulator table not initialized yet');
+        return;
+    }
+
+    // Fetch from backend (repricer): exclude zero, sorted asc
+    $.ajax({
+        url: '/pricing-master/lmp-history',
+        type: 'GET',
+        data: { sku: sku, channel: channel },
+        success: function(res) {
+            let html = '<div class="table-responsive"><table class="table table-sm table-bordered"><thead><tr><th>SKU</th><th>LMP</th><th>Link</th></tr></thead><tbody>';
+            if (!res.success || !res.data || res.data.length === 0) {
+                html += '<tr><td colspan="3" class="text-center">No LMP values found &gt; 0 for this SKU</td></tr>';
+            } else {
+                res.data.forEach(item => {
+                    const price = item.price || 0;
+                    const link = item.link || null;
+                    html += `<tr><td>${sku}</td><td>${fmtMoney(price)}</td><td>${link ? `<a href="${link}" target="_blank"><i class=\"bi bi-link\"></i></a>` : '-'}</td></tr>`;
+                });
+            }
+            html += '</tbody></table></div>';
+
+            const container = document.getElementById('lmpDataContent');
+            if (container) container.innerHTML = html;
+
+            const modalEl = document.getElementById('lmpDataModal');
+            if (modalEl) {
+                const modal = new bootstrap.Modal(modalEl);
+                modal.show();
+            }
+        },
+        error: function() {
+            const container = document.getElementById('lmpDataContent');
+            if (container) container.innerHTML = '<div class="p-2 text-danger">Failed to load LMP history.</div>';
+            const modalEl = document.getElementById('lmpDataModal');
+            if (modalEl) {
+                const modal = new bootstrap.Modal(modalEl);
+                modal.show();
+            }
+        }
+    });
 }
 
 // Handle image URL input blur event

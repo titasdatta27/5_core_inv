@@ -337,6 +337,12 @@ class PricingMasterViewsController extends Controller
         $aliexpressLookup = AliExpressSheetData::whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
         $walmartProductSheetLookup = DB::table('walmart_product_sheet')->whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
         $dobaProductSheetLookup = DB::table('doba_sheet_data')->whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
+        // Wayfair sheet lookup
+        $wayfairSheetLookup = DB::table('wayfair_product_sheets')
+            ->select('sku', 'price', 'l30', 'l60', 'views')
+            ->whereIn('sku', $nonParentSkus)
+            ->get()
+            ->keyBy('sku');
 
         // Fetch LMPA and LMP data
         $lmpLookup = collect();
@@ -433,6 +439,7 @@ class PricingMasterViewsController extends Controller
                 ($reverb ? ($reverb->views ?? 0) : 0) +
                 ($temuMetric ? ($temuMetric->product_clicks_l30 ?? 0) : 0) +
                 ($tiktok ? ($tiktok->views ?? 0) : 0) +
+                ($wayfairSheetLookup[$sku]->views ?? 0) +
                 ($walmartSheet ? ($walmartSheet->views ?? 0) : 0) +
                 ($dobaSheet ? ($dobaSheet->views ?? 0) : 0);
 
@@ -446,6 +453,7 @@ class PricingMasterViewsController extends Controller
                 ($temuMetric ? ($temuMetric->quantity_purchased_l30 ?? 0) : 0) +
                 ($reverb ? ($reverb->r_l30 ?? 0) : 0) +
                 ($walmart ? ($walmart->l30 ?? 0) : 0) +
+                (($wayfairSheetLookup[$sku]->l30 ?? 0)) +
                 ($macy ? ($macy->m_l30 ?? 0) : 0) +
                 ($bestbuyUsa ? ($bestbuyUsa->m_l30 ?? 0) : 0) +
                 ($tiendamia ? ($tiendamia->m_l30 ?? 0) : 0) +
@@ -461,6 +469,7 @@ class PricingMasterViewsController extends Controller
                 ($temuMetric ? ($temuMetric->quantity_purchased_l60 ?? 0) : 0) +
                 ($reverb ? ($reverb->r_l60 ?? 0) : 0) +
                 ($walmart ? ($walmart->l60 ?? 0) : 0) +
+                (($wayfairSheetLookup[$sku]->l60 ?? 0)) +
                 ($macy ? ($macy->m_l60 ?? 0) : 0) +
                 ($bestbuyUsa ? ($bestbuyUsa->m_l60 ?? 0) : 0) +
                 ($tiendamia ? ($tiendamia->m_l60 ?? 0) : 0) +
@@ -685,6 +694,11 @@ class PricingMasterViewsController extends Controller
                 'aliexpress_roi' => $aliexpress && $lp > 0 && ($aliexpress->price ?? 0) > 0 ? (($aliexpress->price * 0.89 - $lp - $ship) / $lp) : 0,
                 'aliexpress_buyer_link' => isset($aliexpressListingData[$sku]) ? ($aliexpressListingData[$sku]->value['buyer_link'] ?? null) : null,
                 'aliexpress_seller_link' => isset($aliexpressListingData[$sku]) ? ($aliexpressListingData[$sku]->value['seller_link'] ?? null) : null,
+                // Wayfair (from sheet)
+                'wayfair_price' => isset($wayfairSheetLookup[$sku]) ? ($wayfairSheetLookup[$sku]->price ?? 0) : 0,
+                'wayfair_l30' => isset($wayfairSheetLookup[$sku]) ? ($wayfairSheetLookup[$sku]->l30 ?? 0) : 0,
+                'wayfair_l60' => isset($wayfairSheetLookup[$sku]) ? ($wayfairSheetLookup[$sku]->l60 ?? 0) : 0,
+                'wayfair_views' => isset($wayfairSheetLookup[$sku]) ? ($wayfairSheetLookup[$sku]->views ?? 0) : 0,
                 // Direct assignments
                 'views_clicks' => $shein ? ($shein->views_clicks ?? 0) : 0,
                 'lmp' => $shein ? ($shein->lmp ?? 0) : 0,
@@ -2051,6 +2065,47 @@ class PricingMasterViewsController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Import failed: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getLmpHistory(Request $request)
+    {
+        $request->validate([
+            'sku' => 'required|string',
+            'channel' => 'nullable|string',
+        ]);
+
+        $sku = $request->input('sku');
+        $channel = strtolower($request->input('channel', ''));
+
+        // Decide table based on channel
+        $table = $channel === 'amz' ? 'lmpa_data' : 'lmp_data';
+
+        try {
+            $rows = DB::connection('repricer')
+                ->table($table)
+                ->select('price', 'link', DB::raw('NULL as created_at'))
+                ->where('sku', $sku)
+                ->where('price', '>', 0)
+                ->orderBy('price', 'asc')
+                ->limit(200)
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $rows,
+            ]);
+        } catch (Exception $e) {
+            Log::error('Failed to load LMP history', [
+                'sku' => $sku,
+                'channel' => $channel,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Unable to fetch LMP history',
             ], 500);
         }
     }
