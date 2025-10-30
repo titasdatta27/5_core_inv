@@ -47,64 +47,64 @@
 
                     { title: "Amz API L30", field: "Amazon_L30", hozAlign: "center" },
                     // { title: "Amz Orders L30", field: "Amazon_O_L30", hozAlign: "center" },
-                    { title: "Amz Qty L30", field: "Amazon_Q_L30", hozAlign: "center" },
+                    { title: "Amz Shopify L30", field: "Amazon_Q_L30", hozAlign: "center" },
 
-                    { title: "eBay1 L30", field: "Ebay1_L30", hozAlign: "center" },
+                    { title: "eBay1 API L30", field: "Ebay1_L30", hozAlign: "center" },
                     // { title: "eBay Orders L30", field: "Ebay_O_L30", hozAlign: "center" },
-                    { title: "eBay Qty L30", field: "Ebay_Q_L30", hozAlign: "center" },
+                    { title: "eBay Shopify L30", field: "Ebay_Q_L30", hozAlign: "center" },
 
-                    { title: "eBay2 L30", field: "Ebay2_L30", hozAlign: "center" },
+                    { title: "eBay2  API L30", field: "Ebay2_L30", hozAlign: "center" },
                     // { title: "eBay2 Orders L30", field: "Ebay2_O_L30", hozAlign: "center" },
-                    { title: "eBay2 Qty L30", field: "Ebay2_Q_L30", hozAlign: "center" },
+                    { title: "eBay2 Shopify L30", field: "Ebay2_Q_L30", hozAlign: "center" },
 
-                    { title: "eBay3 L30", field: "Ebay3_L30", hozAlign: "center" },
+                    { title: "eBay3 API L30", field: "Ebay3_L30", hozAlign: "center" },
                     // { title: "eBay3 Orders L30", field: "Ebay3_O_L30", hozAlign: "center" },
-                    { title: "eBay3 Qty L30", field: "Ebay3_Q_L30", hozAlign: "center" },
+                    { title: "eBay3 Shopify L30", field: "Ebay3_Q_L30", hozAlign: "center" },
 
-                    { title: "Reverb L30", field: "Reverb_L30", hozAlign: "center" },
+                    { title: "Reverb API L30", field: "Reverb_L30", hozAlign: "center" },
                     // { title: "Reverb Orders L30", field: "Reverb_O_L30", hozAlign: "center" },
-                    { title: "Reverb Qty L30", field: "Reverb_Q_L30", hozAlign: "center" },
+                    { title: "Reverb Shopify L30", field: "Reverb_Q_L30", hozAlign: "center" },
 
-                    { title: "Walmart L30", field: "Walmart_L30", hozAlign: "center" },
+                    { title: "Walmart API L30", field: "Walmart_L30", hozAlign: "center" },
                     // { title: "Walmart Orders L30", field: "Walmart_O_L30", hozAlign: "center" },
-                    { title: "Walmart Qty L30", field: "Walmart_Q_L30", hozAlign: "center" },
+                    { title: "Walmart Shopify L30", field: "Walmart_Q_L30", hozAlign: "center" },
 
-                    { title: "Temu L30", field: "Temu_L30", hozAlign: "center" },
+                    { title: "Temu API L30", field: "Temu_L30", hozAlign: "center" },
                     // { title: "Temu Orders L30", field: "Temu_O_L30", hozAlign: "center" },
-                    { title: "Temu Qty L30", field: "Temu_Q_L30", hozAlign: "center" },
+                    { title: "Temu Shopify L30", field: "Temu_Q_L30", hozAlign: "center" },
 
-                    { title: "Wayfair L30", field: "Wayfair_L30", hozAlign: "center" },
+                    { title: "Wayfair API L30", field: "Wayfair_L30", hozAlign: "center" },
                     // { title: "Wayfair Orders L30", field: "Wayfair_O_L30", hozAlign: "center" },
-                    { title: "Wayfair Qty L30", field: "Wayfair_Q_L30", hozAlign: "center" },
+                    { title: "Wayfair Shopify L30", field: "Wayfair_Q_L30", hozAlign: "center" },
 
-                    { title: "TikTok L30", field: "TikTok_L30", hozAlign: "center" },
-                    { title: "TikTok L60", field: "TikTok_L60", hozAlign: "center" },
+                    { title: "TikTok API L30", field: "TikTok_L30", hozAlign: "center" },
+                    { title: "TikTok API L60", field: "TikTok_L60", hozAlign: "center" },
 
-                    { title: "Mercari W L30", field: "MercariW_L30", hozAlign: "center" },
+                    { title: "Mercari W Sheet API L30", field: "MercariW_L30", hozAlign: "center" },
                     // { title: "Mercari W Orders L30", field: "MercariW_O_L30", hozAlign: "center" },
-                    { title: "Mercari W Qty L30", field: "MercariW_Q_L30", hozAlign: "center" },
+                    { title: "Mercari W Shopify L30", field: "MercariW_Q_L30", hozAlign: "center" },
 
-                    { title: "Mercari WO L30", field: "MercariWO_L30", hozAlign: "center" },
-                    { title: "Mercari WO L60", field: "MercariWO_L60", hozAlign: "center" },
+                    { title: "Mercari WO Sheet API L30", field: "MercariWO_L30", hozAlign: "center" },
+                    { title: "Mercari WO Sheet API L60", field: "MercariWO_L60", hozAlign: "center" },
 
-                    { title: "PLS L30", field: "PLS_L30", hozAlign: "center" },
-                    { title: "PLS L60", field: "PLS_L60", hozAlign: "center" },
+                    { title: "PLS Sheet API L30", field: "PLS_L30", hozAlign: "center" },
+                    { title: "PLS Sheet API L60", field: "PLS_L60", hozAlign: "center" },
 
-                    { title: "BestBuy L30", field: "BestBuy_L30", hozAlign: "center" },
+                    { title: "BestBuy API L30", field: "BestBuy_L30", hozAlign: "center" },
                     // { title: "BestBuy Orders L30", field: "BestBuyUSA_O_L30", hozAlign: "center" },
-                    { title: "BestBuy Qty L30", field: "BestBuyUSA_Q_L30", hozAlign: "center" },
+                    { title: "BestBuy Shopify L30", field: "BestBuyUSA_Q_L30", hozAlign: "center" },
 
-                    { title: "Macy L30", field: "Macy_L30", hozAlign: "center" },
+                    { title: "Macy API L30", field: "Macy_L30", hozAlign: "center" },
                     // { title: "Macy Orders L30", field: "Macys_O_L30", hozAlign: "center" },
-                    { title: "Macy Qty L30", field: "Macys_Q_L30", hozAlign: "center" },
+                    { title: "Macy Shopify L30", field: "Macys_Q_L30", hozAlign: "center" },
 
-                    { title: "AliExpress L30", field: "AliExpress_L30", hozAlign: "center" },
+                    { title: "AliExpress API L30", field: "AliExpress_L30", hozAlign: "center" },
                     // { title: "Ali Orders L30", field: "AliExpress_O_L30", hozAlign: "center" },
-                    { title: "Ali Qty L30", field: "AliExpress_Q_L30", hozAlign: "center" },
+                    { title: "Ali Shopify L30", field: "AliExpress_Q_L30", hozAlign: "center" },
 
-                    { title: "Shein L30", field: "Shein_L30", hozAlign: "center" },
+                    { title: "Shein API L30", field: "Shein_L30", hozAlign: "center" },
                     // { title: "Shein Orders L30", field: "Shein_O_L30", hozAlign: "center" },
-                    { title: "Shein Qty L30", field: "Shein_Q_L30", hozAlign: "center" },
+                    { title: "Shein Shopify L30", field: "Shein_Q_L30", hozAlign: "center" },
                 ],
             });
         });
