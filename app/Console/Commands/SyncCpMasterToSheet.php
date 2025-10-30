@@ -14,7 +14,7 @@ class SyncCpMasterToSheet extends Command
 
     public function handle()
     {
-        $sheetUrl = "https://script.google.com/macros/s/AKfycbypyTELRP5TTc-SD3ZXl6nT0BhD1yzdeubcVXBTrZgKvheKuUY2PfuLgDwdLc8Bz5AtYg/exec";   // ✅ Change
+        $sheetUrl = "https://script.google.com/macros/s/AKfycbwfegttlsmKh-6RKa9NXSJA6zLDidFqex0iGzqHTONt8Za3raj6WSHmGJflM98uOT-tUA/exec";   // ✅ Change
 
         $rows = ProductMaster::select('*', 'Values as values')->get();
         $total = $rows->count();
