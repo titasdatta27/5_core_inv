@@ -1,3 +1,4 @@
+
 <?php
 
 use App\Http\Controllers\AdsMaster\AdsMasterController;
@@ -2269,7 +2270,9 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::get('product-market', [ProductMarketing::class, 'product_master']);
     Route::get('product-market/details', [ProductMarketing::class, 'product_market_details']);
 
-
+// Shopify All Channels - View + JSON
+Route::get('/shopify-all-channels', [\App\Http\Controllers\SyncShopifyAllChannelDataController::class, 'index']);
+Route::get('/shopify-all-channels-json', [\App\Http\Controllers\SyncShopifyAllChannelDataController::class, 'data']);
 
     Route::get('channels-reviews-master', [ChannelWiseReviewsController::class, 'reviews_dashboard']);
     Route::get('channels-reviews/details', [ChannelWiseReviewsController::class, 'reviews_dashboard_details']);

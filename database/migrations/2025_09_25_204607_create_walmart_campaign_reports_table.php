@@ -21,6 +21,7 @@ return new class extends Migration
             $table->decimal('cpc', 10, 2)->default(0);
             $table->bigInteger('impression')->default(0);
             $table->bigInteger('clicks')->default(0);
+            $table->bigInteger('sold')->default(0);
             $table->timestamps();
         });
     }

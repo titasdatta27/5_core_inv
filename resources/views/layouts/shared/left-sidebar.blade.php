@@ -83,6 +83,10 @@
                             <a href="{{ url('product-market') }}">Product Marketing</a>
                         </li>
 
+                        <li></li>
+                            <a href="{{ url('shopify-all-channels') }}"> All Product Marketing</a>
+                        </li>
+
                     </ul>
                 </div>
 
@@ -1420,7 +1424,7 @@
                                         <div class="collapse" id="amazonSubmenu">
                                             <ul class="side-nav-fourth-level">
                                                 <li>
-                                                    <a href="{{ route('adcvr.amazon') }}">PRICING</a>
+                                                    <a href="{{ route('adcvr.amazon') }}">Pricing</a>
                                                 </li>
                                             </ul>
                                         </div>

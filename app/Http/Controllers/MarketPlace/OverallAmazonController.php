@@ -234,6 +234,10 @@ class OverallAmazonController extends Controller
                 }
             }
 
+            $row['amz_price'] = $amazonSheet ? ($amazonSheet->price ?? 0) : 0;
+            $row['amz_pft'] = $amazonSheet && ($amazonSheet->price ?? 0) > 0 ? (($amazonSheet->price * 0.70 - $lp - $ship) / $amazonSheet->price) : 0;
+            $row['amz_roi'] = $amazonSheet && $lp > 0 && ($amazonSheet->price ?? 0) > 0 ? (($amazonSheet->price * 0.70 - $lp - $ship) / $lp) : 0;
+
             $prices = DB::connection('repricer')
                 ->table('lmpa_data')
                 ->where('sku', $sku)
@@ -250,10 +254,7 @@ class OverallAmazonController extends Controller
                 }
             }
 
-            if ($row['NRA'] !== 'NRA' && $row['campaignName'] !== '') {
-                $result[] = (object) $row;
-            }
-
+            $result[] = (object) $row;
         }
 
         return response()->json([
