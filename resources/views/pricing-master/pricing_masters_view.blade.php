@@ -2166,6 +2166,11 @@
                 { label: "Temu", prefix: "temu", logo: "{{ asset('uploads/temu.jpeg') }}" },
                 { label: "Walmart", prefix: "walmart", logo: "{{ asset('uploads/walmart.png') }}" },
                 { label: "Wayfair", prefix: "wayfair", logo: "{{ asset('uploads/wayfair.png') }}" },
+                { label: "Mercari WO Ship", prefix: "mercariwoship", logo: "{{ asset('assets/5core.png') }}" },
+                { label: "Mercari W Ship", prefix: "mercariwship", logo: "{{ asset('assets/5core.png') }}" },
+                { label: "FB Marketplace", prefix: "fbmarketplace", logo: "{{ asset('assets/5core.png') }}" },
+                { label: "Business 5Core", prefix: "business5core", logo: "{{ asset('assets/5core.png') }}" },
+                { label: "PLS", prefix: "pls", logo: "{{ asset('assets/5core.png') }}" },
                 { label: "eBay2", prefix: "ebay2", logo: "{{ asset('uploads/2.png') }}" },
                 { label: "eBay3", prefix: "ebay3", logo: "{{ asset('uploads/3.png') }}" },
                 { label: "Shopify B2C", prefix: "shopifyb2c", logo: "{{ asset('uploads/shopify.png') }}" },
@@ -2307,6 +2312,30 @@
                                     ${data.aliexpress_seller_link ? `<div><strong>SL:</strong> <a href="${data.aliexpress_seller_link}" target="_blank" class="text-info">Seller Link</a></div>` : ''}
                                     ${data.aliexpress_buyer_link ? `<div><strong>BL:</strong> <a href="${data.aliexpress_buyer_link}" target="_blank" class="text-success">Buyer Link</a></div>` : ''}
                                 ` : ''}
+                                ${r.prefix === 'wayfair' ? `
+                                    ${data.wayfair_seller_link ? `<div><strong>SL:</strong> <a href="${data.wayfair_seller_link}" target="_blank" class="text-info">Seller Link</a></div>` : ''}
+                                    ${data.wayfair_buyer_link ? `<div><strong>BL:</strong> <a href="${data.wayfair_buyer_link}" target="_blank" class="text-success">Buyer Link</a></div>` : ''}
+                                ` : ''}
+                                ${r.prefix === 'fbmarketplace' ? `
+                                    ${data.fbmarketplace_seller_link ? `<div><strong>SL:</strong> <a href="${data.fbmarketplace_seller_link}" target="_blank" class="text-info">Seller Link</a></div>` : ''}
+                                    ${data.fbmarketplace_buyer_link ? `<div><strong>BL:</strong> <a href="${data.fbmarketplace_buyer_link}" target="_blank" class="text-success">Buyer Link</a></div>` : ''}
+                                ` : ''}
+                                ${r.prefix === 'mercariwoship' ? `
+                                    ${data.mercariwoship_seller_link ? `<div><strong>SL:</strong> <a href="${data.mercariwoship_seller_link}" target="_blank" class="text-info">Seller Link</a></div>` : ''}
+                                    ${data.mercariwoship_buyer_link ? `<div><strong>BL:</strong> <a href="${data.mercariwoship_buyer_link}" target="_blank" class="text-success">Buyer Link</a></div>` : ''}
+                                ` : ''}
+                                ${r.prefix === 'mercariwship' ? `
+                                    ${data.mercariwship_seller_link ? `<div><strong>SL:</strong> <a href="${data.mercariwship_seller_link}" target="_blank" class="text-info">Seller Link</a></div>` : ''}
+                                    ${data.mercariwship_buyer_link ? `<div><strong>BL:</strong> <a href="${data.mercariwship_buyer_link}" target="_blank" class="text-success">Buyer Link</a></div>` : ''}
+                                ` : ''}
+                                ${r.prefix === 'business5core' ? `
+                                    ${data.business5core_seller_link ? `<div><strong>SL:</strong> <a href="${data.business5core_seller_link}" target="_blank" class="text-info">Seller Link</a></div>` : ''}
+                                    ${data.business5core_buyer_link ? `<div><strong>BL:</strong> <a href="${data.business5core_buyer_link}" target="_blank" class="text-success">Buyer Link</a></div>` : ''}
+                                ` : ''}
+                                ${r.prefix === 'pls' ? `
+                                    ${data.pls_seller_link ? `<div><strong>SL:</strong> <a href="${data.pls_seller_link}" target="_blank" class="text-info">Seller Link</a></div>` : ''}
+                                    ${data.pls_buyer_link ? `<div><strong>BL:</strong> <a href="${data.pls_buyer_link}" target="_blank" class="text-success">Buyer Link</a></div>` : ''}
+                                ` : ''}
 
                             </div>
                         </div>
@@ -2352,6 +2381,9 @@
                                 : r.prefix === 'reverb' ? (data.reverb_views ?? "-")
                                 : r.prefix === 'temu' ? (data.temu_views ?? "-")
                                 : r.prefix === 'wayfair' ? (data.wayfair_views ?? "-")
+                                : r.prefix === 'fbmarketplace' ? (data.fbmarketplace_views ?? "-")
+                                : r.prefix === 'mercariwoship' ? (data.mercariwoship_views ?? "-")
+                                : r.prefix === 'mercariwship' ? (data.mercariwship_views ?? "-")
                                 : r.prefix === 'tiktok' ? (data.tiktok_views ?? "-")
                                 : r.prefix === 'aliexpress' ? (data.aliexpress_views ?? "-")
                                 : "-" }
@@ -2424,6 +2456,7 @@
                                     }
                                     return '-';
                                 }
+                                // Other channels: no LMP history shown
                                 return '-';
                             })()}
                         </div>

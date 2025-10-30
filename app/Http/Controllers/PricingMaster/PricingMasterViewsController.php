@@ -47,6 +47,7 @@ use App\Models\SheinListingStatus;
 use App\Models\BestbuyUsaProduct;
 use App\Models\BestbuyUSADataView;
 use App\Models\BestbuyUSAListingStatus;
+use App\Models\BusinessFiveCoreSheetdata;
 use App\Models\CvrLqs;
 use App\Models\TemuMetric;
 use App\Models\TiendamiaProduct;
@@ -55,6 +56,7 @@ use App\Models\TiendamiaListingStatus;
 use App\Models\TiktokShopDataView;
 use App\Models\TiktokShopListingStatus;
 use App\Models\TiktokSheet;
+use App\Models\WayfairListingStatus;
 use App\Services\AmazonSpApiService;
 use App\Services\DobaApiService;
 use App\Services\EbayApiService;
@@ -82,6 +84,20 @@ class PricingMasterViewsController extends Controller
         $this->walmart = new WalmartService();
         $this->doba = new DobaApiService();
         $this->ebay = new EbayApiService();
+    }
+
+    private function getListingStatusLink($record, string $key)
+    {
+        if (!$record) return null;
+        $val = $record->value ?? null;
+        if (is_array($val)) {
+            $arr = $val;
+        } elseif (is_string($val)) {
+            $arr = json_decode($val, true) ?: [];
+        } else {
+            $arr = [];
+        }
+        return $arr[$key] ?? null;
     }
 
 
@@ -280,6 +296,9 @@ class PricingMasterViewsController extends Controller
         $tiendamiaListingData = TiendamiaListingStatus::whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
         $tiktokListingData = TiktokShopListingStatus::whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
         $aliexpressListingData = AliexpressListingStatus::whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
+        $wayfairListingData = WayfairListingStatus::whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
+
+
 
         $pricingData = PricingMaster::whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
         $macyData = MacyProduct::whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
@@ -343,6 +362,29 @@ class PricingMasterViewsController extends Controller
             ->whereIn('sku', $nonParentSkus)
             ->get()
             ->keyBy('sku');
+        // Mercari without ship
+        $mercariWoShipSheet = DB::table('mercari_wo_ship_sheet_data')
+            ->select('sku', 'price', 'l30', 'l60', 'views')
+            ->whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
+        $mercariWoShipStatuses = DB::table('mercari_wo_ship_listing_statuses')->whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
+        // Mercari with ship
+        $mercariWShipSheet = DB::table('mercari_w_ship_sheet_data')
+            ->select('sku', 'price', 'l30', 'l60', 'views')
+            ->whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
+        $mercariWShipStatuses = DB::table('mercari_w_ship_listing_statuses')->whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
+        // FB Marketplace
+        $fbMarketplaceSheet = DB::table('fb_marketplace_sheet_data')
+            ->select('sku', 'price', 'l30', 'l60', 'views')
+            ->whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
+        $fbMarketplaceStatuses = DB::table('fb_marketplace_listing_statuses')->whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
+        // Business Five Core
+        $businessFiveCoreSheet = BusinessFiveCoreSheetdata::whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
+        $businessFiveCoreStatuses = DB::table('business5core_listing_statuses')->whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
+        // PLS
+        $plsProducts = DB::table('pls_products')
+            ->select('sku', 'price', 'p_l30', 'p_l60')
+            ->whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
+        $plsStatuses = DB::table('pls_listing_statuses')->whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
 
         // Fetch LMPA and LMP data
         $lmpLookup = collect();
@@ -440,6 +482,9 @@ class PricingMasterViewsController extends Controller
                 ($temuMetric ? ($temuMetric->product_clicks_l30 ?? 0) : 0) +
                 ($tiktok ? ($tiktok->views ?? 0) : 0) +
                 ($wayfairSheetLookup[$sku]->views ?? 0) +
+                ($fbMarketplaceSheet[$sku]->views ?? 0) +
+                ($mercariWoShipSheet[$sku]->views ?? 0) +
+                ($mercariWShipSheet[$sku]->views ?? 0) +
                 ($walmartSheet ? ($walmartSheet->views ?? 0) : 0) +
                 ($dobaSheet ? ($dobaSheet->views ?? 0) : 0);
 
@@ -454,6 +499,9 @@ class PricingMasterViewsController extends Controller
                 ($reverb ? ($reverb->r_l30 ?? 0) : 0) +
                 ($walmart ? ($walmart->l30 ?? 0) : 0) +
                 (($wayfairSheetLookup[$sku]->l30 ?? 0)) +
+                (($fbMarketplaceSheet[$sku]->l30 ?? 0)) +
+                (($mercariWoShipSheet[$sku]->l30 ?? 0)) +
+                (($mercariWShipSheet[$sku]->l30 ?? 0)) +
                 ($macy ? ($macy->m_l30 ?? 0) : 0) +
                 ($bestbuyUsa ? ($bestbuyUsa->m_l30 ?? 0) : 0) +
                 ($tiendamia ? ($tiendamia->m_l30 ?? 0) : 0) +
@@ -470,6 +518,9 @@ class PricingMasterViewsController extends Controller
                 ($reverb ? ($reverb->r_l60 ?? 0) : 0) +
                 ($walmart ? ($walmart->l60 ?? 0) : 0) +
                 (($wayfairSheetLookup[$sku]->l60 ?? 0)) +
+                (($fbMarketplaceSheet[$sku]->l60 ?? 0)) +
+                (($mercariWoShipSheet[$sku]->l60 ?? 0)) +
+                (($mercariWShipSheet[$sku]->l60 ?? 0)) +
                 ($macy ? ($macy->m_l60 ?? 0) : 0) +
                 ($bestbuyUsa ? ($bestbuyUsa->m_l60 ?? 0) : 0) +
                 ($tiendamia ? ($tiendamia->m_l60 ?? 0) : 0) +
@@ -694,11 +745,104 @@ class PricingMasterViewsController extends Controller
                 'aliexpress_roi' => $aliexpress && $lp > 0 && ($aliexpress->price ?? 0) > 0 ? (($aliexpress->price * 0.89 - $lp - $ship) / $lp) : 0,
                 'aliexpress_buyer_link' => isset($aliexpressListingData[$sku]) ? ($aliexpressListingData[$sku]->value['buyer_link'] ?? null) : null,
                 'aliexpress_seller_link' => isset($aliexpressListingData[$sku]) ? ($aliexpressListingData[$sku]->value['seller_link'] ?? null) : null,
+
+                // Mercari With Out Ship
+
+                'mercariwoship_price' => isset($mercariWoShipSheet[$sku]) ? ($mercariWoShipSheet[$sku]->price ?? 0) : 0,
+                'mercariwoship_l30' => isset($mercariWoShipSheet[$sku]) ? ($mercariWoShipSheet[$sku]->l30 ?? 0) : 0,
+                'mercariwoship_l60' => isset($mercariWoShipSheet[$sku]) ? ($mercariWoShipSheet[$sku]->l60 ?? 0) : 0,
+                'mercariwoship_pft' => isset($mercariWoShipSheet[$sku]) && ($mercariWoShipSheet[$sku]->price ?? 0) > 0 ? ((($mercariWoShipSheet[$sku]->price * 0.80) - $lp - $ship) / $mercariWoShipSheet[$sku]->price) : 0,
+                'mercariwoship_roi' => isset($mercariWoShipSheet[$sku]) && $lp > 0 && ($mercariWoShipSheet[$sku]->price ?? 0) > 0 ? ((($mercariWoShipSheet[$sku]->price * 0.80) - $lp - $ship) / $lp) : 0,
+                'mercariwoship_views' => isset($mercariWoShipSheet[$sku]) ? ($mercariWoShipSheet[$sku]->views ?? 0) : 0,
+                'mercariwoship_buyer_link' => isset($mercariWoShipSheet[$sku]) && ($mercariWoShipSheet[$sku]->buyer_link ?? null)
+                    ? $mercariWoShipSheet[$sku]->buyer_link
+                    : (isset($mercariWoShipStatuses[$sku]) ? $this->getListingStatusLink($mercariWoShipStatuses[$sku], 'buyer_link') : null),
+                'mercariwoship_seller_link' => isset($mercariWoShipSheet[$sku]) && ($mercariWoShipSheet[$sku]->seller_link ?? null)
+                    ? $mercariWoShipSheet[$sku]->seller_link
+                    : (isset($mercariWoShipStatuses[$sku]) ? $this->getListingStatusLink($mercariWoShipStatuses[$sku], 'seller_link') : null),
+
+
+                // Mercari With Ship
+
+                'mercariwship_price' => isset($mercariWShipSheet[$sku]) ? ($mercariWShipSheet[$sku]->price ?? 0) : 0,
+                'mercariwship_l30' => isset($mercariWShipSheet[$sku]) ? ($mercariWShipSheet[$sku]->l30 ?? 0) : 0,
+                'mercariwship_l60' => isset($mercariWShipSheet[$sku]) ? ($mercariWShipSheet[$sku]->l60 ?? 0) : 0,
+                'mercariwship_pft' => isset($mercariWShipSheet[$sku]) && ($mercariWShipSheet[$sku]->price ?? 0) > 0 ? ((($mercariWShipSheet[$sku]->price * 0.80) - $lp - $ship) / $mercariWShipSheet[$sku]->price) : 0,
+                'mercariwship_roi' => isset($mercariWShipSheet[$sku]) && $lp > 0 && ($mercariWShipSheet[$sku]->price ?? 0) > 0 ? ((($mercariWShipSheet[$sku]->price * 0.80) - $lp - $ship) / $lp) : 0,
+                'mercariwship_views' => isset($mercariWShipSheet[$sku]) ? ($mercariWShipSheet[$sku]->views ?? 0) : 0,
+                'mercariwship_buyer_link' => isset($mercariWShipSheet[$sku]) && ($mercariWShipSheet[$sku]->buyer_link ?? null)
+                    ? $mercariWShipSheet[$sku]->buyer_link
+                    : (isset($mercariWShipStatuses[$sku]) ? $this->getListingStatusLink($mercariWShipStatuses[$sku], 'buyer_link') : null),
+                'mercariwship_seller_link' => isset($mercariWShipSheet[$sku]) && ($mercariWShipSheet[$sku]->seller_link ?? null)
+                    ? $mercariWShipSheet[$sku]->seller_link
+                    : (isset($mercariWShipStatuses[$sku]) ? $this->getListingStatusLink($mercariWShipStatuses[$sku], 'seller_link') : null),
+
+
+
+                // FB Marketplace
+                'fbmarketplace_price' => isset($fbMarketplaceSheet[$sku]) ? ($fbMarketplaceSheet[$sku]->price ?? 0) : 0,
+                'fbmarketplace_l30' => isset($fbMarketplaceSheet[$sku]) ? ($fbMarketplaceSheet[$sku]->l30 ?? 0) : 0,
+                'fbmarketplace_l60' => isset($fbMarketplaceSheet[$sku]) ? ($fbMarketplaceSheet[$sku]->l60 ?? 0) : 0,
+                'fbmarketplace_pft' => isset($fbMarketplaceSheet[$sku]) && ($fbMarketplaceSheet[$sku]->price ?? 0) > 0 ? ((($fbMarketplaceSheet[$sku]->price * 0.80) - $lp - $ship) / $fbMarketplaceSheet[$sku]->price) : 0,
+                'fbmarketplace_roi' => isset($fbMarketplaceSheet[$sku]) && $lp > 0 && ($fbMarketplaceSheet[$sku]->price ?? 0) > 0 ? ((($fbMarketplaceSheet[$sku]->price * 0.80) - $lp - $ship) / $lp) : 0,
+                'fbmarketplace_views' => isset($fbMarketplaceSheet[$sku]) ? ($fbMarketplaceSheet[$sku]->views ?? 0) : 0,
+                'fbmarketplace_buyer_link' => isset($fbMarketplaceSheet[$sku]) && ($fbMarketplaceSheet[$sku]->buyer_link ?? null)
+                    ? $fbMarketplaceSheet[$sku]->buyer_link
+                    : (isset($fbMarketplaceStatuses[$sku]) ? $this->getListingStatusLink($fbMarketplaceStatuses[$sku], 'buyer_link') : null),
+                'fbmarketplace_seller_link' => isset($fbMarketplaceSheet[$sku]) && ($fbMarketplaceSheet[$sku]->seller_link ?? null)
+                    ? $fbMarketplaceSheet[$sku]->seller_link
+                    : (isset($fbMarketplaceStatuses[$sku]) ? $this->getListingStatusLink($fbMarketplaceStatuses[$sku], 'seller_link') : null),
+
+
+
+                // Business Five Core
+                'business5core_price' => isset($businessFiveCoreSheet[$sku]) ? ($businessFiveCoreSheet[$sku]->price ?? 0) : 0,
+                'business5core_l30' => isset($businessFiveCoreSheet[$sku]) ? ($businessFiveCoreSheet[$sku]->l30 ?? 0) : 0,
+                'business5core_l60' => isset($businessFiveCoreSheet[$sku]) ? ($businessFiveCoreSheet[$sku]->l60 ?? 0) : 0,
+                'business5core_pft' => isset($businessFiveCoreSheet[$sku]) && ($businessFiveCoreSheet[$sku]->price ?? 0) > 0 ? ((($businessFiveCoreSheet[$sku]->price * 0.80) - $lp - $ship) / $businessFiveCoreSheet[$sku]->price) : 0,
+                'business5core_roi' => isset($businessFiveCoreSheet[$sku]) && $lp > 0 && ($businessFiveCoreSheet[$sku]->price ?? 0) > 0 ? ((($businessFiveCoreSheet[$sku]->price * 0.80) - $lp - $ship) / $lp) : 0,
+                'business5core_views' => isset($businessFiveCoreSheet[$sku]) ? ($businessFiveCoreSheet[$sku]->views ?? 0) : 0,
+                'business5core_buyer_link' => isset($businessFiveCoreSheet[$sku]) && ($businessFiveCoreSheet[$sku]->buyer_link ?? null)
+                    ? $businessFiveCoreSheet[$sku]->buyer_link
+                    : (isset($businessFiveCoreStatuses[$sku]) ? $this->getListingStatusLink($businessFiveCoreStatuses[$sku], 'buyer_link') : null),
+                'business5core_seller_link' => isset($businessFiveCoreSheet[$sku]) && ($businessFiveCoreSheet[$sku]->seller_link ?? null)
+                    ? $businessFiveCoreSheet[$sku]->seller_link
+                    : (isset($businessFiveCoreStatuses[$sku]) ? $this->getListingStatusLink($businessFiveCoreStatuses[$sku], 'seller_link') : null),
+             
+             
+
+
+                // PLS
+                'pls_price' => isset($plsProducts[$sku]) ? ($plsProducts[$sku]->price ?? 0) : 0,
+                'pls_l30' => isset($plsProducts[$sku]) ? ($plsProducts[$sku]->p_l30 ?? 0) : 0,
+                'pls_l60' => isset($plsProducts[$sku]) ? ($plsProducts[$sku]->p_l60 ?? 0) : 0,
+                'pls_pft' => isset($plsProducts[$sku]) && ($plsProducts[$sku]->price ?? 0) > 0 ? ((($plsProducts[$sku]->price * 0.80) - $lp - $ship) / $plsProducts[$sku]->price) : 0,
+                'pls_roi' => isset($plsProducts[$sku]) && $lp > 0 && ($plsProducts[$sku]->price ?? 0) > 0 ? ((($plsProducts[$sku]->price * 0.80) - $lp - $ship) / $lp) : 0,
+                'pls_buyer_link' => isset($plsProducts[$sku]) && ($plsProducts[$sku]->buyer_link ?? null)
+                    ? $plsProducts[$sku]->buyer_link
+                    : (isset($plsStatuses[$sku]) ? $this->getListingStatusLink($plsStatuses[$sku], 'buyer_link') : null),
+                'pls_seller_link' => isset($plsProducts[$sku]) && ($plsProducts[$sku]->seller_link ?? null)
+                    ? $plsProducts[$sku]->seller_link
+                    : (isset($plsStatuses[$sku]) ? $this->getListingStatusLink($plsStatuses[$sku], 'seller_link') : null),
+               
+               
                 // Wayfair (from sheet)
                 'wayfair_price' => isset($wayfairSheetLookup[$sku]) ? ($wayfairSheetLookup[$sku]->price ?? 0) : 0,
                 'wayfair_l30' => isset($wayfairSheetLookup[$sku]) ? ($wayfairSheetLookup[$sku]->l30 ?? 0) : 0,
                 'wayfair_l60' => isset($wayfairSheetLookup[$sku]) ? ($wayfairSheetLookup[$sku]->l60 ?? 0) : 0,
                 'wayfair_views' => isset($wayfairSheetLookup[$sku]) ? ($wayfairSheetLookup[$sku]->views ?? 0) : 0,
+                'wayfair_pft' => isset($wayfairSheetLookup[$sku]) && ($wayfairSheetLookup[$sku]->price ?? 0) > 0 ? ((($wayfairSheetLookup[$sku]->price * 0.80) - $lp - $ship) / $wayfairSheetLookup[$sku]->price) : 0,
+                'wayfair_roi' => isset($wayfairSheetLookup[$sku]) && $lp > 0 && ($wayfairSheetLookup[$sku]->price ?? 0) > 0 ? ((($wayfairSheetLookup[$sku]->price * 0.80) - $lp - $ship) / $lp) : 0,
+                'wayfair_buyer_link' => isset($wayfairListingData[$sku]) ? $this->getListingStatusLink($wayfairListingData[$sku], 'buyer_link') : null,
+                'wayfair_seller_link' => isset($wayfairListingData[$sku]) ? $this->getListingStatusLink($wayfairListingData[$sku], 'seller_link') : null,
+
+                // Mercari WO Ship
+             
+            
+                // Mercari W Ship
+               
+             
+            
                 // Direct assignments
                 'views_clicks' => $shein ? ($shein->views_clicks ?? 0) : 0,
                 'lmp' => $shein ? ($shein->lmp ?? 0) : 0,

@@ -93,7 +93,7 @@
                             <td>
                                 @php
                                     if($SALES_L30_Total > 0){
-                                        $acos = $SPEND_L30_total/$SALES_L30_Total;
+                                        $acos = ($SPEND_L30_total/$SALES_L30_Total)*100;
                                         $acos = number_format($acos, 2);
                                     }else{
                                         $acos = 0;
@@ -101,12 +101,22 @@
                                 @endphp
                                 {{ '('.$acos.') %'  }}
                             </td>
-                            <td></td>
+                            <td>
+                                @php
+                                    if($totalSales > 0){
+                                        $tacos = ($SPEND_L30_total/$totalSales)*100;
+                                        $tacos = number_format($tacos, 2);
+                                    }else{
+                                        $tacos = 0;
+                                    }
+                                @endphp
+                                {{ '('.$tacos.') %'  }}
+                            </td>
                             <td>{{ $SOLD_L30_Total }}</td>
                             <td>
                                 @php
                                     if($CLICKS_L30_total > 0){
-                                        $cvr = $SOLD_L30_Total/$CLICKS_L30_total;
+                                        $cvr = ($SOLD_L30_Total/$CLICKS_L30_total)*100;
                                         $cvr = number_format($cvr, 2);
                                     }else{
                                         $cvr = 0;
@@ -128,7 +138,7 @@
                             <td>
                                 @php
                                     if($kw_sales_L30_Total > 0){
-                                        $acos = $kw_spend_L30_total/$kw_sales_L30_Total;
+                                        $acos = ($kw_spend_L30_total/$kw_sales_L30_Total)*100;
                                         $acos = number_format($acos, 2);
                                     }else{
                                         $acos = 0;
@@ -141,7 +151,7 @@
                             <td>
                                 @php
                                     if($kw_clicks_L30_total > 0){
-                                        $cvr = $kw_sold_L30_Total/$kw_clicks_L30_total;
+                                        $cvr = ($kw_sold_L30_Total/$kw_clicks_L30_total)*100;
                                         $cvr = number_format($cvr, 2);
                                     }else{
                                         $cvr = 0;
@@ -163,7 +173,7 @@
                             <td>
                                 @php
                                     if($pt_sales_L30_Total > 0){
-                                        $acos = $pt_spend_L30_total/$pt_sales_L30_Total;
+                                        $acos = ($pt_spend_L30_total/$pt_sales_L30_Total)*100;
                                         $acos = number_format($acos, 2);
                                     }else{
                                         $acos = 0;
@@ -176,7 +186,7 @@
                             <td>
                                 @php
                                     if($pt_clicks_L30_total > 0){
-                                        $cvr = $pt_sold_L30_Total/$pt_clicks_L30_total;
+                                        $cvr = ($pt_sold_L30_Total/$pt_clicks_L30_total)*100;
                                         $cvr = number_format($cvr, 2);
                                     }else{
                                         $cvr = 0;
@@ -198,7 +208,7 @@
                             <td>
                                 @php
                                     if($hl_sales_L30_Total > 0){
-                                        $acos = $hl_spend_L30_total/$hl_sales_L30_Total;
+                                        $acos = ($hl_spend_L30_total/$hl_sales_L30_Total)*100;
                                         $acos = number_format($acos, 2);
                                     }else{
                                         $acos = 0;
@@ -211,7 +221,7 @@
                             <td>
                                 @php
                                     if($hl_clicks_L30_total > 0){
-                                        $cvr = $hl_sold_L30_Total/$hl_clicks_L30_total;
+                                        $cvr = ($hl_sold_L30_Total/$hl_clicks_L30_total)*100;
                                         $cvr = number_format($cvr, 2); 
                                     }else{
                                         $cvr = 0;
@@ -233,7 +243,7 @@
                             <td>
                                 @php
                                     if($ebay_SALES_L30_total > 0){
-                                        $acos = $ebay_SPEND_L30_total/$ebay_SALES_L30_total;
+                                        $acos = ($ebay_SPEND_L30_total/$ebay_SALES_L30_total)*100;
                                         $acos = number_format($acos, 2);
                                     }else{
                                         $acos = 0;
@@ -241,12 +251,22 @@
                                 @endphp
                                 {{ '('.$acos.') %'  }}
                             </td>
-                            <td></td>
+                            <td>
+                                @php
+                                    if($totalEbaySales > 0){
+                                        $tacos = ($ebay_SPEND_L30_total/$totalEbaySales)*100;
+                                        $tacos = number_format($tacos, 2);
+                                    }else{
+                                        $tacos = 0;
+                                    }
+                                @endphp
+                                {{ '('.$tacos.') %'  }}
+                            </td>
                             <td>{{ $ebay_SOLD_L30_total }}</td>
                             <td>
                                 @php
                                     if($ebay_CLICKS_L30_total > 0){
-                                        $cvr = $ebay_SOLD_L30_total/$ebay_CLICKS_L30_total;
+                                        $cvr = ($ebay_SOLD_L30_total/$ebay_CLICKS_L30_total)*100;
                                         $cvr = number_format($cvr, 2);
                                     }else{
                                         $cvr = 0;
@@ -268,7 +288,7 @@
                             <td>
                                 @php
                                     if($ebay_kw_sales_L30_total > 0){
-                                        $acos = $ebay_kw_spend_L30_total/$ebay_kw_sales_L30_total;
+                                        $acos = ($ebay_kw_spend_L30_total/$ebay_kw_sales_L30_total)*100;
                                         $acos = number_format($acos, 2);
                                     }else{
                                         $acos = 0;
@@ -281,7 +301,7 @@
                             <td>
                                 @php
                                     if($ebay_kw_clicks_L30_total > 0){
-                                        $cvr = $ebay_kw_sold_L30_total/$ebay_kw_clicks_L30_total;
+                                        $cvr = ($ebay_kw_sold_L30_total/$ebay_kw_clicks_L30_total)*100;
                                         $cvr = number_format($cvr, 2);
                                     }else{
                                         $cvr = 0;
@@ -303,7 +323,7 @@
                             <td>
                                 @php
                                     if($ebay_pmt_sales_L30_total > 0){
-                                        $acos = $ebay_pmt_spend_L30_total/$ebay_pmt_sales_L30_total;
+                                        $acos = ($ebay_pmt_spend_L30_total/$ebay_pmt_sales_L30_total)*100;
                                         $acos = number_format($acos, 2);
                                     }else{
                                         $acos = 0;
@@ -316,7 +336,7 @@
                             <td>
                                 @php
                                     if($ebay_pmt_clicks_L30_total > 0){
-                                        $cvr = $ebay_pmt_sold_L30_total/$ebay_pmt_clicks_L30_total;
+                                        $cvr = ($ebay_pmt_sold_L30_total/$ebay_pmt_clicks_L30_total)*100;
                                         $cvr = number_format($cvr, 2);
                                     }else{
                                         $cvr = 0;
@@ -325,6 +345,81 @@
                                 {{ '('.$cvr.') %' }}
                             </td>
                             <td>{{ $ebayptMissing }}</td>
+                        </tr>
+
+                        <tr style="background-color:#cfe2f3;" class="accordion-header">
+                            <td><b>EBAY 2</b></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+
+                        <tr class="accordion-body">
+                            <td>EB PMT</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+
+                        <tr style="background-color:#cfe2f3;" class="accordion-header">
+                            <td><b>EBAY 3</b></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+
+                         <tr class="accordion-body">
+                            <td>EB KW</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+
+                        <tr class="accordion-body">
+                            <td>EB PMT</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
                         </tr>
 
                         <tr style="background-color:#cfe2f3;" class="accordion-header">
