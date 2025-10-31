@@ -81,17 +81,14 @@
                     { title: "Wayfair Shopify L30", field: "Wayfair_Q_L30", hozAlign: "center" },
 
                     { title: "TikTok API L30", field: "TikTok_L30", hozAlign: "center" },
-                    { title: "TikTok API L60", field: "TikTok_L60", hozAlign: "center" },
 
                     { title: "Mercari W Sheet API L30", field: "MercariW_L30", hozAlign: "center" },
                     // { title: "Mercari W Orders L30", field: "MercariW_O_L30", hozAlign: "center" },
                     { title: "Mercari W Shopify L30", field: "MercariW_Q_L30", hozAlign: "center" },
 
                     { title: "Mercari WO Sheet API L30", field: "MercariWO_L30", hozAlign: "center" },
-                    { title: "Mercari WO Sheet API L60", field: "MercariWO_L60", hozAlign: "center" },
 
                     { title: "PLS Sheet API L30", field: "PLS_L30", hozAlign: "center" },
-                    { title: "PLS Sheet API L60", field: "PLS_L60", hozAlign: "center" },
 
                     { title: "BestBuy API L30", field: "BestBuy_L30", hozAlign: "center" },
                     // { title: "BestBuy Orders L30", field: "BestBuyUSA_O_L30", hozAlign: "center" },
