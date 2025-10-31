@@ -44,7 +44,12 @@ use App\Models\EbayGeneralReport;
 use App\Models\EbayPriorityReport;
 use App\Models\WalmartProductSheet;
 use App\Models\WalmartDataView;
+use App\Models\EbayThreeDataView;
+use App\Models\Ebay3PriorityReport;
+use App\Models\Ebay3GeneralReport;
 use App\Models\WalmartCampaignReport;
+use App\Models\EbayTwoDataView;
+use App\Models\Ebay2GeneralReport;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -53,6 +58,9 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Spatie\FlareClient\Api;
+
+  
+            
 
 class AdsMasterController extends Controller
 {
@@ -4121,24 +4129,405 @@ class AdsMasterController extends Controller
 
         /** End Walmart data **/
 
-            $roundVars = [
-                'ebay_SALES_L30_total', 'ebay_kw_sales_L30_total', 'ebay_pmt_sales_L30_total',
-                'ebay_SPEND_L30_total', 'ebay_kw_spend_L30_total', 'ebay_pmt_spend_L30_total',
-                'ebay_CLICKS_L30_total', 'ebay_kw_clicks_L30_total', 'ebay_pmt_clicks_L30_total',
-                'ebay_SOLD_L30_total', 'ebay_kw_sold_L30_total', 'ebay_pmt_sold_L30_total',
-                'SPEND_L30_total', 'kw_spend_L30_total', 'pt_spend_L30_total', 'hl_spend_L30_total',
-                'CLICKS_L30_total', 'kw_clicks_L30_total', 'pt_clicks_L30_total', 'hl_clicks_L30_total',
-                'totalSales', 'totalEbaySales','SOLD_L30_Total', 'kw_sold_L30_Total', 'pt_sold_L30_Total', 'hl_sold_L30_Total',
-                'SALES_L30_Total', 'kw_sales_L30_Total', 'pt_sales_L30_Total', 'hl_sales_L30_Total', 'walmart_SALES_L30_Total', 'walmart_SPEND_L30_Total', 'walmart_CLICKS_L30_Total', 'walmart_SOLD_L30_Total'
-            ];
+        /** Start Code for Ebay-3 Add Running List */
 
-            foreach ($roundVars as $varName) {
-                if (isset($$varName)) {
-                    $$varName = round((float) $$varName);
+        $normalizeSku = fn($sku) => strtoupper(trim($sku));
+
+        $productMasters = ProductMaster::orderBy('parent', 'asc')
+            ->orderByRaw("CASE WHEN sku LIKE 'PARENT %' THEN 1 ELSE 0 END")
+            ->orderBy('sku', 'asc')
+            ->get();
+
+        $skus = $productMasters->pluck('sku')->filter()->map($normalizeSku)->unique()->values()->all();
+
+        $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy(fn($item) => $normalizeSku($item->sku));
+
+        $ebayMetricData = DB::table('ebay_3_metrics')
+            ->select('sku', 'ebay_price', 'item_id')
+            ->whereIn('sku', $skus)
+            ->get()
+            ->keyBy(fn($item) => $normalizeSku($item->sku));
+
+        $nrValues = EbayThreeDataView::whereIn('sku', $skus)->pluck('value', 'sku');
+
+        $ebayCampaignReportsL30 = Ebay3PriorityReport::where('report_range', 'L30')
+            ->where(function ($q) use ($skus) {
+                foreach ($skus as $sku) {
+                    $q->orWhere('campaign_name', 'LIKE', '%' . $sku . '%');
+                }
+            })
+            ->get();
+
+        $ebayCampaignReportsL7 = Ebay3PriorityReport::where('report_range', 'L7')
+            ->where(function ($q) use ($skus) {
+                foreach ($skus as $sku) {
+                    $q->orWhere('campaign_name', 'LIKE', '%' . $sku . '%');
+                }
+            })
+            ->get();
+           
+
+        $itemIds = $ebayMetricData->pluck('item_id')->toArray();
+        
+        $ebayGeneralReportsL30 = Ebay3GeneralReport::where('report_range', 'L30')
+            ->whereIn('listing_id', $itemIds)
+            ->get();
+
+        $ebayGeneralReportsL7 = Ebay3GeneralReport::where('report_range', 'L7')
+            ->whereIn('listing_id', $itemIds)
+            ->get();
+
+        $result = [];
+
+        foreach ($productMasters as $pm) {
+            $sku = strtoupper($pm->sku);
+            $parent = $pm->parent;
+
+            $shopify = $shopifyData[$sku] ?? null;
+            $ebay = $ebayMetricData[$sku] ?? null;
+
+            $matchedCampaignL30 = $ebayCampaignReportsL30->first(function ($item) use ($sku) {
+                return strtoupper(trim($item->campaign_name)) === strtoupper(trim($sku));
+            });
+
+            $matchedCampaignL7 = $ebayCampaignReportsL7->first(function ($item) use ($sku) {
+                return strtoupper(trim($item->campaign_name)) === strtoupper(trim($sku));
+            });
+            
+            $matchedGeneralL30 = $ebayGeneralReportsL30->first(function ($item) use ($ebay) {
+                if (!$ebay || empty($ebay->item_id)) return false;
+                return trim((string)$item->listing_id) == trim((string)$ebay->item_id);
+            });
+
+            $matchedGeneralL7 = $ebayGeneralReportsL7->first(function ($item) use ($ebay) {
+                if (!$ebay || empty($ebay->item_id)) return false;
+                return trim((string)$item->listing_id) == trim((string)$ebay->item_id);
+            });
+
+            $row = [];
+
+            $row['parent'] = $parent;
+            $row['sku'] = $pm->sku;
+            $row['INV'] = $shopify->inv ?? 0;
+            $row['L30'] = $shopify->quantity ?? 0;
+            $row['e_l30'] = $ebay->ebay_l30 ?? 0;
+            $row['campaignName'] = $matchedCampaignL7->campaign_name ?? ($matchedCampaignL30->campaign_name ?? '');
+
+            //kw
+            $row['kw_spend_L30'] = (float) str_replace('USD ', '', $matchedCampaignL30->cpc_ad_fees_payout_currency ?? 0);
+            $row['kw_spend_L7'] = (float) str_replace('USD ', '', $matchedCampaignL7->cpc_ad_fees_payout_currency ?? 0);
+            $row['kw_sales_L30'] = (float) str_replace('USD ', '', $matchedCampaignL30->cpc_sale_amount_payout_currency ?? 0);
+            $row['kw_sales_L7'] = (float) str_replace('USD ', '', $matchedCampaignL7->cpc_sale_amount_payout_currency ?? 0);
+            $row['kw_sold_L30'] = (int) ($matchedCampaignL30->cpc_attributed_sales ?? 0);
+            $row['kw_sold_L7'] = (int) ($matchedCampaignL7->cpc_attributed_sales ?? 0);
+            $row['kw_clicks_L30'] = (int) ($matchedCampaignL30?->cpc_clicks ?? 0);
+            $row['kw_clicks_L7'] = (int) ($matchedCampaignL7?->cpc_clicks ?? 0);
+            $row['kw_impr_L30'] = (int) ($matchedCampaignL30?->cpc_impressions ?? 0);
+            $row['kw_impr_L7'] = (int) ($matchedCampaignL7?->cpc_impressions ?? 0);
+
+            //pmt
+            $row['pmt_spend_L30'] = (float) str_replace('USD ', '', $matchedGeneralL30->ad_fees ?? 0);
+            $row['pmt_sales_L30'] = (float) str_replace('USD ', '', $matchedGeneralL30->sale_amount ?? 0);
+            $row['pmt_spend_L7'] = (float) str_replace('USD ', '', $matchedGeneralL7->ad_fees ?? 0);
+            $row['pmt_sales_L7'] = (float) str_replace('USD ', '', $matchedGeneralL7->sale_amount ?? 0);
+
+            $row['pmt_sold_L30'] = (int) ($matchedGeneralL30->sales ?? 0);
+            $row['pmt_sold_L7'] = (int) ($matchedGeneralL7->sales ?? 0);
+            $row['pmt_clicks_L30'] = (int) ($matchedGeneralL30->clicks ?? 0);
+            $row['pmt_clicks_L7'] = (int) ($matchedGeneralL7->clicks ?? 0);
+            $row['pmt_impr_L30'] = (int) ($matchedGeneralL30->impressions ?? 0);
+            $row['pmt_impr_L7'] = (int) ($matchedGeneralL7->impressions ?? 0);
+
+            $row['SPEND_L30'] = $row['kw_spend_L30'] + $row['pmt_spend_L30'];
+            $row['SPEND_L7'] = $row['kw_spend_L7'] + $row['pmt_spend_L7'];
+            $row['SALES_L30'] = $row['kw_sales_L30'] + $row['pmt_sales_L30'];
+            $row['SALES_L7'] = $row['kw_sales_L7'] + $row['pmt_sales_L7'];
+            $row['SOLD_L30'] = $row['kw_sold_L30'] + $row['pmt_sold_L30'];
+            $row['SOLD_L7'] = $row['kw_sold_L7'] + $row['pmt_sold_L7'];
+            $row['CLICKS_L30'] = $row['kw_clicks_L30'] + $row['pmt_clicks_L30'];
+            $row['CLICKS_L7'] = $row['kw_clicks_L7'] + $row['pmt_clicks_L7'];
+            $row['IMP_L30'] = $row['kw_impr_L30'] + $row['pmt_impr_L30'];
+            $row['IMP_L7'] = $row['kw_impr_L7'] + $row['pmt_impr_L7'];
+
+            $row['NR'] = '';
+            if (isset($nrValues[$pm->sku])) {
+                $raw = $nrValues[$pm->sku];
+                if (!is_array($raw)) {
+                    $raw = json_decode($raw, true);
+                }
+                if (is_array($raw)) {
+                    $row['NR'] = $raw['NR'] ?? '';
                 }
             }
 
-        return view('channels.adv-masters', compact('kw_spend_L30_total', 'pt_spend_L30_total', 'hl_spend_L30_total', 'kw_clicks_L30_total', 'pt_clicks_L30_total', 'hl_clicks_L30_total', 'SPEND_L30_total', 'CLICKS_L30_total', 'ebay_SALES_L30_total', 'ebay_kw_sales_L30_total', 'ebay_pmt_sales_L30_total', 'ebay_SPEND_L30_total', 'ebay_kw_spend_L30_total', 'ebay_pmt_spend_L30_total', 'ebay_CLICKS_L30_total', 'ebay_kw_clicks_L30_total', 'ebay_pmt_clicks_L30_total', 'ebay_SOLD_L30_total', 'ebay_kw_sold_L30_total', 'ebay_pmt_sold_L30_total', 'bothMissing', 'totalMissingAds', 'kwMissing', 'ptMissing', 'ebaytotalMissingAds', 'ebaykwMissing', 'ebayptMissing', 'totalSales', 'totalEbaySales', 'SOLD_L30_Total', 'kw_sold_L30_Total', 'pt_sold_L30_Total', 'hl_sold_L30_Total', 'SALES_L30_Total', 'kw_sales_L30_Total', 'pt_sales_L30_Total', 'hl_sales_L30_Total', 'walmart_SALES_L30_Total', 'walmart_SPEND_L30_Total', 'walmart_CLICKS_L30_Total', 'walmart_SOLD_L30_Total'));
+            if($row['campaignName'] !== ''){
+                $result[] = $row;
+            }
+        }
+
+
+        $ebay3_SPEND_L30_Total = 0;  
+        $ebay3_kw_spend_L30_total = 0;
+        $ebay3_pmt_spend_L30_Total = 0;
+        $ebay3_CLICKS_L30_Total = 0; 
+        $ebay3_kw_clicks_L30_Total = 0;
+        $ebay3_pmt_clicks_L30_Total = 0;
+        $ebay3_SALES_L30_Total = 0;
+        $ebay3_kw_sales_L30_Total = 0;
+        $ebay3_pmt_sales_L30_Total = 0;
+        $ebay3_SOLD_L30_Total = 0;
+        $ebay3_kw_sold_L30_Total = 0;
+        $ebay3_pmt_sold_L30_Total = 0;
+
+        foreach ($result as $row) 
+        {
+            $sku = strtolower($row['sku'] ?? '');
+
+            $ebay3_SPEND_L30_Value = $row['SPEND_L30'] ?? 0;
+            if (is_string($ebay3_SPEND_L30_Value)) {
+                $ebay3_SPEND_L30_Value = floatval($ebay3_SPEND_L30_Value);
+            }
+            $ebay3_SPEND_L30_Total += $ebay3_SPEND_L30_Value ?: 0;
+
+
+            $ebay3_kw_spend_L30_value = $row['kw_spend_L30'] ?? 0;
+            if (is_string($ebay3_kw_spend_L30_value)) {
+                $ebay3_kw_spend_L30_value = floatval($ebay3_kw_spend_L30_value);
+            }
+            $ebay3_kw_spend_L30_total += $ebay3_kw_spend_L30_value ?: 0;
+
+
+            $ebay3_pmt_spend_L30_Value = $row['pmt_spend_L30'] ?? 0;
+            if (is_string($ebay3_pmt_spend_L30_Value)) {
+                $ebay3_pmt_spend_L30_Value = floatval($ebay3_pmt_spend_L30_Value);
+            }
+            $ebay3_pmt_spend_L30_Total += $ebay3_pmt_spend_L30_Value ?: 0;
+
+
+            $ebay3_CLICKS_L30_Value = $row['CLICKS_L30'] ?? 0;
+            if (is_string($ebay3_CLICKS_L30_Value)) {
+                $ebay3_CLICKS_L30_Value = floatval($ebay3_CLICKS_L30_Value);
+            }
+            $ebay3_CLICKS_L30_Total += $ebay3_CLICKS_L30_Value ?: 0;
+
+
+            $ebay3_kw_clicks_L30_Value = $row['kw_clicks_L30'] ?? 0;
+            if (is_string($ebay3_kw_clicks_L30_Value)) {
+                $ebay3_kw_clicks_L30_Value = floatval($ebay3_kw_clicks_L30_Value);
+            }
+            $ebay3_kw_clicks_L30_Total += $ebay3_kw_clicks_L30_Value ?: 0;
+
+
+            $ebay3_pmt_clicks_L30_Value = $row['pmt_clicks_L30'] ?? 0;
+            if (is_string($ebay3_pmt_clicks_L30_Value)) {
+                $ebay3_pmt_clicks_L30_Value = floatval($ebay3_pmt_clicks_L30_Value);
+            }
+            $ebay3_pmt_clicks_L30_Total += $ebay3_pmt_clicks_L30_Value ?: 0;
+
+            $ebay3_SALES_L30_Value = $row['SALES_L30'] ?? 0;
+            if (is_string($ebay3_SALES_L30_Value)) {
+                $ebay3_SALES_L30_Value = floatval($ebay3_SALES_L30_Value);
+            }
+            $ebay3_SALES_L30_Total += $ebay3_SALES_L30_Value ?: 0;
+
+            $ebay3_kw_sales_L30_Value = $row['kw_sales_L30'] ?? 0;
+            if (is_string($ebay3_kw_sales_L30_Value)) {
+                $ebay3_kw_sales_L30_Value = floatval($ebay3_kw_sales_L30_Value);
+            }
+            $ebay3_kw_sales_L30_Total += $ebay3_kw_sales_L30_Value ?: 0;
+
+
+            $ebay3_pmt_sales_L30_Value = $row['pmt_sales_L30'] ?? 0;
+            if (is_string($ebay3_pmt_sales_L30_Value)) {
+                $ebay3_pmt_sales_L30_Value = floatval($ebay3_pmt_sales_L30_Value);
+            }
+            $ebay3_pmt_sales_L30_Total += $ebay3_pmt_sales_L30_Value ?: 0;
+
+            $ebay3_SOLD_L30_Value = $row['SOLD_L30'] ?? 0;
+            if (is_string($ebay3_SOLD_L30_Value)) {
+                $ebay3_SOLD_L30_Value = floatval($ebay3_SOLD_L30_Value);
+            }
+            $ebay3_SOLD_L30_Total += $ebay3_SOLD_L30_Value ?: 0;
+
+
+            $ebay3_kw_sold_L30_Value = $row['kw_sold_L30'] ?? 0;
+            if (is_string($ebay3_kw_sold_L30_Value)) {
+                $ebay3_kw_sold_L30_Value = floatval($ebay3_kw_sold_L30_Value);
+            }
+            $ebay3_kw_sold_L30_Total += $ebay3_kw_sold_L30_Value ?: 0;
+            
+            $ebay3_pmt_sold_L30_Value = $row['pmt_sold_L30'] ?? 0;
+            if (is_string($ebay3_pmt_sold_L30_Value)) {
+                $ebay3_pmt_sold_L30_Value = floatval($ebay3_pmt_sold_L30_Value);
+            }
+            $ebay3_pmt_sold_L30_Total += $ebay3_pmt_sold_L30_Value ?: 0;
+
+        }
+
+        /** End Code for Ebay-3 Add Running List **/
+
+        /** Start Code for Ebay-2 Running Ads Data */
+        
+            $normalizeSku = fn($sku) => strtoupper(trim($sku));
+
+            $productMasters = ProductMaster::orderBy('parent', 'asc')
+            ->orderByRaw("CASE WHEN sku LIKE 'PARENT %' THEN 1 ELSE 0 END")
+            ->orderBy('sku', 'asc')
+            ->get();
+
+            $skus = $productMasters->pluck('sku')->filter()->map($normalizeSku)->unique()->values()->all();
+
+            $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy(fn($item) => $normalizeSku($item->sku));
+
+            $ebayMetricData = DB::connection('apicentral')->table('ebay2_metrics')
+                ->select('sku', 'ebay_price', 'item_id')
+                ->whereIn('sku', $skus)
+                ->get()
+                ->keyBy(fn($item) => $normalizeSku($item->sku));
+
+            $nrValues = EbayTwoDataView::whereIn('sku', $skus)->pluck('value', 'sku');
+
+            $itemIds = $ebayMetricData->pluck('item_id')->toArray();
+        
+            $ebayGeneralReportsL30 = Ebay2GeneralReport::where('report_range', 'L30')
+                ->whereIn('listing_id', $itemIds)
+                ->get();
+
+            $ebayGeneralReportsL7 = Ebay2GeneralReport::where('report_range', 'L7')
+                ->whereIn('listing_id', $itemIds)
+                ->get();
+
+            $result = [];
+
+            foreach ($productMasters as $pm) {
+                $sku = strtoupper($pm->sku);
+                $parent = $pm->parent;
+
+                $shopify = $shopifyData[$sku] ?? null;
+                $ebay = $ebayMetricData[$sku] ?? null;
+            
+                $matchedGeneralL30 = $ebayGeneralReportsL30->first(function ($item) use ($ebay) {
+                    if (!$ebay || empty($ebay->item_id)) return false;
+                    return trim((string)$item->listing_id) == trim((string)$ebay->item_id);
+                });
+
+                $matchedGeneralL7 = $ebayGeneralReportsL7->first(function ($item) use ($ebay) {
+                    if (!$ebay || empty($ebay->item_id)) return false;
+                    return trim((string)$item->listing_id) == trim((string)$ebay->item_id);
+                });
+
+                if (!$matchedGeneralL30 && !$matchedGeneralL7) {
+                    continue;
+                }
+
+                $row = [];
+
+                $row['parent'] = $parent;
+                $row['sku'] = $pm->sku;
+                $row['INV'] = $shopify->inv ?? 0;
+                $row['L30'] = $shopify->quantity ?? 0;
+                $row['e_l30'] = $ebay->ebay_l30 ?? 0;
+
+                //pmt
+                $row['pmt_spend_L30'] = (float) str_replace('USD ', '', $matchedGeneralL30->ad_fees ?? 0);
+                $row['pmt_sales_L30'] = (float) str_replace('USD ', '', $matchedGeneralL30->sale_amount ?? 0);
+                $row['pmt_spend_L7'] = (float) str_replace('USD ', '', $matchedGeneralL7->ad_fees ?? 0);
+                $row['pmt_sales_L7'] = (float) str_replace('USD ', '', $matchedGeneralL7->sale_amount ?? 0);
+
+                $row['pmt_sold_L30'] = (int) ($matchedGeneralL30->sales ?? 0);
+                $row['pmt_sold_L7'] = (int) ($matchedGeneralL7->sales ?? 0);
+                $row['pmt_clicks_L30'] = (int) ($matchedGeneralL30->clicks ?? 0);
+                $row['pmt_clicks_L7'] = (int) ($matchedGeneralL7->clicks ?? 0);
+                $row['pmt_impr_L30'] = (int) ($matchedGeneralL30->impressions ?? 0);
+                $row['pmt_impr_L7'] = (int) ($matchedGeneralL7->impressions ?? 0);
+
+                $row['SPEND_L30'] = $row['pmt_spend_L30'];
+                $row['SPEND_L7'] = $row['pmt_spend_L7'];
+                $row['SALES_L30'] = $row['pmt_sales_L30'];
+                $row['SALES_L7'] = $row['pmt_sales_L7'];
+                $row['SOLD_L30'] = $row['pmt_sold_L30'];
+                $row['SOLD_L7'] = $row['pmt_sold_L7'];
+                $row['CLICKS_L30'] = $row['pmt_clicks_L30'];
+                $row['CLICKS_L7'] = $row['pmt_clicks_L7'];
+                $row['IMP_L30'] = $row['pmt_impr_L30'];
+                $row['IMP_L7'] = $row['pmt_impr_L7'];
+
+                $row['NR'] = '';
+                if (isset($nrValues[$pm->sku])) {
+                    $raw = $nrValues[$pm->sku];
+                    if (!is_array($raw)) {
+                        $raw = json_decode($raw, true);
+                    }
+                    if (is_array($raw)) {
+                        $row['NR'] = $raw['NR'] ?? '';
+                    }
+                }
+
+                $result[] = $row;
+            }
+
+            $ebay2_SPEND_L30_Total = 0;
+            $ebay2_pmt_spend_L30_Total = 0;
+            $ebay2_CLICKS_L30_Total = 0;
+            $ebay2_pmt_clicks_L30_Total = 0;
+            $ebay2_SALES_L30_Total = 0;
+            $ebay2_pmt_sales_L30_total = 0;
+            $ebay2_SOLD_L30_Total = 0;
+            $ebay2_pmt_sold_L30_Total = 0;
+
+            foreach ($result as $row) {
+                $sku = strtolower($row['sku'] ?? '');
+
+                // $value = $row[$field] ?? 0;
+                // $total += is_numeric($value) ? (float)$value : 0;
+
+                $ebay2_SPEND_L30_Value = $row['SPEND_L30'] ?? 0;
+                $ebay2_SPEND_L30_Total += is_numeric($ebay2_SPEND_L30_Value) ? (float)$ebay2_SPEND_L30_Value : 0;
+
+
+                $ebay2_pmt_spend_L30_Value = $row['pmt_spend_L30'] ?? 0;
+                $ebay2_pmt_spend_L30_Total += is_numeric($ebay2_pmt_spend_L30_Value) ? (float)$ebay2_pmt_spend_L30_Value : 0;
+
+                $ebay2_CLICKS_L30_Value = $row['CLICKS_L30'] ?? 0;
+                $ebay2_CLICKS_L30_Total += is_numeric($ebay2_CLICKS_L30_Value) ? (float)$ebay2_CLICKS_L30_Value : 0;
+
+                $ebay2_pmt_clicks_L30_Value = $row['pmt_clicks_L30'] ?? 0;
+                $ebay2_pmt_clicks_L30_Total += is_numeric($ebay2_pmt_clicks_L30_Value) ? (float)$ebay2_pmt_clicks_L30_Value : 0;
+
+                $ebay2_SALES_L30_Value = $row['SALES_L30'] ?? 0;
+                $ebay2_SALES_L30_Total += is_numeric($ebay2_SALES_L30_Value) ? (float)$ebay2_SALES_L30_Value : 0;
+
+                $ebay2_pmt_sales_L30_value = $row['pmt_sales_L30'] ?? 0;
+                $ebay2_pmt_sales_L30_total += is_numeric($ebay2_pmt_sales_L30_value) ? (float)$ebay2_pmt_sales_L30_value : 0;
+
+                $ebay2_SOLD_L30_Value = $row['SOLD_L30'] ?? 0;
+                $ebay2_SOLD_L30_Total += is_numeric($ebay2_SOLD_L30_Value) ? (float)$ebay2_SOLD_L30_Value : 0;
+
+                $ebay2_pmt_sold_L30_Value = $row['pmt_sold_L30'] ?? 0;
+                $ebay2_pmt_sold_L30_Total += is_numeric($ebay2_pmt_sold_L30_Value) ? (float)$ebay2_pmt_sold_L30_Value : 0;
+            }
+
+
+        /** End Code for Ebay-2 Running Ads Data **/
+
+        $roundVars = [
+            'ebay_SALES_L30_total', 'ebay_kw_sales_L30_total', 'ebay_pmt_sales_L30_total',
+            'ebay_SPEND_L30_total', 'ebay_kw_spend_L30_total', 'ebay_pmt_spend_L30_total',
+            'ebay_CLICKS_L30_total', 'ebay_kw_clicks_L30_total', 'ebay_pmt_clicks_L30_total',
+            'ebay_SOLD_L30_total', 'ebay_kw_sold_L30_total', 'ebay_pmt_sold_L30_total',
+            'SPEND_L30_total', 'kw_spend_L30_total', 'pt_spend_L30_total', 'hl_spend_L30_total',
+            'CLICKS_L30_total', 'kw_clicks_L30_total', 'pt_clicks_L30_total', 'hl_clicks_L30_total',
+            'totalSales', 'totalEbaySales','SOLD_L30_Total', 'kw_sold_L30_Total', 'pt_sold_L30_Total', 'hl_sold_L30_Total',
+            'SALES_L30_Total', 'kw_sales_L30_Total', 'pt_sales_L30_Total', 'hl_sales_L30_Total', 'walmart_SALES_L30_Total', 'walmart_SPEND_L30_Total', 'walmart_CLICKS_L30_Total', 'walmart_SOLD_L30_Total', 'ebay3_SPEND_L30_Total', 'ebay3_kw_spend_L30_total', 'ebay3_pmt_spend_L30_Total', 'ebay3_CLICKS_L30_Total', 'ebay3_kw_clicks_L30_Total', 'ebay3_pmt_clicks_L30_Total', 'ebay3_SALES_L30_Total', 'ebay3_kw_sales_L30_Total', 'ebay3_pmt_sales_L30_Total', 'ebay3_SOLD_L30_Total', 'ebay3_kw_sold_L30_Total', 'ebay3_pmt_sold_L30_Total', 'ebay2_SPEND_L30_Total', 'ebay2_pmt_spend_L30_Total', 'ebay2_CLICKS_L30_Total', 'ebay2_pmt_clicks_L30_Total', 'ebay2_SALES_L30_Total', 'ebay2_pmt_sales_L30_total', 'ebay2_SOLD_L30_Total', 'ebay2_pmt_sold_L30_Total'
+        ];
+
+        foreach ($roundVars as $varName) {
+            if (isset($$varName)) {
+                $$varName = round((float) $$varName);
+            }
+        }
+
+        return view('channels.adv-masters', compact('kw_spend_L30_total', 'pt_spend_L30_total', 'hl_spend_L30_total', 'kw_clicks_L30_total', 'pt_clicks_L30_total', 'hl_clicks_L30_total', 'SPEND_L30_total', 'CLICKS_L30_total', 'ebay_SALES_L30_total', 'ebay_kw_sales_L30_total', 'ebay_pmt_sales_L30_total', 'ebay_SPEND_L30_total', 'ebay_kw_spend_L30_total', 'ebay_pmt_spend_L30_total', 'ebay_CLICKS_L30_total', 'ebay_kw_clicks_L30_total', 'ebay_pmt_clicks_L30_total', 'ebay_SOLD_L30_total', 'ebay_kw_sold_L30_total', 'ebay_pmt_sold_L30_total', 'bothMissing', 'totalMissingAds', 'kwMissing', 'ptMissing', 'ebaytotalMissingAds', 'ebaykwMissing', 'ebayptMissing', 'totalSales', 'totalEbaySales', 'SOLD_L30_Total', 'kw_sold_L30_Total', 'pt_sold_L30_Total', 'hl_sold_L30_Total', 'SALES_L30_Total', 'kw_sales_L30_Total', 'pt_sales_L30_Total', 'hl_sales_L30_Total', 'walmart_SALES_L30_Total', 'walmart_SPEND_L30_Total', 'walmart_CLICKS_L30_Total', 'walmart_SOLD_L30_Total', 'ebay3_SPEND_L30_Total', 'ebay3_kw_spend_L30_total', 'ebay3_pmt_spend_L30_Total', 'ebay3_CLICKS_L30_Total', 'ebay3_kw_clicks_L30_Total', 'ebay3_pmt_clicks_L30_Total', 'ebay3_SALES_L30_Total', 'ebay3_kw_sales_L30_Total', 'ebay3_pmt_sales_L30_Total', 'ebay3_SOLD_L30_Total', 'ebay3_kw_sold_L30_Total', 'ebay3_pmt_sold_L30_Total', 'ebay2_SPEND_L30_Total', 'ebay2_pmt_spend_L30_Total', 'ebay2_CLICKS_L30_Total', 'ebay2_pmt_clicks_L30_Total', 'ebay2_SALES_L30_Total', 'ebay2_pmt_sales_L30_total', 'ebay2_SOLD_L30_Total', 'ebay2_pmt_sold_L30_Total'));
     }
 
     public function combinedFilter($data, $filters) 
