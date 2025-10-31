@@ -32,30 +32,39 @@ class SyncShopifyAllChannelDataController extends Controller
 		$spreadsheet = new Spreadsheet();
 		$sheet = $spreadsheet->getActiveSheet();
 
-		if (empty($result)) {
-			$sheet->setCellValue('A1', 'No data available');
-		} else {
-			$headers = array_keys($result[0]);
-			$sheet->fromArray($headers, null, 'A1');
+		$this->populateSheet($sheet, $result);
 
-			$rowIndex = 2;
-			foreach ($result as $row) {
-				$sheet->fromArray(
-					array_map([$this, 'formatValueForCell'], array_values($row)),
-					null,
-					'A' . $rowIndex
-				);
-				$rowIndex++;
+		return response()->streamDownload(function () use ($spreadsheet) {
+			if (ob_get_length()) {
+				ob_end_clean();
 			}
+
+			$writer = new Xlsx($spreadsheet);
+			$writer->save('php://output');
+		}, $fileName, [
+			'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+		]);
+	}
+
+	protected function populateSheet($sheet, array $rows): void
+	{
+		if (empty($rows)) {
+			$sheet->setCellValue('A1', 'No data available');
+			return;
 		}
 
-		$tempFile = tempnam(sys_get_temp_dir(), 'shopify_all_channels_');
-		$writer = new Xlsx($spreadsheet);
-		$writer->save($tempFile);
+		$headers = array_keys($rows[0]);
+		$sheet->fromArray($headers, null, 'A1');
 
-		return response()->download($tempFile, $fileName, [
-			'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-		])->deleteFileAfterSend(true);
+		$rowIndex = 2;
+		foreach ($rows as $row) {
+			$sheet->fromArray(
+				array_map([$this, 'formatValueForCell'], array_values($row)),
+				null,
+				'A' . $rowIndex
+			);
+			$rowIndex++;
+		}
 	}
 
 	protected function formatValueForCell($value)
@@ -119,7 +128,7 @@ class SyncShopifyAllChannelDataController extends Controller
 				'SKU' => $row->sku,
 				'Shopify_INV' => $value['shopify']['inv'] ?? 0,
 				'Shopify_Qty' => $value['shopify']['qty'] ?? 0,
-				'Img' => $value['shopify']['img'] ?? '',
+				
 				'Ebay1_L30' => $value['ebay_one']['l30'] ?? 0,
 				'Ebay1_L60' => $value['ebay_one']['l60'] ?? 0,
 				'Ebay_O_L30' => $ebayO['o_l30'],
