@@ -199,7 +199,7 @@ class ShopifyApiInventoryController extends Controller
 
     public function fetchInventoryWithCommitment(): array
     {
-        set_time_limit(300);
+        set_time_limit(500);
         $shopUrl = 'https://' . env('SHOPIFY_STORE_URL');
         $token = env('SHOPIFY_PASSWORD'); 
 

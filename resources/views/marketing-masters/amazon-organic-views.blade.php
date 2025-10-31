@@ -2412,6 +2412,7 @@
                                     SPFT: item.SPFT || 0,
                                     SROI: item.SROI || 0,
                                     Spend: item.ad_spend || 0,
+                                    MOQ: item.MOQ || 0
                                 };
                             });
 
@@ -2478,6 +2479,8 @@
                         SPRICE: item.SPRICE || 0,
                         SPFT: item.SPFT || 0,
                         SROI: item.SROI || 0,
+                        MOQ: item.MOQ || 0,
+
                     };
                 });
 
@@ -2690,7 +2693,7 @@
                             data-item='${JSON.stringify(item.raw_data)}'>W</span>`
                     ));
 
-                    // $row.append($('<td>').text(item.INV));
+                    $row.append($('<td>').text(item.MOQ || ''));
                     // $row.append($('<td>').text(item.INV));
                     // $row.append($('<td>').text(item.INV));
                     // $row.append($('<td>').text(item.INV));

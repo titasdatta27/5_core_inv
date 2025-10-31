@@ -132,11 +132,11 @@ class OrganicViewsController extends Controller
             }
             $ship = isset($values['ship']) ? floatval($values['ship']) : (isset($pm->ship) ? floatval($pm->ship) : 0);
 
-            if (!isset($values['moq']) || $values['moq'] === null) {
-                $values['moq'] = 0; // or set dynamically if you prefer
-                $pm->Values = json_encode($values, JSON_UNESCAPED_UNICODE);
-                $pm->save();
-            }
+            // if (!isset($values['moq']) || $values['moq'] === null) {
+            //     $values['moq'] = 0; // or set dynamically if you prefer
+            //     $pm->Values = json_encode($values, JSON_UNESCAPED_UNICODE);
+            //     $pm->save();
+            // }
 
             $price = isset($row['price']) ? floatval($row['price']) : 0;
             $units_ordered_l30 = isset($row['A_L30']) ? floatval($row['A_L30']) : 0;
@@ -156,6 +156,8 @@ class OrganicViewsController extends Controller
             $row['percentage'] = $percentage;
             $row['LP_productmaster'] = $lp;
             $row['Ship_productmaster'] = $ship;
+
+            $row['MOQ'] = isset($values['moq']) ? intval($values['moq']) : null;
 
             // Default values
             $row['NRL'] = '';
