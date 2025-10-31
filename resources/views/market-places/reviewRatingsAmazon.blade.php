@@ -1,4 +1,4 @@
-@extends('layouts.vertical', ['title' => 'Amazon - AD CVR', 'mode' => $mode ?? '', 'demo' => $demo ?? ''])
+@extends('layouts.vertical', ['title' => 'Amazon - Review Ratings', 'mode' => $mode ?? '', 'demo' => $demo ?? ''])
 @section('css')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator.min.css" rel="stylesheet">
@@ -126,10 +126,6 @@
         .red-bg {
             color: #ff2727 !important;
         }
-        .price-cell input {
-            color: #000 !important;
-            background-color: #fff !important;
-        }
     </style>
 @endsection
 @section('content')
@@ -145,7 +141,7 @@
                         <!-- Title -->
                         <h4 class="fw-bold text-primary mb-3 d-flex align-items-center">
                             <i class="fa-solid fa-chart-line me-2"></i>
-                            AD CVR
+                            Review Ratings
                         </h4>
 
                         <!-- Filters Row -->
@@ -278,7 +274,7 @@
 
             var table = new Tabulator("#budget-under-table", {
                 index: "Sku",
-                ajaxURL: "/ad-cvr-amazon-data",
+                ajaxURL: "/review-ratings-amazon-data",
                 layout: "fitDataFill",
                 movableColumns: true,
                 resizableColumns: true,
@@ -636,241 +632,245 @@
                             `;
                         }
                     },
-                    {
-                        title: "Price",
-                        field: "price"
-                    },
-                    {
-                        title: "LMP",
-                        field: "lmp",
-                        formatter: function(cell) {
-                            let lmp = cell.getValue();
-                            return `
-                                <span>${lmp}</span>
-                                <i class="fa fa-info-circle text-primary toggle-lmp-cols-btn" 
-                                data-lmp="${lmp}" 
-                                style="cursor:pointer; margin-left:8px;"></i>
-                            `;
-                        }
-                    },
-                    {
-                        title: "PRICE 1",
-                        field: "lmp_1",
-                        visible: false
-                    },
-                    {
-                        title: "PRICE 2",
-                        field: "lmp_2",
-                        visible: false
-                    },
-                    {
-                        title: "PRICE 3",
-                        field: "lmp_3",
-                        visible: false
-                    },
-                    {
-                        title: "PRICE 4",
-                        field: "lmp_4",
-                        visible: false
-                    },
-                    {
-                        title: "PRICE 5",
-                        field: "lmp_5",
-                        visible: false
-                    },
-                    {
-                        title: "PRICE 6",
-                        field: "lmp_6",
-                        visible: false
-                    },
-                    {
-                        title: "PRICE 7",
-                        field: "lmp_7",
-                        visible: false
-                    },
-                    {
-                        title: "PRICE 8",
-                        field: "lmp_8",
-                        visible: false
-                    },
-                    {
-                        title: "PRICE 9",
-                        field: "lmp_9",
-                        visible: false
-                    },
-                    {
-                        title: "PRICE 10",
-                        field: "lmp_10",
-                        visible: false
-                    },
-                    {
-                        title: "PRICE 11",
-                        field: "lmp_11",
-                        visible: false
-                    },
-                    {
-                        title: "PFT",
-                        field: "PFT_percentage",
-                        hozAlign: "center",
-                        formatter: function(cell){
-                            let value = parseFloat(cell.getValue()) || 0;
-                            let pft = value.toFixed(0);
+                    // {
+                    //     title: "Price",
+                    //     field: "price"
+                    // },
+                    // {
+                    //     title: "LMP",
+                    //     field: "lmp",
+                    //     formatter: function(cell) {
+                    //         let lmp = cell.getValue();
+                    //         return `
+                    //             <span>${lmp}</span>
+                    //             <i class="fa fa-info-circle text-primary toggle-lmp-cols-btn" 
+                    //             data-lmp="${lmp}" 
+                    //             style="cursor:pointer; margin-left:8px;"></i>
+                    //         `;
+                    //     }
+                    // },
+                    // {
+                    //     title: "PRICE 1",
+                    //     field: "lmp_1",
+                    //     visible: false
+                    // },
+                    // {
+                    //     title: "PRICE 2",
+                    //     field: "lmp_2",
+                    //     visible: false
+                    // },
+                    // {
+                    //     title: "PRICE 3",
+                    //     field: "lmp_3",
+                    //     visible: false
+                    // },
+                    // {
+                    //     title: "PRICE 4",
+                    //     field: "lmp_4",
+                    //     visible: false
+                    // },
+                    // {
+                    //     title: "PRICE 5",
+                    //     field: "lmp_5",
+                    //     visible: false
+                    // },
+                    // {
+                    //     title: "PRICE 6",
+                    //     field: "lmp_6",
+                    //     visible: false
+                    // },
+                    // {
+                    //     title: "PRICE 7",
+                    //     field: "lmp_7",
+                    //     visible: false
+                    // },
+                    // {
+                    //     title: "PRICE 8",
+                    //     field: "lmp_8",
+                    //     visible: false
+                    // },
+                    // {
+                    //     title: "PRICE 9",
+                    //     field: "lmp_9",
+                    //     visible: false
+                    // },
+                    // {
+                    //     title: "PRICE 10",
+                    //     field: "lmp_10",
+                    //     visible: false
+                    // },
+                    // {
+                    //     title: "PRICE 11",
+                    //     field: "lmp_11",
+                    //     visible: false
+                    // },
+                    // {
+                    //     title: "PFT",
+                    //     field: "PFT_percentage",
+                    //     hozAlign: "center",
+                    //     formatter: function(cell){
+                    //         let value = parseFloat(cell.getValue()) || 0;
+                    //         let pft = value.toFixed(0);
 
-                            if (pft < 10) {
-                                color = "red";
-                            } else if (pft >= 10 && pft < 15) {
-                                color = "yellow";
-                            } else if (pft >= 15 && pft < 20) {
-                                color = "blue";
-                            } else if (pft >= 20 && pft <= 40) {
-                                color = "green";
-                            } else if (pft > 40) {
-                                color = "pink";
-                            }
+                    //         if (pft < 10) {
+                    //             color = "red";
+                    //         } else if (pft >= 10 && pft < 15) {
+                    //             color = "yellow";
+                    //         } else if (pft >= 15 && pft < 20) {
+                    //             color = "blue";
+                    //         } else if (pft >= 20 && pft <= 40) {
+                    //             color = "green";
+                    //         } else if (pft > 40) {
+                    //             color = "pink";
+                    //         }
 
-                            return `
-                                <span class="dil-percent-value ${color}">
-                                    ${pft}%
-                                </span>
-                            `;
-                        }
-                    },
-                    {
-                        title: "GPFT",
-                        field: "gpft",
-                        hozAlign: "center",
-                        formatter: function(cell){
-                            let ship = Number(cell.getRow().getData().SHIP) || 0;
-                            let lp = Number(cell.getRow().getData().LP) || 0;
+                    //         return `
+                    //             <span class="dil-percent-value ${color}">
+                    //                 ${pft}%
+                    //             </span>
+                    //         `;
+                    //     }
+                    // },
+                    // {
+                    //     title: "GPFT",
+                    //     field: "gpft",
+                    //     hozAlign: "center",
+                    //     formatter: function(cell){
+                    //         let ship = Number(cell.getRow().getData().SHIP) || 0;
+                    //         let lp = Number(cell.getRow().getData().LP) || 0;
 
-                            const spend = parseFloat(cell.getRow().getData()['spend_l90']) || 0;
-                            const aL90 = Number(cell.getRow().getData()['A_L90']) || 0;
-                            const price = Number(cell.getRow().getData().price) || 0;
-                            const amazonAdUpdates = {{ $amazonAdUpdates ?? 0 }};
+                    //         const spend = parseFloat(cell.getRow().getData()['spend_l90']) || 0;
+                    //         const aL90 = Number(cell.getRow().getData()['A_L90']) || 0;
+                    //         const price = Number(cell.getRow().getData().price) || 0;
+                    //         const amazonAdUpdates = {{ $amazonAdUpdates ?? 0 }};
 
-                            let percentage = {{ $amazonPercentage ?? 0 }};
-                            let costPercentage = (percentage + amazonAdUpdates) / 100; 
-                            let netPft = (price * costPercentage) - ship - lp - (spend / aL90);
+                    //         let percentage = {{ $amazonPercentage ?? 0 }};
+                    //         let costPercentage = (percentage + amazonAdUpdates) / 100; 
+                    //         let netPft = (price * costPercentage) - ship - lp - (spend / aL90);
                             
-                            const totalAmazonPercentage = (percentage - amazonAdUpdates) / 100;
-                            const netGpft = (price * totalAmazonPercentage) - ship - lp;
-                            let gPft = (netGpft / price) * 100;
+                    //         const totalAmazonPercentage = (percentage - amazonAdUpdates) / 100;
+                    //         const netGpft = (price * totalAmazonPercentage) - ship - lp;
+                    //         let gPft = (netGpft / price) * 100;
 
-                            if(isNaN(gPft) || !isFinite(gPft)) {
-                                gPft = 0;
-                            }
+                    //         if(isNaN(gPft) || !isFinite(gPft)) {
+                    //             gPft = 0;
+                    //         }
 
-                            if (gPft < 10) {
-                                color = "red";
-                            } else if (gPft >= 10 && gPft < 15) {
-                                color = "yellow";
-                            } else if (gPft >= 15 && gPft < 20) {
-                                color = "blue";
-                            } else if (gPft >= 20 && gPft <= 40) {
-                                color = "green";
-                            } else if (gPft > 40) {
-                                color = "pink";
-                            }
+                    //         if (gPft < 10) {
+                    //             color = "red";
+                    //         } else if (gPft >= 10 && gPft < 15) {
+                    //             color = "yellow";
+                    //         } else if (gPft >= 15 && gPft < 20) {
+                    //             color = "blue";
+                    //         } else if (gPft >= 20 && gPft <= 40) {
+                    //             color = "green";
+                    //         } else if (gPft > 40) {
+                    //             color = "pink";
+                    //         }
 
-                            return `
-                                <span class="dil-percent-value ${color}">
-                                    ${gPft.toFixed(0)}%
-                                </span>
-                            `;
-                        }
-                    },
-                    {
-                        title: "TPFT%",
-                        field: "TPFT",
-                        hozAlign: "center",
-                        formatter: function(cell){
-                            let value = parseFloat(cell.getValue()) || 0;
-                            let percent = value.toFixed(0);
-                            let color = "";
+                    //         return `
+                    //             <span class="dil-percent-value ${color}">
+                    //                 ${gPft.toFixed(0)}%
+                    //             </span>
+                    //         `;
+                    //     }
+                    // },
+                    // {
+                    //     title: "TPFT%",
+                    //     field: "TPFT",
+                    //     hozAlign: "center",
+                    //     formatter: function(cell){
+                    //         let value = parseFloat(cell.getValue()) || 0;
+                    //         let percent = value.toFixed(0);
+                    //         let color = "";
 
-                            if (value < 10) {
-                                color = "red";
-                            } else if (value >= 10 && value < 15) {
-                                color = "#ffc107";
-                            } else if (value >= 15 && value < 20) {
-                                color = "blue";
-                            } else if (value >= 20 && value <= 40) {
-                                color = "green";
-                            } else if (value > 40) {
-                                color = "#e83e8c";
-                            }
+                    //         if (value < 10) {
+                    //             color = "red";
+                    //         } else if (value >= 10 && value < 15) {
+                    //             color = "#ffc107";
+                    //         } else if (value >= 15 && value < 20) {
+                    //             color = "blue";
+                    //         } else if (value >= 20 && value <= 40) {
+                    //             color = "green";
+                    //         } else if (value > 40) {
+                    //             color = "#e83e8c";
+                    //         }
 
-                            return `
-                                <span style="font-weight:600; color:${color};">
-                                    ${percent}%
-                                </span>
-                            `;
-                        }
-                    },
-                    {
-                        title: "SPRICE",
-                        field: "amz_price",
-                        editor: "input",
-                        cssClass: "price-cell",
-                        formatter: function(cell){
-                            let value = parseFloat(cell.getValue()) || 0;
-                            return `<span class="dil-percent-value">$${value.toFixed(2)}</span>`;
-                        }
-                    },
-                    {
-                        title: "SPFT",
-                        field: "amz_pft",
-                        formatter: function(cell) {
-                            let value = parseFloat(cell.getValue()) || 0;
-                            let spft = value.toFixed(0);
-                            const pftClass = spft > 20 ? 'positive' : spft < 10 ? 'negative' : 'neutral';
+                    //         return `
+                    //             <span style="font-weight:600; color:${color};">
+                    //                 ${percent}%
+                    //             </span>
+                    //         `;
+                    //     }
+                    // },
+                    // {
+                    //     title: "SPRICE",
+                    //     field: "amz_price",
+                    //     formatter: function(cell){
+                    //         let value = parseFloat(cell.getValue()) || 0;
+                    //         let sprice = value.toFixed(0);
 
-                            const val = Number(spft);
-                            let color = '#000000';
+                    //         return `
+                    //             <span class="dil-percent-value">
+                    //                 $${sprice}
+                    //             </span>
+                    //         `;
+                    //     }
+                    // },
+                    // {
+                    //     title: "SPFT",
+                    //     field: "amz_pft",
+                    //     formatter: function(cell) {
+                    //         let value = parseFloat(cell.getValue()) || 0;
+                    //         let spft = value.toFixed(0);
+                    //         const pftClass = spft > 20 ? 'positive' : spft < 10 ? 'negative' : 'neutral';
 
-                            if (isFinite(val) && !isNaN(val)) {
-                                if (val <= 0) color = '#ff0000';
-                                else if (val > 0 && val <= 10) color = '#ff0000';
-                                else if (val > 10 && val <= 14) color = '#fd7e14';
-                                else if (val > 14 && val <= 19) color = '#0d6efd';
-                                else if (val > 19 && val <= 40) color = '#198754';
-                                else if (val > 40) color = '#800080';
-                            }
+                    //         const val = Number(spft);
+                    //         let color = '#000000';
 
-                            return `
-                                <div class="value-indicator ${pftClass}" style="color: ${color};">
-                                    ${fmtPct(spft)}
-                                </div>
-                            `;
-                        }
-                    },
-                    {
-                        title: "SROI",
-                        field: "amz_roi",
-                        formatter: function(cell){
-                            let value = parseFloat(cell.getValue()) || 0;
-                            let sroi = value.toFixed(0);
-                            const roiClass = sroi > 30 ? 'positive' : sroi < 15 ? 'negative' : 'neutral';
+                    //         if (isFinite(val) && !isNaN(val)) {
+                    //             if (val <= 0) color = '#ff0000';
+                    //             else if (val > 0 && val <= 10) color = '#ff0000';
+                    //             else if (val > 10 && val <= 14) color = '#fd7e14';
+                    //             else if (val > 14 && val <= 19) color = '#0d6efd';
+                    //             else if (val > 19 && val <= 40) color = '#198754';
+                    //             else if (val > 40) color = '#800080';
+                    //         }
 
-                            const val = Number(sroi);
-                            let color = '#000000';
+                    //         return `
+                    //             <div class="value-indicator ${pftClass}" style="color: ${color};">
+                    //                 ${fmtPct(spft)}
+                    //             </div>
+                    //         `;
+                    //     }
+                    // },
+                    // {
+                    //     title: "SROI",
+                    //     field: "amz_roi",
+                    //     formatter: function(cell){
+                    //         let value = parseFloat(cell.getValue()) || 0;
+                    //         let sroi = value.toFixed(0);
+                    //         const roiClass = sroi > 30 ? 'positive' : sroi < 15 ? 'negative' : 'neutral';
 
-                            if (isFinite(val) && !isNaN(val)) {
-                                if (val <= 0) color = '#ff0000';
-                                else if (val > 0 && val <= 10) color = '#ff0000';
-                                else if (val > 10 && val <= 14) color = '#fd7e14';
-                                else if (val > 14 && val <= 19) color = '#0d6efd';
-                                else if (val > 19 && val <= 40) color = '#198754';
-                                else if (val > 40) color = '#800080';
-                            }
+                    //         const val = Number(sroi);
+                    //         let color = '#000000';
 
-                            return `
-                                <div class="value-indicator ${roiClass}" style="color: ${color};">
-                                    ${fmtPct(sroi)}
-                                </div>
-                            `;
-                        }
-                    },
+                    //         if (isFinite(val) && !isNaN(val)) {
+                    //             if (val <= 0) color = '#ff0000';
+                    //             else if (val > 0 && val <= 10) color = '#ff0000';
+                    //             else if (val > 10 && val <= 14) color = '#fd7e14';
+                    //             else if (val > 14 && val <= 19) color = '#0d6efd';
+                    //             else if (val > 19 && val <= 40) color = '#198754';
+                    //             else if (val > 40) color = '#800080';
+                    //         }
+
+                    //         return `
+                    //             <div class="value-indicator ${roiClass}" style="color: ${color};">
+                    //                 ${fmtPct(sroi)}
+                    //             </div>
+                    //         `;
+                    //     }
+                    // },
                 ],
                 ajaxResponse: function(url, params, response) {
                     return response.data;
@@ -882,56 +882,6 @@
                     document.getElementById("apr-all-sbid-btn").classList.remove("d-none");
                 } else {
                     document.getElementById("apr-all-sbid-btn").classList.add("d-none");
-                }
-            });
-
-            table.on("cellEdited", function(cell) {
-                const field = cell.getField();
-
-                if (field === "amz_price") {
-                    const row = cell.getRow();
-                    const data = row.getData();
-
-                    const amz_price = Number(data.amz_price) || 0;
-                    const lp   = Number(data.LP) || 0;
-                    const ship = Number(data.SHIP) || 0;
-
-                    const amz_pft = amz_price > 0
-                        ? ((amz_price * 0.70 - lp - ship) / amz_price)
-                        : 0;
-
-                    const amz_roi = (lp > 0 && amz_price > 0)
-                        ? ((amz_price * 0.70 - lp - ship) / lp)
-                        : 0;
-
-                    row.update({
-                        amz_pft: amz_pft,
-                        amz_roi: amz_roi
-                    });
-
-                    fetch('/update-amz-price', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document
-                                .querySelector('meta[name="csrf-token"]')
-                                .getAttribute('content')
-                        },
-                        body: JSON.stringify({
-                            sku: data.sku,
-                            price: amz_price
-                        })
-                    })
-                    .then(res => {
-                        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                        return res.json();
-                    })
-                    .then(result => {
-                        console.log('✅ Amazon price updated successfully:', result.message || result);
-                    })
-                    .catch(err => {
-                        console.error('❌ Update failed:', err);
-                    });
                 }
             });
 

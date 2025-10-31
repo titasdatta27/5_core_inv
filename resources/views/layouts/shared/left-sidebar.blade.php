@@ -1407,6 +1407,9 @@
                                                 <li>
                                                     <a href="{{ route('adcvr.amazon') }}">Pricing</a>
                                                 </li>
+                                                <li>
+                                                    <a href="{{ route('review-ratings.amazon') }}">Review Ratings</a>
+                                                </li>
                                             </ul>
                                         </div>
                                     </li>
