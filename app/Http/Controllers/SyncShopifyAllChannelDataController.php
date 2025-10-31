@@ -19,6 +19,7 @@ class SyncShopifyAllChannelDataController extends Controller
 	{
 		$rows = $this->fetchRows();
 		$result = $this->mapRows($rows);
+		$result = $this->prependSummaryRow($result);
 
 		return response()->json($result);
 	}
@@ -27,6 +28,7 @@ class SyncShopifyAllChannelDataController extends Controller
 	{
 		$rows = $this->fetchRows();
 		$result = $this->mapRows($rows);
+		$result = $this->prependSummaryRow($result);
 
 		$fileName = 'shopify_all_channels_' . now()->format('Y_m_d_His') . '.xlsx';
 		$spreadsheet = new Spreadsheet();
@@ -65,6 +67,42 @@ class SyncShopifyAllChannelDataController extends Controller
 			);
 			$rowIndex++;
 		}
+	}
+
+	protected function prependSummaryRow(array $rows): array
+	{
+		if (empty($rows)) {
+			return $rows;
+		}
+
+		$summary = [];
+		$keys = array_keys($rows[0]);
+
+		foreach ($keys as $key) {
+			if ($key === 'Parent') {
+				$summary[$key] = 'TOTAL';
+				continue;
+			}
+
+			if ($key === 'SKU') {
+				$summary[$key] = '';
+				continue;
+			}
+
+			if ($key === 'Shopify_Qty' || str_contains($key, '_L30')) {
+				$summary[$key] = collect($rows)->sum(function ($row) use ($key) {
+					$value = $row[$key] ?? 0;
+					return is_numeric($value) ? (float) $value : 0;
+				});
+				continue;
+			}
+
+			$summary[$key] = '';
+		}
+
+		array_unshift($rows, $summary);
+
+		return $rows;
 	}
 
 	protected function formatValueForCell($value)
