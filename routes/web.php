@@ -1245,10 +1245,24 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
 
 
     //organic views routes
-    Route::get('/organic-views-amazon-data', action: [OrganicViewsController::class, 'getOrganicViewsData'])->name('organicviews.amazon.data');
+
+    Route::get('/organic-views-amazon-data', action: [OrganicViewsController::class, 'getAmazonOrganicViewsData'])->name('organicviews.amazon.data');
     Route::get('/organicviews-amazon', action: [OrganicViewsController::class, 'amazonOrganicViews'])->name('organicviews.amazon');
 
+    Route::get('/organic-views-ebay-data', action: [OrganicViewsController::class, 'getEbayOrganicViewsData'])->name('organicviews.ebay.data');
+    Route::get('/organicviews-ebay', action: [OrganicViewsController::class, 'ebayOrganicViews'])->name('organicviews.ebay');
 
+    Route::get('/organic-views-ebay2-data', action: [OrganicViewsController::class, 'getEbay2OrganicViewsData'])->name('organicviews.ebay2.data');
+    Route::get('/organicviews-ebay2', action: [OrganicViewsController::class, 'ebay2OrganicViews'])->name('organicviews.ebay2');
+
+    Route::get('/organic-views-ebay3-data', action: [OrganicViewsController::class, 'getEbay3OrganicViewsData'])->name('organicviews.ebay3.data');
+    Route::get('/organicviews-ebay3', action: [OrganicViewsController::class, 'ebay3OrganicViews'])->name('organicviews.ebay3');
+
+    Route::get('/organic-views-temu-data', action: [OrganicViewsController::class, 'getTemuOrganicViewsData'])->name('organicviews.temu.data');
+    Route::get('/organicviews-temu', action: [OrganicViewsController::class, 'temuOrganicViews'])->name('organicviews.temu');
+
+    Route::get('/organic-views-walmart-data', action: [OrganicViewsController::class, 'getWalmartOrganicViewsData'])->name('organicviews.walmart.data');
+    Route::get('/organicviews-walmart', action: [OrganicViewsController::class, 'walmartOrganicViews'])->name('organicviews.walmart');
 
 
     // Analysis routes
