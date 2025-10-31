@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class SyncShopifyAllChannelDataController extends Controller
 {
@@ -14,13 +17,73 @@ class SyncShopifyAllChannelDataController extends Controller
 
 	public function data(Request $request)
 	{
-		$rows = DB::table('shopify_all_channels_data')
+		$rows = $this->fetchRows();
+		$result = $this->mapRows($rows);
+
+		return response()->json($result);
+	}
+
+	public function export(Request $request)
+	{
+		$rows = $this->fetchRows();
+		$result = $this->mapRows($rows);
+
+		$fileName = 'shopify_all_channels_' . now()->format('Y_m_d_His') . '.xlsx';
+		$spreadsheet = new Spreadsheet();
+		$sheet = $spreadsheet->getActiveSheet();
+
+		if (empty($result)) {
+			$sheet->setCellValue('A1', 'No data available');
+		} else {
+			$headers = array_keys($result[0]);
+			$sheet->fromArray($headers, null, 'A1');
+
+			$rowIndex = 2;
+			foreach ($result as $row) {
+				$sheet->fromArray(
+					array_map([$this, 'formatValueForCell'], array_values($row)),
+					null,
+					'A' . $rowIndex
+				);
+				$rowIndex++;
+			}
+		}
+
+		$tempFile = tempnam(sys_get_temp_dir(), 'shopify_all_channels_');
+		$writer = new Xlsx($spreadsheet);
+		$writer->save($tempFile);
+
+		return response()->download($tempFile, $fileName, [
+			'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+		])->deleteFileAfterSend(true);
+	}
+
+	protected function formatValueForCell($value)
+	{
+		if (is_bool($value)) {
+			return $value ? 'TRUE' : 'FALSE';
+		}
+
+		if (is_scalar($value) || $value === null) {
+			return $value ?? '';
+		}
+
+		return json_encode($value);
+	}
+
+	protected function fetchRows(): Collection
+	{
+		return DB::table('shopify_all_channels_data')
 			->select(['sku', 'parent', 'value'])
 			->orderBy('parent')
 			->orderBy('sku')
 			->get();
+	}
 
+	protected function mapRows(Collection $rows): array
+	{
 		$result = [];
+
 		foreach ($rows as $row) {
 			$value = is_string($row->value) ? json_decode($row->value, true) : ($row->value ?? []);
 
@@ -152,7 +215,7 @@ class SyncShopifyAllChannelDataController extends Controller
 			];
 		}
 
-		return response()->json($result);
+		return $result;
 	}
 }
  

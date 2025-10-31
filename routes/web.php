@@ -2267,6 +2267,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
 // Shopify All Channels - View + JSON
 Route::get('/shopify-all-channels', [\App\Http\Controllers\SyncShopifyAllChannelDataController::class, 'index']);
 Route::get('/shopify-all-channels-json', [\App\Http\Controllers\SyncShopifyAllChannelDataController::class, 'data']);
+Route::get('/shopify-all-channels-export', [\App\Http\Controllers\SyncShopifyAllChannelDataController::class, 'export']);
 
     Route::get('channels-reviews-master', [ChannelWiseReviewsController::class, 'reviews_dashboard']);
     Route::get('channels-reviews/details', [ChannelWiseReviewsController::class, 'reviews_dashboard_details']);
