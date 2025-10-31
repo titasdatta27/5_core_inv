@@ -19,5 +19,8 @@ class ShopifySku extends Model
         'price',
         'image_src',
         'shopify_l30',
+        'available_to_sell',
+        'committed',        
+        'on_hand',
     ];
 }

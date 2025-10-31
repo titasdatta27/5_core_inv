@@ -427,13 +427,35 @@
                             <td></td>
                             <td></td>
                             <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
+                            <td>{{ $walmart_SPEND_L30_Total }}</td>
+                            <td>{{ $walmart_CLICKS_L30_Total }}</td>
+                            <td>{{ $walmart_SALES_L30_Total }}</td>
+                            <td>
+                                @php
+                                    if($walmart_SALES_L30_Total > 0){
+                                        $acos = ($walmart_SPEND_L30_Total/$walmart_SALES_L30_Total)*100;
+                                        $acos = number_format($acos, 2);
+                                    }else{
+                                        $acos = 0;
+                                    }
+                                @endphp
+                                {{ '('.$acos.') %'  }}
+                            </td>
+                            <td>
+                              
+                            </td>
+                            <td>{{ $walmart_SOLD_L30_Total }}</td>
+                            <td>
+                                @php
+                                    if($walmart_CLICKS_L30_Total > 0){
+                                        $cvr = ($walmart_SOLD_L30_Total/$walmart_CLICKS_L30_Total)*100;
+                                        $cvr = number_format($cvr, 2);
+                                    }else{
+                                        $cvr = 0;
+                                    }
+                                @endphp
+                                {{ '('.$cvr.') %' }}
+                            </td>
                             <td></td>
                         </tr>
 
