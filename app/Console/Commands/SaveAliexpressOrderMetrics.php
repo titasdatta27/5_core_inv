@@ -30,6 +30,8 @@ class SaveAliexpressOrderMetrics extends Command
                 'page_size' => $pageSize,
                 'days' => $days
             ]);
+            
+            $this->info("API Response Status: " . $response->status());
 
             if ($response->failed()) {
                 $this->error("Failed to fetch data from API for page {$page}: " . $response->body());
@@ -44,10 +46,14 @@ class SaveAliexpressOrderMetrics extends Command
                 break;
             }
 
+            $this->info("Found " . count($orders) . " orders on page {$page}");
+            
             foreach ($orders as $order) {
                 $orderDate = Carbon::parse($order['gmt_create']);
                 $orderId = $order['order_id'];
                 $orderStatus = $order['order_status'];
+                
+                $this->info("Processing order {$orderId} from {$orderDate} with status {$orderStatus}");
                 
                 foreach ($order['product_list']['aeop_order_product_dto'] as $product) {
                     $sku = $product['sku_code'] ?? null;
