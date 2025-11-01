@@ -16,8 +16,12 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header">
-                        <h4>Shopify - All Channels Overview</h4>
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">Shopify - All Channels Overview</h4>
+                        <a href="{{ url('/shopify-all-channels-export') }}" class="btn btn-outline-success btn-sm">
+                            <i class="fa fa-file-excel"></i>
+                            Export Excel
+                        </a>
                     </div>
                     <div class="card-body" style="padding: 0;">
                         <div id="shopify-all-channels-wrapper" style="height: calc(100vh - 200px); display: flex; flex-direction: column;">
@@ -43,7 +47,6 @@
                     { title: "SKU", field: "SKU", headerFilter: "input", frozen: true },
                     { title: "Shopify INV", field: "Shopify_INV", hozAlign: "center" },
                     { title: "OV L30", field: "Shopify_Qty", hozAlign: "center" },
-                    { title: "Img", field: "Img", formatter: function(cell){ const url = cell.getValue(); return url ? `<img src=\"${url}\" style=\"height:32px;width:auto;\">` : '' }, hozAlign: "center" },
 
                     { title: "Amz API L30", field: "Amazon_L30", hozAlign: "center" },
                     // { title: "Amz Orders L30", field: "Amazon_O_L30", hozAlign: "center" },
@@ -78,17 +81,14 @@
                     { title: "Wayfair Shopify L30", field: "Wayfair_Q_L30", hozAlign: "center" },
 
                     { title: "TikTok API L30", field: "TikTok_L30", hozAlign: "center" },
-                    { title: "TikTok API L60", field: "TikTok_L60", hozAlign: "center" },
 
                     { title: "Mercari W Sheet API L30", field: "MercariW_L30", hozAlign: "center" },
                     // { title: "Mercari W Orders L30", field: "MercariW_O_L30", hozAlign: "center" },
                     { title: "Mercari W Shopify L30", field: "MercariW_Q_L30", hozAlign: "center" },
 
                     { title: "Mercari WO Sheet API L30", field: "MercariWO_L30", hozAlign: "center" },
-                    { title: "Mercari WO Sheet API L60", field: "MercariWO_L60", hozAlign: "center" },
 
                     { title: "PLS Sheet API L30", field: "PLS_L30", hozAlign: "center" },
-                    { title: "PLS Sheet API L60", field: "PLS_L60", hozAlign: "center" },
 
                     { title: "BestBuy API L30", field: "BestBuy_L30", hozAlign: "center" },
                     // { title: "BestBuy Orders L30", field: "BestBuyUSA_O_L30", hozAlign: "center" },
