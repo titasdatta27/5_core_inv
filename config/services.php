@@ -68,4 +68,10 @@ return [
         'client_secret' => env('WAYFAIR_CLIENT_SECRET'),
         'audience' => env('WAYFAIR_AUDIENCE'),
     ],
+
+    'tiktok' => [
+        'app_id' => env('TIKTOK_APP_ID'),
+        'app_secret' => env('TIKTOK_APP_SECRET'),
+        'webhook_secret' => env('TIKTOK_WEBHOOK_SECRET'),
+    ],
 ];

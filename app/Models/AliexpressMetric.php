@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class AliexpressMetric extends Model
 {
@@ -36,20 +37,25 @@ class AliexpressMetric extends Model
         $orderDate = Carbon::parse($orderData['gmt_create']);
         $now = Carbon::now();
         
+        Log::info("Processing product ID: {$productId}, SKU: {$sku}, Order Date: {$orderDate}");
+        
         $metric = static::firstOrNew([
             'product_id' => $productId,
             'sku' => $sku
         ]);
         
         $orderDates = $metric->order_dates ?? [];
-        $orderKey = $orderData['order_id'] . '_' . $orderDate->toDateTimeString();
+        $orderKey = $orderData['order_id'] . '_' . $productId . '_' . $orderDate->toDateTimeString();
         
         // Only process if this order hasn't been recorded yet
         if (!isset($orderDates[$orderKey])) {
             $orderDates[$orderKey] = [
                 'date' => $orderDate->toDateTimeString(),
                 'count' => $productData['product_count'],
-                'order_id' => $orderData['order_id']
+                'order_id' => $orderData['order_id'],
+                'product_id' => $productId,
+                'sku' => $sku,
+                'amount' => $productData['product_unit_price']['amount']
             ];
             
             // Calculate L30 and L60
