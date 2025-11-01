@@ -836,9 +836,21 @@
                                                 <li>
                                                     <a href="{{ route('organicviews.amazon') }}">Amazon</a>
                                                 </li>
-                                                {{-- <li>
-                                                    <a href="#"> Ebay</a>
-                                                </li> --}}
+                                                <li>
+                                                    <a href="{{ route('organicviews.ebay') }}"> Ebay</a>
+                                                </li>
+                                                <li>
+                                                    <a href="{{ route('organicviews.ebay2') }}"> Ebay 2</a>
+                                                </li>
+                                                <li>
+                                                    <a href="{{ route('organicviews.ebay3') }}"> Ebay 3</a>
+                                                </li>
+                                                <li>
+                                                    <a href="{{ route('organicviews.temu') }}">Temu</a>
+                                                </li>
+                                                <li>
+                                                    <a href="{{ route('organicviews.walmart') }}">Walmart</a>
+                                                </li>
                                             </ul>
                                         </div>
                                     </li>
@@ -1428,6 +1440,9 @@
                                                 </li>
                                                 <li>
                                                     <a href="{{ route('review-ratings.amazon') }}">Review Ratings</a>
+                                                </li>
+                                                <li>
+                                                    <a href="{{ route('targetting.amazon') }}">Targetting</a>
                                                 </li>
                                             </ul>
                                         </div>
