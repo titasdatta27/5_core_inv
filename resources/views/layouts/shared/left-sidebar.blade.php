@@ -1441,6 +1441,9 @@
                                                 <li>
                                                     <a href="{{ route('review-ratings.amazon') }}">Review Ratings</a>
                                                 </li>
+                                                <li>
+                                                    <a href="{{ route('targetting.amazon') }}">Targetting</a>
+                                                </li>
                                             </ul>
                                         </div>
                                     </li>
