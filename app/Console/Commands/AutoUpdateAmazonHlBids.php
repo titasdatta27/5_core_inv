@@ -88,8 +88,7 @@ class AutoUpdateAmazonHlBids extends Command
                 $expected1 = $sku;                
                 $expected2 = $sku . ' HEAD';      
 
-                return ($cleanName === $expected1 || $cleanName === $expected2)
-                    && strtoupper($item->campaignStatus) === 'ENABLED';
+                return ($cleanName === $expected1 || $cleanName === $expected2);
             });
 
             $matchedCampaignL1 = $amazonSpCampaignReportsL1->first(function ($item) use ($sku) {
@@ -97,14 +96,8 @@ class AutoUpdateAmazonHlBids extends Command
                 $expected1 = $sku;
                 $expected2 = $sku . ' HEAD';
 
-                return ($cleanName === $expected1 || $cleanName === $expected2)
-                    && strtoupper($item->campaignStatus) === 'ENABLED';
+                return ($cleanName === $expected1 || $cleanName === $expected2);
             });
-
-
-            if (!$matchedCampaignL7 && !$matchedCampaignL1) {
-                continue;
-            }
 
             $row = [];
             $row['INV']    = $shopify->inv ?? 0;
