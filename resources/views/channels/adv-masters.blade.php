@@ -379,7 +379,7 @@
                                 @endphp
                                 {{ '('.$cvr.') %' }}
                             </td>
-                            <td></td>
+                            <td>{{ $ebay2_ptMissing }}</td>
                         </tr>
 
                         <tr class="accordion-body">
@@ -414,7 +414,7 @@
                                 @endphp
                                 {{ '('.$cvr.') %' }}
                             </td>
-                            <td></td>
+                            <td>{{ $ebay2_ptMissing }}</td>
                         </tr>
 
                         <tr style="background-color:#cfe2f3;" class="accordion-header">
@@ -450,7 +450,7 @@
                                 @endphp
                                 {{ '('.$cvr.') %' }}
                             </td>
-                            <td></td>
+                            <td>{{ $ebay3totalMissingAds }}</td>
                         </tr>
 
                          <tr class="accordion-body">
@@ -485,7 +485,7 @@
                                 @endphp
                                 {{ '('.$cvr.') %' }}
                             </td>
-                            <td></td>
+                            <td>{{ $ebay3kwMissing }}</td>
                         </tr>
 
                         <tr class="accordion-body">
@@ -520,7 +520,7 @@
                                 @endphp
                                 {{ '('.$cvr.') %' }}
                             </td>
-                            <td></td>
+                            <td>{{ $ebay3ptMissing }}</td>
                         </tr>
 
                         <tr style="background-color:#cfe2f3;" class="accordion-header">
@@ -725,11 +725,13 @@ $(document).ready(function() {
                 let table = $('#adv-master-table').DataTable({
                     paging: false,
                     info: false,
-                    searching: false,
+                    searching: true,
                     scrollX:false,
                     autoWidth: false,
                     ordering:false,
                 });
+
+                $('.dataTables_filter').hide();
                 
                 $('#adv-master-table').colResizable({
                     liveDrag: true,
@@ -738,11 +740,17 @@ $(document).ready(function() {
                     draggingClass: "dragging"
                 });
 
+                $('#search-input').on('keyup', function() {
+                    table.search(this.value).draw();
+                });
+
             };
             document.body.appendChild(colScript); 
         };
         document.body.appendChild(dtScript); 
     }, 200); 
+
+   
 });
 </script>
    

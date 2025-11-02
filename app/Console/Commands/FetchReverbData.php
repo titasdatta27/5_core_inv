@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use App\Models\ReverbProduct;
+use App\Models\ReverbOrderMetric;
 use Carbon\Carbon;
 
 class FetchReverbData extends Command
@@ -21,7 +22,7 @@ class FetchReverbData extends Command
      *
      * @var string
      */
-    protected $description = 'Fetch Reverb listing data and store in database daily';
+    protected $description = 'Calculate Reverb L30/L60 data from metrics table and update products';
 
     /**
      * Execute the console command.
@@ -32,23 +33,20 @@ class FetchReverbData extends Command
         $listings = $this->fetchAllListings();
 
         $today = Carbon::today();
-        // $l30Start = $today->copy()->subDays(30);
-        // $l30End   = $today->copy()->subDay();
-        // $l60Start = $today->copy()->subDays(60);
-        // $l60End   = $l30Start->copy()->subDay();
+        
+        // Calculate L30 range (last 30 days from today)
+        $l30End = $today->copy();
+        $l30Start = $today->copy()->subDays(30);
 
-        $l30End   = $today->copy()->subDay();     // 2025-09-25
-        $l30Start = $l30End->copy()->subDays(29); // 2025-08-27
+        // Calculate L60 range (31-60 days from today) - expand to catch all orders
+        $l60End = $l30Start->copy()->subDay();
+        $l60Start = $l60End->copy()->subDays(35); // Go back further to catch August orders
 
-        $l60End   = $l30Start->copy()->subDay();  // 2025-08-26
-        $l60Start = $l60End->copy()->subDays(59); // 2025-07-29
+        $this->info("Date ranges - L30: {$l30Start->toDateString()} to {$l30End->toDateString()}, L60: {$l60Start->toDateString()} to {$l60End->toDateString()}");
 
-
-        // $rL30 = $this->getOrderQuantities(30);
-        // $rL60 = $this->getOrderQuantities(60);
-
-        $rL30 = $this->getOrderQuantities($l30Start, $l30End);
-        $rL60 = $this->getOrderQuantities($l60Start, $l60End);
+        // Calculate quantities from metrics table
+        $rL30 = $this->calculateQuantitiesFromMetrics($l30Start, $l30End);
+        $rL60 = $this->calculateQuantitiesFromMetrics($l60Start, $l60End);
 
         foreach ($listings as $item) {
             $sku = $item['sku'] ?? null;
@@ -58,11 +56,8 @@ class FetchReverbData extends Command
                 continue;
             }
 
-            $r30 = $rL30[$sku]['qty'] ?? 0;
-            $r60 = $rL60[$sku]['qty'] ?? 0;
-            $status = $rL30[$sku]['status'] ?? null;
-
-            // $this->line("Listing SKU: $sku | R_L30: $r30 | R_L60: $r60");
+            $r30 = $rL30[$sku] ?? 0;
+            $r60 = $rL60[$sku] ?? 0;
 
             // Store record
             ReverbProduct::updateOrCreate(
@@ -71,7 +66,6 @@ class FetchReverbData extends Command
                 'sku' => $sku,
                 'r_l30' => $r30,
                 'r_l60' => $r60,
-                'status' => $status,
                 'price' => $item['price']['amount'] ?? null,
                 'views' => $item['stats']['views'] ?? null,
             ]);
@@ -107,50 +101,19 @@ class FetchReverbData extends Command
         return $listings;
     }
 
-    protected function getOrderQuantities(Carbon $startDate, Carbon $endDate): array
+    protected function calculateQuantitiesFromMetrics(Carbon $startDate, Carbon $endDate): array
     {
-        $this->info("Fetching orders from {$startDate->toDateString()} to {$endDate->toDateString()}...");
+        $this->info("Calculating quantities from metrics table for {$startDate->toDateString()} to {$endDate->toDateString()}...");
 
-        
-        $url = "https://api.reverb.com/api/my/orders/selling/all?updated_start_date={$startDate->toIso8601String()}&updated_end_date={$endDate->toIso8601String()}";
-        $quantityMap = [];
+        $quantities = ReverbOrderMetric::whereBetween('order_date', [$startDate->toDateString(), $endDate->toDateString()])
+            ->where('status', '!=', 'returned')
+            ->selectRaw('sku, SUM(quantity) as total_quantity')
+            ->groupBy('sku')
+            ->pluck('total_quantity', 'sku')
+            ->toArray();
 
-        do {
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . config('services.reverb.token'),
-                'Accept' => 'application/hal+json',
-                'Accept-Version' => '3.0',
-            ])->get($url);
-
-            if ($response->failed()) {
-                $this->error("Failed to fetch orders");
-                return [];
-            }
-
-            $orders = $response->json()['orders'] ?? [];
-            foreach ($orders as $order) {
-                $sku = $order['sku'] ?? null;
-                $qty = $order['quantity'] ?? 0;
-                $status = $order['status'] ?? ($order['status'] ?? null); 
-
-            if ($sku) {
-                if (!isset($quantityMap[$sku])) {
-                        $quantityMap[$sku] = ['qty' => 0, 'status' => $status];
-                }
-
-                    $quantityMap[$sku]['qty'] += $qty;
-                    $quantityMap[$sku]['status'] = $status;
-                }
-                    // $this->line("Order SKU: $sku, Qty: $qty");
-                    // $quantityMap[$sku] = ($quantityMap[$sku] ?? 0) + $qty;
-                
-            }
-
-            $url = $response->json()['_links']['next']['href'] ?? null;
-        } while ($url);
-
-        $this->info("Orders processed from {$startDate->toDateString()} to {$endDate->toDateString()}.");
-        return $quantityMap;
+        $this->info("Found " . count($quantities) . " SKUs with orders in this period.");
+        return $quantities;
     }
 
     
