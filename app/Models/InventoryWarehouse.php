@@ -35,6 +35,7 @@ class InventoryWarehouse extends Model
         'specification',
         'supplier_names',
         'pushed',
+        'transit_container_id',
 
     ];
 

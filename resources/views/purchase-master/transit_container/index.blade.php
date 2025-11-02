@@ -374,6 +374,7 @@ Object.entries(groupedData).forEach(([tabName, data], index) => {
             // Ensure tab_name and SKU are normalized
             const tabName = (rowData.tab_name || '').trim().toUpperCase();
             const sku = (rowData.our_sku || '').trim().toUpperCase();
+            const rowId = rowData.id;
 
             // The pushed flag should already be set in your controller for this exact combination
             if (rowData.pushed == 1) {
@@ -824,11 +825,169 @@ Object.entries(groupedData).forEach(([tabName, data], index) => {
 
 });
 
+//push inventory to inventory warehouse 
+// document.getElementById("push-inventory-btn").addEventListener("click", async function () {
+//     const activeTab = document.querySelector(".nav-link.active");
+//     if (!activeTab) return alert("No container tab selected.");
+
+//     const tabId = activeTab.getAttribute("data-bs-target"); 
+//     const index = tabId.replace("#tab-", "");
+//     const table = window.tabTables[index];
+//     if (!table) return alert("No data found for this container.");
+
+//     const selectedRows = table.getSelectedData();
+//     if (selectedRows.length === 0) return alert("Please select at least one SKU to push.");
+
+//     if (!confirm(`Are you sure you want to push ${selectedRows.length} selected SKU(s)?`)) return;
+
+//     const tabName = activeTab.textContent.trim();
+
+//     // Normalize SKUs before sending
+//     const rowsToSend = selectedRows.map(r => ({
+//         ...r,
+//         our_sku: r.our_sku.trim().toUpperCase(),
+//         row_id: r.id,
+//         tab_name: tabName
+//     }));
+
+//     fetch("/inventory-warehouse/push", {
+//         method: "POST",
+//         headers: {
+//             "Content-Type": "application/json",
+//             "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+//         },
+//         body: JSON.stringify({ tab_name: tabName, data: rowsToSend })
+//     })
+//     .then(res => res.json())
+//     .then(response => {
+//         if (!response.success) return alert(response.message || "Push failed!");
+
+//         // const pushedSkus = [];
+//         // const skippedSkus = response.skipped || [];
+//         // const notFoundSkus = response.not_found || [];
+//         const pushed = response.pushed || [];
+//         const skipped = response.skipped || [];
+//         const notFound = response.not_found || [];
+
+
+//         selectedRows.forEach(row => {
+//             const tableRow = table.getRow(row.id);
+//             if (!tableRow) return;
+
+//             const id = row.id;
+
+//             if (skippedIds.includes(id)) {
+//                 tableRow.getElement().style.backgroundColor = "#f8d7da"; // red - skipped
+//             } else if (notFoundIds.includes(id)) {
+//                 tableRow.getElement().style.backgroundColor = "#fff3cd"; // yellow - not found
+//             } else if (pushedIds.includes(id)) {
+//                 tableRow.getElement().style.backgroundColor = "#d4edda"; // green - pushed
+//                 tableRow.deselect();
+//                 tableRow.update({ pushed: 1 });
+//             }
+
+//             // if (skippedSkus.includes(row.our_sku)) {
+//             //     tableRow.getElement().style.backgroundColor = "#f8d7da"; // red
+//             // } else if (notFoundSkus.includes(row.our_sku)) {
+//             //     tableRow.getElement().style.backgroundColor = "#fff3cd"; // yellow for not found
+//             // } else {
+//             //     tableRow.getElement().style.backgroundColor = "#d4edda"; // green
+//             //     tableRow.deselect();
+//             //     tableRow.update({ pushed: 1 });
+//             //     pushedSkus.push(row.our_sku);
+//             // }
+//         });
+
+//         // Alert skipped SKUs
+//         if (skippedIds.length > 0) {
+//             alert("These rows were already pushed and skipped (row ids):\n" + skippedIds.join(", "));
+//         }
+
+//         // Alert not found SKUs
+//         if (notFoundIds.length > 0) {
+//             alert("These rows' SKUs were not found in Shopify (row ids):\n" + notFoundIds.join(", "));
+//         }
+
+//         // Redirect with pushed SKUs info
+//         const query = pushedSkus.length > 0 ? `?pushed=${encodeURIComponent(pushedSkus.join(","))}` : "";
+//         window.location.href = "/inventory-warehouse" + query;
+//     })
+//     .catch(err => {
+//         console.error("Push error:", err);
+//         alert("Something went wrong while pushing inventory.");
+//     });
+// });
+
+// document.getElementById("push-inventory-btn").addEventListener("click", async function () {
+//     const activeTab = document.querySelector(".nav-link.active");
+//     if (!activeTab) return alert("No container tab selected.");
+
+//     const tabId = activeTab.getAttribute("data-bs-target"); 
+//     const index = tabId.replace("#tab-", "");
+//     const table = window.tabTables[index];
+//     if (!table) return alert("No data found for this container.");
+
+//     const selectedRows = table.getSelectedData();
+//     if (selectedRows.length === 0) return alert("Please select at least one SKU to push.");
+
+//     if (!confirm(`Are you sure you want to push ${selectedRows.length} selected SKU(s)?`)) return;
+
+//     const tabName = activeTab.textContent.trim();
+
+//     const rowsToSend = selectedRows.map(r => ({
+//         ...r,
+//         our_sku: r.our_sku.trim().toUpperCase(),
+//         row_id: r.id,
+//         tab_name: tabName
+//     }));
+
+//     fetch("/inventory-warehouse/push", {
+//         method: "POST",
+//         headers: {
+//             "Content-Type": "application/json",
+//             "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+//         },
+//         body: JSON.stringify({ tab_name: tabName, data: rowsToSend })
+//     })
+//     .then(res => res.json())
+//     .then(response => {
+//         if (!response.success) return alert(response.message || "Push failed!");
+
+//         const pushed = response.pushed || [];
+//         const skipped = response.skipped || [];
+//         const notFound = response.not_found || [];
+
+//         // ✅ Apply colors row-wise
+//         pushed.forEach(({ row_id }) => {
+//             const row = table.getRow(row_id);
+//             if (row) {
+//                 row.getElement().style.backgroundColor = "#d4edda"; // green
+//                 row.deselect();
+//                 row.update({ pushed: 1 });
+//             }
+//         });
+
+//         // Alerts with SKUs instead of IDs
+//         if (skipped.length > 0)
+//             alert("These SKUs were already pushed and skipped:\n" + skipped.join(", "));
+
+//         if (notFound.length > 0)
+//             alert("These SKUs were not found in Shopify:\n" + notFound.join(", "));
+
+//         if (pushed.length > 0)
+//             alert("Successfully pushed SKUs:\n" + pushed.map(r => r.sku).join(", "));
+//     })
+//     .catch(err => {
+//         console.error("Push error:", err);
+//         alert("Something went wrong while pushing inventory.");
+//     });
+// });
+
 document.getElementById("push-inventory-btn").addEventListener("click", async function () {
     const activeTab = document.querySelector(".nav-link.active");
     if (!activeTab) return alert("No container tab selected.");
 
-    const tabId = activeTab.getAttribute("data-bs-target"); 
+    const tabId = activeTab.getAttribute("data-bs-target");
     const index = tabId.replace("#tab-", "");
     const table = window.tabTables[index];
     if (!table) return alert("No data found for this container.");
@@ -839,64 +998,72 @@ document.getElementById("push-inventory-btn").addEventListener("click", async fu
     if (!confirm(`Are you sure you want to push ${selectedRows.length} selected SKU(s)?`)) return;
 
     const tabName = activeTab.textContent.trim();
-
-    // Normalize SKUs before sending
     const rowsToSend = selectedRows.map(r => ({
         ...r,
-        our_sku: r.our_sku.trim().toUpperCase()
+        our_sku: r.our_sku.trim().toUpperCase(),
+        row_id: r.id,
+        tab_name: tabName
     }));
 
-    fetch("/inventory-warehouse/push", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
-        },
-        body: JSON.stringify({ tab_name: tabName, data: rowsToSend })
-    })
-    .then(res => res.json())
-    .then(response => {
-        if (!response.success) return alert(response.message || "Push failed!");
+    // Show processing overlay
+    const overlay = document.createElement("div");
+    overlay.id = "processing-overlay";
+    overlay.innerHTML = `
+        <div style="position:fixed;top:0;left:0;width:100%;height:100%;
+            background:rgba(0,0,0,0.6);color:white;display:flex;align-items:center;
+            justify-content:center;flex-direction:column;z-index:9999;font-size:20px;">
+            <div>🚀 Processing container...</div>
+            <small>Please wait while we push inventory to Shopify.</small>
+        </div>`;
+    document.body.appendChild(overlay);
 
-        const pushedSkus = [];
-        const skippedSkus = response.skipped || [];
-        const notFoundSkus = response.not_found || [];
+    try {
+        const res = await fetch("/inventory-warehouse/push", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({ tab_name: tabName, data: rowsToSend })
+        });
 
-        selectedRows.forEach(row => {
-            const tableRow = table.getRow(row.id);
-            if (!tableRow) return;
+        const response = await res.json();
+        document.body.removeChild(overlay);
 
-            if (skippedSkus.includes(row.our_sku)) {
-                tableRow.getElement().style.backgroundColor = "#f8d7da"; // red
-            } else if (notFoundSkus.includes(row.our_sku)) {
-                tableRow.getElement().style.backgroundColor = "#fff3cd"; // yellow for not found
-            } else {
-                tableRow.getElement().style.backgroundColor = "#d4edda"; // green
-                tableRow.deselect();
-                tableRow.update({ pushed: 1 });
-                pushedSkus.push(row.our_sku);
+        if (!response.success) {
+            alert(response.message || "Push failed!");
+            return;
+        }
+
+        const pushed = response.pushed || [];
+        const skipped = response.skipped || [];
+        const notFound = response.not_found || [];
+
+        pushed.forEach(({ row_id }) => {
+            const row = table.getRow(row_id);
+            if (row) {
+                row.getElement().style.backgroundColor = "#d4edda"; // green
+                row.deselect();
+                row.update({ pushed: 1 });
             }
         });
 
-        // Alert skipped SKUs
-        if (skippedSkus.length > 0) {
-            alert("These SKUs were already pushed and skipped:\n" + skippedSkus.join(", "));
-        }
+        let msg = "";
+        if (pushed.length) msg += `✅ Pushed successfully:\n${pushed.map(r => r.sku).join(", ")}\n\n`;
+        if (skipped.length) msg += `⚠️ Already pushed (skipped):\n${skipped.join(", ")}\n\n`;
+        if (notFound.length) msg += `❌ Not found in Shopify:\n${notFound.join(", ")}`;
 
-        // Alert not found SKUs
-        if (notFoundSkus.length > 0) {
-            alert("These SKUs were not found in Shopify:\n" + notFoundSkus.join(", "));
-        }
+        alert(msg || "Push complete!");
+        location.reload(); // 🔄 Auto refresh
 
-        // Redirect with pushed SKUs info
-        const query = pushedSkus.length > 0 ? `?pushed=${encodeURIComponent(pushedSkus.join(","))}` : "";
-        window.location.href = "/inventory-warehouse" + query;
-    })
-    .catch(err => {
+    } catch (err) {
+        document.body.removeChild(overlay);
         console.error("Push error:", err);
         alert("Something went wrong while pushing inventory.");
-    });
+    }
 });
+
+
 
 
 //push arrived container to inventory warehouse 

@@ -53,26 +53,43 @@ class TransitContainerDetailsController extends Controller
             return [$normSku => $value];
         })->toArray();
 
-        $pushedMap = InventoryWarehouse::select('tab_name', 'our_sku', 'pushed', 'created_at')
-            ->whereNotNull('our_sku')
-            ->whereNotNull('tab_name')
-            ->orderBy('created_at', 'desc')
-            ->get()
-            ->unique(function ($item) {
-                return strtoupper(trim($item->tab_name)) . '|' . strtoupper(trim($item->our_sku));
-            })
-            ->mapWithKeys(function ($item) {
-                $normTab = strtoupper(trim(preg_replace('/\s+/', ' ', $item->tab_name)));
-                $normSku = strtoupper(trim(preg_replace('/\s+/', ' ', $item->our_sku)));
-                return ["{$normTab}|{$normSku}" => (int) $item->pushed];
-            })
+        // $pushedMap = InventoryWarehouse::select('tab_name', 'our_sku', 'pushed', 'created_at','transit_container_id')
+        //     ->whereNotNull('transit_container_id')
+        //     ->whereNotNull('tab_name')
+        //     ->orderBy('created_at', 'desc')
+        //     ->get()
+        //     ->unique(function ($item) {
+        //         return strtoupper(trim($item->tab_name)) . '|' . (int) $item->transit_container_id;
+        //     })
+        //     ->mapWithKeys(function ($item) {
+        //         $normTab = strtoupper(trim(preg_replace('/\s+/', ' ', $item->tab_name)));
+        //         // $normSku = strtoupper(trim(preg_replace('/\s+/', ' ', $item->our_sku)));
+        //         return ["{$normTab}|{$item->row_id}" => (int) $item->pushed];
+        //     })
+        // ->toArray();
+        $pushedMap = InventoryWarehouse::select('tab_name', 'transit_container_id', 'our_sku', 'pushed', 'created_at')
+        ->whereNotNull('transit_container_id')
+        ->whereNotNull('tab_name')
+        ->orderBy('created_at', 'desc')
+        ->get()
+        ->unique(function ($item) {
+            return strtoupper(trim($item->tab_name)) . '|' . (int)$item->transit_container_id;
+        })
+        ->mapWithKeys(function ($item) {
+            $normTab = strtoupper(trim(preg_replace('/\s+/', ' ', $item->tab_name)));
+            $rowId = (int)$item->transit_container_id;
+            return ["{$normTab}|{$rowId}" => (int) $item->pushed];
+        })
         ->toArray();
 
-        // 🔥 Transform TransitContainerDetail Records
+
+        // Transform TransitContainerDetail Records
         $allRecords->transform(function ($record) use ($skuParentMap, $parentSupplierMap, $shopifyImages, $productValuesMap, $pushedMap) {
             $sku = strtoupper(trim(preg_replace('/\s+/', ' ', $record->our_sku ?? '')));
             $tabKey = strtoupper(trim(preg_replace('/\s+/', ' ', $record->tab_name ?? '')));
-            $key = "{$tabKey}|{$sku}";
+            // $rowId = $record->id; 
+
+            $key = "{$tabKey}|{$record->id}";
 
             $parent = $skuParentMap[$sku] ?? null;
 
