@@ -381,7 +381,7 @@ class EbayOverUtilizedBgtController extends Controller
                 return stripos($item->campaign_name, $sku) !== false;
             });
 
-            if (!$matchedCampaignL7 && !$matchedCampaignL1) {
+            if (!$matchedCampaignL7) {
                 continue;
             }
 
@@ -391,10 +391,10 @@ class EbayOverUtilizedBgtController extends Controller
             $row['INV']    = $shopify->inv ?? 0;
             $row['L30']    = $shopify->quantity ?? 0;
             $row['price']  = $ebay->ebay_price ?? 0;
-            $row['campaign_id'] = $matchedCampaignL7->campaign_id ?? ($matchedCampaignL1->campaign_id ?? '');
-            $row['campaignName'] = $matchedCampaignL7->campaign_name ?? ($matchedCampaignL1->campaign_name ?? '');
-            $row['campaignStatus'] = $matchedCampaignL7->campaignStatus ?? ($matchedCampaignL1->campaignStatus ?? '');
-            $row['campaignBudgetAmount'] = $matchedCampaignL7->campaignBudgetAmount ?? ($matchedCampaignL1->campaignBudgetAmount ?? '');
+            $row['campaign_id'] = $matchedCampaignL7->campaign_id ?? '';
+            $row['campaignName'] = $matchedCampaignL7->campaign_name ?? '';
+            $row['campaignStatus'] = $matchedCampaignL7->campaignStatus ?? '';
+            $row['campaignBudgetAmount'] = $matchedCampaignL7->campaignBudgetAmount ?? '';
 
             $adFees   = (float) str_replace('USD ', '', $matchedCampaignL30->cpc_ad_fees_payout_currency ?? 0);
             $sales    = (float) str_replace('USD ', '', $matchedCampaignL30->cpc_sale_amount_payout_currency ?? 0 );
