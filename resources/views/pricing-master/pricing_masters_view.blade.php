@@ -917,7 +917,7 @@
        
             const ebay3Profit = data.ebay3_price ? ((parseFloat(data.ebay3_price) * 0.71) - LP - SHIP) * (parseFloat(data
                 .ebay3_l30) || 0) : 0;
-            const ebay2Profit = data.ebay2_price ? ((parseFloat(data.ebay2_price) * 0.80) - LP - SHIP) * (parseFloat(data
+            const ebay2Profit = data.ebay2_price ? ((parseFloat(data.ebay2_price) * 0.80) - LP - (parseFloat(data.ebay2_ship) || SHIP)) * (parseFloat(data
                 .ebay2_l30) || 0) : 0;
             const walmartProfit = data.walmart_price ? ((parseFloat(data.walmart_price) * 0.80) - LP - SHIP) * (parseFloat(
                 data.walmart_l30) || 0) : 0;
@@ -956,7 +956,7 @@
                 { name: "doba", price: data.doba_price, l30: data.doba_l30, percent: 0.95 },
                 { name: "temu", price: data.temu_price, l30: data.temu_l30, percent: 0.87 }, // 👈 Temu special case
                 { name: "ebay3", price: data.ebay3_price, l30: data.ebay3_l30, percent: 0.72 },
-                { name: "ebay2", price: data.ebay2_price, l30: data.ebay2_l30, percent: 0.80 },
+                { name: "ebay2", price: data.ebay2_price, l30: data.ebay2_l30, percent: 0.80, ship: data.ebay2_ship },
                 { name: "walmart", price: data.walmart_price, l30: data.walmart_l30, percent: 0.89 },
                 { name: "shein", price: data.shein_price, l30: data.shein_l30, percent: 0.89 },
                 { name: "tiendamia", price: data.tiendamia_price, l30: data.tiendamia_l30, percent: 0.83 },
@@ -972,7 +972,7 @@
                 const price = parseFloat(mp.price) || 0;
                 const l30 = parseFloat(mp.l30) || 0;
                 if (price && l30) {
-                    const shippingCost = mp.name === "temu" ? temuship : SHIP;
+                    const shippingCost = mp.name === "temu" ? temuship : (mp.ship ? parseFloat(mp.ship) : SHIP);
 
                     totalProfit += ((price * mp.percent) - LP - shippingCost) * l30;
                     totalRevenue += price * l30;
@@ -1508,7 +1508,7 @@
                         const dobaProfit = ((dobaPrice * 0.95) - LP - SHIP) ;
                         const temuProfit = ((temuPrice * 0.87) - LP - temuship) ;
                         const ebay3Profit = ((ebay3Price * 0.71) - LP - SHIP);
-                        const ebay2Profit = ((ebay2Price * 0.80) - LP - SHIP) ;
+                        const ebay2Profit = ((ebay2Price * 0.80) - LP - (parseFloat(data.ebay2_ship) || SHIP)) ;
                         const walmartProfit = ((walmartPrice * 0.80) - LP - SHIP) ;
                         const sheinProfit = ((sheinPrice * 0.89) - LP - SHIP) ;
                         const bestbuyProfit = ((bestbuyPrice * 0.80) - LP - SHIP) ;
@@ -1668,7 +1668,7 @@
                             const dobaProfit    = data.doba_price       ? ((parseFloat(data.doba_price) * 0.95) - LP - SHIP) * dobaL30 : 0;
                             const temuProfit    = data.temu_price       ? ((parseFloat(data.temu_price) * 0.87) - LP - temuship) * temuL30 : 0;
                             const ebay3Profit   = data.ebay3_price      ? ((parseFloat(data.ebay3_price) * 0.71) - LP - SHIP) * ebay3L30 : 0;
-                            const ebay2Profit   = data.ebay2_price      ? ((parseFloat(data.ebay2_price) * 0.80) - LP - SHIP) * ebay2L30 : 0;
+                            const ebay2Profit   = data.ebay2_price      ? ((parseFloat(data.ebay2_price) * 0.80) - LP - (parseFloat(data.ebay2_ship) || SHIP)) * ebay2L30 : 0;
                             const walmartProfit = data.walmart_price    ? ((parseFloat(data.walmart_price) * 0.80) - LP - SHIP) * walmartL30 : 0;
                             const sheinProfit   = data.shein_price      ? ((parseFloat(data.shein_price) * 0.89) - LP - SHIP) * sheinL30 : 0;
                             const bestbuyProfit  = data.bestbuy_price    ? ((parseFloat(data.bestbuy_price) * 0.80) - LP - SHIP) * bestbuyL30 : 0;
@@ -1952,7 +1952,7 @@
                 { price: parent.doba_price, l30: parent.doba_l30, factor: 0.95 },
                 { price: parent.temu_price, l30: parent.temu_l30, factor: 0.87, ship: parent.temu_ship },
                 { price: parent.ebay3_price, l30: parent.ebay3_l30, factor: 0.71 },
-                { price: parent.ebay2_price, l30: parent.ebay2_l30, factor: 0.80 },
+                { price: parent.ebay2_price, l30: parent.ebay2_l30, factor: 0.80, ship: parent.ebay2_ship },
                 { price: parent.walmart_price, l30: parent.walmart_l30, factor: 0.80 },
                 { price: parent.shein_price, l30: parent.shein_l30, factor: 0.89 },
                 { price: parent.aliexpress_price, l30: parent.aliexpress_l30, factor: 0.89 },

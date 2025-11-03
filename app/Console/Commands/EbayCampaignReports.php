@@ -336,7 +336,8 @@ class EbayCampaignReports extends Command
         $offset = 0;
 
         do {
-            $res = Http::withToken($token)->get('https://api.ebay.com/sell/marketing/v1/ad_campaign', [
+            $res = Http::withToken($token)->timeout(120)   // 2 minutes
+                ->retry(3, 5000)->get('https://api.ebay.com/sell/marketing/v1/ad_campaign', [
                 'limit' => $limit,
                 'offset' => $offset,
             ]);
