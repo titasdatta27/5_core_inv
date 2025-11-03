@@ -809,7 +809,7 @@
                     },
                     {
                         title: "SPRICE",
-                        field: "amz_price",
+                        field: "ebay_price",
                         editor: "input",
                         cssClass: "price-cell",
                         formatter: function(cell){
@@ -819,7 +819,7 @@
                     },
                     {
                         title: "SPFT",
-                        field: "amz_pft",
+                        field: "ebay_pft",
                         formatter: function(cell) {
                             let value = parseFloat(cell.getValue()) || 0;
                             let spft = value.toFixed(0);
@@ -846,7 +846,7 @@
                     },
                     {
                         title: "SROI",
-                        field: "amz_roi",
+                        field: "ebay_roi",
                         formatter: function(cell){
                             let value = parseFloat(cell.getValue()) || 0;
                             let sroi = value.toFixed(0);
@@ -888,28 +888,28 @@
             table.on("cellEdited", function(cell) {
                 const field = cell.getField();
 
-                if (field === "amz_price") {
+                if (field === "ebay_price") {
                     const row = cell.getRow();
                     const data = row.getData();
 
-                    const amz_price = Number(data.amz_price) || 0;
+                    const ebay_price = Number(data.ebay_price) || 0;
                     const lp   = Number(data.LP) || 0;
                     const ship = Number(data.SHIP) || 0;
 
-                    const amz_pft = amz_price > 0
-                        ? ((amz_price * 0.70 - lp - ship) / amz_price)
+                    const ebay_pft = ebay_price > 0
+                        ? ((ebay_price * 0.70 - lp - ship) / ebay_price)
                         : 0;
 
-                    const amz_roi = (lp > 0 && amz_price > 0)
-                        ? ((amz_price * 0.70 - lp - ship) / lp)
+                    const ebay_roi = (lp > 0 && ebay_price > 0)
+                        ? ((ebay_price * 0.70 - lp - ship) / lp)
                         : 0;
 
                     row.update({
-                        amz_pft: amz_pft,
-                        amz_roi: amz_roi
+                        ebay_pft: ebay_pft,
+                        ebay_roi: ebay_roi
                     });
 
-                    fetch('/update-amz-price', {
+                    fetch('/update-ebay-price', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -919,7 +919,7 @@
                         },
                         body: JSON.stringify({
                             sku: data.sku,
-                            price: amz_price
+                            price: ebay_price
                         })
                     })
                     .then(res => {
