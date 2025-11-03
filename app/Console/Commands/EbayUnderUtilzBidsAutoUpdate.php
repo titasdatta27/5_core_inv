@@ -109,7 +109,12 @@ class EbayUnderUtilzBidsAutoUpdate extends Command
             $row['l1_cpc'] = (float) str_replace('USD ', '', $matchedCampaignL1->cost_per_click ?? 0);
 
             $l1_cpc = floatval($row['l1_cpc']);
-            $row['sbid'] = floor($l1_cpc * 0.95 * 100) / 100;
+            $l7_cpc = floatval($row['l7_cpc']);
+            if($l1_cpc > $l7_cpc){
+                $row['sbid'] = floor($l1_cpc * 1.05 * 100) / 100;
+            }else{
+                $row['sbid'] = floor($l7_cpc * 1.05 * 100) / 100;
+            }
 
             $budget = floatval($row['campaignBudgetAmount']);
             $l7_spend = floatval($row['l7_spend']);
