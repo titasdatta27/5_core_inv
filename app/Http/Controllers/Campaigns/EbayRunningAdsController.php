@@ -101,7 +101,7 @@ class EbayRunningAdsController extends Controller
             $row['INV'] = $shopify->inv ?? 0;
             $row['L30'] = $shopify->quantity ?? 0;
             $row['e_l30'] = $ebay->ebay_l30 ?? 0;
-            $row['campaignName'] = $matchedCampaignL7->campaign_name ?? ($matchedCampaignL30->campaign_name ?? '');
+            $row['campaignName'] = $matchedCampaignL7->campaign_name ?? '';
 
             //kw
             $row['kw_spend_L30'] = (float) str_replace('USD ', '', $matchedCampaignL30->cpc_ad_fees_payout_currency ?? 0);

@@ -219,6 +219,9 @@ class Kernel extends ConsoleKernel
         $schedule->command('ebay:auto-update-over-bids')
             ->dailyAt('12:00')
             ->timezone('Asia/Kolkata');
+        $schedule->command('ebay:auto-update-under-bids')
+            ->dailyAt('12:00')
+            ->timezone('Asia/Kolkata');
         $schedule->command('ebay:auto-update-pink-dil-bids')
             ->dailyAt('12:00')
             ->timezone('Asia/Kolkata');

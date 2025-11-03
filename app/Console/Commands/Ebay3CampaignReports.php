@@ -328,19 +328,26 @@ class Ebay3CampaignReports extends Command
     private function getAllCampaigns($token)
     {
         $campaigns = [];
-        $limit = 50;
+        $limit = 200;
         $offset = 0;
 
-        do {
-            $res = Http::withToken($token)->get('https://api.ebay.com/sell/marketing/v1/ad_campaign', [
-                'limit' => $limit,
-                'offset' => $offset,
-            ]);
+        while (true) {
+            $res = Http::withToken($token)
+                ->timeout(120)
+                ->retry(3, 5000)
+                ->get('https://api.ebay.com/sell/marketing/v1/ad_campaign', [
+                    'limit' => $limit,
+                    'offset' => $offset,
+                ]);
 
-            if (!$res->ok()) break;
+            if (!$res->ok()) {
+                break;
+            }
 
             $data = $res->json();
-            foreach ($data['campaigns'] ?? [] as $c) {
+            $pageCampaigns = $data['campaigns'] ?? [];
+
+            foreach ($pageCampaigns as $c) {
                 $campaigns[$c['campaignId']] = [
                     'name' => $c['campaignName'] ?? null,
                     'status' => $c['campaignStatus'] ?? null,
@@ -349,9 +356,13 @@ class Ebay3CampaignReports extends Command
                 ];
             }
 
-            $total = $data['total'] ?? 0;
+            $count = count($pageCampaigns);
+            if ($count < $limit) {
+                break;
+            }
+
             $offset += $limit;
-        } while ($offset < $total);
+        }
 
         return $campaigns;
     }
