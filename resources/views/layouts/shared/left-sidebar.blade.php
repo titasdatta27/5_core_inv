@@ -1720,6 +1720,20 @@
                             </a>
                             <div class="collapse" id="sidebarThirdLevel">
                                 <ul class="side-nav-third-level">
+                                    <li>
+                                        <a data-bs-toggle="collapse" href="#ebaySubmenucvr" aria-expanded="false"
+                                            aria-controls="ebaySubmenucvr">
+                                            <span>AD CVR</span>
+                                            <span class="menu-arrow"></span>
+                                        </a>
+                                        <div class="collapse" id="ebaySubmenucvr">
+                                            <ul class="side-nav-fourth-level">
+                                                <li>
+                                                    <a href="{{ route('adcvr.ebay') }}">Pricing</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </li>
 
                                     <li>
                                         <a data-bs-toggle="collapse" href="#ebaySubmenu" aria-expanded="false"
@@ -2321,6 +2335,21 @@
                             </a>
                             <div class="collapse" id="sidebarWalmart">
                                 <ul class="side-nav-third-level">
+                                    <li>
+                                        <a data-bs-toggle="collapse" href="#walmartSubmenucvr" aria-expanded="false"
+                                            aria-controls="walmartSubmenucvr">
+                                            <span>AD CVR</span>
+                                            <span class="menu-arrow"></span>
+                                        </a>
+                                        <div class="collapse" id="walmartSubmenucvr">
+                                            <ul class="side-nav-fourth-level">
+                                                <li>
+                                                    <a href="{{ route('adcvr.walmart') }}">Pricing</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </li>
+
                                     <li>
                                         <a data-bs-toggle="collapse" href="#walmartSubmenu" aria-expanded="false"
                                             aria-controls="walmartSubmenu">
