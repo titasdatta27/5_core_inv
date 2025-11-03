@@ -103,6 +103,7 @@ class FetchTemuMetrics extends Command
                 ['goods_id' => $goodId],
                 $metrics
             );
+            $this->info("Updated analytics for Goods ID: {$goodId} - Impressions L30: {$metrics['product_impressions_l30']}, Clicks L30: {$metrics['product_clicks_l30']}");
         }
 
         $this->info("Analytics data updated successfully.");
@@ -199,9 +200,14 @@ class FetchTemuMetrics extends Command
                     $sku = $sku['skuSn'] ?? null;
                     
                     if ($sku && $goodsId) {
-                        TemuMetric::where('sku', $sku)->update([
+                        $updated = TemuMetric::where('sku', $sku)->update([
                             'goods_id' => $goodsId,
                         ]);
+                        if ($updated) {
+                            $this->info("Updated goods_id for SKU: {$sku} to {$goodsId}");
+                        } else {
+                            $this->warn("No record found for SKU: {$sku} to update goods_id");
+                        }
                     }
                 }
             }
@@ -284,10 +290,16 @@ class FetchTemuMetrics extends Command
             } while (true);
 
             foreach ($finalSkuQuantities as $skuId => $data) {                
-                TemuMetric::where('sku_id', $skuId)->update([
+                $this->info("Updating quantity for SKU_ID: {$skuId}, L30: {$data['quantity_purchased_l30']}, L60: {$data['quantity_purchased_l60']}");
+                $updated = TemuMetric::where('sku_id', $skuId)->update([
                     'quantity_purchased_l30' => $data['quantity_purchased_l30'],
                     'quantity_purchased_l60' => $data['quantity_purchased_l60'],
                 ]);
+                if ($updated) {
+                    $this->info("Successfully updated quantity for SKU_ID: {$skuId}");
+                } else {
+                    $this->warn("No record found for SKU_ID: {$skuId} to update quantity");
+                }
             }
         }
 
@@ -412,15 +424,16 @@ class FetchTemuMetrics extends Command
                 // Ensure numeric
                 $price = is_numeric($price) ? (float) $price : null;
 
-                if ($price === null) {
-                    Log::warning("Price missing for SKU {$outSkuSn}", $sku);
-                    continue; // don’t overwrite with 0
+                $this->info("Updating TemuMetric for SKU: {$outSkuSn}, SKU_ID: {$skuId}, Price: {$price}");
+                try {
+                    TemuMetric::updateOrCreate(
+                        ['sku' => $outSkuSn, 'sku_id' => $skuId],
+                        ['base_price' => $price]
+                    );
+                    $this->info("Successfully updated TemuMetric for SKU: {$outSkuSn}");
+                } catch (\Exception $e) {
+                    $this->error("Failed to update TemuMetric for SKU: {$outSkuSn} - Error: " . $e->getMessage());
                 }
-
-                TemuMetric::updateOrCreate(
-                    ['sku' => $outSkuSn, 'sku_id' => $skuId],
-                    ['base_price' => $price]
-                );
             }
 
             $pageToken = $data['result']['pagination']['nextToken'] ?? null;
