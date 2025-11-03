@@ -349,7 +349,7 @@
 
                         <tr style="background-color:#cfe2f3;" class="accordion-header">
                             <td><b>EBAY 2</b></td>
-                            <td></td>
+                            <td>{{ $totalEbay2Sales }}</td>
                             <td></td>
                             <td></td>
                             <td>{{ $ebay2_SPEND_L30_Total }}</td>
@@ -366,7 +366,17 @@
                                 @endphp
                                 {{ '('.$acos.') %'  }}
                             </td>
-                            <td></td>
+                            <td>
+                                @php
+                                    if($totalEbay2Sales > 0){
+                                        $tacos = ($ebay2_SPEND_L30_Total/$totalEbay2Sales)*100;
+                                        $tacos = number_format($tacos, 2);
+                                    }else{
+                                        $tacos = 0;
+                                    }
+                                @endphp
+                                {{ '('.$tacos.') %'  }}
+                            </td>
                             <td>{{ $ebay2_SOLD_L30_Total }}</td>
                             <td>
                                 @php
@@ -419,7 +429,7 @@
 
                         <tr style="background-color:#cfe2f3;" class="accordion-header">
                             <td><b>EBAY 3</b></td>
-                            <td></td>
+                            <td>{{ $totalSalesEbay3 }}</td>
                             <td></td>
                             <td></td>
                             <td>{{ $ebay3_SPEND_L30_Total }}</td>
@@ -437,6 +447,15 @@
                                 {{ '('.$acos.') %'  }}
                             </td>
                             <td>
+                                @php
+                                    if($totalSalesEbay3 > 0){
+                                        $tacos = ($ebay3_SPEND_L30_Total/$totalSalesEbay3)*100;
+                                        $tacos = number_format($tacos, 2);
+                                    }else{
+                                        $tacos = 0;
+                                    }
+                                @endphp
+                                {{ '('.$tacos.') %'  }}
                             </td>
                             <td>{{ $ebay3_SOLD_L30_Total }}</td>
                             <td>
