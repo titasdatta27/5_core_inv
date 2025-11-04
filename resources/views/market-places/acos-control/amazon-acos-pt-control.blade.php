@@ -692,12 +692,19 @@
                     }
 
                     let invFilterVal = $("#inv-filter").val();
+                    let inv = parseFloat(data.INV);
+
                     if (!invFilterVal) {
-                        if (parseFloat(data.INV) === 0) return false;
-                    } else if (invFilterVal === "INV_0") {
-                        if (parseFloat(data.INV) !== 0) return false;
-                    } else if (invFilterVal === "OTHERS") {
-                        if (parseFloat(data.INV) === 0) return false;
+                        // Default → show only > 0
+                        if (inv <= 0) return false;
+                    } 
+                    else if (invFilterVal === "INV_0") {
+                        // Only 0
+                        if (inv !== 0) return false;
+                    } 
+                    else if (invFilterVal === "OTHERS") {
+                        // Show only > 0
+                        if (inv <= 0) return false;
                     }
 
                     let nrlFilterVal = $("#nrl-filter").val();
