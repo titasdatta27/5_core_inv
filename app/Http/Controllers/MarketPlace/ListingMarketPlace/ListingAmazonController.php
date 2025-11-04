@@ -39,7 +39,6 @@ class ListingAmazonController extends Controller
 
         // Fetch all status records for these SKUs
         $statusData = AmazonListingStatus::whereIn('sku', $skus)->get()->keyBy('sku');
-        dd($statusData);
 
         $processedData = $productMasters->map(function ($item) use ($shopifyData, $amazonDataViewValues, $statusData) {
             $childSku = $item->sku;
