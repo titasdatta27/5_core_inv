@@ -189,17 +189,39 @@ class AmazonFbaAdsController extends Controller
                 );
             });
             
-            $row['acos_L30'] = ($matchedCampaignL30 && ($matchedCampaignL30->sales30d ?? 0) > 0)
-                ? round(($matchedCampaignL30->spend / $matchedCampaignL30->sales30d) * 100, 2)
-                : null;
+            $sales30 = $matchedCampaignL30->sales30d ?? 0;
+            $spend30 = $matchedCampaignL30->spend ?? 0;
+            $sales15 = ($matchedCampaignL15->sales14d ?? 0) + ($matchedCampaignL1->sales1d ?? 0);
+            $spend15 = $matchedCampaignL15->spend ?? 0;
+            $sales7 = $matchedCampaignL7->sales7d ?? 0;
+            $spend7 = $matchedCampaignL7->spend ?? 0;
 
-            $row['acos_L15'] = ($matchedCampaign15 && ($matchedCampaign15->sales14d ?? 0) > 0)
-                ? round(($matchedCampaign15->spend / $matchedCampaign15->sales14d) * 100, 2)
-                : null;
+            // ACOS L30
+            if ($sales30 > 0) {
+                $row['acos_L30'] = round(($spend30 / $sales30) * 100, 2);
+            } elseif ($spend30 > 0) {
+                $row['acos_L30'] = 100;
+            } else {
+                $row['acos_L30'] = 0;
+            }
 
-            $row['acos_L7'] = ($matchedCampaignL7 && ($matchedCampaignL7->sales7d ?? 0) > 0)
-                ? round(($matchedCampaignL7->spend / $matchedCampaignL7->sales7d) * 100, 2)
-                : null;
+            // ACOS L15
+            if ($sales15 > 0) {
+                $row['acos_L15'] = round(($spend15 / $sales15) * 100, 2);
+            } elseif ($spend15 > 0) {
+                $row['acos_L15'] = 100;
+            } else {
+                $row['acos_L15'] = 0;
+            }
+
+            // ACOS L7
+            if ($sales7 > 0) {
+                $row['acos_L7'] = round(($spend7 / $sales7) * 100, 2);
+            } elseif ($spend7 > 0) {
+                $row['acos_L7'] = 100;
+            } else {
+                $row['acos_L7'] = 0;
+            }
 
 
             $row['clicks_L30'] = $matchedCampaignL30->clicks ?? 0;

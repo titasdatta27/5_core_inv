@@ -726,64 +726,95 @@
 
                     if (!(ub7 < 70 )) return false;
 
-                    let searchVal = ($("#global-search").val() || "").toLowerCase();
-                    if (searchVal && !(data.campaignName || "").toLowerCase().includes(searchVal)) {
+                    // ✅ SEARCH FILTER
+                    let searchVal = $("#global-search").val()?.toLowerCase() || "";
+                    if (searchVal && !(data.campaignName?.toLowerCase().includes(searchVal))) {
                         return false;
                     }
 
-                    // ⚙️ Status filter
+                    // ✅ STATUS FILTER
                     let statusVal = $("#status-filter").val();
                     if (statusVal && data.campaignStatus !== statusVal) {
                         return false;
                     }
 
-                    // 📦 INV filter
                     let invFilterVal = $("#inv-filter").val();
-                    let inv = parseFloat(data.INV) || 0;
-                    if (!invFilterVal && inv === 0) return false;
-                    if (invFilterVal === "INV_0" && inv !== 0) return false;
-                    if (invFilterVal === "OTHERS" && inv === 0) return false;
+                    if (!invFilterVal) {
+                        if (parseFloat(data.INV) === 0) return false;
+                    } else if (invFilterVal === "INV_0") {
+                        if (parseFloat(data.INV) !== 0) return false;
+                    } else if (invFilterVal === "OTHERS") {
+                        if (parseFloat(data.INV) === 0) return false;
+                    }
 
-                    // 🟩 NRL filter
                     let nrlFilterVal = $("#nrl-filter").val();
-                    if (nrlFilterVal && (data.NRL || "") !== nrlFilterVal) return false;
+                    if (nrlFilterVal) {
+                        let rowSelect = document.querySelector(
+                            `select[data-sku="${data.sku}"][data-field="NRL"]`
+                        );
+                        let rowVal = rowSelect ? rowSelect.value : "";
+                        if (!rowVal) rowVal = data.NRL || "";
 
-                    // 🟧 NR filter
+                        if (rowVal !== nrlFilterVal) return false;
+                    }
+
                     let nraFilterVal = $("#nra-filter").val();
-                    if (nraFilterVal && (data.NR || "") !== nraFilterVal) return false;
+                    if (nraFilterVal) {
+                        let rowSelect = document.querySelector(
+                            `select[data-sku="${data.sku}"][data-field="NR"]`
+                        );
+                        let rowVal = rowSelect ? rowSelect.value : "";
+                        if (!rowVal) rowVal = data.NR || "";
 
-                    // 🟦 FBA filter
+                        if (rowVal !== nraFilterVal) return false;
+                    }
+
                     let fbaFilterVal = $("#fba-filter").val();
-                    if (fbaFilterVal && (data.FBA || "") !== fbaFilterVal) return false;
+                    if (fbaFilterVal) {
+                        let rowSelect = document.querySelector(
+                            `select[data-sku="${data.sku}"][data-field="FBA"]`
+                        );
+                        let rowVal = rowSelect ? rowSelect.value : "";
+                        if (!rowVal) rowVal = data.FBA || "";
+
+                        if (rowVal !== fbaFilterVal) return false;
+                    }
 
                     return true;
                 }
 
-                // ✅ Apply once
+                // ✅ SET FILTER
                 table.setFilter(combinedFilter);
 
-                // ✅ Efficient filter refresh (no duplicate registration)
-                function refreshFilters() {
-                    table.refreshFilter();
-                    updateCampaignStats();
-                }
-
-                // Attach once
-                $("#global-search").on("input", refreshFilters);
-                $("#status-filter, #inv-filter, #nrl-filter, #nra-filter, #fba-filter").on("change", refreshFilters);
-
-                // Stats updater
+                // ✅ UPDATE COUNTS
                 function updateCampaignStats() {
-                    let total = table.getDataCount();
-                    let filtered = table.getDataCount("active");
-                    let currentPage = table.getRows("active").length;
+                    let allRows = table.getData();
+                    let filteredRows = allRows.filter(combinedFilter);
+
+                    let total = allRows.length;
+                    let filtered = filteredRows.length;
+
                     let percentage = total > 0 ? ((filtered / total) * 100).toFixed(0) : 0;
 
-                    $("#total-campaigns").text(currentPage);
-                    $("#percentage-campaigns").text(percentage + "%");
+                    document.getElementById("total-campaigns").innerText = filtered; 
+                    document.getElementById("percentage-campaigns").innerText = percentage + "%";
                 }
 
-                table.on("dataFiltered pageLoaded dataProcessed", updateCampaignStats);
+                table.on("dataFiltered", updateCampaignStats);
+                table.on("pageLoaded", updateCampaignStats);
+                table.on("dataProcessed", updateCampaignStats);
+
+                // ✅ SEARCH + FILTER CHANGE HANDLERS
+                $("#global-search").on("keyup", function () {
+                    table.setFilter(combinedFilter);
+                });
+
+                $("#status-filter, #inv-filter, #nrl-filter, #nra-filter, #fba-filter")
+                    .on("change", function () {
+                        table.setFilter(combinedFilter);
+                    });
+
+                // ✅ INITIAL UPDATE
                 updateCampaignStats();
             });
 
