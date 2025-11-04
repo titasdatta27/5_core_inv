@@ -2243,6 +2243,7 @@
                         if (item) {
                             Object.assign(item, data);
                         }
+                        
                         calculateTotals(); // Recalculate totals after update
                         renderTable(); // Optionally re-render table if needed
                     },
