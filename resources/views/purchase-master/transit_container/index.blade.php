@@ -410,7 +410,7 @@ Object.entries(groupedData).forEach(([tabName, data], index) => {
             },
             { title: "Parent", field: "parent"},
             { title: "Sku", field: "our_sku" },
-            { title: "Supplier", field: "supplier_name"},
+            { title: "Supplier", field: "supplier_name", editor: "input" },
             {
               title: "Images",
               field: "photos",

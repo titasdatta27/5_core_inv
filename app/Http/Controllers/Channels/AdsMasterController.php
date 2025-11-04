@@ -4740,6 +4740,45 @@ class AdsMasterController extends Controller
 
         /** End Ebay-3 Missing data ***/
 
+        /** Start Ebay2 Total Sales Data */
+        $productMasters = ProductMaster::orderBy("parent", "asc")
+            ->orderByRaw("CASE WHEN sku LIKE 'PARENT %' THEN 1 ELSE 0 END")
+            ->orderBy("sku", "asc")
+            ->get();
+
+        $skus = $productMasters->pluck("sku")
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+            
+        $ebayMetrics = DB::connection('apicentral')
+            ->table('ebay2_metrics')
+            ->select('sku', 'ebay_price', 'ebay_l30', 'ebay_l60', 'views', 'item_id')
+            ->whereIn('sku', $skus)
+            ->get()
+            ->keyBy('sku');  
+      
+        $totalEbay2Sales = 0;
+        foreach ($productMasters as $pm) {
+            $ebayMetric = $ebayMetrics[$pm->sku] ?? null;
+            $totalEbay2Sales = ($ebayMetric->ebay_l30 ?? 0) * ($ebayMetric->ebay_price ?? 0);
+        }
+        /** End Ebay2 Total Sales Data **/
+
+        /** Start Ebay3 Total Sales Data **/
+        $productMasterRows = ProductMaster::all()->keyBy('sku');
+        $skus = $productMasterRows->pluck('sku')->toArray();
+
+        $ebayMetrics = Ebay3Metric::select('sku', 'ebay_price', 'ebay_l30', 'ebay_l60', 'views', 'item_id')->whereIn('sku', $skus)->get()->keyBy('sku');
+        
+        $totalSalesEbay3 = 0;
+        foreach ($productMasterRows as $productMaster) {
+            $ebayMetric = $ebayMetrics[$productMaster->sku] ?? null;
+            $totalSalesEbay3 = $totalSalesEbay3 + (($ebayMetric->ebay_l30 ?? 0) * ($ebayMetric->ebay_price ?? 0));
+        }
+        /** End Ebay Total Sales Data **/
+
         $roundVars = [
             'ebay_SALES_L30_total', 'ebay_kw_sales_L30_total', 'ebay_pmt_sales_L30_total',
             'ebay_SPEND_L30_total', 'ebay_kw_spend_L30_total', 'ebay_pmt_spend_L30_total',
@@ -4748,7 +4787,7 @@ class AdsMasterController extends Controller
             'SPEND_L30_total', 'kw_spend_L30_total', 'pt_spend_L30_total', 'hl_spend_L30_total',
             'CLICKS_L30_total', 'kw_clicks_L30_total', 'pt_clicks_L30_total', 'hl_clicks_L30_total',
             'totalSales', 'totalEbaySales','SOLD_L30_Total', 'kw_sold_L30_Total', 'pt_sold_L30_Total', 'hl_sold_L30_Total',
-            'SALES_L30_Total', 'kw_sales_L30_Total', 'pt_sales_L30_Total', 'hl_sales_L30_Total', 'walmart_SALES_L30_Total', 'walmart_SPEND_L30_Total', 'walmart_CLICKS_L30_Total', 'walmart_SOLD_L30_Total', 'ebay3_SPEND_L30_Total', 'ebay3_kw_spend_L30_total', 'ebay3_pmt_spend_L30_Total', 'ebay3_CLICKS_L30_Total', 'ebay3_kw_clicks_L30_Total', 'ebay3_pmt_clicks_L30_Total', 'ebay3_SALES_L30_Total', 'ebay3_kw_sales_L30_Total', 'ebay3_pmt_sales_L30_Total', 'ebay3_SOLD_L30_Total', 'ebay3_kw_sold_L30_Total', 'ebay3_pmt_sold_L30_Total', 'ebay2_SPEND_L30_Total', 'ebay2_pmt_spend_L30_Total', 'ebay2_CLICKS_L30_Total', 'ebay2_pmt_clicks_L30_Total', 'ebay2_SALES_L30_Total', 'ebay2_pmt_sales_L30_total', 'ebay2_SOLD_L30_Total', 'ebay2_pmt_sold_L30_Total', 'ebay2_ptMissing', 'ebay3totalMissingAds', 'ebay3kwMissing', 'ebay3ptMissing'
+            'SALES_L30_Total', 'kw_sales_L30_Total', 'pt_sales_L30_Total', 'hl_sales_L30_Total', 'walmart_SALES_L30_Total', 'walmart_SPEND_L30_Total', 'walmart_CLICKS_L30_Total', 'walmart_SOLD_L30_Total', 'ebay3_SPEND_L30_Total', 'ebay3_kw_spend_L30_total', 'ebay3_pmt_spend_L30_Total', 'ebay3_CLICKS_L30_Total', 'ebay3_kw_clicks_L30_Total', 'ebay3_pmt_clicks_L30_Total', 'ebay3_SALES_L30_Total', 'ebay3_kw_sales_L30_Total', 'ebay3_pmt_sales_L30_Total', 'ebay3_SOLD_L30_Total', 'ebay3_kw_sold_L30_Total', 'ebay3_pmt_sold_L30_Total', 'ebay2_SPEND_L30_Total', 'ebay2_pmt_spend_L30_Total', 'ebay2_CLICKS_L30_Total', 'ebay2_pmt_clicks_L30_Total', 'ebay2_SALES_L30_Total', 'ebay2_pmt_sales_L30_total', 'ebay2_SOLD_L30_Total', 'ebay2_pmt_sold_L30_Total', 'ebay2_ptMissing', 'ebay3totalMissingAds', 'ebay3kwMissing', 'ebay3ptMissing', 'totalEbay2Sales', 'totalSalesEbay3'
         ];
 
         foreach ($roundVars as $varName) {
@@ -4757,7 +4796,17 @@ class AdsMasterController extends Controller
             }
         }
 
-        return view('channels.adv-masters', compact('kw_spend_L30_total', 'pt_spend_L30_total', 'hl_spend_L30_total', 'kw_clicks_L30_total', 'pt_clicks_L30_total', 'hl_clicks_L30_total', 'SPEND_L30_total', 'CLICKS_L30_total', 'ebay_SALES_L30_total', 'ebay_kw_sales_L30_total', 'ebay_pmt_sales_L30_total', 'ebay_SPEND_L30_total', 'ebay_kw_spend_L30_total', 'ebay_pmt_spend_L30_total', 'ebay_CLICKS_L30_total', 'ebay_kw_clicks_L30_total', 'ebay_pmt_clicks_L30_total', 'ebay_SOLD_L30_total', 'ebay_kw_sold_L30_total', 'ebay_pmt_sold_L30_total', 'bothMissing', 'totalMissingAds', 'kwMissing', 'ptMissing', 'ebaytotalMissingAds', 'ebaykwMissing', 'ebayptMissing', 'totalSales', 'totalEbaySales', 'SOLD_L30_Total', 'kw_sold_L30_Total', 'pt_sold_L30_Total', 'hl_sold_L30_Total', 'SALES_L30_Total', 'kw_sales_L30_Total', 'pt_sales_L30_Total', 'hl_sales_L30_Total', 'walmart_SALES_L30_Total', 'walmart_SPEND_L30_Total', 'walmart_CLICKS_L30_Total', 'walmart_SOLD_L30_Total', 'ebay3_SPEND_L30_Total', 'ebay3_kw_spend_L30_total', 'ebay3_pmt_spend_L30_Total', 'ebay3_CLICKS_L30_Total', 'ebay3_kw_clicks_L30_Total', 'ebay3_pmt_clicks_L30_Total', 'ebay3_SALES_L30_Total', 'ebay3_kw_sales_L30_Total', 'ebay3_pmt_sales_L30_Total', 'ebay3_SOLD_L30_Total', 'ebay3_kw_sold_L30_Total', 'ebay3_pmt_sold_L30_Total', 'ebay2_SPEND_L30_Total', 'ebay2_pmt_spend_L30_Total', 'ebay2_CLICKS_L30_Total', 'ebay2_pmt_clicks_L30_Total', 'ebay2_SALES_L30_Total', 'ebay2_pmt_sales_L30_total', 'ebay2_SOLD_L30_Total', 'ebay2_pmt_sold_L30_Total', 'ebay2_ptMissing', 'ebay3totalMissingAds', 'ebay3kwMissing', 'ebay3ptMissing'));
+        return view('channels.adv-masters', compact('kw_spend_L30_total', 'pt_spend_L30_total', 'hl_spend_L30_total', 'kw_clicks_L30_total', 'pt_clicks_L30_total', 'hl_clicks_L30_total', 'SPEND_L30_total', 'CLICKS_L30_total', 'ebay_SALES_L30_total', 'ebay_kw_sales_L30_total', 'ebay_pmt_sales_L30_total', 'ebay_SPEND_L30_total', 'ebay_kw_spend_L30_total', 'ebay_pmt_spend_L30_total', 'ebay_CLICKS_L30_total', 'ebay_kw_clicks_L30_total', 'ebay_pmt_clicks_L30_total', 'ebay_SOLD_L30_total', 'ebay_kw_sold_L30_total', 'ebay_pmt_sold_L30_total', 'bothMissing', 'totalMissingAds', 'kwMissing', 'ptMissing', 'ebaytotalMissingAds', 'ebaykwMissing', 'ebayptMissing', 'totalSales', 'totalEbaySales', 'SOLD_L30_Total', 'kw_sold_L30_Total', 'pt_sold_L30_Total', 'hl_sold_L30_Total', 'SALES_L30_Total', 'kw_sales_L30_Total', 'pt_sales_L30_Total', 'hl_sales_L30_Total', 'walmart_SALES_L30_Total', 'walmart_SPEND_L30_Total', 'walmart_CLICKS_L30_Total', 'walmart_SOLD_L30_Total', 'ebay3_SPEND_L30_Total', 'ebay3_kw_spend_L30_total', 'ebay3_pmt_spend_L30_Total', 'ebay3_CLICKS_L30_Total', 'ebay3_kw_clicks_L30_Total', 'ebay3_pmt_clicks_L30_Total', 'ebay3_SALES_L30_Total', 'ebay3_kw_sales_L30_Total', 'ebay3_pmt_sales_L30_Total', 'ebay3_SOLD_L30_Total', 'ebay3_kw_sold_L30_Total', 'ebay3_pmt_sold_L30_Total', 'ebay2_SPEND_L30_Total', 'ebay2_pmt_spend_L30_Total', 'ebay2_CLICKS_L30_Total', 'ebay2_pmt_clicks_L30_Total', 'ebay2_SALES_L30_Total', 'ebay2_pmt_sales_L30_total', 'ebay2_SOLD_L30_Total', 'ebay2_pmt_sold_L30_Total', 'ebay2_ptMissing', 'ebay3totalMissingAds', 'ebay3kwMissing', 'ebay3ptMissing', 'totalEbay2Sales', 'totalSalesEbay3'));
+    }
+
+    public function extractNumber($value)
+    {
+        if (is_null($value)) {
+            return null;
+        }
+        // Match only digits
+        preg_match('/\d+/', $value, $matches);
+        return $matches[0] ?? null;
     }
 
     public function combinedFilter($data, $filters) 

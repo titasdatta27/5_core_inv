@@ -164,10 +164,10 @@ class ShopifyApiInventoryController extends Controller
             $pageInfo = $this->getNextPageInfo($response);
             $hasMore = (bool) $pageInfo;
 
-            // Avoid rate limiting
+            // Avoid rate limiting - increased delay to 1 second
             if ($hasMore) {
-                Log::info("Waiting 0.5s before next page...");
-                usleep(500000); // 0.5s delay
+                Log::info("Waiting 1s before next page...");
+                usleep(1000000); // 1s delay
             }
         }
 
@@ -218,6 +218,9 @@ class ShopifyApiInventoryController extends Controller
                 }
             }
         }
+
+        // Rate limiting delay
+        usleep(1000000); // 1s delay
 
         if (!$locationId) {
             Log::error('Ohio location not found.');
@@ -271,6 +274,11 @@ class ShopifyApiInventoryController extends Controller
             if ($linkHeader && preg_match('/<([^>]+)>; rel="next"/', $linkHeader, $matches)) {
                 $nextPageUrl = $matches[1];
             }
+
+            // Rate limiting delay between product pages
+            if ($nextPageUrl) {
+                usleep(1000000); // 1s delay
+            }
         } while ($nextPageUrl);
 
         // Step 3: Fetch Inventory Levels (only from Ohio)
@@ -294,6 +302,9 @@ class ShopifyApiInventoryController extends Controller
                 $iid = $level['inventory_item_id'];
                 $availableByIid[$iid] = ($availableByIid[$iid] ?? 0) + $level['available'];
             }
+
+            // Rate limiting delay between inventory chunks
+            usleep(1000000); // 1s delay
         }
 
         // Step 4: Fetch Committed Quantities from Orders
@@ -320,6 +331,9 @@ class ShopifyApiInventoryController extends Controller
         } else {
             Log::error('Failed to fetch orders');
         }
+
+        // Rate limiting delay before final processing
+        usleep(1000000); // 1s delay
 
         // Step 5: Merge Final Inventory
         $final = [];
@@ -372,7 +386,7 @@ class ShopifyApiInventoryController extends Controller
                 $attempts = 0;
 
                 if ($hasMore) {
-                    usleep(500000); // 0.5s delay
+                    usleep(1000000); // 1s delay
                 }
             } else {
                 $attempts++;
@@ -586,6 +600,9 @@ class ShopifyApiInventoryController extends Controller
                     ];
                 }
             }
+
+            // Rate limiting delay between chunks
+            usleep(1000000); // 1s delay
         }
 
         return $inventoryLevels;
@@ -622,6 +639,11 @@ class ShopifyApiInventoryController extends Controller
 
             $pageInfo = $this->getNextPageInfo($response);
             $hasMore = (bool) $pageInfo;
+
+            // Rate limiting delay
+            if ($hasMore) {
+                usleep(1000000); // 1s delay
+            }
         }
 
         return $committed;

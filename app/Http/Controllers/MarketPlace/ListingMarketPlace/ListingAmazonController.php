@@ -38,7 +38,7 @@ class ListingAmazonController extends Controller
         $amazonDataViewValues = AmazonDataView::whereIn('sku', $skus)->pluck('value', 'sku');
 
         // Fetch all status records for these SKUs
-        $statusData = AmazonListingStatus::whereIn('sku', $skus)->get()->keyBy('sku');
+        $statusData = AmazonDataView::whereIn('sku', $skus)->get()->keyBy('sku');
 
         $processedData = $productMasters->map(function ($item) use ($shopifyData, $amazonDataViewValues, $statusData) {
             $childSku = $item->sku;
@@ -51,7 +51,7 @@ class ListingAmazonController extends Controller
             $item->is_parent = $isParent;
 
             // Default values
-            $item->nr_req = null;
+            $item->NRL = null;
             $item->listed = null;
             $item->buyer_link = null;
             $item->seller_link = null;
@@ -59,7 +59,7 @@ class ListingAmazonController extends Controller
             // If status exists, fill values from JSON
             if (isset($statusData[$childSku])) {
                 $status = $statusData[$childSku]->value;
-                $item->nr_req = $status['nr_req'] ?? null;
+                $item->NRL = $status['NRL'] ?? null;
                 $item->listed = $status['listed'] ?? null;
                 $item->buyer_link = $status['buyer_link'] ?? null;
                 $item->seller_link = $status['seller_link'] ?? null;
@@ -78,7 +78,7 @@ class ListingAmazonController extends Controller
     {
         $validated = $request->validate([
             'sku' => 'required|string',
-            'nr_req' => 'nullable|string',
+            'NRL' => 'nullable|string',
             'listed' => 'nullable|string',
             'buyer_link' => 'nullable|url',
             'seller_link' => 'nullable|url',
@@ -91,14 +91,14 @@ class ListingAmazonController extends Controller
         $existing = $status ? $status->value : [];
 
         // Only update the fields that are present in the request
-        $fields = ['nr_req', 'listed', 'buyer_link', 'seller_link'];
+        $fields = ['NRL', 'listed', 'buyer_link', 'seller_link'];
         foreach ($fields as $field) {
             if ($request->has($field)) {
                 $existing[$field] = $validated[$field];
             }
         }
 
-        AmazonListingStatus::updateOrCreate(
+        AmazonDataView::updateOrCreate(
             ['sku' => $validated['sku']],
             ['value' => $existing]
         );
@@ -131,7 +131,7 @@ class ListingAmazonController extends Controller
             }
 
             // NR/REQ logic
-            $nrReq = $status['nr_req'] ?? (floatval($inv) > 0 ? 'REQ' : 'NR');
+            $nrReq = $status['NRL'] ?? (floatval($inv) > 0 ? 'REQ' : 'NR');
             if ($nrReq === 'REQ') {
                 $reqCount++;
             }
@@ -145,7 +145,7 @@ class ListingAmazonController extends Controller
             if ($nrReq !== 'NR' && ($listed === 'Pending' || empty($listed))) {
                 $pendingCount++;
             }
-            // $nrReq = $status['nr_req'] ?? (floatval($inv) > 0 ? 'REQ' : 'NR');
+            // $nrReq = $status['NRL'] ?? (floatval($inv) > 0 ? 'REQ' : 'NR');
             // if ($nrReq === 'REQ') {
             //     $reqCount++;
             // } elseif ($nrReq === 'NR') {

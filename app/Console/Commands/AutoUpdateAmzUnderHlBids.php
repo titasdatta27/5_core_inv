@@ -88,8 +88,7 @@ class AutoUpdateAmzUnderHlBids extends Command
                 $expected1 = $sku;                
                 $expected2 = $sku . ' HEAD';      
 
-                return ($cleanName === $expected1 || $cleanName === $expected2)
-                    && strtoupper($item->campaignStatus) === 'ENABLED';
+                return ($cleanName === $expected1 || $cleanName === $expected2);
             });
 
             $matchedCampaignL1 = $amazonSpCampaignReportsL1->first(function ($item) use ($sku) {
@@ -97,8 +96,7 @@ class AutoUpdateAmzUnderHlBids extends Command
                 $expected1 = $sku;
                 $expected2 = $sku . ' HEAD';
 
-                return ($cleanName === $expected1 || $cleanName === $expected2)
-                    && strtoupper($item->campaignStatus) === 'ENABLED';
+                return ($cleanName === $expected1 || $cleanName === $expected2);
             });
 
 
@@ -148,7 +146,7 @@ class AutoUpdateAmzUnderHlBids extends Command
 
             $ub7 = $budget > 0 ? ($l7_spend / ($budget * 7)) * 100 : 0;
 
-            if ($row['NRA'] !== 'NRA' && $ub7 < 70) {
+            if ($ub7 < 70) {
                 $result[] = (object) $row;
             }
 

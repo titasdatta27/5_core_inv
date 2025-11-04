@@ -700,6 +700,9 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::get('/amazon/low-visibility/view-data-fbm', [AmazonLowVisibilityController::class, 'getViewAmazonLowVisibilityDataFbm']);
     Route::get('/amazon/low-visibility/view-data-both', [AmazonLowVisibilityController::class, 'getViewAmazonLowVisibilityDataBoth']);
 
+    Route::get('/ad-cvr-ebay', action: [EbayZeroController::class, 'adcvrEbay'])->name('adcvr.ebay');
+    Route::get('/ad-cvr-ebay-data', action: [EbayZeroController::class, 'adcvrEbayData'])->name('adcvr.ebay.data');
+    Route::post('/update-ebay-price', [EbayZeroController::class, 'updateEbayPrice'])->name('update.ebay.price');
 
     Route::get('/ebay/zero/view-data', [EbayZeroController::class, 'getVieweBayZeroData'])->name('ebay.zero.viewData');
     Route::get('/ebay/low-visibility/view-data', [EbayLowVisibilityController::class, 'getVieweBayLowVisibilityData']);
@@ -776,7 +779,6 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::get('/amazon-analytics/export', [OverallAmazonController::class, 'exportAmazonAnalytics'])->name('amazon.analytics.export');
     Route::get('/amazon-analytics/sample', [OverallAmazonController::class, 'downloadSample'])->name('amazon.analytics.sample');
 
-
     //ebay 2 
     Route::get('/zero-ebay2', [Ebay2ZeroController::class, 'ebay2Zeroview'])->name('zero.ebay2');
     Route::get('/zero_ebay2/view-data', [Ebay2ZeroController::class, 'getViewEbay2ZeroData']);
@@ -829,6 +831,10 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::post('/listing_walmart/save-status', [ListingWalmartController::class, 'saveStatus']);
     Route::post('/listing_walmart/import', [ListingWalmartController::class, 'import'])->name('listing_walmart.import');
     Route::get('/listing_walmart/export', [ListingWalmartController::class, 'export'])->name('listing_walmart.export');
+
+    Route::get('/ad-cvr-walmart', action: [WalmartZeroController::class, 'adcvrWalmart'])->name('adcvr.walmart');
+    Route::get('/ad-cvr-walmart-data', action: [WalmartZeroController::class, 'adcvrWalmartData'])->name('adcvr.walmart.data');
+    Route::post('/update-walmart-price', [WalmartZeroController::class, 'updateWalmartPrice'])->name('update.walmart.price');
 
     Route::get('walmartAnalysis', action: [WalmartControllerMarket::class, 'overallWalmart']);
     Route::get('/walmart/view-data', [WalmartControllerMarket::class, 'getViewWalmartData']);

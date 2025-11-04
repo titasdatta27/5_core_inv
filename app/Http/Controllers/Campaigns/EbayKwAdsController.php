@@ -64,10 +64,6 @@ class EbayKwAdsController extends Controller
             $row['campaignBudgetAmount'] = $matchedCampaignL30->campaignBudgetAmount ?? 0;
             $row['campaignStatus'] = $matchedCampaignL30->campaignStatus ?? '';
 
-            if(!$matchedCampaignL30){
-                continue;
-            }
-
             if (isset($nrValues[$pm->sku])) {
                 $raw = $nrValues[$pm->sku];
                 if (!is_array($raw)) {
@@ -114,7 +110,7 @@ class EbayKwAdsController extends Controller
                 $row["cpc_" . strtolower($period)]         = $cpc;
             }
 
-            if ($row['NR'] !== "NRA") {
+            if ($row['campaignName'] !== "") {
                 $result[] = (object) $row;
             }
     

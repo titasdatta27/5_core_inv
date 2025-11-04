@@ -325,8 +325,7 @@ class AmazonSbBudgetController extends Controller
                 $expected1 = $sku;                
                 $expected2 = $sku . ' HEAD';      
 
-                return ($cleanName === $expected1 || $cleanName === $expected2)
-                    && strtoupper($item->campaignStatus) === 'ENABLED';
+                return ($cleanName === $expected1 || $cleanName === $expected2);
             });
 
             $matchedCampaignL1 = $amazonSpCampaignReportsL1->first(function ($item) use ($sku) {
@@ -334,14 +333,8 @@ class AmazonSbBudgetController extends Controller
                 $expected1 = $sku;
                 $expected2 = $sku . ' HEAD';
 
-                return ($cleanName === $expected1 || $cleanName === $expected2)
-                    && strtoupper($item->campaignStatus) === 'ENABLED';
+                return ($cleanName === $expected1 || $cleanName === $expected2);
             });
-
-
-            if (!$matchedCampaignL7 && !$matchedCampaignL1) {
-                continue;
-            }
 
             $row = [];
             $row['parent'] = $parent;
@@ -350,8 +343,8 @@ class AmazonSbBudgetController extends Controller
             $row['L30']    = $shopify->quantity ?? 0;
             $row['fba']    = $pm->fba ?? null;
             $row['A_L30']  = $amazonSheet->units_ordered_l30 ?? 0;
-            $row['campaign_id'] = $matchedCampaignL7->campaign_id ?? ($matchedCampaignL1->campaign_id ?? '');
-            $row['campaignName'] = $matchedCampaignL7->campaignName ?? ($matchedCampaignL1->campaignName ?? '');
+            $row['campaign_id'] = $matchedCampaignL7->campaign_id ?? '';
+            $row['campaignName'] = $matchedCampaignL7->campaignName ?? '';
             $row['campaignStatus'] = $matchedCampaignL7->campaignStatus ?? ($matchedCampaignL1->campaignStatus ?? '');
             $row['campaignBudgetAmount'] = $matchedCampaignL7->campaignBudgetAmount ?? ($matchedCampaignL1->campaignBudgetAmount ?? '');
             $row['sbid'] = $matchedCampaignL7->sbid ?? ($matchedCampaignL1->sbid ?? '');
@@ -385,8 +378,10 @@ class AmazonSbBudgetController extends Controller
                     $row['TPFT'] = $raw['TPFT'] ?? null;
                 }
             }
-
-            $result[] = (object) $row;
+            
+            if($row['campaignName'] !== '' ){
+                $result[] = (object) $row;
+            }
         }
 
         $uniqueResult = collect($result)->unique('sku')->values()->all();
@@ -470,8 +465,7 @@ class AmazonSbBudgetController extends Controller
                 $expected1 = $sku;                
                 $expected2 = $sku . ' HEAD';      
 
-                return ($cleanName === $expected1 || $cleanName === $expected2)
-                    && strtoupper($item->campaignStatus) === 'ENABLED';
+                return ($cleanName === $expected1 || $cleanName === $expected2);
             });
 
             $matchedCampaignL15 = $amazonSpCampaignReportsL15->first(function ($item) use ($sku) {
@@ -479,8 +473,7 @@ class AmazonSbBudgetController extends Controller
                 $expected1 = $sku;                
                 $expected2 = $sku . ' HEAD';      
 
-                return ($cleanName === $expected1 || $cleanName === $expected2)
-                    && strtoupper($item->campaignStatus) === 'ENABLED';
+                return ($cleanName === $expected1 || $cleanName === $expected2);
             });
 
             $matchedCampaignL7 = $amazonSpCampaignReportsL7->first(function ($item) use ($sku) {
@@ -488,8 +481,7 @@ class AmazonSbBudgetController extends Controller
                 $expected1 = $sku;                
                 $expected2 = $sku . ' HEAD';      
 
-                return ($cleanName === $expected1 || $cleanName === $expected2)
-                    && strtoupper($item->campaignStatus) === 'ENABLED';
+                return ($cleanName === $expected1 || $cleanName === $expected2);
             });
 
             $matchedCampaignL1 = $amazonSpCampaignReportsL1->first(function ($item) use ($sku) {
@@ -497,14 +489,8 @@ class AmazonSbBudgetController extends Controller
                 $expected1 = $sku;
                 $expected2 = $sku . ' HEAD';
 
-                return ($cleanName === $expected1 || $cleanName === $expected2)
-                    && strtoupper($item->campaignStatus) === 'ENABLED';
+                return ($cleanName === $expected1 || $cleanName === $expected2);
             });
-
-
-            if (!$matchedCampaignL7 && !$matchedCampaignL1) {
-                continue;
-            }
 
             $row = [];
             $row['parent'] = $parent;
@@ -513,8 +499,8 @@ class AmazonSbBudgetController extends Controller
             $row['L30']    = $shopify->quantity ?? 0;
             $row['fba']    = $pm->fba ?? null;
             $row['A_L30']  = $amazonSheet->units_ordered_l30 ?? 0;
-            $row['campaign_id'] = $matchedCampaignL7->campaign_id ?? ($matchedCampaignL1->campaign_id ?? '');
-            $row['campaignName'] = $matchedCampaignL7->campaignName ?? ($matchedCampaignL1->campaignName ?? '');
+            $row['campaign_id'] = $matchedCampaignL7->campaign_id ?? '';
+            $row['campaignName'] = $matchedCampaignL7->campaignName ?? '';
             $row['campaignStatus'] = $matchedCampaignL7->campaignStatus ?? ($matchedCampaignL1->campaignStatus ?? '');
             $row['campaignBudgetAmount'] = $matchedCampaignL7->campaignBudgetAmount ?? ($matchedCampaignL1->campaignBudgetAmount ?? '');
             $row['sbid'] = $matchedCampaignL7->sbid ?? ($matchedCampaignL1->sbid ?? '');
@@ -566,7 +552,7 @@ class AmazonSbBudgetController extends Controller
                 }
             }
             
-            if($row['NRA'] !== 'NRA' ){
+            if($row['campaignName'] !== '' ){
                 $result[] = (object) $row;
             }
         }

@@ -25,7 +25,7 @@ class SyncWalmartAdSheetData extends Command
         $json = $response->json();
 
         // Expected keys: L1, L7, L30
-        foreach (['L1', 'L7', 'L30'] as $range) {
+        foreach (['L1', 'L7', 'L30', 'L90'] as $range) {
 
             if (!isset($json[$range]['data'])) {
                 $this->warn("$range not found");

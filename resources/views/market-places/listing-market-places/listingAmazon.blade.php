@@ -1201,7 +1201,7 @@
                                             <div class="metric-total" id="inv-total">0</div>
                                         </div>
                                     </th>
-                                    <th data-field="nr_req" style="vertical-align: middle; white-space: nowrap;">
+                                    <th data-field="NRL" style="vertical-align: middle; white-space: nowrap;">
                                         <div class="d-flex flex-column align-items-center" style="gap: 4px">
                                             <div class="d-flex align-items-center">
                                                 NRL/REQ
@@ -1212,7 +1212,7 @@
                                                 0</div>
                                         </div>
                                     </th>
-                                    <th data-field="nr_req" style="vertical-align: middle; white-space: nowrap;">
+                                    <th data-field="NRL" style="vertical-align: middle; white-space: nowrap;">
                                         <div class="d-flex flex-column align-items-center" style="gap: 4px">
                                             <div class="d-flex align-items-center">
                                                 LINK
@@ -1426,8 +1426,8 @@
                         // Set default value for nr_req if missing and INV > 0
                         tableData = tableData.map(item => ({
                             ...item,
-                            nr_req: item.nr_req || (parseFloat(item.INV) > 0 ? 'REQ' :
-                                'NR'),
+                            NRL: item.NRL || (parseFloat(item.INV) > 0 ? 'RL' :
+                                'NRL'),
                             listed: item.listed || (parseFloat(item.INV) > 0 ? 'Pending' :
                                 'Listed')
                         }));
@@ -1545,7 +1545,7 @@
                     $row.addClass('parent-row');
                 }
 
-                // if(item.nr_req === 'NR'){
+                // if(item.nr_req === 'NRL'){
                 //     $row.addClass('nr-hide');
                 // }
 
@@ -1558,15 +1558,15 @@
                 if (!item.sku.includes('PARENT')) {
                     const $dropdown = $('<select>')
                         .addClass('nr-req-dropdown form-control form-control-sm')
-                        .append('<option value="REQ" class="req-option">REQ</option>')
-                        .append('<option value="NR" class="nr-option">NRL</option>');
+                        .append('<option value="RL" class="req-option">REQ</option>')
+                        .append('<option value="NRL" class="nr-option">NRL</option>');
 
-                    const initialValue = item.nr_req || 'REQ';
+                    const initialValue = item.NRL || 'RL';
                     $dropdown.val(initialValue);
 
-                    if (initialValue === 'REQ') {
+                    if (initialValue === 'RL') {
                         $dropdown.css('background-color', '#28a745').css('color', 'white');
-                    } else if (initialValue === 'NR') {
+                    } else if (initialValue === 'NRL') {
                         $dropdown.css('background-color', '#dc3545').css('color', 'white');
                     }
 
@@ -1814,14 +1814,14 @@
                         if (parseFloat(item.INV) > 0 && !item.sku.includes('PARENT')) {
                             metrics.invTotal += parseFloat(item.INV) || 0;
 
-                            if (item.nr_req === 'REQ') {
+                            if (item.NRL === 'REQ') {
                                 metrics.reqTotal++;
                             }
                             if (!item.buyer_link && !item.seller_link) {
                                 metrics.withoutLinkTotal++;
                             }
                             // Count Listed and Pending rows
-                            if (item.nr_req !== 'NR') {
+                            if (item.NRL !== 'NRL') {
                                 if (item.listed === 'Listed') {
                                     metrics.listedTotal++;
                                 }
@@ -2194,12 +2194,12 @@
             $(document).on('change', '.nr-req-dropdown, .listed-dropdown', function() {
                 const $row = $(this).closest('tr');
                 const sku = $row.find('td').eq(2).text().trim(); // Adjust index if needed
-                const nr_req = $row.find('.nr-req-dropdown').val() || 'REQ';
+                const NRL = $row.find('.nr-req-dropdown').val() || 'RL';
                 const listed = $row.find('.listed-dropdown').val() || 'Pending';
 
-                if (nr_req === 'REQ') {
+                if (NRL === 'RL') {
                     $(this).css('background-color', '#28a745').css('color', 'white');
-                } else if (nr_req === 'NR') {
+                } else if (NRL === 'NRL') {
                     $(this).css('background-color', '#dc3545').css('color', 'white');
                 }
 
@@ -2207,7 +2207,7 @@
                 const buyer_link = $row.data('buyer-link') || '';
                 const seller_link = $row.data('seller-link') || '';
 
-                saveStatusToDB(sku, nr_req, listed, buyer_link, seller_link);
+                saveStatusToDB(sku, NRL, listed, buyer_link, seller_link);
             });
 
             // Save links when submitting the modal
@@ -2256,10 +2256,10 @@
             $(document).on('change', '.nr-req-dropdown', function() {
                 const $row = $(this).closest('tr');
                 const sku = $row.find('td').eq(2).text().trim();
-                const nr_req = $(this).val();
+                const NRL = $(this).val();
 
                 saveStatusToDB(sku, {
-                    nr_req
+                    NRL
                 });
             });
 
@@ -2281,7 +2281,7 @@
                     filteredData = [...tableData];
                 } else {
                     // Filter rows based on NR/REQ value
-                    filteredData = tableData.filter(item => item.nr_req === selectedValue);
+                    filteredData = tableData.filter(item => item.NRL === selectedValue);
                 }
 
                 currentPage = 1; // Reset to the first page
