@@ -9,5 +9,9 @@ class MarketplacePercentage extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['marketplace', 'percentage','ad_updates','deleted_at'];
+    protected $table = 'marketplace_percentages';
+
+    protected $fillable = ['marketplace', 'percentage'];
+
+    protected $dates = ['deleted_at'];
 }
