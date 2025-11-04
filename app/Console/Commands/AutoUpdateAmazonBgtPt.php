@@ -141,12 +141,12 @@ class AutoUpdateAmazonBgtPt extends Command
             }
 
             // Double SBGT ONLY for exact thresholds
-            if (($dilColor === "red" && $tpft > 18) ||
-                ($dilColor === "yellow" && $tpft > 22) ||
-                ($dilColor === "green" && $tpft > 26) ||
-                ($dilColor === "pink" && $tpft > 30)) {
-                $sbgt = $sbgt * 2;
-            }
+            // if (($dilColor === "red" && $tpft > 18) ||
+            //     ($dilColor === "yellow" && $tpft > 22) ||
+            //     ($dilColor === "green" && $tpft > 26) ||
+            //     ($dilColor === "pink" && $tpft > 30)) {
+            //     $sbgt = $sbgt * 2;
+            // }
 
             $row['sbgt'] = $sbgt;
 

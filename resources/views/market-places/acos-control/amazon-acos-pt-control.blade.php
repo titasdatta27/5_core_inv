@@ -550,12 +550,12 @@
                                     dilColor = getDilColor(dilDecimal);
                                 }
 
-                                if ((dilColor === "red" && tpftInt > 10) ||
-                                    (dilColor === "yellow" && tpftInt > 22) ||
-                                    (dilColor === "green" && tpftInt > 26) ||
-                                    (dilColor === "pink" && tpftInt > 30)) {
-                                    sbgt = sbgt * 2;
-                                }
+                                // if ((dilColor === "red" && tpftInt > 10) ||
+                                //     (dilColor === "yellow" && tpftInt > 22) ||
+                                //     (dilColor === "green" && tpftInt > 26) ||
+                                //     (dilColor === "pink" && tpftInt > 30)) {
+                                //     sbgt = sbgt * 2;
+                                // }
                             }else{
                                 sbgt = 5;
                             }
