@@ -3087,7 +3087,7 @@
                     const totalProfit = (aL30 * price) * rawPft / 100;
                     
                     let percentage = {{ $amazonPercentage ?? 0 }};
-                    let costPercentage = (percentage + amazonAdUpdates) / 100; 
+                    let costPercentage = (percentage - amazonAdUpdates) / 100; 
                     let netPft = (price * costPercentage) - ship - lp - (spend / aL30);
                     let tpft = (netPft / price) * 100;
                     
@@ -3095,7 +3095,7 @@
                     const netGpft = (price * totalAmazonPercentage) - ship - lp;
                     let gPft = (netGpft / price) * 100;
 
-                    // GPFT with color coding
+                    // PFT with color coding
                     if(isNaN(gPft) || !isFinite(gPft)) {
                         gPft = 0;
                     }
