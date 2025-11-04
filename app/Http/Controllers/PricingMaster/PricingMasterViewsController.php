@@ -1046,8 +1046,24 @@ class PricingMasterViewsController extends Controller
 
     protected function calculateCVR($l30, $views)
     {
-        if (!$views) return null;
-        $cvr = ($l30 / $views) * 100;
+        // Normalize inputs to numeric values safely
+        $l30Num = is_numeric($l30) ? (float) $l30 : 0.0;
+
+        // If $views is an array/object or not numeric, try to coerce scalar values, otherwise treat as zero
+        if (is_array($views) || is_object($views)) {
+            $viewsNum = 0.0;
+        } else {
+            // Cast strings like "0.0" correctly to float; floatval on non-numeric returns 0.0
+            $viewsNum = is_numeric($views) ? (float) $views : floatval($views);
+        }
+
+        // Guard: avoid division when denominator is zero
+        if ($viewsNum == 0.0) {
+            return null;
+        }
+
+        $cvr = ($l30Num / $viewsNum) * 100;
+
         return [
             'value' => number_format($cvr, 2),
             'color' => $cvr <= 7 ? 'blue' : ($cvr <= 13 ? 'green' : 'red')

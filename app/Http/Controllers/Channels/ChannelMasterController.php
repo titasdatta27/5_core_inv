@@ -3105,6 +3105,11 @@ class ChannelMasterController extends Controller
         $channel->channel_percentage = $channelPercentage;
         $channel->save();
 
+        MarketplacePercentage::updateOrCreate(
+            ['marketplace' => $updatedChannel],
+            ['percentage' => number_format((float)$channelPercentage, 2, '.', '')]
+        );
+
         return response()->json(['success' => true]);
     }
 

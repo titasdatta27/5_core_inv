@@ -1090,7 +1090,8 @@
                                 <label for="inv-filter" class="mr-2">INV:</label>
                                 <select id="inv-filter" class="form-control form-control-sm">
                                     <option value="all">All</option>
-                                    <option value="inv-only">INV Only</option>
+                                    <option value="0">0</option>
+                                    <option value="1-100+">1-100+</option>
                                 </select>
                             </div>
                         </div>
@@ -1402,7 +1403,7 @@
                     initEnhancedDropdowns();
 
                     // Set default INV filter to "INV Only" on page load
-                    $('#inv-filter').val('inv-only').trigger('change');
+                    // $('#inv-filter').val('inv-only').trigger('change');
                 });
             }
 
@@ -1987,10 +1988,14 @@
                     });
                 }
 
-                $('#row-data-type').on('change', function() {
-                    const filterType = $(this).val();
-                    applyRowTypeFilter(filterType);
+                $('#nr-req-filter, #row-data-type').on('change', function() {
+                    applyCombinedFilters();
                 });
+
+                // $('#row-data-type').on('change', function() {
+                //     const filterType = $(this).val();
+                //     applyRowTypeFilter(filterType);
+                // });
             }
 
             // Calculate INV and L30 totals for each parent
@@ -2123,19 +2128,44 @@
                 $results.show();
             }
 
-            function applyRowTypeFilter(filterType) {
-                // Reset to all data first
+            // function applyRowTypeFilter(filterType) {
+            //     // Reset to all data first
+            //     filteredData = [...tableData];
+
+            //     // Apply the row type filter
+            //     if (filterType === 'parent') {
+            //         filteredData = filteredData.filter(item => item.is_parent);
+            //     } else if (filterType === 'sku') {
+            //         filteredData = filteredData.filter(item => !item.is_parent);
+            //     }
+            //     // else 'all' - no filtering needed
+
+            //     // Reset to first page and render
+            //     currentPage = 1;
+            //     renderTable();
+            //     calculateTotals();
+            // }
+
+            function applyCombinedFilters() {
+                const typeFilter = $('#row-data-type').val();
+                const nrFilter = $('#nr-req-filter').val();
+
+                // Start with all rows
                 filteredData = [...tableData];
 
-                // Apply the row type filter
-                if (filterType === 'parent') {
+                // Apply Data Type filter first
+                if (typeFilter === 'parent') {
                     filteredData = filteredData.filter(item => item.is_parent);
-                } else if (filterType === 'sku') {
+                } else if (typeFilter === 'sku') {
                     filteredData = filteredData.filter(item => !item.is_parent);
                 }
-                // else 'all' - no filtering needed
 
-                // Reset to first page and render
+                // Then apply NR/REQ filter
+                if (nrFilter !== 'all') {
+                    filteredData = filteredData.filter(item => item.nr_req === nrFilter);
+                }
+
+                // Reset to first page and re-render
                 currentPage = 1;
                 renderTable();
                 calculateTotals();
@@ -2176,19 +2206,21 @@
                 const selectedValue = $(this).val();
 
                 if (selectedValue === 'all') {
-                    // Show all rows, including rows with INV <= 0
+                    // Show all rows
                     filteredData = [...tableData];
-                } else if (selectedValue === 'inv-only') {
-                    // Show rows with INV > 0, but always include rows with "PARENT" in the SKU
-                    filteredData = tableData.filter(item => {
-                        return item.sku.includes('PARENT') || parseFloat(item.INV) > 0;
-                    });
+                } else if (selectedValue === '0') {
+                    // Show rows where INV == 0
+                    filteredData = tableData.filter(item => parseFloat(item.INV) === 0);
+                } else if (selectedValue === '1-100+') {
+                    // Show rows where INV > 0
+                    filteredData = tableData.filter(item => parseFloat(item.INV) > 0);
                 }
 
-                currentPage = 1; // Reset to the first page
-                renderTable(); // Re-render the table
+                currentPage = 1; // Reset pagination
+                renderTable();   // Re-render table
                 calculateTotals(); // Recalculate totals
             });
+
 
             // Save NR/REQ or Listed/Pending when dropdown changes
             $(document).on('change', '.nr-req-dropdown, .listed-dropdown', function() {
