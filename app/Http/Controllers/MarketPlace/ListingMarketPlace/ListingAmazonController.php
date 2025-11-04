@@ -39,6 +39,7 @@ class ListingAmazonController extends Controller
 
         // Fetch all status records for these SKUs
         $statusData = AmazonListingStatus::whereIn('sku', $skus)->get()->keyBy('sku');
+        dd($statusData);
 
         $processedData = $productMasters->map(function ($item) use ($shopifyData, $amazonDataViewValues, $statusData) {
             $childSku = $item->sku;
@@ -88,6 +89,7 @@ class ListingAmazonController extends Controller
         
         $status = AmazonListingStatus::where('sku', $sku)->first();
 
+        
         $existing = $status ? $status->value : [];
 
         // Only update the fields that are present in the request
