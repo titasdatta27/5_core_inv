@@ -1201,7 +1201,7 @@
                                             <div class="metric-total" id="inv-total">0</div>
                                         </div>
                                     </th>
-                                    <th data-field="NRL" style="vertical-align: middle; white-space: nowrap;">
+                                    <th data-field="nr_req" style="vertical-align: middle; white-space: nowrap;">
                                         <div class="d-flex flex-column align-items-center" style="gap: 4px">
                                             <div class="d-flex align-items-center">
                                                 NRL/REQ
@@ -1212,7 +1212,7 @@
                                                 0</div>
                                         </div>
                                     </th>
-                                    <th data-field="NRL" style="vertical-align: middle; white-space: nowrap;">
+                                    <th data-field="nr_req" style="vertical-align: middle; white-space: nowrap;">
                                         <div class="d-flex flex-column align-items-center" style="gap: 4px">
                                             <div class="d-flex align-items-center">
                                                 LINK
@@ -1426,8 +1426,8 @@
                         // Set default value for nr_req if missing and INV > 0
                         tableData = tableData.map(item => ({
                             ...item,
-                            NRL: item.NRL || (parseFloat(item.INV) > 0 ? 'RL' :
-                                'NRL'),
+                            nr_req: item.nr_req || (parseFloat(item.INV) > 0 ? 'REQ' :
+                                'NR'),
                             listed: item.listed || (parseFloat(item.INV) > 0 ? 'Pending' :
                                 'Listed')
                         }));
@@ -1545,7 +1545,7 @@
                     $row.addClass('parent-row');
                 }
 
-                // if(item.nr_req === 'NRL'){
+                // if(item.nr_req === 'NR'){
                 //     $row.addClass('nr-hide');
                 // }
 
@@ -1558,15 +1558,15 @@
                 if (!item.sku.includes('PARENT')) {
                     const $dropdown = $('<select>')
                         .addClass('nr-req-dropdown form-control form-control-sm')
-                        .append('<option value="RL" class="req-option">REQ</option>')
-                        .append('<option value="NRL" class="nr-option">NRL</option>');
+                        .append('<option value="REQ" class="req-option">REQ</option>')
+                        .append('<option value="NR" class="nr-option">NRL</option>');
 
-                    const initialValue = item.NRL || 'RL';
+                    const initialValue = item.nr_req || 'REQ';
                     $dropdown.val(initialValue);
 
-                    if (initialValue === 'RL') {
+                    if (initialValue === 'REQ') {
                         $dropdown.css('background-color', '#28a745').css('color', 'white');
-                    } else if (initialValue === 'NRL') {
+                    } else if (initialValue === 'NR') {
                         $dropdown.css('background-color', '#dc3545').css('color', 'white');
                     }
 
@@ -1814,14 +1814,14 @@
                         if (parseFloat(item.INV) > 0 && !item.sku.includes('PARENT')) {
                             metrics.invTotal += parseFloat(item.INV) || 0;
 
-                            if (item.NRL === 'REQ') {
+                            if (item.nr_req === 'REQ') {
                                 metrics.reqTotal++;
                             }
                             if (!item.buyer_link && !item.seller_link) {
                                 metrics.withoutLinkTotal++;
                             }
                             // Count Listed and Pending rows
-                            if (item.NRL !== 'NRL') {
+                            if (item.nr_req !== 'NR') {
                                 if (item.listed === 'Listed') {
                                     metrics.listedTotal++;
                                 }
@@ -2194,12 +2194,12 @@
             $(document).on('change', '.nr-req-dropdown, .listed-dropdown', function() {
                 const $row = $(this).closest('tr');
                 const sku = $row.find('td').eq(2).text().trim(); // Adjust index if needed
-                const NRL = $row.find('.nr-req-dropdown').val() || 'RL';
+                const nr_req = $row.find('.nr-req-dropdown').val() || 'REQ';
                 const listed = $row.find('.listed-dropdown').val() || 'Pending';
 
-                if (NRL === 'RL') {
+                if (nr_req === 'REQ') {
                     $(this).css('background-color', '#28a745').css('color', 'white');
-                } else if (NRL === 'NRL') {
+                } else if (nr_req === 'NR') {
                     $(this).css('background-color', '#dc3545').css('color', 'white');
                 }
 
@@ -2207,7 +2207,7 @@
                 const buyer_link = $row.data('buyer-link') || '';
                 const seller_link = $row.data('seller-link') || '';
 
-                saveStatusToDB(sku, NRL, listed, buyer_link, seller_link);
+                saveStatusToDB(sku, nr_req, listed, buyer_link, seller_link);
             });
 
             // Save links when submitting the modal
@@ -2243,6 +2243,7 @@
                         if (item) {
                             Object.assign(item, data);
                         }
+                        
                         calculateTotals(); // Recalculate totals after update
                         renderTable(); // Optionally re-render table if needed
                     },
@@ -2255,10 +2256,10 @@
             $(document).on('change', '.nr-req-dropdown', function() {
                 const $row = $(this).closest('tr');
                 const sku = $row.find('td').eq(2).text().trim();
-                const NRL = $(this).val();
+                const nr_req = $(this).val();
 
                 saveStatusToDB(sku, {
-                    NRL
+                    nr_req
                 });
             });
 
@@ -2280,7 +2281,7 @@
                     filteredData = [...tableData];
                 } else {
                     // Filter rows based on NR/REQ value
-                    filteredData = tableData.filter(item => item.NRL === selectedValue);
+                    filteredData = tableData.filter(item => item.nr_req === selectedValue);
                 }
 
                 currentPage = 1; // Reset to the first page
