@@ -4779,6 +4779,105 @@ class AdsMasterController extends Controller
         }
         /** End Ebay Total Sales Data **/
 
+        /** Start Shopify G-Shopping Data */
+            /*
+            $productMasters = ProductMaster::orderBy('parent', 'asc')
+                ->orderByRaw("CASE WHEN sku LIKE 'PARENT %' THEN 1 ELSE 0 END")
+                ->orderBy('sku', 'asc')
+                ->get();
+
+            $skus = $productMasters->pluck('sku')->filter()->unique()->values()->all();
+
+            $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy('sku');
+
+            $googleCampaigns = DB::connection('apicentral')
+                ->table('google_ads_campaigns')
+                ->select(
+                    'campaign_id',
+                    'campaign_name',
+                    'campaign_status',
+                    'budget_amount_micros',
+                    'range_type',
+                    'metrics_cost_micros',
+                    'metrics_clicks',
+                    'metrics_impressions',
+                    'ga4_sold_units',
+                    'ga4_ad_sales'
+                )
+                ->whereIn('range_type', ['L7', 'L15', 'L30', 'L60'])
+                ->get();
+
+                $ranges = ['L7', 'L15', 'L30', 'L60'];
+
+                $result = [];
+
+            foreach ($productMasters as $pm) {
+                $sku = strtoupper(trim($pm->sku));
+                $parent = $pm->parent;
+
+                $shopify = $shopifyData[$sku] ?? null;
+
+                $matchedCampaign = $googleCampaigns->first(function ($c) use ($sku) {
+                    $campaign = strtoupper(trim($c->campaign_name));
+                    $skuTrimmed = strtoupper(trim($sku));
+                    
+                    $parts = array_map('trim', explode(',', $campaign));
+                    $exactMatch = in_array($skuTrimmed, $parts);
+                    
+                    return $exactMatch;
+                });
+
+                $row = [];
+                $row['parent'] = $parent;
+                $row['sku']    = $pm->sku;
+                $row['INV']    = $shopify->inv ?? 0;
+                $row['L30']    = $shopify->quantity ?? 0;
+                $row['campaign_id'] = $matchedCampaign->campaign_id ?? null;
+                $row['campaignName'] = $matchedCampaign->campaign_name ?? null;
+                $row['campaignBudgetAmount'] = $matchedCampaign->budget_amount_micros ?? null;
+                $row['campaignBudgetAmount'] = $row['campaignBudgetAmount'] ? $row['campaignBudgetAmount'] / 1000000 : null;
+                $row['campaignStatus'] = $matchedCampaign->campaign_status ?? null;
+
+                foreach ($ranges as $range) {
+                    $campaignRange = $googleCampaigns->first(function ($c) use ($sku, $range) {
+                        $campaign = strtoupper(trim($c->campaign_name));
+                        $skuTrimmed = strtoupper(trim($sku));
+                        
+                        $contains = strpos($campaign, $skuTrimmed) !== false;
+                        
+                        $parts = array_map('trim', explode(',', $campaign));
+                        $exactMatch = in_array($skuTrimmed, $parts);
+                        
+                        return ($contains || $exactMatch) && $c->range_type === $range;
+                    });
+
+
+                    $row["spend_$range"] = isset($campaignRange->metrics_cost_micros)
+                        ? $campaignRange->metrics_cost_micros / 1000000
+                        : 0;
+
+                    $row["clicks_$range"] = $campaignRange->metrics_clicks ?? 0;
+                    $row["impressions_$range"] = $campaignRange->metrics_impressions ?? 0;
+                    $row["cpc_$range"] = $row["clicks_$range"] ? $row["spend_$range"] / $row["clicks_$range"] : 0;
+                    $row["ad_sales_$range"] = $campaignRange->ga4_ad_sales ?? 0;
+                    $row["ad_sold_$range"] = $campaignRange->ga4_sold_units ?? 0;
+                }
+
+                if($row['campaignName'] != '') {
+                    $result[] = (object) $row;
+                }
+            }
+        
+            $uniqueResult = collect($result)->unique('sku')->values()->all();
+            $GShopping_spendl30_Total = 0;
+            foreach($uniqueResult as $row)
+            {
+                $GShopping_spendl30_Total = $GShopping_spendl30_Total + $row['spend_L30'];
+
+            }
+            */
+        /** End Shopify G-shopping Data **/
+
         $roundVars = [
             'ebay_SALES_L30_total', 'ebay_kw_sales_L30_total', 'ebay_pmt_sales_L30_total',
             'ebay_SPEND_L30_total', 'ebay_kw_spend_L30_total', 'ebay_pmt_spend_L30_total',
