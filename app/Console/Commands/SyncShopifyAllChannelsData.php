@@ -26,6 +26,12 @@ class SyncShopifyAllChannelsData extends Command
         $productMasterSkus = ProductMaster::pluck('sku', 'parent')->toArray();
         $reverbSkus = ReverbProduct::whereNotIn('sku', array_keys($productMasterSkus))->pluck('sku')->toArray();
         
+        // 🆕 Also get SKUs from temu_metrics that might not be in ProductMaster/Reverb
+        $temuSkus = DB::table('temu_metrics')
+            ->whereNotIn('sku', array_merge(array_keys($productMasterSkus), $reverbSkus))
+            ->pluck('sku')
+            ->toArray();
+        
         // Combine both sets of SKUs
         $allSkus = array_merge(
             array_map(function($sku, $parent) {
@@ -33,8 +39,13 @@ class SyncShopifyAllChannelsData extends Command
             }, array_keys($productMasterSkus), $productMasterSkus),
             array_map(function($sku) {
                 return ['sku' => $sku, 'parent' => null];
-            }, $reverbSkus)
+            }, $reverbSkus),
+            array_map(function($sku) {
+                return ['sku' => $sku, 'parent' => null];
+            }, $temuSkus)
         );
+        
+        $this->info('Total SKUs to process: ' . count($allSkus));
 
         // Process in chunks
         collect($allSkus)->chunk(1000)->each(function ($products) {
