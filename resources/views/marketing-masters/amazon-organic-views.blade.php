@@ -1568,6 +1568,15 @@
                                         {{-- <div class="metric-total" id="organic_views-total">0</div> --}}
                                     </div>
                                 </th>
+                                <th data-field="sold" style="vertical-align: middle; white-space: nowrap;">
+                                    <div class="d-flex flex-column align-items-center" style="gap: 4px">
+                                        <div class="d-flex align-items-center">
+                                            Sold <span class="sort-arrow">↓</span>
+                                        </div>
+                                        {{-- <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> --}}
+                                        {{-- <div class="metric-total" id="organic_views-total">0</div> --}}
+                                    </div>
+                                </th>
                                 <th data-field="amazon_product_link" style="vertical-align: middle; white-space: nowrap;">
                                     <div class="d-flex flex-column align-items-center" style="gap: 4px">
                                         <div class="d-flex align-items-center">
@@ -2412,7 +2421,9 @@
                                     SPFT: item.SPFT || 0,
                                     SROI: item.SROI || 0,
                                     Spend: item.ad_spend || 0,
-                                    MOQ: item.MOQ || 0
+                                    MOQ: item.MOQ || 0,
+                                    sold: item.sold || 0,
+                                    organic_views: item.organic_views || 0,
                                 };
                             });
 
@@ -2480,6 +2491,8 @@
                         SPFT: item.SPFT || 0,
                         SROI: item.SROI || 0,
                         MOQ: item.MOQ || 0,
+                        organic_views: item.organic_views || 0,
+                        sold: item.sold || 0,
 
                     };
                 });
@@ -2694,15 +2707,16 @@
                     ));
 
                     $row.append($('<td>').text(item.MOQ || ''));
-                    // $row.append($('<td>').text(item.INV));
-                    // $row.append($('<td>').text(item.INV));
-                    // $row.append($('<td>').text(item.INV));
-                    // $row.append($('<td>').text(item.INV));
-                    // $row.append($('<td>').text(item.INV));
-                    // $row.append($('<td>').text(item.INV));
-                    // $row.append($('<td>').text(item.INV));
-                    // $row.append($('<td>').text(item.INV));
-                    // $row.append($('<td>').text(item.INV));
+                    $row.append($('<td>').text(item.INV));
+                    $row.append($('<td>').text(item.INV));
+                    $row.append($('<td>').text(item.INV));
+                    $row.append($('<td>').text(item.INV));
+                    $row.append($('<td>').text(item.organic_views));
+                    $row.append($('<td>').text(item.sold));
+                    $row.append($('<td>').text(item.INV));
+                    $row.append($('<td>').text(item.INV));
+                    $row.append($('<td>').text(item.INV));
+                    $row.append($('<td>').text(item.INV));
 
                     $tbody.append($row);
                 });
