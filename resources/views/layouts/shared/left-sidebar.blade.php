@@ -1651,6 +1651,23 @@
                                         </div>
                                     </li>
                                     <li>
+                                        <a data-bs-toggle="collapse" href="#amazonCpc" aria-expanded="false"
+                                            aria-controls="amazonCpc">
+                                            <span>Amazon CPC 0</span>
+                                            <span class="menu-arrow"></span>
+                                        </a>
+                                        <div class="collapse" id="amazonCpc">
+                                            <ul class="side-nav-fourth-level">
+                                                <li>
+                                                    <a href="{{ route('amazon.kw.cpc.zero.list') }}">KW CPC ZERO</a>
+                                                </li>
+                                                <li>
+                                                    <a href="{{ route('amazon.pt.cpc.zero.list') }}">PT CPC ZERO</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </li>
+                                    <li>
                                         <a data-bs-toggle="collapse" href="#amazonFbaBudget" aria-expanded="false"
                                             aria-controls="amazonFbaBudget">
                                             <span>Amazon FBA Budget</span>
