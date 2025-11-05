@@ -712,8 +712,7 @@
             });
 
 
-            table.on("tableBuilt", function() {
-
+            table.on("tableBuilt", function () {
                 function combinedFilter(data) {
                     var budget = parseFloat(data.campaignBudgetAmount) || 0;
                     var l7_spend = parseFloat(data.l7_spend || 0);
@@ -722,13 +721,16 @@
                     var ub7 = budget > 0 ? (l7_spend / (budget * 7)) * 100 : 0;
                     var ub1 = budget > 0 ? (l1_spend / budget) * 100 : 0;
 
+                    // ✅ UB7 must be > 90
                     if (!(ub7 > 90)) return false;
 
+                    // ✅ SEARCH FILTER
                     let searchVal = $("#global-search").val()?.toLowerCase() || "";
                     if (searchVal && !(data.campaignName?.toLowerCase().includes(searchVal))) {
                         return false;
                     }
 
+                    // ✅ STATUS FILTER
                     let statusVal = $("#status-filter").val();
                     if (statusVal && data.campaignStatus !== statusVal) {
                         return false;
@@ -779,16 +781,20 @@
                     return true;
                 }
 
+                // ✅ SET FILTER
                 table.setFilter(combinedFilter);
 
+                // ✅ UPDATE COUNTS
                 function updateCampaignStats() {
-                    let total = table.getDataCount();
-                    let filtered = table.getDataCount("active");
-                    let currentPage = table.getRows("active").length;
+                    let allRows = table.getData();
+                    let filteredRows = allRows.filter(combinedFilter);
+
+                    let total = allRows.length;
+                    let filtered = filteredRows.length;
 
                     let percentage = total > 0 ? ((filtered / total) * 100).toFixed(0) : 0;
 
-                    document.getElementById("total-campaigns").innerText = currentPage;
+                    document.getElementById("total-campaigns").innerText = filtered; 
                     document.getElementById("percentage-campaigns").innerText = percentage + "%";
                 }
 
@@ -796,16 +802,20 @@
                 table.on("pageLoaded", updateCampaignStats);
                 table.on("dataProcessed", updateCampaignStats);
 
-                $("#global-search").on("keyup", function() {
+                // ✅ SEARCH + FILTER CHANGE HANDLERS
+                $("#global-search").on("keyup", function () {
                     table.setFilter(combinedFilter);
                 });
 
-                $("#status-filter, #inv-filter, #nrl-filter, #nra-filter, #fba-filter").on("change", function() {
-                    table.setFilter(combinedFilter);
-                });
+                $("#status-filter, #inv-filter, #nrl-filter, #nra-filter, #fba-filter")
+                    .on("change", function () {
+                        table.setFilter(combinedFilter);
+                    });
 
+                // ✅ INITIAL UPDATE
                 updateCampaignStats();
             });
+
 
             document.addEventListener("click", function(e) {
                 if (e.target.classList.contains("toggle-cols-btn")) {

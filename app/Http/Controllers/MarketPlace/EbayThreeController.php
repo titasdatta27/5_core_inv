@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Cache;
 use App\Models\ProductMaster;
 use App\Models\ShopifySku;
 use App\Models\EbayThreeDataView;
+use App\Models\Ebay3Metric;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -79,6 +80,9 @@ class EbayThreeController extends Controller
         // Get all unique SKUs from product master
         $skus = $productMasterRows->pluck('sku')->toArray();
 
+        $ebayMetrics = Ebay3Metric::select('sku', 'ebay_price', 'ebay_l30', 'ebay_l60', 'views', 'item_id')->whereIn('sku', $skus)->get()->keyBy('sku');
+
+
         // Fetch shopify data for these SKUs
         $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy('sku');
 
@@ -103,6 +107,8 @@ class EbayThreeController extends Controller
             $sku = $productMaster->sku;
             $isParent = stripos($sku, 'PARENT') !== false;
 
+            $ebayMetric = $ebayMetrics[$productMaster->sku] ?? null;
+
             // Initialize the data structure
             $processedItem = [
                 'SL No.' => $slNo++,
@@ -116,6 +122,10 @@ class EbayThreeController extends Controller
                     'Values' => $productMaster->Values
                 ]
             ];
+
+            //Start Ebay3 Data
+            $processedItem['eBay L30'] = $ebayMetric->ebay_l30 ?? 0;
+            $processedItem['eBay Price'] = $ebayMetric->ebay_price ?? 0;
 
             // Add values from product_master
             $values = $productMaster->Values ?: [];

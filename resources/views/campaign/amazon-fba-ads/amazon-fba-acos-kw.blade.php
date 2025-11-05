@@ -672,7 +672,7 @@
 
                     let invFilterVal = $("#inv-filter").val();
                     if (!invFilterVal) {
-                        // if (parseFloat(data.INV) === 0) return false;
+                        if (parseFloat(data.INV) === 0) return false;
                     } else if (invFilterVal === "INV_0") {
                         if (parseFloat(data.INV) !== 0) return false;
                     } else if (invFilterVal === "OTHERS") {
@@ -715,8 +715,10 @@
                     return true;
                 }
 
+                // ✅ SET FILTER
                 table.setFilter(combinedFilter);
 
+                // ✅ UPDATE COUNTS
                 function updateCampaignStats() {
                     let allRows = table.getData();
                     let filteredRows = allRows.filter(combinedFilter);
@@ -734,7 +736,8 @@
                 table.on("pageLoaded", updateCampaignStats);
                 table.on("dataProcessed", updateCampaignStats);
 
-                $("#global-search").on("keyup", function() {
+                // ✅ SEARCH + FILTER CHANGE HANDLERS
+                $("#global-search").on("keyup", function () {
                     table.setFilter(combinedFilter);
                 });
 

@@ -1,4 +1,4 @@
-@extends('layouts.vertical', ['title' => 'Amazon FBA - Correctly Utilized BGT KW', 'mode' => $mode ?? '', 'demo' => $demo ?? ''])
+@extends('layouts.vertical', ['title' => 'Ebay - AD CVR', 'mode' => $mode ?? '', 'demo' => $demo ?? ''])
 @section('css')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator.min.css" rel="stylesheet">
@@ -126,12 +126,16 @@
         .red-bg {
             color: #ff2727 !important;
         }
+        .price-cell input {
+            color: #000 !important;
+            background-color: #fff !important;
+        }
     </style>
 @endsection
 @section('content')
     @include('layouts.shared.page-title', [
-        'page_title' => 'Amazon FBA',
-        'sub_title' => 'Amazon FBA',
+        'page_title' => 'Ebay - AD CVR',
+        'sub_title' => 'Ebay - AD CVR',
     ])
     <div class="row">
         <div class="col-12">
@@ -141,7 +145,7 @@
                         <!-- Title -->
                         <h4 class="fw-bold text-primary mb-3 d-flex align-items-center">
                             <i class="fa-solid fa-chart-line me-2"></i>
-                            Correctly Utilized BGT KW
+                            AD CVR
                         </h4>
 
                         <!-- Filters Row -->
@@ -149,6 +153,13 @@
                             <!-- Inventory Filters -->
                             <div class="col-md-6">
                                 <div class="d-flex gap-2">
+                                    <select id="clicks-filter" class="form-select form-select-md" style="width: 175px;">
+                                        <option value="">Select CLICKS L90</option>
+                                        <option value="ALL">ALL</option>
+                                        <option value="CLICKS_L90">CLICKS L90 > 25</option>
+                                        <option value="OTHERS">OTHERS</option>
+                                    </select>
+
                                     <select id="inv-filter" class="form-select form-select-md">
                                         <option value="">Select INV</option>
                                         <option value="ALL">ALL</option>
@@ -185,9 +196,12 @@
                                     <button id="apr-all-sbid-btn" class="btn btn-info btn-sm d-none">
                                         APR ALL SBID
                                     </button>
+                                    <a href="javascript:void(0)" id="export-btn" class="btn btn-sm btn-success d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-file-export me-1"></i> Export Excel/CSV
+                                    </a>
                                     <button class="btn btn-success btn-md">
-                                        <i class="fa fa-arrow-down me-1"></i>
-                                        Need to decrease bids: <span id="total-campaigns" class="fw-bold ms-1 fs-4">0</span>
+                                        <i class="fa fa-arrow-up me-1"></i>
+                                        Need to increase bids: <span id="total-campaigns" class="fw-bold ms-1 fs-4">0</span>
                                     </button>
                                     <button class="btn btn-primary btn-md">
                                         <i class="fa fa-percent me-1"></i>
@@ -202,8 +216,7 @@
                             <div class="col-md-6">
                                 <div class="d-flex gap-2">
                                     <div class="input-group">
-                                        <input type="text" id="global-search" class="form-control form-control-md" 
-                                               placeholder="Search campaign...">
+                                        <input type="text" id="global-search" class="form-control form-control-md" placeholder="Search campaign...">
                                     </div>
                                     <select id="status-filter" class="form-select form-select-md" style="width: 140px;">
                                         <option value="">All Status</option>
@@ -241,14 +254,19 @@
 @section('script')
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://unpkg.com/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
+    <!-- SheetJS for Excel Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
+        function fmtPct(v) {
+            if (v === null || v === undefined || v === "") return "-";
+            const num = parseFloat(v);
+            if (isNaN(num)) return "-";
+
+            
+            return Math.round(num * 100) + "%";
+        }
+
         document.addEventListener("DOMContentLoaded", function() {
-
-            const invFilter  = document.querySelector("#inv-filter");
-            const nrlFilter  = document.querySelector("#nrl-filter");
-            const nraFilter  = document.querySelector("#nra-filter");
-            const fbaFilter  = document.querySelector("#fba-filter");
-
 
             const getDilColor = (value) => {
                 const percent = parseFloat(value) * 100;
@@ -260,12 +278,16 @@
 
             var table = new Tabulator("#budget-under-table", {
                 index: "Sku",
-                ajaxURL: "/amazon/fba/kw/ads/data",
-                layout: "fitData",
+                ajaxURL: "/ad-cvr-ebay-data",
+                layout: "fitDataFill",
                 movableColumns: true,
                 resizableColumns: true,
                 height: "700px",             
                 virtualDom: true,
+                initialSort:[
+                    {column:"parent", dir:"asc"},  
+                    {column:"sku", dir:"asc"},     
+                ],
                 rowFormatter: function(row) {
                     const data = row.getData();
                     const sku = data["Sku"] || '';
@@ -275,6 +297,13 @@
                     }
                 },
                 columns: [
+                    {
+                        formatter: "rowSelection",
+                        titleFormatter: "rowSelection",
+                        hozAlign: "center",
+                        headerSort: false,
+                        width: 50
+                    },
                     {
                         title: "Parent",
                         field: "parent"
@@ -320,8 +349,8 @@
                         visible: false
                     },
                     {
-                        title: "AL 30",
-                        field: "A_L30",
+                        title: "AL 90",
+                        field: "A_L90",
                         visible: false
                     },
                     {
@@ -329,11 +358,11 @@
                         field: "A DIL %",
                         formatter: function(cell) {
                             const data = cell.getData();
-                            const al30 = parseFloat(data.A_L30);
+                            const al90 = parseFloat(data.A_L90);
                             const inv = parseFloat(data.INV);
 
-                            if (!isNaN(al30) && !isNaN(inv) && inv !== 0) {
-                                const dilDecimal = (al30 / inv);
+                            if (!isNaN(al90) && !isNaN(inv) && inv !== 0) {
+                                const dilDecimal = (al90 / inv);
                                 const color = getDilColor(dilDecimal);
                                 return `<div class="text-center"><span class="dil-percent-value ${color}">${Math.round(dilDecimal * 100)}%</span></div>`;
                             }
@@ -442,180 +471,313 @@
                         formatter: (cell) => parseFloat(cell.getValue() || 0)
                     },
                     {
-                        title: "ACOS L30",
-                        field: "acos_L30",
+                        title: "ACOS L90",
+                        field: "acos_L90",
                         hozAlign: "right",
                         formatter: function(cell) {
-                            const value = cell.getRow().getData().acos_L30 || 0;
                             return `
-                                <span>${value.toFixed(0) + "%"}</span>
-                                <i class="fa fa-info-circle text-primary toggle-acos-cols-btn"
-                                style="cursor:pointer; margin-left:8px;"></i>
+                                <span>${parseFloat(cell.getValue() || 0).toFixed(0) + "%"}</span>
                             `;
                             
                         }
                     },
                     {
-                        title: "ACOS L15",
-                        field: "acos_L15",
-                        hozAlign: "right",
-                        visible: false,
-                        formatter: function(cell) {
-                            return parseFloat(cell.getValue() || 0).toFixed(0) + "%";
-                        }
-                    },
-                    {
-                        title: "ACOS L7",
-                        field: "acos_L7",
-                        hozAlign: "right",
-                        visible: false,
-                        formatter: function(cell) {
-                            return parseFloat(cell.getValue() || 0).toFixed(0) + "%";
-                        }
-                    },
-                    {
-                        title: "Clicks L30",
-                        field: "clicks_L30",
+                        title: "SPEND L90",
+                        field: "spend_l90",
                         hozAlign: "right",
                         formatter: function(cell) {
                             return `
-                                <span>${cell.getValue().toFixed(0)}</span>
-                                <i class="fa fa-info-circle text-primary toggle-clicks-cols-btn"
+                                <span>${parseFloat(cell.getValue() || 0).toFixed(0)}</span>
+                            `;
+                        }
+                    },
+                    {
+                        title: "SALES L90",
+                        field: "ad_sales_l90",
+                        hozAlign: "right",
+                        formatter: function(cell) {
+                            return `
+                                <span>${parseFloat(cell.getValue() || 0).toFixed(0)}</span>
+                            `;
+                        }
+                    },
+                    {
+                        title: "CLK L90",
+                        field: "clicks_L90",
+                        hozAlign: "right",
+                        formatter: function(cell) {
+                            return `
+                                <span>${parseFloat(cell.getValue() || 0).toFixed(0)}</span>
+                            `;
+                        }
+                    },
+                    // {
+                    //     title: "L7 CPC",
+                    //     field: "l7_cpc",
+                    //     hozAlign: "center",
+                    //     formatter: function(cell) {
+                    //         var row = cell.getRow().getData();
+                    //         var l7_cpc = parseFloat(row.l7_cpc) || 0;
+                    //         return l7_cpc.toFixed(2);
+                    //     }
+                    // },
+                    // {
+                    //     title: "SBGT",
+                    //     field: "sbgt",
+                    //     formatter: function(cell) {
+                    //         var row = cell.getRow().getData();
+                    //         var acos = parseFloat(row.acos_L30) || 0;
+                    //         const tpft = parseFloat(row.TPFT) || 0;
+                    //         const clicks = parseFloat(row.clicks_L30) || 0;
+                    //         var tpftInt = Math.floor(tpft);
+                    //         var sbgt;
+                            
+                    //         if(clicks > 25){
+                    //             if(acos >= 100){
+                    //                 sbgt = 1;
+                    //             }else if(acos >= 50 && acos <= 100){
+                    //                 sbgt = 2;
+                    //             }else if(acos >= 40 && acos <= 50){
+                    //                 sbgt = 3;
+                    //             }else if(acos >= 35 && acos <= 40){
+                    //                 sbgt = 4;
+                    //             }else if(acos >= 30 && acos <= 35){
+                    //                 sbgt = 5;
+                    //             }else if(acos >= 25 && acos <= 30){
+                    //                 sbgt = 6;
+                    //             }else if(acos >= 20 && acos <= 25){
+                    //                 sbgt = 7;
+                    //             }else if(acos >= 15 && acos <= 20){
+                    //                 sbgt = 8;
+                    //             }else if(acos >= 10 && acos <= 15){
+                    //                 sbgt = 9;
+                    //             }else if(acos < 10 && acos > 0){
+                    //                 sbgt = 10;
+                    //             }else{
+                    //                 sbgt = 3;
+                    //             }
+
+                    //             const l30 = parseFloat(row.L30);
+                    //             const inv = parseFloat(row.INV);
+                    //             let dilColor = "";
+                    //             if (!isNaN(l30) && !isNaN(inv) && inv !== 0) {
+                    //                 const dilDecimal = l30 / inv;
+                    //                 dilColor = getDilColor(dilDecimal);
+                    //             }
+
+                    //             if ((dilColor === "red" && tpftInt > 10) ||
+                    //                 (dilColor === "yellow" && tpftInt > 22) ||
+                    //                 (dilColor === "green" && tpftInt > 26) ||
+                    //                 (dilColor === "pink" && tpftInt > 30)) {
+                    //                 sbgt = sbgt * 2;
+                    //             }
+                    //         }else{
+                    //             sbgt = 5;
+                    //         }
+
+                    //         return `
+                    //             <input type="number" class="form-control form-control-sm text-center sbgt-input"  value="${sbgt}" min="1" max="10"  data-campaign-id="${row.campaign_id}">
+                    //         `;
+                    //     },
+                    // },
+                    // {
+                    //     title: "APR BGT",
+                    //     field: "apr_bgt",
+                    //     hozAlign: "center",
+                    //     formatter: function(cell, formatterParams, onRendered) {
+                    //         var value = cell.getValue() || 0;
+                    //         return `
+                    //             <div style="align-items:center; gap:5px;">
+                    //                 <button class="btn btn-primary update-row-btn">APR BGT</button>
+                    //             </div>
+                    //         `;
+                    //     },
+                    //     cellClick: function(e, cell) {
+                    //         if (e.target.classList.contains("update-row-btn")) {
+                    //             var rowData = cell.getRow().getData();
+                    //             var acos = parseFloat(rowData.acos_L30) || 0;  
+
+                    //             if(acos > 0){   
+                    //                 var sbgtInput = cell.getRow().getElement().querySelector('.sbgt-input');
+                    //                 var sbgtValue = parseFloat(sbgtInput.value) || 0;
+
+                    //                 updateBid(sbgtValue, rowData.campaign_id);
+                    //             } else {
+                    //                 console.log("Skipped because acos_L30 = 0 for campaign:", rowData.campaign_id);
+                    //             }
+                    //         }
+                    //     }
+
+                    // },
+                    {
+                        title: "ADS SOLD",
+                        field: "A_L90",
+                    },
+                    {
+                        title: "CVR%",
+                        field: "cvr_l90",
+                        formatter: function(cell){
+                            let value = parseFloat(cell.getValue()) || 0;
+                            let cvr = value.toFixed(0);
+                            let color = "";
+
+                            if (value < 5) {
+                                color = "red";
+                            } else if (value >= 5 && value <= 10) {
+                                color = "green";
+                            } else if (value > 10) {
+                                color = "pink";
+                            }
+
+                            return `
+                                <span class="dil-percent-value ${color}">
+                                    ${cvr}%
+                                </span>
+                            `;
+                        }
+                    },
+                    {
+                        title: "Price",
+                        field: "price"
+                    },
+                    {
+                        title: "LMP",
+                        field: "lmp",
+                        formatter: function(cell) {
+                            let lmp = cell.getValue();
+                            return `
+                                <span>${lmp}</span>
+                                <i class="fa fa-info-circle text-primary toggle-lmp-cols-btn" 
+                                data-lmp="${lmp}" 
                                 style="cursor:pointer; margin-left:8px;"></i>
                             `;
                         }
                     },
                     {
-                        title: "Clicks L15",
-                        field: "clicks_L15",
-                        hozAlign: "right",
-                        visible: false,
-                        formatter: function(cell) {
-                            return parseFloat(cell.getValue() || 0).toFixed(0);
-                        }
-                    },
-                    {
-                        title: "Clicks L7",
-                        field: "clicks_L7",
-                        hozAlign: "right",
-                        visible: false,
-                        formatter: function(cell) {
-                            return parseFloat(cell.getValue() || 0).toFixed(0);
-                        }
-                    },
-                    {
-                        title: "7 UB%",
-                        field: "l7_spend",
-                        hozAlign: "right",
-                        formatter: function(cell) {
-                            var row = cell.getRow().getData();
-                            var l7_spend = parseFloat(row.l7_spend) || 0;
-                            var budget = parseFloat(row.campaignBudgetAmount) || 0;
-                            var ub7 = budget > 0 ? (l7_spend / (budget * 7)) * 100 : 0;
-
-                            var td = cell.getElement();
-                            td.classList.remove('green-bg', 'pink-bg', 'red-bg');
-                            if (ub7 >= 70 && ub7 <= 90) {
-                                td.classList.add('green-bg');
-                            } else if (ub7 > 90) {
-                                td.classList.add('pink-bg');
-                            } else if (ub7 < 70) {
-                                td.classList.add('red-bg');
-                            }
-
-                            return ub7.toFixed(0) + "%";
-                        }
-                    },
-                    {
-                        title: "1 UB%",
-                        field: "l1_spend",
-                        hozAlign: "right",
-                        formatter: function(cell) {
-                            var row = cell.getRow().getData();
-                            var l1_spend = parseFloat(row.l1_spend) || 0;
-                            var budget = parseFloat(row.campaignBudgetAmount) || 0;
-                            var ub1 = budget > 0 ? (l1_spend / budget) * 100 : 0;
-
-                            var td = cell.getElement();
-                            td.classList.remove('green-bg', 'pink-bg', 'red-bg');
-                            if (ub1 >= 70 && ub1 <= 90) {
-                                td.classList.add('green-bg');
-                            } else if (ub1 > 90) {
-                                td.classList.add('pink-bg');
-                            } else if (ub1 < 70) {
-                                td.classList.add('red-bg');
-                            }
-
-                            return ub1.toFixed(0) + "%";
-                        }
-                    },
-                    {
-                        title: "L7 CPC",
-                        field: "l7_cpc",
-                        hozAlign: "center",
-                        formatter: function(cell) {
-                            var row = cell.getRow().getData();
-                            var l7_cpc = parseFloat(row.l7_cpc) || 0;
-                            return l7_cpc.toFixed(2);
-                        }
-                    },
-                    {
-                        title: "L1 CPC",
-                        field: "l1_cpc",
-                        hozAlign: "center",
-                        formatter: function(cell) {
-                            var row = cell.getRow().getData();
-                            var l1_cpc = parseFloat(row.l1_cpc) || 0;
-                            return l1_cpc.toFixed(2);
-                        }
-                    },
-                    {
-                        title: "SBID",
-                        field: "sbid",
-                        hozAlign: "center",
-                        formatter: function(cell) {
-                            var row = cell.getRow().getData();
-                            var l1_cpc = parseFloat(row.l1_cpc) || 0;
-                            var l7_cpc = parseFloat(row.l7_cpc) || 0;
-                            var sbid;
-
-                            sbid = (l1_cpc * 0.95).toFixed(2);
-
-                            // if(l1_cpc > l7_cpc) {
-                            //     sbid = (l1_cpc * 0.95).toFixed(2);
-                            // }else{
-                            //     sbid = (l7_cpc * 0.95).toFixed(2);
-                            // }
-                            return sbid;
-                        },
-                    },
-                    {
-                        title: "APR BID",
-                        field: "apr_bid",
-                        hozAlign: "center",
-                        formatter: function(cell, formatterParams, onRendered) {
-                            var value = cell.getValue() || 0;
-                            return `
-                                <div style="align-items:center; gap:5px;">
-                                    <button class="btn btn-primary update-row-btn">APR BID</button>
-                                </div>
-                            `;
-                        },
-                        cellClick: function(e, cell) {
-                            if (e.target.classList.contains("update-row-btn")) {
-                                var row = cell.getRow().getData();
-                                var l1_cpc = parseFloat(row.l1_cpc) || 0;
-                                var l7_cpc = parseFloat(row.l7_cpc) || 0;
-                                var sbid;
-                                if(l1_cpc > l7_cpc) {
-                                    sbid = (l1_cpc * 0.95).toFixed(2);
-                                }else{
-                                    sbid = (l7_cpc * 0.95).toFixed(2);
-                                }
-                                updateBid(sbid, row.campaign_id);
-                            }
-                        },
+                        title: "PRICE 1",
+                        field: "lmp_1",
                         visible: false
+                    },
+                    {
+                        title: "PRICE 2",
+                        field: "lmp_2",
+                        visible: false
+                    },
+                    {
+                        title: "PRICE 3",
+                        field: "lmp_3",
+                        visible: false
+                    },
+                    {
+                        title: "PRICE 4",
+                        field: "lmp_4",
+                        visible: false
+                    },
+                    {
+                        title: "PRICE 5",
+                        field: "lmp_5",
+                        visible: false
+                    },
+                    {
+                        title: "PRICE 6",
+                        field: "lmp_6",
+                        visible: false
+                    },
+                    {
+                        title: "PRICE 7",
+                        field: "lmp_7",
+                        visible: false
+                    },
+                    {
+                        title: "PRICE 8",
+                        field: "lmp_8",
+                        visible: false
+                    },
+                    {
+                        title: "PRICE 9",
+                        field: "lmp_9",
+                        visible: false
+                    },
+                    {
+                        title: "PRICE 10",
+                        field: "lmp_10",
+                        visible: false
+                    },
+                    {
+                        title: "PRICE 11",
+                        field: "lmp_11",
+                        visible: false
+                    },
+                    {
+                        title: "PFT",
+                        field: "PFT_percentage",
+                        hozAlign: "center",
+                        formatter: function(cell){
+                            let value = parseFloat(cell.getValue()) || 0;
+                            let pft = value.toFixed(0);
+
+                            if (pft < 10) {
+                                color = "red";
+                            } else if (pft >= 10 && pft < 15) {
+                                color = "yellow";
+                            } else if (pft >= 15 && pft < 20) {
+                                color = "blue";
+                            } else if (pft >= 20 && pft <= 40) {
+                                color = "green";
+                            } else if (pft > 40) {
+                                color = "pink";
+                            }
+
+                            return `
+                                <span class="dil-percent-value ${color}">
+                                    ${pft}%
+                                </span>
+                            `;
+                        }
+                    },
+                    {
+                        title: "GPFT",
+                        field: "gpft",
+                        hozAlign: "center",
+                        formatter: function(cell){
+                            let ship = Number(cell.getRow().getData().SHIP) || 0;
+                            let lp = Number(cell.getRow().getData().LP) || 0;
+
+                            const spend = parseFloat(cell.getRow().getData()['spend_l90']) || 0;
+                            const aL90 = Number(cell.getRow().getData()['A_L90']) || 0;
+                            const price = Number(cell.getRow().getData().price) || 0;
+                            const ebayAdUpdates = {{ $ebayAdUpdates ?? 0 }};
+
+                            let percentage = {{ $ebayPercentage ?? 0 }};
+                            let costPercentage = (percentage + ebayAdUpdates) / 100; 
+                            let netPft = (price * costPercentage) - ship - lp - (spend / aL90);
+                            
+                            const totalEbayPercentage = (percentage - ebayAdUpdates) / 100;
+                            const netGpft = (price * totalEbayPercentage) - ship - lp;
+                            let gPft = (netGpft / price) * 100;
+
+                            if(isNaN(gPft) || !isFinite(gPft)) {
+                                gPft = 0;
+                            }
+
+                            if (gPft < 10) {
+                                color = "red";
+                            } else if (gPft >= 10 && gPft < 15) {
+                                color = "yellow";
+                            } else if (gPft >= 15 && gPft < 20) {
+                                color = "blue";
+                            } else if (gPft >= 20 && gPft <= 40) {
+                                color = "green";
+                            } else if (gPft > 40) {
+                                color = "pink";
+                            }
+
+                            return `
+                                <span class="dil-percent-value ${color}">
+                                    ${gPft.toFixed(0)}%
+                                </span>
+                            `;
+                        }
                     },
                     {
                         title: "TPFT%",
@@ -644,7 +806,71 @@
                                 </span>
                             `;
                         }
-                    }
+                    },
+                    {
+                        title: "SPRICE",
+                        field: "ebay_price",
+                        editor: "input",
+                        cssClass: "price-cell",
+                        formatter: function(cell){
+                            let value = parseFloat(cell.getValue()) || 0;
+                            return `<span class="dil-percent-value">$${value.toFixed(2)}</span>`;
+                        }
+                    },
+                    {
+                        title: "SPFT",
+                        field: "ebay_pft",
+                        formatter: function(cell) {
+                            let value = parseFloat(cell.getValue()) || 0;
+                            let spft = value.toFixed(0);
+                            const pftClass = spft > 20 ? 'positive' : spft < 10 ? 'negative' : 'neutral';
+
+                            const val = Number(spft);
+                            let color = '#000000';
+
+                            if (isFinite(val) && !isNaN(val)) {
+                                if (val <= 0) color = '#ff0000';
+                                else if (val > 0 && val <= 10) color = '#ff0000';
+                                else if (val > 10 && val <= 14) color = '#fd7e14';
+                                else if (val > 14 && val <= 19) color = '#0d6efd';
+                                else if (val > 19 && val <= 40) color = '#198754';
+                                else if (val > 40) color = '#800080';
+                            }
+
+                            return `
+                                <div class="value-indicator ${pftClass}" style="color: ${color};">
+                                    ${fmtPct(spft)}
+                                </div>
+                            `;
+                        }
+                    },
+                    {
+                        title: "SROI",
+                        field: "ebay_roi",
+                        formatter: function(cell){
+                            let value = parseFloat(cell.getValue()) || 0;
+                            let sroi = value.toFixed(0);
+                            const roiClass = sroi > 30 ? 'positive' : sroi < 15 ? 'negative' : 'neutral';
+
+                            const val = Number(sroi);
+                            let color = '#000000';
+
+                            if (isFinite(val) && !isNaN(val)) {
+                                if (val <= 0) color = '#ff0000';
+                                else if (val > 0 && val <= 10) color = '#ff0000';
+                                else if (val > 10 && val <= 14) color = '#fd7e14';
+                                else if (val > 14 && val <= 19) color = '#0d6efd';
+                                else if (val > 19 && val <= 40) color = '#198754';
+                                else if (val > 40) color = '#800080';
+                            }
+
+                            return `
+                                <div class="value-indicator ${roiClass}" style="color: ${color};">
+                                    ${fmtPct(sroi)}
+                                </div>
+                            `;
+                        }
+                    },
                 ],
                 ajaxResponse: function(url, params, response) {
                     return response.data;
@@ -659,30 +885,52 @@
                 }
             });
 
-            table.on("cellEdited", function(cell){
-                if(cell.getField() === "crnt_bid"){
-                    var row = cell.getRow();
-                    var rowData = row.getData();
-                    var newCrntBid = parseFloat(rowData.crnt_bid) || 0;
+            table.on("cellEdited", function(cell) {
+                const field = cell.getField();
+
+                if (field === "ebay_price") {
+                    const row = cell.getRow();
+                    const data = row.getData();
+
+                    const ebay_price = Number(data.ebay_price) || 0;
+                    const lp   = Number(data.LP) || 0;
+                    const ship = Number(data.SHIP) || 0;
+
+                    const ebay_pft = ebay_price > 0
+                        ? ((ebay_price * 0.70 - lp - ship) / ebay_price)
+                        : 0;
+
+                    const ebay_roi = (lp > 0 && ebay_price > 0)
+                        ? ((ebay_price * 0.70 - lp - ship) / lp)
+                        : 0;
 
                     row.update({
-                        sbid: (newCrntBid * 0.9).toFixed(2)
+                        ebay_pft: ebay_pft,
+                        ebay_roi: ebay_roi
                     });
 
-                    $.ajax({
-                        url: '/update-amazon-sp-bid-price', 
+                    fetch('/update-ebay-price', {
                         method: 'POST',
-                        data: {
-                            id: rowData.campaign_id,
-                            crnt_bid: newCrntBid,
-                            _token: '{{ csrf_token() }}'
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document
+                                .querySelector('meta[name="csrf-token"]')
+                                .getAttribute('content')
                         },
-                        success: function(response){
-                            console.log(response);
-                        },
-                        error: function(xhr){
-                            alert('Error updating CRNT BID');
-                        }
+                        body: JSON.stringify({
+                            sku: data.sku,
+                            price: ebay_price
+                        })
+                    })
+                    .then(res => {
+                        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                        return res.json();
+                    })
+                    .then(result => {
+                        console.log('✅ Ebay price updated successfully:', result.message || result);
+                    })
+                    .catch(err => {
+                        console.error('❌ Update failed:', err);
                     });
                 }
             });
@@ -693,7 +941,7 @@
                     let field = e.target.getAttribute("data-field");
                     let value = e.target.value;
 
-                    fetch('/update-amazon-nr-nrl-fba', {
+                    fetch('/update-ebay-nr-nrl-fba', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -713,29 +961,34 @@
                 }
             });
 
-
             table.on("tableBuilt", function() {
 
                 function combinedFilter(data) {
-                    var budget = parseFloat(data.campaignBudgetAmount) || 0;
-                    var l7_spend = parseFloat(data.l7_spend || 0);
-                    var l1_spend = parseFloat(data.l1_spend || 0);
 
-                    var ub7 = budget > 0 ? (l7_spend / (budget * 7)) * 100 : 0;
-                    var ub1 = budget > 0 ? (l1_spend / budget) * 100 : 0;
-
-                    if (!(ub7 >= 70 && ub7 <= 90)) return false;
-
-                    // ✅ SEARCH FILTER
                     let searchVal = $("#global-search").val()?.toLowerCase() || "";
                     if (searchVal && !(data.campaignName?.toLowerCase().includes(searchVal))) {
                         return false;
                     }
 
-                    // ✅ STATUS FILTER
                     let statusVal = $("#status-filter").val();
                     if (statusVal && data.campaignStatus !== statusVal) {
                         return false;
+                    }
+
+                    let clicksFilterVal = $("#clicks-filter").val();
+                    let clicks_L90 = parseFloat(data.clicks_L90) || 0;
+
+                    if (!clicksFilterVal) {
+                        if (clicks_L90 <= 25) return false;
+                    } else {
+                        // When user selects a filter from dropdown
+                        if (clicksFilterVal === "CLICKS_L90") {
+                            if (clicks_L90 <= 25) return false;
+                        } else if (clicksFilterVal === "ALL") {
+                            // Show all rows
+                        } else if (clicksFilterVal === "OTHERS") {
+                            if (clicks_L90 > 25) return false;
+                        }
                     }
 
                     let invFilterVal = $("#inv-filter").val();
@@ -783,10 +1036,8 @@
                     return true;
                 }
 
-                // ✅ SET FILTER
                 table.setFilter(combinedFilter);
 
-                // ✅ UPDATE COUNTS
                 function updateCampaignStats() {
                     let allRows = table.getData();
                     let filteredRows = allRows.filter(combinedFilter);
@@ -804,17 +1055,14 @@
                 table.on("pageLoaded", updateCampaignStats);
                 table.on("dataProcessed", updateCampaignStats);
 
-                // ✅ SEARCH + FILTER CHANGE HANDLERS
-                $("#global-search").on("keyup", function () {
+                $("#global-search").on("keyup", function() {
                     table.setFilter(combinedFilter);
                 });
 
-                $("#status-filter, #inv-filter, #nrl-filter, #nra-filter, #fba-filter")
-                    .on("change", function () {
-                        table.setFilter(combinedFilter);
-                    });
+                $("#status-filter,#clicks-filter,#inv-filter, #nrl-filter, #nra-filter, #fba-filter").on("change", function() {
+                    table.setFilter(combinedFilter);
+                });
 
-                // ✅ INITIAL UPDATE
                 updateCampaignStats();
             });
 
@@ -822,7 +1070,22 @@
                 if (e.target.classList.contains("toggle-cols-btn")) {
                     let btn = e.target;
 
-                    let colsToToggle = ["INV", "L30", "DIL %", "A_L30", "A DIL %", "NRL", "NRA", "FBA"];
+                    let colsToToggle = ["INV", "L30", "DIL %", "A_L90", "A DIL %", "NRL", "NRA", "FBA"];
+
+                    colsToToggle.forEach(colName => {
+                        let col = table.getColumn(colName);
+                        if (col) {
+                            col.toggle();
+                        }
+                    });
+                }
+            });
+
+            document.addEventListener("click", function(e) {
+                if (e.target.classList.contains("toggle-lmp-cols-btn")) {
+                    let btn = e.target;
+
+                    let colsToToggle = ["lmp_1", "lmp_2", "lmp_3", "lmp_4", "lmp_5", "lmp_6", "lmp_7", "lmp_8", "lmp_9", "lmp_10", "lmp_11"];
 
                     colsToToggle.forEach(colName => {
                         let col = table.getColumn(colName);
@@ -846,7 +1109,6 @@
                 }
             });
 
-
             document.addEventListener("click", function(e) {
                 if (e.target.classList.contains("toggle-clicks-cols-btn")) {
                     let colsToToggle = ["clicks_L15", "clicks_L7"]; 
@@ -861,34 +1123,35 @@
             });
 
             document.getElementById("apr-all-sbid-btn").addEventListener("click", function(){
+
                 const overlay = document.getElementById("progress-overlay");
                 overlay.style.display = "flex";
 
-                var filteredData = table.getSelectedRows();
+                var filteredData = table.getSelectedRows(); 
                 
                 var campaignIds = [];
-                var bids = [];
+                var bgts = [];
 
                 filteredData.forEach(function(row){
                     var rowEl = row.getElement();
-                    if(rowEl && rowEl.offsetParent !== null){
+                    if(rowEl && rowEl.offsetParent !== null){  
                         var rowData = row.getData();
-                        var l1_cpc = parseFloat(rowData.l1_cpc) || 0;
-                        var l7_cpc = parseFloat(rowData.l7_cpc) || 0;
-                        var sbid;
-                        if(l1_cpc > l7_cpc) {
-                            sbid = (l1_cpc * 0.95).toFixed(2);
-                        }else{
-                            sbid = (l7_cpc * 0.95).toFixed(2);
-                        }
+                        var acos = parseFloat(rowData.acos_L90) || 0;
 
-                        campaignIds.push(rowData.campaign_id);
-                        bids.push(sbid);
+                        if(acos > 0){
+                            var sbgtInput = rowEl.querySelector('.sbgt-input');
+                            var sbgtValue = sbgtInput ? parseFloat(sbgtInput.value) || 0 : 0;
+
+                            campaignIds.push(rowData.campaign_id);
+                            bgts.push(sbgtValue);
+                        }
                     }
                 });
+
                 console.log("Campaign IDs:", campaignIds);
-                console.log("Bids:", bids);
-                fetch('/update-keywords-bid-price', {
+                console.log("Bids:", bgts);
+
+                fetch('/update-ebay-campaign-bgt-price', {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -896,30 +1159,34 @@
                     },
                     body: JSON.stringify({
                         campaign_ids: campaignIds,
-                        bids: bids
+                        bgts: bgts
                     })
                 })
                 .then(res => res.json())
                 .then(data => {
                     console.log("Backend response:", data);
                     if(data.status === 200){
-                        alert("Keywords updated successfully!");
+                        alert("Campaign budget updated successfully!");
                     } else {
                         alert("Something went wrong: " + data.message);
                     }
                 })
-                .catch(err => console.error(err))
+                .catch(err => {
+                    console.error(err);
+                    alert("Request failed: " + err.message);
+                })
                 .finally(() => {
                     overlay.style.display = "none";
                 });
             });
 
-            function updateBid(aprBid, campaignId) {
+            function updateBid(sbgtValue, campaignId) {
                 const overlay = document.getElementById("progress-overlay");
                 overlay.style.display = "flex";
 
-                console.log("Updating bid for Campaign ID:", campaignId, "New Bid:", aprBid);
-                fetch('/update-keywords-bid-price', {
+                console.log("Updating bid for Campaign ID:", campaignId, "New Bid:", sbgtValue);
+
+                fetch('/update-ebay-campaign-bgt-price', {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -927,24 +1194,43 @@
                     },
                     body: JSON.stringify({
                         campaign_ids: [campaignId],
-                        bids: [aprBid]
+                        bgts: [sbgtValue]
                     })
                 })
                 .then(res => res.json())
                 .then(data => {
                     console.log("Backend response:", data);
                     if(data.status === 200){
-                        alert("Keywords updated successfully!");
+                        alert("Campaign budget updated successfully!");
                     } else {
                         alert("Something went wrong: " + data.message);
                     }
                 })
-                .catch(err => console.error(err))
+                .catch(err => {
+                    console.error(err);
+                    alert("Request failed: " + err.message);
+                })
                 .finally(() => {
                     overlay.style.display = "none";
                 });
             }
 
+            document.getElementById("export-btn").addEventListener("click", function () {
+                let allData = table.getData("active"); 
+
+                if (allData.length === 0) {
+                    alert("No data available to export!");
+                    return;
+                }
+
+                let exportData = allData.map(row => ({ ...row }));
+
+                let ws = XLSX.utils.json_to_sheet(exportData);
+                let wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Campaigns");
+
+                XLSX.writeFile(wb, "ebay_acos_kw_ads.xlsx");
+            });
 
             document.body.style.zoom = "78%";
         });

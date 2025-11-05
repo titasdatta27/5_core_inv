@@ -21,5 +21,7 @@ class AmazonDatasheet extends Model
         'asin',
         'sku',
         'price',
+        'organic_views',
+        'sold',
     ];
 }
