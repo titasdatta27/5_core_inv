@@ -22,17 +22,22 @@ class SyncShopifyAllChannelsData extends Command
     {
         $this->info('Starting sync into shopify_all_channels_data...');
 
-        // Get all unique SKUs from ProductMaster and ReverbProduct
+        // Get all unique SKUs from ProductMaster
         $productMasterSkus = ProductMaster::pluck('sku', 'parent')->toArray();
+        
+        // Get SKUs from ReverbProduct that are not in ProductMaster
         $reverbSkus = ReverbProduct::whereNotIn('sku', array_keys($productMasterSkus))->pluck('sku')->toArray();
         
-        // 🆕 Also get SKUs from temu_metrics that might not be in ProductMaster/Reverb
-        $temuSkus = DB::table('temu_metrics')
-            ->whereNotIn('sku', array_merge(array_keys($productMasterSkus), $reverbSkus))
+        // 🆕 Get ALL SKUs from temu_metrics (we'll filter later)
+        $allCombinedSkus = array_unique(array_merge(array_keys($productMasterSkus), $reverbSkus));
+        
+        // Get Temu SKUs that are NOT in the combined list
+        $temuOnlySkus = DB::table('temu_metrics')
+            ->whereNotIn('sku', $allCombinedSkus)
             ->pluck('sku')
             ->toArray();
         
-        // Combine both sets of SKUs
+        // Combine all SKUs
         $allSkus = array_merge(
             array_map(function($sku, $parent) {
                 return ['sku' => $sku, 'parent' => $parent];
@@ -42,10 +47,11 @@ class SyncShopifyAllChannelsData extends Command
             }, $reverbSkus),
             array_map(function($sku) {
                 return ['sku' => $sku, 'parent' => null];
-            }, $temuSkus)
+            }, $temuOnlySkus)
         );
         
         $this->info('Total SKUs to process: ' . count($allSkus));
+        $this->info('ProductMaster: ' . count($productMasterSkus) . ' | Reverb only: ' . count($reverbSkus) . ' | Temu only: ' . count($temuOnlySkus));
 
         // Process in chunks
         collect($allSkus)->chunk(1000)->each(function ($products) {
