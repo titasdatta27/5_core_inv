@@ -126,11 +126,9 @@ class AutoUpdateAmazonBgtHl extends Command
             }else if ($acos < 10) {
                 $sbgt = 10;        
             } else if ($acos >= 10 && $acos < 15) {
-                $sbgt = 9;         
-            } else if ($acos >= 15 && $acos < 20) {
                 $sbgt = 8;         
-            } else if ($acos >= 20 && $acos <= 50) {
-                $sbgt = 2;        
+            } else if ($acos >= 15 && $acos < 20) {
+                $sbgt = 6;         
             } else {  
                 $sbgt = 1;
             }

@@ -361,7 +361,7 @@
                         }
                     },
                     {
-                        title: "IMP L30",
+                        title: 'IMP L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="imp-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "impressions_L30",
                         hozAlign: "right",
                         formatter: function(cell) {
@@ -375,7 +375,7 @@
                         }
                     },
                     {
-                        title: "IMP L60",
+                        title: 'IMP L60 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="imp-l60-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "impressions_L60",
                         hozAlign: "right",
                         formatter: function(cell) {
@@ -386,7 +386,7 @@
                         visible: false
                     },
                     {
-                        title: "IMP L15",
+                        title: 'IMP L15 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="imp-l15-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "impressions_L15",
                         hozAlign: "right",
                         formatter: function(cell) {
@@ -397,7 +397,7 @@
                         visible: false
                     },
                     {
-                        title: "IMP L7",
+                        title: 'IMP L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="imp-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "impressions_L7",
                         hozAlign: "right",
                         formatter: function(cell) {
@@ -409,7 +409,7 @@
                         visible: false
                     },
                     {
-                        title: "Clicks L30",
+                        title: 'Clicks L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="clicks-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "clicks_L30",
                         hozAlign: "right",
                         formatter: function(cell) {
@@ -426,7 +426,7 @@
                         }
                     },
                     {
-                        title: "Clicks L60",
+                        title: 'Clicks L60 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="clicks-l60-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "clicks_L60",
                         hozAlign: "right",
                         formatter: function(cell) {
@@ -441,7 +441,7 @@
                         visible: false
                     },
                     {
-                        title: "Clicks L15",
+                        title: 'Clicks L15 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="clicks-l15-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "clicks_L15",
                         hozAlign: "right",
                         formatter: function(cell) {
@@ -456,7 +456,7 @@
                         visible: false
                     },
                     {
-                        title: "Clicks L7",
+                        title: 'Clicks L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="clicks-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "clicks_L7",
                         hozAlign: "right",
                         formatter: function(cell) {
@@ -471,7 +471,7 @@
                         visible: false
                     },
                     {
-                        title: "Spend L30",
+                        title: 'Spend L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="spend-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "spend_L30",
                         hozAlign: "right",
                         formatter: function(cell) {
@@ -485,7 +485,7 @@
                         }
                     },
                     {
-                        title: "Spend L60",
+                        title: 'Spend L60 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="spend-l60-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "spend_L60",
                         hozAlign: "right",
                         formatter: function(cell) {
@@ -497,7 +497,7 @@
                         visible: false
                     },
                     {
-                        title: "Spend L15",
+                        title: 'Spend L15 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="spend-l15-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "spend_L15",
                         hozAlign: "right",
                         formatter: function(cell) {
@@ -509,7 +509,7 @@
                         visible: false
                     },
                     {
-                        title: "Spend L7",
+                        title: 'Spend L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="spend-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "spend_L7",
                         hozAlign: "right",
                         formatter: function(cell) {
@@ -521,7 +521,7 @@
                         visible: false
                     },
                     {
-                        title: "Ad Sales L30",
+                        title: 'Ad Sales L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="ad-sales-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "ad_sales_L30",
                         hozAlign: "right",
                         formatter: function(cell) {
@@ -535,7 +535,7 @@
                         }
                     },
                     {
-                        title: "Ad Sales L60",
+                        title: 'Ad Sales L60 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="ad-sales-l60-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "ad_sales_L60",
                         hozAlign: "right",
                         formatter: function(cell) {
@@ -547,7 +547,7 @@
                         visible: false
                     },
                     {
-                        title: "Ad Sales L15",
+                        title: 'Ad Sales L15 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="ad-sales-l15-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "ad_sales_L15",
                         hozAlign: "right",
                         formatter: function(cell) {
@@ -559,7 +559,7 @@
                         visible: false
                     },
                     {
-                        title: "Ad Sales L7",
+                        title: 'Ad Sales L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="ad-sales-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "ad_sales_L7",
                         hozAlign: "right",
                         formatter: function(cell) {
@@ -571,7 +571,7 @@
                         visible: false
                     },
                     {
-                        title: "Ad Sold L30",
+                        title: 'Ad Sold L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="ad-sold-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "ad_sold_L30",
                         hozAlign: "right",
                         formatter: function(cell) {
@@ -585,7 +585,7 @@
                         }
                     },
                     {
-                        title: "Ad Sold L60",
+                        title: 'Ad Sold L60 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="ad-sold-l60-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "ad_sold_L60",
                         hozAlign: "right",
                         formatter: function(cell) {
@@ -597,7 +597,7 @@
                         visible: false
                     },
                     {
-                        title: "Ad Sold L15",
+                        title: 'Ad Sold L15 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="ad-sold-l15-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "ad_sold_L15",
                         hozAlign: "right",
                         formatter: function(cell) {
@@ -609,7 +609,7 @@
                         visible: false
                     },
                     {
-                        title: "Ad Sold L7",
+                        title: 'Ad Sold L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="ad-sold-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "ad_sold_L7",
                         hozAlign: "right",
                         formatter: function(cell) {
@@ -621,7 +621,7 @@
                         visible: false
                     },
                     {
-                        title: "ACOS L30",
+                        title: 'ACOS L30',
                         field: "acos_L30",
                         hozAlign: "right",
                         formatter: function(cell) {
@@ -751,7 +751,7 @@
                         visible: false
                     },
                     {
-                        title: "CPC L30",
+                        title: 'CPC L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="cpc-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "cpc_L30",
                         hozAlign: "center",
                         formatter: function(cell) {
@@ -769,7 +769,7 @@
                         }
                     },
                     {
-                        title: "CPC L60",
+                        title: 'CPC L60 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="cpc-l60-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "cpc_L60",
                         hozAlign: "center",
                         formatter: function(cell) {
@@ -780,7 +780,7 @@
                         visible: false
                     },
                     {
-                        title: "CPC L15",
+                        title: 'CPC L15 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="cpc-l15-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "cpc_L15",
                         hozAlign: "center",
                         formatter: function(cell) {
@@ -791,7 +791,7 @@
                         visible: false
                     },
                     {
-                        title: "CPC L7",
+                        title: 'CPC L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="cpc-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                         field: "cpc_L7",
                         hozAlign: "center",
                         formatter: function(cell) {
@@ -1052,8 +1052,152 @@
                     let total = allRows.length;
                     let filtered = filteredRows.length;
 
-                    let percentage = total > 0 ? ((filtered / total) * 100).toFixed(0) : 0;
+                    // Improved helper function to handle both numbers and strings
+                    const calculateTotal = (field) => {
+                        return filteredRows.reduce((sum, row) => {
+                            //const sku = (row.sku || "").toLowerCase().trim();
+                            //if (!sku.includes("parent ")) {
+                                let value = row[field];
+                                // Ensure value is a number
+                                if (typeof value === 'string') {
+                                    value = parseFloat(value) || 0;
+                                }
+                                return sum + (value || 0);
+                            //}
+                            //return sum;
+                        }, 0);
+                    };
 
+                    let impl30Total = calculateTotal('impressions_L30');
+                    let impl60Total = calculateTotal('impressions_L60');
+                    let impl15Total = calculateTotal('impressions_L15');
+                    let impl7Total = calculateTotal('impressions_L7');
+                    let clicksl30Total = calculateTotal('clicks_L30');
+                    let clicksl60Total = calculateTotal('clicks_L60');
+                    let clicksl15Total = calculateTotal('clicks_L15');
+                    let clicksL7Total = calculateTotal('clicks_L7');
+                    let spendL30Total = calculateTotal('spend_L30');
+                    let spendL60Total = calculateTotal('spend_L60');
+                    let spendl15Total = calculateTotal('spend_L15');
+                    let spendl7Total = calculateTotal('spend_L7');
+                    let adSalesl30Total = calculateTotal('ad_sales_L30');
+                    let adSalesl60Total = calculateTotal('ad_sales_L60');
+                    let adSalesl15Total = calculateTotal('ad_sales_L15');
+                    let adSalesl7Total = calculateTotal('ad_sales_L7');
+                    let adSoldl30Total = calculateTotal('ad_sold_L30');
+                    let adSoldl60Total = calculateTotal('ad_sold_L60');
+                    let adSoldl15Total = calculateTotal('ad_sold_L15');
+                    let adSoldl7Total = calculateTotal('ad_sold_L7');
+                    let cpcL30Total = calculateTotal('cpc_L30');
+                    let cpcL60Total = calculateTotal('cpc_L60');
+                    let cpcL15Total = calculateTotal('cpc_L15');
+                    let cpcl7Total = calculateTotal('cpc_L7');
+                        
+
+                       
+                    document.getElementById("cpc-l7-total").innerText = cpcl7Total > 0 ? ` (${cpcl7Total.toFixed(2)})` : "";
+                    document.getElementById("cpc-l7-total").style.display = cpcl7Total > 0 ? "inline" : "none";
+                    
+                    document.getElementById("cpc-l15-total").innerText = cpcL15Total > 0 ? ` (${cpcL15Total.toFixed(2)})` : "";
+                    document.getElementById("cpc-l15-total").style.display = cpcL15Total > 0 ? "inline" : "none";
+
+
+                    document.getElementById("cpc-l60-total").innerText = cpcL60Total > 0 ? ` (${cpcL60Total.toFixed(2)})` : "";
+                    document.getElementById("cpc-l60-total").style.display = cpcL60Total > 0 ? "inline" : "none";
+                  
+                    
+                    document.getElementById("cpc-l7-total").innerText = cpcL30Total > 0 ? ` (${cpcL30Total.toFixed(2)})` : "";
+                    document.getElementById("cpc-l7-total").style.display = cpcL30Total > 0 ? "inline" : "none";
+
+                    
+                    document.getElementById("ad-sold-l7-total").innerText = adSoldl7Total > 0 ? ` (${adSoldl7Total.toFixed(2)})` : "";
+                    document.getElementById("ad-sold-l7-total").style.display = adSoldl7Total > 0 ? "inline" : "none";
+
+                     
+                    document.getElementById("ad-sold-l15-total").innerText = adSoldl15Total > 0 ? ` (${adSoldl15Total.toFixed(2)})` : "";
+                    document.getElementById("ad-sold-l15-total").style.display = adSoldl15Total > 0 ? "inline" : "none";
+
+                      
+                    document.getElementById("ad-sold-l60-total").innerText = adSoldl60Total > 0 ? ` (${adSoldl60Total.toFixed(2)})` : "";
+                    document.getElementById("ad-sold-l60-total").style.display = adSoldl60Total > 0 ? "inline" : "none";
+
+                    
+                    document.getElementById("ad-sold-l30-total").innerText = adSoldl30Total > 0 ? ` (${adSoldl30Total.toFixed(2)})` : "";
+                    document.getElementById("ad-sold-l30-total").style.display = adSoldl30Total > 0 ? "inline" : "none";
+
+                    
+                    document.getElementById("ad-sales-l7-total").innerText = adSalesl7Total > 0 ? ` (${adSalesl7Total.toFixed(2)})` : "";
+                    document.getElementById("ad-sales-l7-total").style.display = adSalesl7Total > 0 ? "inline" : "none";
+
+                    
+                    document.getElementById("ad-sales-l15-total").innerText = adSalesl15Total > 0 ? ` (${adSalesl15Total.toFixed(2)})` : "";
+                    document.getElementById("ad-sales-l15-total").style.display = adSalesl15Total > 0 ? "inline" : "none";
+
+                    
+                    document.getElementById("ad-sales-l60-total").innerText = adSalesl60Total > 0 ? ` (${adSalesl60Total.toFixed(2)})` : "";
+                    document.getElementById("ad-sales-l60-total").style.display = adSalesl60Total > 0 ? "inline" : "none";
+
+                     
+                    document.getElementById("ad-sales-l30-total").innerText = adSalesl30Total > 0 ? ` (${adSalesl30Total.toFixed(2)})` : "";
+                    document.getElementById("ad-sales-l30-total").style.display = adSalesl30Total > 0 ? "inline" : "none";
+
+
+                    document.getElementById("spend-l7-total").innerText = spendl7Total > 0 ? ` (${spendl7Total.toFixed(2)})` : "";
+                    document.getElementById("spend-l7-total").style.display = spendl7Total > 0 ? "inline" : "none";
+                    
+                    
+                    document.getElementById("spend-l15-total").innerText = spendl15Total > 0 ? ` (${spendl15Total.toFixed(2)})` : "";
+                    document.getElementById("spend-l15-total").style.display = spendl15Total > 0 ? "inline" : "none";
+
+                     
+                    document.getElementById("spend-l60-total").innerText = spendL60Total > 0 ? ` (${spendL60Total.toFixed(2)})` : "";
+                    document.getElementById("spend-l60-total").style.display = spendL60Total > 0 ? "inline" : "none";
+
+                    
+                    document.getElementById("spend-l30-total").innerText = spendL30Total > 0 ? ` (${spendL30Total.toFixed(2)})` : "";
+                    document.getElementById("spend-l30-total").style.display = spendL30Total > 0 ? "inline" : "none";
+                    
+                    
+                    document.getElementById("clicks-l7-total").innerText = clicksL7Total > 0 ? ` (${clicksL7Total.toFixed(2)})` : "";
+                    document.getElementById("clicks-l7-total").style.display = clicksL7Total > 0 ? "inline" : "none";
+                     
+                    
+                    document.getElementById("clicks-l15-total").innerText = clicksl15Total > 0 ? ` (${clicksl15Total.toFixed(2)})` : "";
+                    document.getElementById("clicks-l15-total").style.display = clicksl15Total > 0 ? "inline" : "none";
+
+
+                    document.getElementById("imp-l30-total").innerText = impl30Total > 0 ? ` (${impl30Total.toFixed(2)})` : "";
+                    document.getElementById("imp-l30-total").style.display = impl30Total > 0 ? "inline" : "none";
+
+                    document.getElementById("imp-l60-total").innerText = impl60Total > 0 ? ` (${impl60Total.toFixed(2)})` : "";
+                    document.getElementById("imp-l60-total").style.display = impl60Total > 0 ? "inline" : "none";
+
+                    document.getElementById("imp-l15-total").innerText = impl15Total > 0 ? ` (${impl15Total.toFixed(2)})` : "";
+                    document.getElementById("imp-l15-total").style.display = impl15Total > 0 ? "inline" : "none";
+
+                    document.getElementById("imp-l7-total").innerText = impl7Total > 0 ? ` (${impl7Total.toFixed(2)})` : "";
+                    document.getElementById("imp-l7-total").style.display = impl7Total > 0 ? "inline" : "none";
+
+                    document.getElementById("clicks-l30-total").innerText = clicksl30Total > 0 ? ` (${clicksl30Total.toFixed(2)})` : "";
+                    document.getElementById("clicks-l30-total").style.display = clicksl30Total > 0 ? "inline" : "none";
+
+
+                    document.getElementById("clicks-l60-total").innerText = clicksl60Total > 0 ? ` (${clicksl60Total.toFixed(2)})` : "";
+                    document.getElementById("clicks-l60-total").style.display = clicksl60Total > 0 ? "inline" : "none";
+                    
+                    
+   
+                     
+                    
+                    
+ 
+                    
+ 
+                    
+
+
+
+                    let percentage = total > 0 ? ((filtered / total) * 100).toFixed(0) : 0;
                     const totalEl = document.getElementById("total-campaigns");
                     const percentageEl = document.getElementById("percentage-campaigns");
 
