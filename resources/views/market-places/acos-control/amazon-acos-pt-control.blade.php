@@ -521,17 +521,17 @@
                                 if(acos >= 100){
                                     sbgt = 1;
                                 }else if(acos >= 50 && acos <= 100){
-                                    sbgt = 2;
+                                    sbgt = 1;
                                 }else if(acos >= 40 && acos <= 50){
-                                    sbgt = 3;
+                                    sbgt = 1;
                                 }else if(acos >= 35 && acos <= 40){
-                                    sbgt = 4;
+                                    sbgt = 2;
                                 }else if(acos >= 30 && acos <= 35){
-                                    sbgt = 5;
+                                    sbgt = 3;
                                 }else if(acos >= 25 && acos <= 30){
-                                    sbgt = 6;
+                                    sbgt = 5;
                                 }else if(acos >= 20 && acos <= 25){
-                                    sbgt = 7;
+                                    sbgt = 6;
                                 }else if(acos >= 15 && acos <= 20){
                                     sbgt = 8;
                                 }else if(acos >= 10 && acos <= 15){

@@ -120,12 +120,12 @@ class AutoUpdateAmazonBgtKw extends Command
 
             // Basic SBGT
             if ($acos >= 100) $sbgt = 1;
-            elseif ($acos >= 50) $sbgt = 2;
-            elseif ($acos >= 40) $sbgt = 3;
-            elseif ($acos >= 35) $sbgt = 4;
-            elseif ($acos >= 30) $sbgt = 5;
-            elseif ($acos >= 25) $sbgt = 6;
-            elseif ($acos >= 20) $sbgt = 7;
+            elseif ($acos >= 50) $sbgt = 1;
+            elseif ($acos >= 40) $sbgt = 1;
+            elseif ($acos >= 35) $sbgt = 2;
+            elseif ($acos >= 30) $sbgt = 3;
+            elseif ($acos >= 25) $sbgt = 5;
+            elseif ($acos >= 20) $sbgt = 6;
             elseif ($acos >= 15) $sbgt = 8;
             elseif ($acos >= 10) $sbgt = 9;
             elseif ($acos > 0) $sbgt = 10;
