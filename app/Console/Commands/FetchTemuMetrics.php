@@ -52,7 +52,13 @@ class FetchTemuMetrics extends Command
         $this->info('Fetching product analytics data...');
 
         try {
-            $goodsIds = TemuMetric::pluck('goods_id')->toArray();
+            $goodsIds = TemuMetric::whereNotNull('goods_id')->pluck('goods_id')->toArray();
+            
+            if (empty($goodsIds)) {
+                $this->warn("No goods_id found in database. Run fetchGoodsId() first.");
+                Log::warning("No goods_id found for fetchProductAnalyticsData");
+                return;
+            }
 
             $startTs = Carbon::yesterday()->startOfDay()->timestamp * 1000;
             $endTs = Carbon::yesterday()->endOfDay()->timestamp * 1000;
@@ -137,7 +143,13 @@ class FetchTemuMetrics extends Command
         $this->info('Fetching base prices...');
 
         try {
-            $skus = TemuMetric::pluck('sku_id')->toArray();
+            $skus = TemuMetric::whereNotNull('sku_id')->pluck('sku_id')->toArray();
+            
+            if (empty($skus)) {
+                $this->warn("No sku_id found in database. Run fetchSkus() first.");
+                Log::warning("No sku_id found for fetchBasePrice");
+                return;
+            }
 
             foreach ($skus as $skuId) {
                 $requestBody = [
@@ -234,18 +246,21 @@ class FetchTemuMetrics extends Command
                 foreach ($goodsList as $good) {
                     $goodsId = $good['goodsId'] ?? null;
                     foreach ($good['skuInfoList'] ?? [] as $sku) {
-                        $sku = $sku['skuSn'] ?? null;
+                        $skuSn = $sku['skuSn'] ?? null;
                         
-                        if ($sku && $goodsId) {
-                            $updated = TemuMetric::where('sku', $sku)->update([
-                                'goods_id' => $goodsId,
-                            ]);
+                        if ($skuSn && $goodsId) {
+                            // Try both 'sku' and 'sku_id' columns since data might be in either
+                            $updated = TemuMetric::where('sku', $skuSn)
+                                ->orWhere('sku_id', $skuSn)
+                                ->update([
+                                    'goods_id' => $goodsId,
+                                ]);
                             if ($updated) {
-                                $this->info("Updated goods_id for SKU: {$sku} to {$goodsId}");
-                                Log::info("Updated goods_id for SKU: {$sku}", ['goods_id' => $goodsId]);
+                                $this->info("Updated goods_id for SKU: {$skuSn} to {$goodsId} ({$updated} records)");
+                                Log::info("Updated goods_id for SKU: {$skuSn}", ['goods_id' => $goodsId, 'count' => $updated]);
                             } else {
-                                $this->warn("No record found for SKU: {$sku} to update goods_id");
-                                Log::warning("No record found for SKU: {$sku} to update goods_id");
+                                $this->warn("No record found for SKU: {$skuSn} to update goods_id");
+                                Log::warning("No record found for SKU: {$skuSn} to update goods_id");
                             }
                         }
                     }
@@ -339,12 +354,14 @@ class FetchTemuMetrics extends Command
             }
 
             foreach ($finalSkuQuantities as $skuId => $data) {                
-                $updated = TemuMetric::where('sku_id', $skuId)->update([
-                    'quantity_purchased_l30' => $data['quantity_purchased_l30'],
-                    'quantity_purchased_l60' => $data['quantity_purchased_l60'],
-                ]);
+                $updated = TemuMetric::where('sku_id', $skuId)
+                    ->orWhere('sku', $skuId)
+                    ->update([
+                        'quantity_purchased_l30' => $data['quantity_purchased_l30'],
+                        'quantity_purchased_l60' => $data['quantity_purchased_l60'],
+                    ]);
                 if ($updated) {
-                    $this->info("Successfully updated quantity for SKU_ID: {$skuId}");
+                    $this->info("Successfully updated quantity for SKU_ID: {$skuId} ({$updated} records)");
                     Log::info("Updated quantities for SKU: {$skuId}", $data);
                 } else {
                     $this->warn("No record found for SKU_ID: {$skuId} to update quantity");
@@ -499,5 +516,48 @@ class FetchTemuMetrics extends Command
         // Log the request
         $this->info("Generated Sign: $sign");
         return array_merge($params, $requestBody);
+    }
+
+    private function debugSkuStatus()
+    {
+        Log::info('Starting debugSkuStatus');
+        $this->info('🔍 Debugging SKU Status...');
+
+        $totalSkus = TemuMetric::count();
+        $skusWithSkuId = TemuMetric::whereNotNull('sku_id')->count();
+        $skusWithGoodsId = TemuMetric::whereNotNull('goods_id')->count();
+        $skusWithPrice = TemuMetric::whereNotNull('base_price')->count();
+        $skusWithQuantity = TemuMetric::where('quantity_purchased_l30', '>', 0)->count();
+        
+        $this->line("\n📊 SKU Update Statistics:");
+        $this->line("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+        $this->line("Total SKUs: {$totalSkus}");
+        $this->line("SKUs with sku_id: {$skusWithSkuId} (" . number_format(($skusWithSkuId/$totalSkus)*100, 1) . "%)");
+        $this->line("SKUs with goods_id: {$skusWithGoodsId} (" . number_format(($skusWithGoodsId/$totalSkus)*100, 1) . "%)");
+        $this->line("SKUs with base_price: {$skusWithPrice} (" . number_format(($skusWithPrice/$totalSkus)*100, 1) . "%)");
+        $this->line("SKUs with quantity (L30): {$skusWithQuantity} (" . number_format(($skusWithQuantity/$totalSkus)*100, 1) . "%)");
+        $this->line("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+
+        // Show SKUs missing data
+        $incomplete = TemuMetric::where(function($q) {
+            $q->whereNull('goods_id')
+              ->orWhereNull('sku_id')
+              ->orWhereNull('base_price');
+        })->pluck('sku', 'id');
+
+        if ($incomplete->count() > 0) {
+            $this->warn("⚠️  " . $incomplete->count() . " SKUs have incomplete data:");
+            foreach ($incomplete as $id => $sku) {
+                $this->line("  - ID: $id, SKU: {$sku}");
+            }
+        }
+
+        Log::info('Completed debugSkuStatus', [
+            'total' => $totalSkus,
+            'with_sku_id' => $skusWithSkuId,
+            'with_goods_id' => $skusWithGoodsId,
+            'with_price' => $skusWithPrice,
+            'incomplete' => $incomplete->count()
+        ]);
     }
 }
