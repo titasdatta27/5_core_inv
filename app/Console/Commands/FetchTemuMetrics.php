@@ -70,7 +70,7 @@ class FetchTemuMetrics extends Command
                     'endTs' => $range['endTs'],
                 ];
 
-                $signedRequest = $this->generateSignValue($requestBody);
+                $signedRequest = $this->generateSignValue($requestBody);                
                 $response = Http::withHeaders([
                     'Content-Type' => 'application/json',
                 ])->post('https://openapi-b-us.temu.com/openapi/router', $signedRequest);
@@ -354,7 +354,7 @@ class FetchTemuMetrics extends Command
             ];
 
             if ($pageToken) {
-                $requestBody["pageToken"] = $pageToken;
+               $requestBody["pageToken"] = $pageToken;
             }
 
             $signedRequest = $this->generateSignValue($requestBody);

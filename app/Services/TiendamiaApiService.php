@@ -64,10 +64,11 @@ class TiendamiaApiService
       $sku = $data['sku'] ?? null;
         $quantity =$data['quantity'];
         
-            ProductStockMapping::updateOrCreate(
-                ['sku' => $sku],
-                ['inventory_tiendamia'=>$quantity,]
-            );
+            // ProductStockMapping::updateOrCreate(
+            //     ['sku' => $sku],
+            //     ['inventory_tiendamia'=>$quantity,]
+            // );
+            ProductStockMapping::where('sku', $sku)->update(['inventory_tiendamia' => (int) $quantity]);    
         }
         return $allProducts;
     }

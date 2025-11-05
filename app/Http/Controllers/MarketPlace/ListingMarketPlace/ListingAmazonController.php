@@ -7,7 +7,9 @@ use App\Models\AmazonDataView;
 use App\Models\AmazonListingStatus;
 use App\Models\ProductMaster;
 use App\Models\ShopifySku;
+use App\Models\ProductStockMapping;
 use Illuminate\Http\Request;
+use App\Models\AmazonDatasheet;
 use Illuminate\Support\Facades\Cache;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -39,12 +41,13 @@ class ListingAmazonController extends Controller
 
         // Fetch all status records for these SKUs
         $statusData = AmazonListingStatus::whereIn('sku', $skus)->get()->keyBy('sku');
-
-        $processedData = $productMasters->map(function ($item) use ($shopifyData, $amazonDataViewValues, $statusData) {
+        $amazonListed=ProductStockMapping::pluck('sku','inventory_amazon_product')->toArray();
+        $asins = AmazonDatasheet::pluck('asin', 'sku')->toArray();
+        $processedData = $productMasters->map(function ($item) use ($shopifyData, $amazonDataViewValues, $statusData,$amazonListed,$asins) {
             $childSku = $item->sku;
             $parent = $item->parent ?? '';
             $isParent = stripos($childSku, 'PARENT') !== false;
-
+            $item->asin=$asins[$childSku] ?? '';
             $item->INV = $shopifyData[$childSku]->inv ?? 0;
             $item->L30 = $shopifyData[$childSku]->quantity ?? 0;
             $item->Parent = $parent;
@@ -60,7 +63,11 @@ class ListingAmazonController extends Controller
             if (isset($statusData[$childSku])) {
                 $status = $statusData[$childSku]->value;
                 $item->nr_req = $status['nr_req'] ?? null;
-                $item->listed = $status['listed'] ?? null;
+                // $item->listed = $status['listed'] ?? null;
+                // $item->listed =$amazonListed[$childSku]['inventory_amazon_product']?? $status['listed'] ?? null ;
+                $item->listed = (isset($amazonListed[$childSku]['inventory_amazon_product']) && $amazonListed[$childSku]['inventory_amazon_product'] != 'Not Listed') 
+    ? 'Listed' 
+    : 'Not Listed';
                 $item->buyer_link = $status['buyer_link'] ?? null;
                 $item->seller_link = $status['seller_link'] ?? null;
             }

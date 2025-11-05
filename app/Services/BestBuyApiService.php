@@ -64,10 +64,11 @@ class BestBuyApiService
       $sku = $data['sku'] ?? null;
         $quantity =$data['quantity'];
         
-            ProductStockMapping::updateOrCreate(
-                ['sku' => $sku],
-                ['inventory_bestbuy'=>$quantity,]
-            );
+            // ProductStockMapping::updateOrCreate(
+            //     ['sku' => $sku],
+            //     ['inventory_bestbuy'=>$quantity,]
+            // );
+            ProductStockMapping::where('sku', $sku)->update(['inventory_bestbuy' => (int) $quantity]);    
         }
         return $allProducts;
     }

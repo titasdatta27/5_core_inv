@@ -101,10 +101,11 @@ $spuNames = array_filter($spuNames); // remove nulls if any
         $quantity = $item['quantity'];
 
          if (!$sku) {Log::warning('Missing SKU in Shein inventory data', $item);continue;}
-         ProductStockMapping::updateOrCreate(
-            ['sku' => $sku],
-            ['inventory_shein' => $quantity]
-        );
+        //  ProductStockMapping::updateOrCreate(
+        //     ['sku' => $sku],
+        //     ['inventory_shein' => $quantity]
+        // );
+        ProductStockMapping::where('sku', $sku)->update(['inventory_shein' => (int) $quantity]);
     }
     // dd($result);
     Log::info('Total Shein inventory items collected: ' . count($result));

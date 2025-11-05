@@ -166,6 +166,9 @@ foreach ($marketplaces as $key => [$model, $inventoryField]) {
 }
 
 
+
+
+
 protected function fetchFreshData(){
     ini_set('max_execution_time', 300);
 
@@ -196,7 +199,7 @@ protected function fetchFreshDataU($type = null)
 {
 
     //    $result=(new AliExpressApiService())->getInventory();
-    // dd($result);
+    // return($result);
     ini_set('max_execution_time', 1800);
     $progress = [];
       // Define all sources including Shopify
@@ -537,6 +540,7 @@ protected function filterParentSKU(array $data): array
 
     public function refetchLiveDataU(Request $request){        
         $freshData=$this->fetchFreshDataU($request->source);   
+        return $freshData;
         if($freshData){
             return response()->json(['status' => 'success']);
         }

@@ -320,35 +320,35 @@ class FetchEbay3Metrics extends Command
 
     private function getQuantityBySkuFromOrders($token, Carbon $from, Carbon $to, array $onlyTheseSkus = [])
     {
-        $allQuantities = [];
+        // $allQuantities = [];
 
-        $url = "https://api.ebay.com/sell/fulfillment/v1/order?filter=creationdate:[{$from->format('Y-m-d\TH:i:s.000\Z')}..{$to->format('Y-m-d\TH:i:s.000\Z')}]&limit=200";
+        // $url = "https://api.ebay.com/sell/fulfillment/v1/order?filter=creationdate:[{$from->format('Y-m-d\TH:i:s.000\Z')}..{$to->format('Y-m-d\TH:i:s.000\Z')}]&limit=200";
     
-        do {
-            $response = Http::withToken($token)->get($url);
-            if (!$response->ok()) {
-                logger()->error("Fulfillment fetch failed: " . $response->body());
-                break;
-            }
+       
+        //     $response = Http::withToken($token)->get($url);
+        //     if (!$response->ok()) {
+        //         logger()->error("Fulfillment fetch failed: " . $response->body());
+        //         break;
+        //     }
     
-            $data = $response->json();
-            foreach ($data['orders'] ?? [] as $order) {
+        //     $data = $response->json();
+        //     foreach ($data['orders'] ?? [] as $order) {
                 
-                foreach ($order['lineItems'] ?? [] as $line) {
+        //         foreach ($order['lineItems'] ?? [] as $line) {
                     
-                    $sku = $line['sku'] ?? null;
-                    $qty = (int) ($line['quantity'] ?? 0);
-                    if (!$sku || !in_array($sku, $onlyTheseSkus)) continue;
+        //             $sku = $line['sku'] ?? null;
+        //             $qty = (int) ($line['quantity'] ?? 0);
+        //             if (!$sku || !in_array($sku, $onlyTheseSkus)) continue;
     
-                    $allQuantities[$sku] = ($allQuantities[$sku] ?? 0) + $qty;
-                }
-            }
+        //             $allQuantities[$sku] = ($allQuantities[$sku] ?? 0) + $qty;
+        //         }
+        //     }
     
-            $url = $data['next'] ?? null;
+        //     $url = $data['next'] ?? null;
     
-        } while ($url);
+        // } while ($url);
     
-        return $allQuantities;
+        // return $allQuantities;
     }
 
     private function generateEbayToken(): ?string

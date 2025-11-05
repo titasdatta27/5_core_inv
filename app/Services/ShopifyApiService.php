@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\ProductStockMapping;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use App\Models\ProductMaster;
 
 class ShopifyApiService
 {
@@ -26,6 +27,21 @@ class ShopifyApiService
         $pageCount = 0;
         $totalProducts = 0;
         $totalVariants = 0;
+ $validSkus = ProductMaster::selectRaw('DISTINCT TRIM(sku) as sku')
+    ->whereNotNull('sku')
+    ->where(function($query) {
+        $query->whereRaw('LOWER(sku) NOT LIKE ?', ['%parent%']);
+    })
+    ->whereRaw("TRIM(sku) != ''")
+    ->orderBy('sku')
+    ->pluck('sku')
+    ->map(fn($sku) => trim($sku))
+    ->filter()
+    ->unique()
+    ->values()
+    ->toArray();
+
+        // dd($validSkus);
 
         while ($hasMore) {
             $pageCount++;
@@ -55,7 +71,7 @@ class ShopifyApiService
                 Log::error("Failed to fetch products (Page {$pageCount}): ".$response->body());
                 break;
             }
-
+            
             $products = $response->json()['products'] ?? [];
             $productCount = count($products);
             $totalProducts += $productCount;
@@ -71,47 +87,28 @@ class ShopifyApiService
                         $sku
                     );
 
-                    if (! empty($sku)) {
-                        $inventoryData[$sku] = [
-                            'variant_id' => $variant['id'],
-                            'product_id' => $product['id'],
-                            'inventory' => $variant['inventory_quantity'] ?? 0,
-                            'product_title' => $product['title'] ?? '',
-                            'sku' => $sku,
-                            'variant_title' => $variant['title'] ?? '',
-                            'inventory_item_id' => $variant['inventory_item_id'],
-                            'on_hand' => $variant['old_inventory_quantity'] ?? 0,
-                            'available_to_sell' => $variant['inventory_quantity'] ?? 0,
-                            'price' => $variant['price'],
-                            'image_src' => $imageUrl,
-                            'is_parent' => $isParent,
-                        ];
-
-                        if ($isParent) {
-                            $parentVariants[] = [
-                                'sku' => $sku,
-                                'variant_id' => $variant['id'],
-                                'product_title' => $product['title'] ?? '',
-                            ];
-                            Log::info('Parent SKU detected', end($parentVariants));
-                        }
-
-                        if ($totalVariants <= 3 || $totalVariants % 500 === 0) {
-                            Log::info('Variant preview', [
-                                'product_title' => $product['title'] ?? '',
-                                'sku' => $sku,
-                                'image' => $imageUrl,
-                            ]);
-                        }
-                    } else {
-                        Log::warning('Variant without SKU', [
-                            'product_id' => $product['id'],
-                            'variant_id' => $variant['id'],
-                            'on_hand' => $variant['old_inventory_quantity'] ?? 0,
-                            'available_to_sell' => $variant['inventory_quantity'] ?? 0,
-                            'image' => $imageUrl,
-                        ]);
+                    // Ensure SKU is properly formatted but preserve original case
+                    $sku = trim((string) $sku);
+                    
+                    // Skip empty SKUs or SKUs containing 'PARENT'
+                    if ($sku === '' || stripos($sku, 'PARENT') !== false) {
+                        continue;
                     }
+
+                    $inventoryData[$sku] = [
+                        'variant_id' => $variant['id'],
+                        'product_id' => $product['id'],
+                        'inventory' => (int) ($variant['inventory_quantity'] ?? 0),
+                        'product_title' => $product['title'] ?? '',
+                        'sku' => $sku,
+                        'variant_title' => $variant['title'] ?? '',
+                        'inventory_item_id' => $variant['inventory_item_id'],
+                        'on_hand' => (int) ($variant['old_inventory_quantity'] ?? 0),
+                        'available_to_sell' => (int) ($variant['inventory_quantity'] ?? 0),
+                        'price' => $variant['price'],
+                        'image_src' => $imageUrl,
+                        'is_parent' => $isParent,
+                    ];
                 }
             }
 
@@ -124,25 +121,64 @@ class ShopifyApiService
             }
         }
 
-        // ✅ Update all SKUs in DB
+        // ✅ Update all SKUs in DB, but only for SKUs present in ProductMaster (exclude parent SKUs)
+        // Fetch an array of SKUs from ProductMaster where sku does not contain 'PARENT'
+    //    $allSku = ProductMaster::where('sku', 'NOT LIKE', '%PARENT%')
+    //         ->whereNotNull('sku')  // Exclude null SKUs
+    //         ->pluck('sku')
+    //         ->filter()  // Remove any remaining null values
+    //         ->map(fn($s) => trim((string) $s))
+    //         ->filter(fn($s) => $s !== '')  // Remove empty strings after trim
+    //         ->unique()  // Remove duplicates
+    //         ->values()  // Re-index array
+    //         ->toArray();
+    // Get SKUs from ProductMaster excluding any with 'PARENT' (case-insensitive)
+    $validSkus = ProductMaster::selectRaw('DISTINCT TRIM(sku) as sku')
+        ->whereNotNull('sku')
+        ->where(function($query) {
+            $query->whereRaw('LOWER(sku) NOT LIKE ?', ['%parent%']);
+        })
+        ->whereRaw("TRIM(sku) != ''")
+        ->orderBy('sku')
+        ->pluck('sku')
+        ->map(fn($sku) => trim($sku))
+        ->filter()
+        ->unique()
+        ->values()
+        ->toArray();
+
+    Log::info('Found valid SKUs in ProductMaster: ' . count($validSkus));
+
+    // Create lookup array for fast checks
+    $validSkuLookup = array_flip($validSkus);
+
         foreach ($inventoryData as $sku => $data) {
+            // Check if SKU exists in our valid SKUs list
+            if (!isset($validSkuLookup[$sku])) {
+                Log::info("Skipping SKU not in ProductMaster or contains 'PARENT': $sku");
+                continue;
+            }
+
+            // Ensure inventory values are integers
+            $inventory = (int) $data['inventory'];
+
             ProductStockMapping::updateOrCreate(
-                ['sku' => $sku],
+                ['sku' => $sku],  // Use exact SKU from ProductMaster
                 [
-                    'image' =>$data['image_src'],
-                    'inventory_shopify' => $data['inventory'],
-                    'inventory_amazon'=>'Not Listed',
-                    'inventory_walmart'=>'Not Listed',
-                    'inventory_reverb'=>'Not Listed',
-                    'inventory_shein'=>'Not Listed',
-                    'inventory_doba'=>'Not Listed',
-                    'inventory_temu'=>'Not Listed',
-                    'inventory_macy'=>'Not Listed',
-                    'inventory_ebay1'=>'Not Listed',
-                    'inventory_ebay2'=>'Not Listed',
-                    'inventory_ebay3'=>'Not Listed',
-                    'inventory_bestbuy'=>'Not Listed',
-                    'tiendamia'=>'Not Listed',
+                    'image' => $data['image_src'],
+                    'inventory_shopify' => $inventory,
+                    'inventory_amazon' => 'Not Listed',
+                    'inventory_walmart' => 'Not Listed',
+                    'inventory_reverb' => 'Not Listed',
+                    'inventory_shein' => 'Not Listed',
+                    'inventory_doba' => 'Not Listed',
+                    'inventory_temu' => 'Not Listed',
+                    'inventory_macy' => 'Not Listed',
+                    'inventory_ebay1' => 'Not Listed',
+                    'inventory_ebay2' => 'Not Listed',
+                    'inventory_ebay3' => 'Not Listed',
+                    'inventory_bestbuy' => 'Not Listed',
+                    'tiendamia' => 'Not Listed',
                 ]
             );
         }

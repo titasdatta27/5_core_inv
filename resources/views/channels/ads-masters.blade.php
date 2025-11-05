@@ -1137,7 +1137,7 @@
                                     'shopify b2c': '/shopifyB2C',
                                     'doba': '/doba',
                                     'walmart': '/walmartAnalysis',
-                                    'bestbuy usa': '/bestbuyusa-analytics',
+                                    ' usa': '/usa-analytics',
                                     'shein': '/sheinAnalysis',
                                     'tiktokshop': '/tiktokAnalysis',
                                 };
@@ -1442,7 +1442,7 @@
         'shein': { prefix: 'shein', logo: "{{ asset('uploads/Shein.jpg') }}" },
         'tiktokshop': { prefix: 'tiktok', logo: "{{ asset('uploads/tiktok.png') }}" },
         'wayfair': { prefix: 'wayfair', logo: "{{ asset('uploads/wayfair.png') }}" },
-        'bestbuy usa': { prefix: 'bestbuy', logo: "{{ asset('uploads/bestbuy.png') }}" }
+        ' usa': { prefix: '', logo: "{{ asset('uploads/.png') }}" }
     };
 
     const channel = channelMap[channelName.toLowerCase()];

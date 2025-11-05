@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('bestbuy_usa_data_views', function (Blueprint $table) {
+        Schema::create('_usa_data_views', function (Blueprint $table) {
             $table->id();
             $table->string('sku')->unique();
             $table->json('value')->nullable();
@@ -24,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('bestbuy_usa_data_views');
+        Schema::dropIfExists('_usa_data_views');
     }
 };
