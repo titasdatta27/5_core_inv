@@ -765,8 +765,8 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::get('/review-ratings-amazon', action: [OverallAmazonController::class, 'reviewRatingsAmazon'])->name('review-ratings.amazon');
     Route::get('/review-ratings-amazon-data', action: [OverallAmazonController::class, 'reviewRatingsAmazonData'])->name('review-ratings.amazon.data');
 
-    Route::get('/targetting-amazon', action: [OverallAmazonController::class, 'targettingAmazon'])->name('targetting.amazon');
-    Route::get('/targetting-amazon-data', action: [OverallAmazonController::class, 'targettingAmazonData'])->name('targetting.amazon.data');
+    Route::get('/targeting-amazon', action: [OverallAmazonController::class, 'targetingAmazon'])->name('targeting.amazon');
+    Route::get('/targeting-amazon-data', action: [OverallAmazonController::class, 'targetingAmazonData'])->name('targeting.amazon.data');
 
     Route::get('/overall-amazon', action: [OverallAmazonController::class, 'overallAmazon'])->name('overall.amazon');
     Route::post('/overallAmazon/saveLowProfit', action: [OverallAmazonController::class, 'saveLowProfit']);
