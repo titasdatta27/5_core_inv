@@ -1044,30 +1044,98 @@
             console.log('Rendering all channels chart with dates:', dates, 'and datasets:', datasets);
             const ctx = document.getElementById('allChannelsChart').getContext('2d');
             
+            // Extend dates array to include future dates up to 25th of next month
+            const extendedDates = [...dates];
+            const extendedDatasets = datasets.map(dataset => ({
+                ...dataset,
+                data: [...dataset.data]
+            }));
+            
+            if (dates.length > 0) {
+                const lastDate = new Date(dates[dates.length - 1]);
+                const targetDate = new Date(lastDate);
+                
+                // Calculate the 25th of the next month
+                const nextMonth25 = new Date(lastDate.getFullYear(), lastDate.getMonth() + 1, 25);
+                
+                // Add dates from last date + 1 day until 25th of next month
+                let currentDate = new Date(lastDate);
+                currentDate.setDate(currentDate.getDate() + 1);
+                
+                while (currentDate <= nextMonth25) {
+                    const dateStr = currentDate.toISOString().split('T')[0];
+                    extendedDates.push(dateStr);
+                    
+                    // Add null values for all datasets for future dates
+                    extendedDatasets.forEach(dataset => {
+                        dataset.data.push(0);
+                    });
+                    
+                    currentDate.setDate(currentDate.getDate() + 1);
+                }
+            }
+            
             // Filter datasets to show only channels with data updates (non-zero differences)
-            const filteredDatasets = datasets.filter(dataset => {
+            const filteredDatasets = extendedDatasets.filter(dataset => {
                 return dataset.data.some(value => value !== 0);
             });
+            
+            // Calculate daily totals (sum of all channel COUNTS, not differences)
+            // First, get the current Live Pending count from the badge
+            let currentTotal = parseInt(jq('#livePendingCountBadge').text().replace(/,/g, '')) || 0;
+            
+            // Calculate the cumulative counts backwards from current total
+            const dailyTotals = [];
+            
+            // Start from the last date with actual data (not the extended dates) and work backwards
+            const actualDataLength = dates.length;
+            
+            for (let i = actualDataLength - 1; i >= 0; i--) {
+                if (i === actualDataLength - 1) {
+                    // Last date (today) - use current total
+                    dailyTotals.unshift(currentTotal);
+                } else {
+                    // For previous days, subtract the next day's diff
+                    const nextDayDiff = filteredDatasets.reduce((sum, dataset) => {
+                        return sum + (dataset.data[i + 1] || 0);
+                    }, 0);
+                    currentTotal = currentTotal - nextDayDiff;
+                    dailyTotals.unshift(currentTotal);
+                }
+            }
+            
+            // For future dates (beyond actual data), use null to not show data
+            for (let i = actualDataLength; i < extendedDates.length; i++) {
+                dailyTotals.push(null);
+            }
+            
+            // Create a dataset for daily totals
+            const totalDataset = {
+                label: 'Total Live Pending',
+                data: dailyTotals,
+                backgroundColor: 'rgba(102, 126, 234, 0.7)',
+                borderColor: 'rgb(102, 126, 234)',
+                borderWidth: 2,
+                order: 1,
+                spanGaps: false // Don't connect null values
+            };
             
             // Create color legend
             createColorLegend(filteredDatasets);
             
-            // Calculate summary for differences
+            // Calculate summary - show diffs
             if (filteredDatasets.length > 0 && dates.length > 0) {
-                let channelsWithData = 0;
                 let totalPositiveChanges = 0;
                 let totalNegativeChanges = 0;
                 let totalZeroChanges = 0;
                 
+                // Calculate daily diffs
                 filteredDatasets.forEach(dataset => {
-                    if (dataset.data.length > 0) {
-                        channelsWithData++;
-                        dataset.data.forEach(value => {
-                            if (value > 0) totalPositiveChanges++;
-                            else if (value < 0) totalNegativeChanges++;
-                            else totalZeroChanges++;
-                        });
-                    }
+                    dataset.data.forEach(value => {
+                        if (value > 0) totalPositiveChanges += value;
+                        else if (value < 0) totalNegativeChanges += Math.abs(value);
+                        else totalZeroChanges++;
+                    });
                 });
                 
                 // Update summary cards
@@ -1086,10 +1154,10 @@
             
             console.log('Creating new all channels chart...');
             allChannelsChart = new Chart(ctx, {
-                type: 'line',
+                type: 'bar',
                 data: {
-                    labels: dates,
-                    datasets: filteredDatasets
+                    labels: extendedDates,
+                    datasets: [totalDataset]
                 },
                 options: {
                     responsive: true,
@@ -1104,7 +1172,14 @@
                     },
                     plugins: {
                         legend: {
-                            display: false // Hide legend since we have color squares at top
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            }
                         },
                         tooltip: {
                             mode: 'index',
@@ -1130,22 +1205,29 @@
                                 },
                                 label: function(context) {
                                     const value = context.parsed.y;
-                                    const symbol = value > 0 ? '📈' : value < 0 ? '📉' : '➡️';
-                                    return symbol + ' ' + context.dataset.label + ': ' + (value > 0 ? '+' : '') + value;
+                                    return 'Total Live Pending: ' + value.toLocaleString() + ' listings';
                                 },
-                                filter: function(tooltipItem) {
-                                    // Only show channels with data updates (non-zero values)
-                                    return tooltipItem.parsed.y !== 0;
+                                afterBody: function(context) {
+                                    // Calculate diff from previous day
+                                    const currentIndex = context[0].dataIndex;
+                                    if (currentIndex > 0) {
+                                        const currentValue = context[0].parsed.y;
+                                        const previousValue = context[0].dataset.data[currentIndex - 1];
+                                        const diff = currentValue - previousValue;
+                                        const symbol = diff > 0 ? '📈 Increase' : diff < 0 ? '📉 Decrease' : '➡️ No Change';
+                                        return '\n' + symbol + ': ' + (diff > 0 ? '+' : '') + diff + ' from previous day';
+                                    }
+                                    return '';
                                 }
                             }
                         }
                     },
                     scales: {
                         y: {
-                            beginAtZero: false,
+                            beginAtZero: true,
                             title: {
                                 display: true,
-                                text: 'Daily Change',
+                                text: 'Total Live Pending Count',
                                 font: {
                                     size: 13,
                                     weight: 'bold',
@@ -1160,9 +1242,8 @@
                                     color: '#34495E'
                                 },
                                 callback: function(value) {
-                                    return value > 0 ? '↗️ +' + value : value < 0 ? '↘️ ' + value : '➡️ ' + value;
-                                },
-                                maxTicksLimit: 8
+                                    return value.toLocaleString();
+                                }
                             },
                             grid: {
                                 color: function(context) {
@@ -1189,7 +1270,9 @@
                                     weight: '500',
                                     color: '#34495E'
                                 },
-                                maxTicksLimit: 7
+                                autoSkip: false,
+                                maxRotation: 45,
+                                minRotation: 45
                             },
                             grid: {
                                 color: '#ECF0F1',
@@ -1198,10 +1281,11 @@
                         }
                     },
                     interaction: {
-                        mode: 'nearest',
-                        axis: 'x',
+                        mode: 'index',
                         intersect: false
-                    }
+                    },
+                    barPercentage: 0.9,
+                    categoryPercentage: 0.8
                 }
             });
         }
@@ -1383,16 +1467,52 @@
         function renderFullscreenChart(dates, datasets) {
             const ctx = document.getElementById('fullscreenChart').getContext('2d');
             
+            // Filter datasets to show only channels with data updates (non-zero differences)
+            const filteredDatasets = datasets.filter(dataset => {
+                return dataset.data.some(value => value !== 0);
+            });
+            
+            // Calculate daily totals (sum of all channel COUNTS, not differences)
+            // First, get the current Live Pending count from the badge
+            let currentTotal = parseInt(jq('#livePendingCountBadge').text().replace(/,/g, '')) || 0;
+            
+            // Calculate the cumulative counts backwards from current total
+            const dailyTotals = [];
+            
+            // Start from the last date (today) and work backwards
+            for (let i = dates.length - 1; i >= 0; i--) {
+                if (i === dates.length - 1) {
+                    // Last date (today) - use current total
+                    dailyTotals.unshift(currentTotal);
+                } else {
+                    // For previous days, subtract the next day's diff
+                    const nextDayDiff = filteredDatasets.reduce((sum, dataset) => {
+                        return sum + (dataset.data[i + 1] || 0);
+                    }, 0);
+                    currentTotal = currentTotal - nextDayDiff;
+                    dailyTotals.unshift(currentTotal);
+                }
+            }
+            
+            // Create a dataset for daily totals
+            const totalDataset = {
+                label: 'Total Live Pending',
+                data: dailyTotals,
+                backgroundColor: 'rgba(102, 126, 234, 0.7)',
+                borderColor: 'rgb(102, 126, 234)',
+                borderWidth: 2
+            };
+            
             // Destroy previous chart if exists
             if (fullscreenChart) {
                 fullscreenChart.destroy();
             }
             
             fullscreenChart = new Chart(ctx, {
-                type: 'line',
+                type: 'bar',
                 data: {
                     labels: dates,
-                    datasets: datasets
+                    datasets: [totalDataset]
                 },
                 options: {
                     responsive: true,
@@ -1408,8 +1528,6 @@
                             display: true,
                             position: 'top',
                             labels: {
-                                usePointStyle: true,
-                                padding: 20,
                                 font: {
                                     size: 14,
                                     weight: 'bold'
@@ -1430,18 +1548,29 @@
                                 },
                                 label: function(context) {
                                     const value = context.parsed.y;
-                                    const symbol = value > 0 ? '📈' : value < 0 ? '📉' : '➡️';
-                                    return symbol + ' ' + context.dataset.label + ': ' + (value > 0 ? '+' : '') + value;
+                                    return 'Total Live Pending: ' + value.toLocaleString() + ' listings';
+                                },
+                                afterBody: function(context) {
+                                    // Calculate diff from previous day
+                                    const currentIndex = context[0].dataIndex;
+                                    if (currentIndex > 0) {
+                                        const currentValue = context[0].parsed.y;
+                                        const previousValue = context[0].dataset.data[currentIndex - 1];
+                                        const diff = currentValue - previousValue;
+                                        const symbol = diff > 0 ? '📈 Increase' : diff < 0 ? '📉 Decrease' : '➡️ No Change';
+                                        return '\n' + symbol + ': ' + (diff > 0 ? '+' : '') + diff + ' from previous day';
+                                    }
+                                    return '';
                                 }
                             }
                         }
                     },
                     scales: {
                         y: {
-                            beginAtZero: false,
+                            beginAtZero: true,
                             title: {
                                 display: true,
-                                text: 'Daily Change',
+                                text: 'Total Live Pending Count',
                                 font: {
                                     size: 16,
                                     weight: 'bold'
@@ -1454,16 +1583,12 @@
                                     weight: 'bold'
                                 },
                                 callback: function(value) {
-                                    return value > 0 ? '↗️ +' + value : value < 0 ? '↘️ ' + value : '➡️ ' + value;
+                                    return value.toLocaleString();
                                 }
                             },
                             grid: {
-                                color: function(context) {
-                                    return context.tick.value === 0 ? '#ff4757' : '#ddd';
-                                },
-                                lineWidth: function(context) {
-                                    return context.tick.value === 0 ? 4 : 2;
-                                }
+                                color: '#ddd',
+                                lineWidth: 1
                             }
                         },
                         x: {
@@ -1479,15 +1604,19 @@
                                 font: {
                                     size: 13,
                                     weight: 'bold'
-                                }
+                                },
+                                autoSkip: false,
+                                maxRotation: 45,
+                                minRotation: 45
                             }
                         }
                     },
                     interaction: {
-                        mode: 'nearest',
-                        axis: 'x',
+                        mode: 'index',
                         intersect: false
-                    }
+                    },
+                    barPercentage: 0.9,
+                    categoryPercentage: 0.8
                 }
             });
         }
@@ -1504,8 +1633,39 @@
             $('#customLoader').hide();
             $('#channelTableWrapper').show();
             
-            // Load all channels chart
-            loadAllChannelsChartData();
+            // Set default date range: from 25th of previous month to 25th of current month
+            const today = new Date();
+            const currentDay = today.getDate();
+            
+            let startDate, endDate;
+            
+            if (currentDay >= 25) {
+                // If today is 25th or after, show from 25th of current month to 25th of next month
+                startDate = new Date(today.getFullYear(), today.getMonth(), 25);
+                endDate = new Date(today.getFullYear(), today.getMonth() + 1, 25);
+            } else {
+                // If today is before 25th, show from 25th of previous month to 25th of current month
+                startDate = new Date(today.getFullYear(), today.getMonth() - 1, 25);
+                endDate = new Date(today.getFullYear(), today.getMonth(), 25);
+            }
+            
+            // Format dates as YYYY-MM-DD
+            const formatDate = (date) => {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            };
+            
+            const startDateStr = formatDate(startDate);
+            const endDateStr = formatDate(endDate);
+            
+            // Set the date input values
+            jq('#allChannelsStartDate').val(startDateStr);
+            jq('#allChannelsEndDate').val(endDateStr);
+            
+            // Load all channels chart with default date range
+            loadAllChannelsChartData(startDateStr, endDateStr);
             
             // Update totals when table data is loaded
             table.on('tableBuilt', function() {
