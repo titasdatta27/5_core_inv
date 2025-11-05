@@ -1,4 +1,4 @@
-@extends('layouts.vertical', ['title' => 'Amazon - ACOS CONTROL HL', 'mode' => $mode ?? '', 'demo' => $demo ?? ''])
+@extends('layouts.vertical', ['title' => 'Amazon - KW CPC Zero', 'mode' => $mode ?? '', 'demo' => $demo ?? ''])
 @section('css')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator.min.css" rel="stylesheet">
@@ -130,8 +130,8 @@
 @endsection
 @section('content')
     @include('layouts.shared.page-title', [
-        'page_title' => 'Amazon - Budget',
-        'sub_title' => 'Amazon - Budget',
+        'page_title' => 'Amazon - KW CPC Zero',
+        'sub_title' => 'Amazon - KW CPC Zero',
     ])
     <div class="row">
         <div class="col-12">
@@ -141,7 +141,7 @@
                         <!-- Title -->
                         <h4 class="fw-bold text-primary mb-3 d-flex align-items-center">
                             <i class="fa-solid fa-chart-line me-2"></i>
-                            ACOS CONTROL HL
+                            KW CPC Zero
                         </h4>
 
                         <!-- Filters Row -->
@@ -149,13 +149,6 @@
                             <!-- Inventory Filters -->
                             <div class="col-md-6">
                                 <div class="d-flex gap-2">
-                                    <select id="clicks-filter" class="form-select form-select-md" style="width: 175px;">
-                                        <option value="">Select CLICKS L30</option>
-                                        <option value="ALL">ALL</option>
-                                        <option value="CLICKS_L30">CLICKS L30 > 25</option>
-                                        <option value="OTHERS">OTHERS</option>
-                                    </select>
-
                                     <select id="inv-filter" class="form-select form-select-md">
                                         <option value="">Select INV</option>
                                         <option value="ALL">ALL</option>
@@ -163,24 +156,11 @@
                                         <option value="OTHERS">OTHERS</option>
                                     </select>
 
-                                    <select id="nrl-filter" class="form-select form-select-md">
-                                        <option value="">Select NRL</option>
-                                        <option value="NRL">NRL</option>
-                                        <option value="RL">RL</option>
-                                    </select>
-
                                     <select id="nra-filter" class="form-select form-select-md">
                                         <option value="">Select NRA</option>
                                         <option value="NRA">NRA</option>
                                         <option value="RA">RA</option>
                                         <option value="LATER">LATER</option>
-                                    </select>
-
-                                    <select id="fba-filter" class="form-select form-select-md">
-                                        <option value="">Select FBA</option>
-                                        <option value="FBA">FBA</option>
-                                        <option value="FBM">FBM</option>
-                                        <option value="BOTH">BOTH</option>
                                     </select>
 
                                 </div>
@@ -192,16 +172,11 @@
                                     <a href="javascript:void(0)" id="export-btn" class="btn btn-sm btn-success d-flex align-items-center justify-content-center">
                                         <i class="fas fa-file-export me-1"></i> Export Excel/CSV
                                     </a>
-                                    <button id="apr-all-sbid-btn" class="btn btn-info btn-sm d-none">
-                                        APR ALL SBID
+                                    <button class="btn btn-light btn-md fw-bold fs-4" id="filter-l7">
+                                        L7 CPC: <span id="l7-cpc-count" class="fw-bold ms-1 fs-4">0</span>
                                     </button>
-                                    <button class="btn btn-success btn-md">
-                                        <i class="fa fa-arrow-up me-1"></i>
-                                        Need to increase bids: <span id="total-campaigns" class="fw-bold ms-1 fs-4">0</span>
-                                    </button>
-                                    <button class="btn btn-primary btn-md">
-                                        <i class="fa fa-percent me-1"></i>
-                                        of Total: <span id="percentage-campaigns" class="fw-bold ms-1 fs-4">0%</span>
+                                    <button class="btn btn-light btn-md fw-bold fs-4" id="filter-l1">
+                                        L1 CPC: <span id="l1-cpc-count" class="fw-bold ms-1 fs-4">0</span>
                                     </button>
                                 </div>
                             </div>
@@ -212,8 +187,7 @@
                             <div class="col-md-6">
                                 <div class="d-flex gap-2">
                                     <div class="input-group">
-                                        <input type="text" id="global-search" class="form-control form-control-md" 
-                                               placeholder="Search campaign...">
+                                        <input type="text" id="global-search" class="form-control form-control-md" placeholder="Search campaign...">
                                     </div>
                                     <select id="status-filter" class="form-select form-select-md" style="width: 140px;">
                                         <option value="">All Status</option>
@@ -266,7 +240,7 @@
 
             var table = new Tabulator("#budget-under-table", {
                 index: "Sku",
-                ajaxURL: "/amazon-acos-hl-control-data",
+                ajaxURL: "/amazon-kw-cpc-zero-view-data",
                 layout: "fitDataFill",
                 movableColumns: true,
                 resizableColumns: true,
@@ -281,13 +255,13 @@
                     }
                 },
                 columns: [
-                    {
-                        formatter: "rowSelection",
-                        titleFormatter: "rowSelection",
-                        hozAlign: "center",
-                        headerSort: false,
-                        width: 50
+                    { 
+                        title: "#", 
+                        formatter: "rownum", 
+                        hozAlign: "center", 
+                        width: 60 
                     },
+
                     {
                         title: "Parent",
                         field: "parent"
@@ -355,34 +329,6 @@
                         visible: false
                     },
                     {
-                        title: "NRL",
-                        field: "NRL",
-                        formatter: function(cell) {
-                            const row = cell.getRow();
-                            const sku = row.getData().sku;
-                            const value = cell.getValue();
-
-                            let bgColor = "";
-                            if (value === "NRL") {
-                                bgColor = "background-color:#dc3545;color:#fff;"; // red
-                            } else if (value === "RL") {
-                                bgColor = "background-color:#28a745;color:#fff;"; // green
-                            }
-
-                            return `
-                                <select class="form-select form-select-sm editable-select" 
-                                        data-sku="${sku}" 
-                                        data-field="NRL"
-                                        style="width: 90px; ${bgColor}">
-                                    <option value="RL" ${value === 'RL' ? 'selected' : ''}>RL</option>
-                                    <option value="NRL" ${value === 'NRL' ? 'selected' : ''}>NRL</option>
-                                </select>
-                            `;
-                        },
-                        visible: false,
-                        hozAlign: "center"
-                    },
-                    {
                         title: "NRA",
                         field: "NRA",
                         formatter: function(cell) {
@@ -407,37 +353,6 @@
                                     <option value="RA" ${value === 'RA' ? 'selected' : ''}>RA</option>
                                     <option value="NRA" ${value === 'NRA' ? 'selected' : ''}>NRA</option>
                                     <option value="LATER" ${value === 'LATER' ? 'selected' : ''}>LATER</option>
-                                </select>
-                            `;
-                        },
-                        hozAlign: "center",
-                        visible: false
-                    },
-                    {
-                        title: "FBA",
-                        field: "FBA",
-                        formatter: function(cell) {
-                            const row = cell.getRow();
-                            const sku = row.getData().sku;
-                            const value = cell.getValue();
-
-                            let bgColor = "";
-                            if (value === "FBA") {
-                                bgColor = "background-color:#007bff;color:#fff;"; // blue
-                            } else if (value === "FBM") {
-                                bgColor = "background-color:#6f42c1;color:#fff;"; // purple
-                            } else if (value === "BOTH") {
-                                bgColor = "background-color:#90ee90;color:#000;"; // light green
-                            }
-
-                            return `
-                                <select class="form-select form-select-sm editable-select" 
-                                        data-sku="${sku}" 
-                                        data-field="FBA"
-                                        style="width: 90px; ${bgColor}">
-                                    <option value="FBA" ${value === 'FBA' ? 'selected' : ''}>FBA</option>
-                                    <option value="FBM" ${value === 'FBM' ? 'selected' : ''}>FBM</option>
-                                    <option value="BOTH" ${value === 'BOTH' ? 'selected' : ''}>BOTH</option>
                                 </select>
                             `;
                         },
@@ -486,16 +401,6 @@
                         }
                     },
                     {
-                        title: "Clicks L30",
-                        field: "clicks_L30",
-                        hozAlign: "right",
-                        formatter: function(cell) {
-                            return `
-                                <span>${cell.getValue().toFixed(0)}</span>
-                            `;
-                        }
-                    },
-                    {
                         title: "L7 CPC",
                         field: "l7_cpc",
                         hozAlign: "center",
@@ -506,96 +411,15 @@
                         }
                     },
                     {
-                        title: "SBGT",
-                        field: "sbgt",
+                        title: "L1 CPC",
+                        field: "l1_cpc",
+                        hozAlign: "center",
                         formatter: function(cell) {
                             var row = cell.getRow().getData();
-                            var acos = parseFloat(row.acos_L30) || 0;
-                            const tpft = parseFloat(row.TPFT) || 0;
-                            var tpftInt = Math.floor(tpft);
-                            var sbgt;
-
-                            const spend = parseFloat(row.spend_L30) || 0;
-                            const sales = parseFloat(row.ad_sales_L30) || 0;
-                            const clicks = parseFloat(row.clicks_L30) || 0;
-                            
-                            if(clicks > 25){
-                                if (spend > 0 && sales === 0) {
-                                    sbgt = 1;
-                                } else if (acos < 10) {
-                                    sbgt = 10;        
-                                } else if (acos >= 10 && acos < 15) {
-                                    sbgt = 8;         
-                                } else if (acos >= 15 && acos < 20) {
-                                    sbgt = 6;         
-                                } else {  
-                                    sbgt = 1;
-                                }
-                            }else{
-                                sbgt = 5;
-                            }
-
-                            return `
-                                <input type="number" class="form-control form-control-sm text-center sbgt-input"  value="${sbgt}" min="1" max="10"  data-campaign-id="${row.campaign_id}">
-                            `;
-                        },
-                    },
-                    {
-                        title: "APR BGT",
-                        field: "apr_bgt",
-                        hozAlign: "center",
-                        formatter: function(cell, formatterParams, onRendered) {
-                            var value = cell.getValue() || 0;
-                            return `
-                                <div style="align-items:center; gap:5px;">
-                                    <button class="btn btn-primary update-row-btn">APR BGT</button>
-                                </div>
-                            `;
-                        },
-                        cellClick: function(e, cell) {
-                            if (e.target.classList.contains("update-row-btn")) {
-                                var rowData = cell.getRow().getData();
-                                var acos = parseFloat(rowData.acos_L30) || 0;  
-
-                                if(acos > 0){   
-                                    var sbgtInput = cell.getRow().getElement().querySelector('.sbgt-input');
-                                    var sbgtValue = parseFloat(sbgtInput.value) || 0;
-
-                                    updateBid(sbgtValue, rowData.campaign_id);
-                                } else {
-                                    console.log("Skipped because acos_L30 = 0 for campaign:", rowData.campaign_id);
-                                }
-                            }
+                            var l1_cpc = parseFloat(row.l1_cpc) || 0;
+                            return l1_cpc.toFixed(2);
                         }
                     },
-                    {
-                        title: "TPFT%",
-                        field: "TPFT",
-                        hozAlign: "center",
-                        formatter: function(cell){
-                            let value = parseFloat(cell.getValue()) || 0;
-                            let percent = value.toFixed(0);
-                            let color = "";
-
-                            if (value < 10) {
-                                color = "red";
-                            } else if (value >= 10 && value < 15) {
-                                color = "#ffc107";
-                            } else if (value >= 15 && value < 20) {
-                                color = "blue";
-                            } else if (value >= 20 && value <= 40) {
-                                color = "green";
-                            } else if (value > 40) {
-                                color = "#e83e8c";
-                            }
-
-                            return `
-                                <span style="font-weight:600; color:${color};">
-                                    ${percent}%
-                                </span>
-                            `;
-                        }
-                    }
                 ],
                 ajaxResponse: function(url, params, response) {
                     return response.data;
@@ -636,56 +460,34 @@
                 }
             });
 
-            table.on("tableBuilt", function() {
+            table.on("tableBuilt", function () {
+
+                let activeCpcFilter = null;
 
                 function combinedFilter(data) {
 
+                    if (activeCpcFilter === "L7" && Number(data.l7_cpc || 0) !== 0) return false;
+                    if (activeCpcFilter === "L1" && Number(data.l1_cpc || 0) !== 0) return false;
+
                     let searchVal = $("#global-search").val()?.toLowerCase() || "";
-                    if (searchVal && !(data.campaignName?.toLowerCase().includes(searchVal))) {
-                        return false;
-                    }
+                    if (searchVal && !(data.campaignName?.toLowerCase()?.includes(searchVal))) return false;
 
                     let statusVal = $("#status-filter").val();
-                    if (statusVal && data.campaignStatus !== statusVal) {
-                        return false;
-                    }
-
-                    let clicksFilterVal = $("#clicks-filter").val();
-                    let clicks_L30 = parseFloat(data.clicks_L30) || 0;
-
-                    if (!clicksFilterVal) {
-                        if (clicks_L30 <= 25) return false;
-                    } else {
-                        // When user selects a filter from dropdown
-                        if (clicksFilterVal === "CLICKS_L30") {
-                            if (clicks_L30 <= 25) return false;
-                        } else if (clicksFilterVal === "ALL") {
-                            // Show all rows
-                        } else if (clicksFilterVal === "OTHERS") {
-                            if (clicks_L30 > 25) return false;
-                        }
-                    }
+                    if (statusVal && data.campaignStatus !== statusVal) return false;
 
                     let invFilterVal = $("#inv-filter").val();
+                    let inv = Number(data.INV);
+                    if (isNaN(inv)) inv = 0;
 
-                    if (invFilterVal === "INV_0") {
-                        if (parseFloat(data.INV) !== 0) return false;
-                    } else if (invFilterVal === "OTHERS") {
-                        if (parseFloat(data.INV) === 0) return false;
-                    } else if (invFilterVal === "ALL" || invFilterVal === "") {
-                        // show all rows → do nothing
+                    if (!invFilterVal || invFilterVal === "") {
+                        if (inv <= 0) return false;
                     }
-
-
-                    let nrlFilterVal = $("#nrl-filter").val();
-                    if (nrlFilterVal) {
-                        let rowSelect = document.querySelector(
-                            `select[data-sku="${data.sku}"][data-field="NRL"]`
-                        );
-                        let rowVal = rowSelect ? rowSelect.value : "";
-                        if (!rowVal) rowVal = data.NRL || "";
-
-                        if (rowVal !== nrlFilterVal) return false;
+                    else if (invFilterVal === "ALL") { }
+                    else if (invFilterVal === "INV_0") {
+                        if (inv !== 0) return false;
+                    }
+                    else if (invFilterVal === "OTHERS") {
+                        if (inv <= 0) return false;
                     }
 
                     let nraFilterVal = $("#nra-filter").val();
@@ -695,19 +497,7 @@
                         );
                         let rowVal = rowSelect ? rowSelect.value : "";
                         if (!rowVal) rowVal = data.NR || "";
-
                         if (rowVal !== nraFilterVal) return false;
-                    }
-
-                    let fbaFilterVal = $("#fba-filter").val();
-                    if (fbaFilterVal) {
-                        let rowSelect = document.querySelector(
-                            `select[data-sku="${data.sku}"][data-field="FBA"]`
-                        );
-                        let rowVal = rowSelect ? rowSelect.value : "";
-                        if (!rowVal) rowVal = data.FBA || "";
-
-                        if (rowVal !== fbaFilterVal) return false;
                     }
 
                     return true;
@@ -715,32 +505,50 @@
 
                 table.setFilter(combinedFilter);
 
-                function updateCampaignStats() {
-                    let allRows = table.getData();
-                    let filteredRows = allRows.filter(combinedFilter);
+                function updateZeroCounts() {
 
-                    let total = allRows.length;
-                    let filtered = filteredRows.length;
+                    // ✅ Only rows currently visible after filters
+                    let visibleRows = table.getRows("active") || [];
+                    let visibleData = visibleRows.map(r => r.getData());
 
-                    let percentage = total > 0 ? ((filtered / total) * 100).toFixed(0) : 0;
+                    // ✅ Count L7/L1 CPC == 0 from visible rows only
+                    const l7Zero = visibleData.filter(
+                        r => Number(r.l7_cpc || 0) === 0
+                    ).length;
 
-                    document.getElementById("total-campaigns").innerText = filtered; 
-                    document.getElementById("percentage-campaigns").innerText = percentage + "%";
+                    const l1Zero = visibleData.filter(
+                        r => Number(r.l1_cpc || 0) === 0
+                    ).length;
+
+                    $("#l7-cpc-count").text(l7Zero);
+                    $("#l1-cpc-count").text(l1Zero);
                 }
 
-                table.on("dataFiltered", updateCampaignStats);
-                table.on("pageLoaded", updateCampaignStats);
-                table.on("dataProcessed", updateCampaignStats);
 
-                $("#global-search").on("keyup", function() {
+
+                table.on("dataFiltered", updateZeroCounts);
+                table.on("pageLoaded", updateZeroCounts);
+                table.on("dataProcessed", updateZeroCounts);
+
+                $("#global-search").on("keyup", function () {
                     table.setFilter(combinedFilter);
                 });
 
-                $("#status-filter,#clicks-filter,#inv-filter, #nrl-filter, #nra-filter, #fba-filter").on("change", function() {
+                $("#status-filter, #inv-filter, #nra-filter").on("change", function () {
                     table.setFilter(combinedFilter);
                 });
 
-                updateCampaignStats();
+                $("#filter-l7").on("click", function () {
+                    activeCpcFilter = activeCpcFilter === "L7" ? null : "L7";
+                    table.setFilter(combinedFilter);
+                });
+
+                $("#filter-l1").on("click", function () {
+                    activeCpcFilter = activeCpcFilter === "L1" ? null : "L1";
+                    table.setFilter(combinedFilter);
+                });
+
+                updateZeroCounts();
             });
 
             document.addEventListener("click", function(e) {
@@ -784,99 +592,6 @@
                 }
             });
 
-            document.getElementById("apr-all-sbid-btn").addEventListener("click", function(){
-
-                const overlay = document.getElementById("progress-overlay");
-                overlay.style.display = "flex";
-
-                var filteredData = table.getSelectedRows(); 
-                
-                var campaignIds = [];
-                var bgts = [];
-
-                filteredData.forEach(function(row){
-                    var rowEl = row.getElement();
-                    if(rowEl && rowEl.offsetParent !== null){  
-                        var rowData = row.getData();
-                        var acos = parseFloat(rowData.acos_L30) || 0;
-
-                        if(acos > 0){
-                            var sbgtInput = rowEl.querySelector('.sbgt-input');
-                            var sbgtValue = sbgtInput ? parseFloat(sbgtInput.value) || 0 : 0;
-
-                            campaignIds.push(rowData.campaign_id);
-                            bgts.push(sbgtValue);
-                        }
-                    }
-                });
-
-                console.log("Campaign IDs:", campaignIds);
-                console.log("Bids:", bgts);
-
-                fetch('/update-amazon-sb-campaign-bgt-price', {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    },
-                    body: JSON.stringify({
-                        campaign_ids: campaignIds,
-                        bgts: bgts
-                    })
-                })
-                .then(res => res.json())
-                .then(data => {
-                    console.log("Backend response:", data);
-                    if(data.status === 200){
-                        alert("Campaign budget updated successfully!");
-                    } else {
-                        alert("Something went wrong: " + data.message);
-                    }
-                })
-                .catch(err => {
-                    console.error(err);
-                    alert("Request failed: " + err.message);
-                })
-                .finally(() => {
-                    overlay.style.display = "none";
-                });
-            });
-
-            function updateBid(sbgtValue, campaignId) {
-                const overlay = document.getElementById("progress-overlay");
-                overlay.style.display = "flex";
-
-                console.log("Updating bid for Campaign ID:", campaignId, "New Bid:", sbgtValue);
-
-                fetch('/update-amazon-sb-campaign-bgt-price', {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    },
-                    body: JSON.stringify({
-                        campaign_ids: [campaignId],
-                        bgts: [sbgtValue]
-                    })
-                })
-                .then(res => res.json())
-                .then(data => {
-                    console.log("Backend response:", data);
-                    if(data.status === 200){
-                        alert("Campaign budget updated successfully!");
-                    } else {
-                        alert("Something went wrong: " + data.message);
-                    }
-                })
-                .catch(err => {
-                    console.error(err);
-                    alert("Request failed: " + err.message);
-                })
-                .finally(() => {
-                    overlay.style.display = "none";
-                });
-            }
-
             document.getElementById("export-btn").addEventListener("click", function () {
                 let allData = table.getData("active"); 
 
@@ -891,9 +606,8 @@
                 let wb = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(wb, ws, "Campaigns");
 
-                XLSX.writeFile(wb, "amazon_acos_hl_ads.xlsx");
+                XLSX.writeFile(wb, "amazon_kw_cpc_zero_ads.xlsx");
             });
-
 
             document.body.style.zoom = "78%";
         });

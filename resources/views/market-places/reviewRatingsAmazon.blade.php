@@ -130,8 +130,8 @@
 @endsection
 @section('content')
     @include('layouts.shared.page-title', [
-        'page_title' => 'Amazon - Budget',
-        'sub_title' => 'Amazon - Budget',
+        'page_title' => 'Amazon - AD CVR',
+        'sub_title' => 'Amazon - AD CVR',
     ])
     <div class="row">
         <div class="col-12">

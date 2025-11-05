@@ -486,19 +486,19 @@ class OverallAmazonController extends Controller
         ]);
     }
 
-    public function targettingAmazon(){
+    public function targetingAmazon(){
         $marketplaceData = MarketplacePercentage::where('marketplace', 'Amazon')->first();
 
         $percentage = $marketplaceData ? $marketplaceData->percentage : 100;
         $adUpdates = $marketplaceData ? $marketplaceData->ad_updates : 0;
         
-        return view('market-places.targettingAmazon', [
+        return view('market-places.targetingAmazon', [
             'amazonPercentage' => $percentage,
             'amazonAdUpdates' => $adUpdates
         ]);
     }
 
-    public function targettingAmazonData() {
+    public function targetingAmazonData() {
         $productMasters = ProductMaster::orderBy('parent', 'asc')
             ->orderByRaw("CASE WHEN sku LIKE 'PARENT %' THEN 1 ELSE 0 END")
             ->orderBy('sku', 'asc')
@@ -589,6 +589,8 @@ class OverallAmazonController extends Controller
             $row['l7_cpc'] = $matchedCampaignL7->costPerClick ?? 0;
             $row['spend_l90'] = $matchedCampaignL90->spend ?? 0;
             $row['ad_sales_l90'] = $matchedCampaignL90->sales30d ?? 0;
+            $row['clicks'] = $matchedCampaignL90->clicks ?? 0;
+            $row['orders'] = $matchedCampaignL90->unitsSoldSameSku1d ?? 0;
 
             if ($amazonSheet) {
                 $row['A_L30'] = $amazonSheet->units_ordered_l30;

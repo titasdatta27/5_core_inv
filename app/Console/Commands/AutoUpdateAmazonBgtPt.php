@@ -120,12 +120,12 @@ class AutoUpdateAmazonBgtPt extends Command
 
             // Basic SBGT
             if ($acos >= 100) $sbgt = 1;
-            elseif ($acos >= 50) $sbgt = 2;
-            elseif ($acos >= 40) $sbgt = 3;
-            elseif ($acos >= 35) $sbgt = 4;
-            elseif ($acos >= 30) $sbgt = 5;
-            elseif ($acos >= 25) $sbgt = 6;
-            elseif ($acos >= 20) $sbgt = 7;
+            elseif ($acos >= 50) $sbgt = 1;
+            elseif ($acos >= 40) $sbgt = 1;
+            elseif ($acos >= 35) $sbgt = 2;
+            elseif ($acos >= 30) $sbgt = 3;
+            elseif ($acos >= 25) $sbgt = 5;
+            elseif ($acos >= 20) $sbgt = 6;
             elseif ($acos >= 15) $sbgt = 8;
             elseif ($acos >= 10) $sbgt = 9;
             elseif ($acos > 0) $sbgt = 10;
@@ -141,12 +141,12 @@ class AutoUpdateAmazonBgtPt extends Command
             }
 
             // Double SBGT ONLY for exact thresholds
-            if (($dilColor === "red" && $tpft > 18) ||
-                ($dilColor === "yellow" && $tpft > 22) ||
-                ($dilColor === "green" && $tpft > 26) ||
-                ($dilColor === "pink" && $tpft > 30)) {
-                $sbgt = $sbgt * 2;
-            }
+            // if (($dilColor === "red" && $tpft > 18) ||
+            //     ($dilColor === "yellow" && $tpft > 22) ||
+            //     ($dilColor === "green" && $tpft > 26) ||
+            //     ($dilColor === "pink" && $tpft > 30)) {
+            //     $sbgt = $sbgt * 2;
+            // }
 
             $row['sbgt'] = $sbgt;
 

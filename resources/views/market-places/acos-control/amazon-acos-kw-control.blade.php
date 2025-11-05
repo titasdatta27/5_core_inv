@@ -523,17 +523,17 @@
                                 if(acos >= 100){
                                     sbgt = 1;
                                 }else if(acos >= 50 && acos <= 100){
-                                    sbgt = 2;
+                                    sbgt = 1;
                                 }else if(acos >= 40 && acos <= 50){
-                                    sbgt = 3;
+                                    sbgt = 1;
                                 }else if(acos >= 35 && acos <= 40){
-                                    sbgt = 4;
+                                    sbgt = 2;
                                 }else if(acos >= 30 && acos <= 35){
-                                    sbgt = 5;
+                                    sbgt = 3;
                                 }else if(acos >= 25 && acos <= 30){
-                                    sbgt = 6;
+                                    sbgt = 5;
                                 }else if(acos >= 20 && acos <= 25){
-                                    sbgt = 7;
+                                    sbgt = 6;
                                 }else if(acos >= 15 && acos <= 20){
                                     sbgt = 8;
                                 }else if(acos >= 10 && acos <= 15){
@@ -552,12 +552,9 @@
                                     dilColor = getDilColor(dilDecimal);
                                 }
 
-                                if ((dilColor === "red" && tpftInt > 10) ||
-                                    (dilColor === "yellow" && tpftInt > 22) ||
-                                    (dilColor === "green" && tpftInt > 26) ||
-                                    (dilColor === "pink" && tpftInt > 30)) {
-                                    sbgt = sbgt * 2;
-                                }
+                                // if ((dilColor === "red" && tpftInt > 10)) {
+                                //     sbgt = sbgt * 2;
+                                // }
                             }else{
                                 sbgt = 5;
                             }
@@ -623,6 +620,10 @@
                                 </span>
                             `;
                         }
+                    },
+                    {
+                        title: "CVR",
+                        field: "cvr"
                     }
                 ],
                 ajaxResponse: function(url, params, response) {
@@ -695,12 +696,19 @@
                     }
 
                     let invFilterVal = $("#inv-filter").val();
+                    let inv = parseFloat(data.INV);
+
                     if (!invFilterVal) {
-                        if (parseFloat(data.INV) === 0) return false;
-                    } else if (invFilterVal === "INV_0") {
-                        if (parseFloat(data.INV) !== 0) return false;
-                    } else if (invFilterVal === "OTHERS") {
-                        if (parseFloat(data.INV) === 0) return false;
+                        // Default → show only > 0
+                        if (inv <= 0) return false;
+                    } 
+                    else if (invFilterVal === "INV_0") {
+                        // Only 0
+                        if (inv !== 0) return false;
+                    } 
+                    else if (invFilterVal === "OTHERS") {
+                        // Show only > 0
+                        if (inv <= 0) return false;
                     }
 
                     let nrlFilterVal = $("#nrl-filter").val();
