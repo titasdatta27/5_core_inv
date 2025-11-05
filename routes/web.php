@@ -163,6 +163,7 @@ use App\Http\Controllers\AdvertisementMaster\MetaParent\ProductWiseMetaParentCon
 use App\Http\Controllers\ArrivedContainerController;
 use App\Http\Controllers\Campaigns\AmazonAdRunningController;
 use App\Http\Controllers\Campaigns\AmazonCampaignReportsController;
+use App\Http\Controllers\Campaigns\AmazonCPCZeroController;
 use App\Http\Controllers\Campaigns\AmazonFbaAcosController;
 use App\Http\Controllers\Campaigns\AmazonFbaAdsController;
 use App\Http\Controllers\Campaigns\AmazonMissingAdsController;
@@ -2047,6 +2048,13 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
 
         Route::put('/update-amazon-campaign-bgt-price', 'updateAmazonCampaignBgt');
         Route::put('/update-amazon-sb-campaign-bgt-price', 'updateAmazonSbCampaignBgt');
+    });
+
+    Route::controller(AmazonCPCZeroController::class)->group(function () {
+        Route::get('/amazon-kw-cpc-zero/list', 'getKwCpcZeroView')->name('amazon.kw.cpc.zero.list');
+        Route::get('/amazon-kw-cpc-zero-view-data', 'getKwCpcZeroData');
+        Route::get('/amazon-pt-cpc-zero/list', 'getPtCpcZeroView')->name('amazon.pt.cpc.zero.list');
+        Route::get('/amazon-pt-cpc-zero-view-data', 'getPtCpcZeroData');
     });
 
     Route::controller(AmazonFbaAcosController::class)->group(function () {
