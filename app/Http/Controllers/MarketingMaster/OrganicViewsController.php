@@ -116,6 +116,8 @@ class OrganicViewsController extends Controller
                 $row['price_lmpa'] = $amazonSheet->price_lmpa;
                 $row['sessions_l60'] = $amazonSheet->sessions_l60;
                 $row['units_ordered_l60'] = $amazonSheet->units_ordered_l60;
+                $row['organic_views'] = $amazonSheet->organic_views;
+                $row['sold'] = $amazonSheet->sold;
             }
 
             $row['INV'] = $shopify->inv ?? 0;
