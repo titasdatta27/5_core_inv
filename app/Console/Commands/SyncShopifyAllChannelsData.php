@@ -22,14 +22,36 @@ class SyncShopifyAllChannelsData extends Command
     {
         $this->info('Starting sync into shopify_all_channels_data...');
 
-        ProductMaster::query()
-            ->select(['sku', 'parent'])
-            ->orderBy('id')
-            ->chunk(1000, function ($products) {
+        // Get all unique SKUs from ProductMaster and ReverbProduct
+        $productMasterSkus = ProductMaster::pluck('sku', 'parent')->toArray();
+        $reverbSkus = ReverbProduct::whereNotIn('sku', array_keys($productMasterSkus))->pluck('sku')->toArray();
+        
+        // 🆕 Also get SKUs from temu_metrics that might not be in ProductMaster/Reverb
+        $temuSkus = DB::table('temu_metrics')
+            ->whereNotIn('sku', array_merge(array_keys($productMasterSkus), $reverbSkus))
+            ->pluck('sku')
+            ->toArray();
+        
+        // Combine both sets of SKUs
+        $allSkus = array_merge(
+            array_map(function($sku, $parent) {
+                return ['sku' => $sku, 'parent' => $parent];
+            }, array_keys($productMasterSkus), $productMasterSkus),
+            array_map(function($sku) {
+                return ['sku' => $sku, 'parent' => null];
+            }, $reverbSkus),
+            array_map(function($sku) {
+                return ['sku' => $sku, 'parent' => null];
+            }, $temuSkus)
+        );
+        
+        $this->info('Total SKUs to process: ' . count($allSkus));
 
-                foreach ($products as $product) {
-                    $sku = $product->sku;
-                    $parent = $product->parent;
+        // Process in chunks
+        collect($allSkus)->chunk(1000)->each(function ($products) {
+            foreach ($products as $product) {
+                $sku = $product['sku'];
+                $parent = $product['parent'];
 
                     // 🟢 Shopify Orders grouped by platform (tag-based)
                     $shopifyorders = DB::connection('apicentral')
