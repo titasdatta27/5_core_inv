@@ -67,13 +67,11 @@ class ShopifyApiInventoryController extends Controller
                     }
                 });
                 Cache::forget('shopify_skus_list');
-                Log::info('Updated live inventory values (available_to_sell, committed, on_hand)');
             } else {
                 Log::warning('No live inventory returned from Shopify to update live values.');
             }
 
             $duration = round(microtime(true) - $startTime, 2);
-            Log::info("Successfully synced " . count($simplifiedData) . " SKUs in {$duration}s");
             return true;
         } catch (\Exception $e) {
             Log::error('Shopify Inventory Error: ' . $e->getMessage());
@@ -90,7 +88,6 @@ class ShopifyApiInventoryController extends Controller
         $totalProducts = 0;
         $totalVariants = 0;
 
-        Log::info("🔄 Starting Shopify inventory fetch...");
 
         while ($hasMore) {
             $pageCount++;
@@ -171,7 +168,6 @@ class ShopifyApiInventoryController extends Controller
             }
         }
 
-        Log::info("Finished fetching Shopify inventory. Pages: {$pageCount}, Products: {$totalProducts}, Variants: {$totalVariants}");
 
         return $inventoryData;
     }
@@ -193,8 +189,6 @@ class ShopifyApiInventoryController extends Controller
 
         return $cleanUrl;
     }
-
-
 
 
     public function fetchInventoryWithCommitment(): array
@@ -350,7 +344,6 @@ class ShopifyApiInventoryController extends Controller
             ];
         }
 
-        Log::info('Final inventory data (Ohio only):', $final);
 
         return $final;
     }
