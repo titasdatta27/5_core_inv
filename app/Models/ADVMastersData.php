@@ -334,4 +334,26 @@ class ADVMastersData extends Model
             return 0;
         }
     }
+
+    protected function getAdvShopifyGShoppingSaveDataProceed($request)
+    {
+        try {
+            DB::beginTransaction();
+
+                $updateAmazon = ADVMastersData::where('channel', 'G SHOPPING')->first();
+                $updateAmazon->spent = $request->spendL30Total;
+                $updateAmazon->clicks = $request->clicksl30Total;
+                $updateAmazon->ad_sales = $request->adSalesl30Total;
+                $updateAmazon->ad_sold = $request->adSoldl30Total;
+                $updateAmazon->save();
+                 
+            DB::commit();
+            return 1; 
+        } catch (\Exception $e) {
+            DB::rollBack(); 
+            return 0;
+        }
+    }
+
+
 }
