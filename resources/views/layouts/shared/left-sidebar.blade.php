@@ -1442,7 +1442,7 @@
                                                     <a href="{{ route('review-ratings.amazon') }}">Review Ratings</a>
                                                 </li>
                                                 <li>
-                                                    <a href="{{ route('targetting.amazon') }}">Targetting</a>
+                                                    <a href="{{ route('targeting.amazon') }}">Targeting</a>
                                                 </li>
                                             </ul>
                                         </div>
@@ -1646,6 +1646,23 @@
                                                 <li>
                                                     <a href="{{ route('amazon.amz-correctly-utilized-bgt-pt') }}">CORRECTLY
                                                         UTILIZED PT</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <a data-bs-toggle="collapse" href="#amazonCpc" aria-expanded="false"
+                                            aria-controls="amazonCpc">
+                                            <span>Amazon CPC 0</span>
+                                            <span class="menu-arrow"></span>
+                                        </a>
+                                        <div class="collapse" id="amazonCpc">
+                                            <ul class="side-nav-fourth-level">
+                                                <li>
+                                                    <a href="{{ route('amazon.kw.cpc.zero.list') }}">KW CPC ZERO</a>
+                                                </li>
+                                                <li>
+                                                    <a href="{{ route('amazon.pt.cpc.zero.list') }}">PT CPC ZERO</a>
                                                 </li>
                                             </ul>
                                         </div>

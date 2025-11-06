@@ -163,6 +163,7 @@ use App\Http\Controllers\AdvertisementMaster\MetaParent\ProductWiseMetaParentCon
 use App\Http\Controllers\ArrivedContainerController;
 use App\Http\Controllers\Campaigns\AmazonAdRunningController;
 use App\Http\Controllers\Campaigns\AmazonCampaignReportsController;
+use App\Http\Controllers\Campaigns\AmazonCPCZeroController;
 use App\Http\Controllers\Campaigns\AmazonFbaAcosController;
 use App\Http\Controllers\Campaigns\AmazonFbaAdsController;
 use App\Http\Controllers\Campaigns\AmazonMissingAdsController;
@@ -764,8 +765,8 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::get('/review-ratings-amazon', action: [OverallAmazonController::class, 'reviewRatingsAmazon'])->name('review-ratings.amazon');
     Route::get('/review-ratings-amazon-data', action: [OverallAmazonController::class, 'reviewRatingsAmazonData'])->name('review-ratings.amazon.data');
 
-    Route::get('/targetting-amazon', action: [OverallAmazonController::class, 'targettingAmazon'])->name('targetting.amazon');
-    Route::get('/targetting-amazon-data', action: [OverallAmazonController::class, 'targettingAmazonData'])->name('targetting.amazon.data');
+    Route::get('/targeting-amazon', action: [OverallAmazonController::class, 'targetingAmazon'])->name('targeting.amazon');
+    Route::get('/targeting-amazon-data', action: [OverallAmazonController::class, 'targetingAmazonData'])->name('targeting.amazon.data');
 
     Route::get('/overall-amazon', action: [OverallAmazonController::class, 'overallAmazon'])->name('overall.amazon');
     Route::get('/adv-amazon/total-sales/save-data', action: [OverallAmazonController::class, 'getAmazonTotalSalesSaveData'])->name('adv-amazon.total-sales.save-data');
@@ -2053,6 +2054,13 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
 
         Route::put('/update-amazon-campaign-bgt-price', 'updateAmazonCampaignBgt');
         Route::put('/update-amazon-sb-campaign-bgt-price', 'updateAmazonSbCampaignBgt');
+    });
+
+    Route::controller(AmazonCPCZeroController::class)->group(function () {
+        Route::get('/amazon-kw-cpc-zero/list', 'getKwCpcZeroView')->name('amazon.kw.cpc.zero.list');
+        Route::get('/amazon-kw-cpc-zero-view-data', 'getKwCpcZeroData');
+        Route::get('/amazon-pt-cpc-zero/list', 'getPtCpcZeroView')->name('amazon.pt.cpc.zero.list');
+        Route::get('/amazon-pt-cpc-zero-view-data', 'getPtCpcZeroData');
     });
 
     Route::controller(AmazonFbaAcosController::class)->group(function () {

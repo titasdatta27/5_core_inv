@@ -1,4 +1,4 @@
-@extends('layouts.vertical', ['title' => 'Amazon - AD CVR', 'mode' => $mode ?? '', 'demo' => $demo ?? ''])
+@extends('layouts.vertical', ['title' => 'Amazon - Pricing', 'mode' => $mode ?? '', 'demo' => $demo ?? ''])
 @section('css')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator.min.css" rel="stylesheet">
@@ -134,8 +134,8 @@
 @endsection
 @section('content')
     @include('layouts.shared.page-title', [
-        'page_title' => 'Amazon - Budget',
-        'sub_title' => 'Amazon - Budget',
+        'page_title' => 'Amazon - AD CVR',
+        'sub_title' => 'Amazon - AD CVR',
     ])
     <div class="row">
         <div class="col-12">
@@ -145,7 +145,7 @@
                         <!-- Title -->
                         <h4 class="fw-bold text-primary mb-3 d-flex align-items-center">
                             <i class="fa-solid fa-chart-line me-2"></i>
-                            AD CVR
+                            Pricing
                         </h4>
 
                         <!-- Filters Row -->
@@ -186,7 +186,20 @@
                                         <option value="FBM">FBM</option>
                                         <option value="BOTH">BOTH</option>
                                     </select>
-
+                                    <select id="cvr-color-filter" class="form-select form-select-md">
+                                        <option value="">Select CVR Color</option>
+                                        <option value="red">Red (&lt; 5%)</option>
+                                        <option value="green">Green (5% - 10%)</option>
+                                        <option value="pink">Pink (&gt; 10%)</option>
+                                    </select>
+                                    <select id="pft-color-filter" class="form-select form-select-md">
+                                        <option value="">Select PFT</option>
+                                        <option value="red">Red (&lt; 10%)</option>
+                                        <option value="yellow">Yellow (10% - 15%)</option>
+                                        <option value="blue">Blue (15% - 20%)</option>
+                                        <option value="green">Green (20% - 40%)</option>
+                                        <option value="pink">Pink (&gt; 40%)</option>
+                                    </select>
                                 </div>
                             </div>
 
@@ -349,7 +362,7 @@
                         visible: false
                     },
                     {
-                        title: "AL 90",
+                        title: "A L90",
                         field: "A_L90",
                         visible: false
                     },
@@ -629,6 +642,17 @@
                                 color = "pink";
                             }
 
+                            let row = cell.getRow();
+                            let rowData = row.getData();
+                            let basePrice = parseFloat(rowData.amz_price) || 0;
+
+                            if (value < 5) {
+                                let newPrice = basePrice * 0.99;
+                                row.update({ amz_price: newPrice.toFixed(2) });
+                            } else {
+                                row.update({ amz_price: "" });
+                            }
+
                             return `
                                 <span class="dil-percent-value ${color}">
                                     ${cvr}%
@@ -810,12 +834,12 @@
                     {
                         title: "SPRICE",
                         field: "amz_price",
-                        editor: "input",
+                        editor: false,
                         cssClass: "price-cell",
                         formatter: function(cell){
-                            let value = parseFloat(cell.getValue()) || 0;
+                            let value = parseFloat(cell.getValue()) || '';
                             return `<span class="dil-percent-value">$${value.toFixed(2)}</span>`;
-                        }
+                        },
                     },
                     {
                         title: "SPFT",
@@ -1033,6 +1057,41 @@
                         if (rowVal !== fbaFilterVal) return false;
                     }
 
+                    let cvrColorFilterVal = $("#cvr-color-filter").val();
+                    if (cvrColorFilterVal) {
+                        let cvrValue = parseFloat(data.cvr_l90) || 0;
+
+                        let color = "";
+                        if (cvrValue < 5) {
+                            color = "red";
+                        } else if (cvrValue >= 5 && cvrValue <= 10) {
+                            color = "green";
+                        } else if (cvrValue > 10) {
+                            color = "pink";
+                        }
+
+                        if (color !== cvrColorFilterVal) return false;
+                    }
+
+                    let pftColorFilterVal = $("#pft-color-filter").val();
+                    if (pftColorFilterVal) {
+                        let pftValue = parseFloat(data.PFT_percentage) || 0;
+                        let color = "";
+                        if (pftValue < 10) {
+                            color = "red";
+                        } else if (pftValue >= 10 && pftValue < 15) {
+                            color = "yellow";
+                        } else if (pftValue >= 15 && pftValue < 20) {
+                            color = "blue";
+                        } else if (pftValue >= 20 && pftValue <= 40) {
+                            color = "green";
+                        } else if (pftValue > 40) {
+                            color = "pink";
+                        }
+
+                        if (color !== pftColorFilterVal) return false;
+                    }
+
                     return true;
                 }
 
@@ -1059,7 +1118,7 @@
                     table.setFilter(combinedFilter);
                 });
 
-                $("#status-filter,#clicks-filter,#inv-filter, #nrl-filter, #nra-filter, #fba-filter").on("change", function() {
+                $("#status-filter, #clicks-filter, #inv-filter, #nrl-filter, #nra-filter, #fba-filter, #cvr-color-filter, #pft-color-filter").on("change", function() {
                     table.setFilter(combinedFilter);
                 });
 
@@ -1223,7 +1282,13 @@
                     return;
                 }
 
-                let exportData = allData.map(row => ({ ...row }));
+                let exportData = allData.map(row => {
+                    let formattedPrice = row.amz_price ? `$${parseFloat(row.amz_price).toFixed(2)}` : '';
+                    return {
+                        ...row,
+                        SPRICE: formattedPrice
+                    };
+                });
 
                 let ws = XLSX.utils.json_to_sheet(exportData);
                 let wb = XLSX.utils.book_new();

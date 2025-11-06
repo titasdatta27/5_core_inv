@@ -9,6 +9,7 @@ use App\Models\EbayDataView;
 use App\Models\EbayListingStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 
@@ -50,19 +51,20 @@ class ListingEbayController extends Controller
             $item->Parent = $parent;
             $item->is_parent = $isParent;
 
-            // Default values
-            $item->nr_req = null;
-            $item->listed = null;
-            $item->buyer_link = null;
-            $item->seller_link = null;
-
             // If status exists, fill values from JSON
             if (isset($statusData[$childSku])) {
                 $status = $statusData[$childSku]->value;
-                $item->nr_req = $status['nr_req'] ?? null;
+                // Use stored values or calculate defaults based on INV
+                $item->nr_req = $status['nr_req'] ?? (floatval($item->INV) > 0 ? 'REQ' : 'NR');
                 $item->listed = $status['listed'] ?? null;
                 $item->buyer_link = $status['buyer_link'] ?? null;
                 $item->seller_link = $status['seller_link'] ?? null;
+            } else {
+                // No status record exists - set defaults based on INV
+                $item->nr_req = floatval($item->INV) > 0 ? 'REQ' : 'NR';
+                $item->listed = null;
+                $item->buyer_link = null;
+                $item->seller_link = null;
             }
 
             return $item;
@@ -165,62 +167,117 @@ class ListingEbayController extends Controller
 
     public function import(Request $request)
     {
-        $request->validate([
-            'file' => 'required|mimes:csv,txt',
-        ]);
+        try {
+            Log::info('=== Ebay CSV Import Started ===');
+            
+            $request->validate([
+                'file' => 'required|mimes:csv,txt',
+            ]);
 
-        $file = $request->file('file');
-        $rows = array_map('str_getcsv', file($file));
-        // $header = array_map('trim', $rows[0]); // first row = header
-        $header = array_map(function ($h) {
-            return trim(preg_replace('/^\xEF\xBB\xBF/', '', $h)); // remove BOM if present
-        }, $rows[0]);
+            $file = $request->file('file');
+            Log::info('File uploaded: ' . $file->getClientOriginalName());
+            
+            $fileContent = file($file);
+            Log::info('Total lines in file: ' . count($fileContent));
+            
+            // Detect delimiter (comma or tab)
+            $firstLine = $fileContent[0];
+            Log::info('First line (raw): ' . json_encode($firstLine));
+            
+            $delimiter = (strpos($firstLine, "\t") !== false) ? "\t" : ",";
+            Log::info('Detected delimiter: ' . ($delimiter === "\t" ? 'TAB' : 'COMMA'));
+            
+            // Parse CSV with detected delimiter
+            $rows = array_map(function($line) use ($delimiter) {
+                return str_getcsv($line, $delimiter);
+            }, $fileContent);
+            
+            // Process header - remove BOM if present
+            $header = array_map(function ($h) {
+                return trim(preg_replace('/^\xEF\xBB\xBF/', '', $h)); // remove BOM if present
+            }, $rows[0]);
+            
+            Log::info('Headers detected: ' . json_encode($header));
 
-        unset($rows[0]);
+            unset($rows[0]);
 
-        $allowedHeaders = ['sku','listed', 'buyer_link', 'seller_link'];
-        foreach ($header as $h) {
-            if (!in_array($h, $allowedHeaders)) {
-                return response()->json([
-                    'error' => "Invalid header '$h'. Allowed headers: " . implode(', ', $allowedHeaders)
-                ], 422);
-            }
-        }
-
-        foreach ($rows as $row) {
-            if (count($row) < 1) {
-                continue; // skip empty
-            }
-
-            $rowData = array_combine($header, $row);
-            $sku = trim($rowData['sku'] ?? '');
-
-            if (!$sku) {
-                continue;
-            }
-
-            // Only import SKUs that exist in product_masters
-            if (!ProductMaster::where('sku', $sku)->exists()) {
-                continue;
-            }
-
-            $status = EbayListingStatus::where('sku', $sku)->first();
-            $existing = $status ? $status->value : [];
-
-            $fields = ['listed', 'buyer_link', 'seller_link'];
-            foreach ($fields as $field) {
-                if (array_key_exists($field, $rowData) && $rowData[$field] !== '') {
-                    $existing[$field] = $rowData[$field];
+            $allowedHeaders = ['sku', 'nr_req', 'listed', 'buyer_link', 'seller_link'];
+            foreach ($header as $h) {
+                if (!in_array($h, $allowedHeaders)) {
+                    Log::error("Invalid header found: '$h'");
+                    return response()->json([
+                        'error' => "Invalid header '$h'. Allowed headers: " . implode(', ', $allowedHeaders)
+                    ], 422);
                 }
             }
 
-            EbayListingStatus::updateOrCreate(
-                ['sku' => $sku],
-                ['value' => $existing]
-            );
-        }
+            $processedCount = 0;
+            $skippedCount = 0;
+            $errorCount = 0;
 
-        return response()->json(['success' => 'CSV imported successfully']);
+            foreach ($rows as $rowIndex => $row) {
+                if (count($row) < 1) {
+                    Log::info("Row $rowIndex: Skipped (empty row)");
+                    $skippedCount++;
+                    continue; // skip empty
+                }
+
+                Log::info("Row $rowIndex data: " . json_encode($row));
+
+                $rowData = array_combine($header, $row);
+                Log::info("Row $rowIndex combined: " . json_encode($rowData));
+                
+                $sku = trim($rowData['sku'] ?? '');
+
+                if (!$sku) {
+                    Log::info("Row $rowIndex: Skipped (no SKU)");
+                    $skippedCount++;
+                    continue;
+                }
+
+                // Only import SKUs that exist in product_masters
+                if (!ProductMaster::where('sku', $sku)->exists()) {
+                    Log::warning("Row $rowIndex: SKU '$sku' not found in product_masters");
+                    $skippedCount++;
+                    continue;
+                }
+
+                $status = EbayListingStatus::where('sku', $sku)->first();
+                $existing = $status ? $status->value : [];
+
+                $fields = ['nr_req', 'listed', 'buyer_link', 'seller_link'];
+                foreach ($fields as $field) {
+                    if (array_key_exists($field, $rowData) && $rowData[$field] !== '') {
+                        $existing[$field] = $rowData[$field];
+                    }
+                }
+
+                EbayListingStatus::updateOrCreate(
+                    ['sku' => $sku],
+                    ['value' => $existing]
+                );
+                
+                Log::info("Row $rowIndex: SKU '$sku' processed successfully");
+                $processedCount++;
+            }
+
+            Log::info("=== Ebay CSV Import Completed ===");
+            Log::info("Processed: $processedCount, Skipped: $skippedCount, Errors: $errorCount");
+
+            return response()->json([
+                'success' => 'CSV imported successfully',
+                'processed' => $processedCount,
+                'skipped' => $skippedCount
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('Ebay CSV Import Error: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
+            
+            return response()->json([
+                'error' => 'Import failed: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
 
@@ -231,7 +288,7 @@ class ListingEbayController extends Controller
             'Content-Disposition' => 'attachment; filename="listing_status.csv"',
         ];
 
-        $columns = ['sku', 'listed', 'buyer_link', 'seller_link'];
+        $columns = ['sku', 'nr_req', 'listed', 'buyer_link', 'seller_link'];
 
         $callback = function () use ($columns) {
             $file = fopen('php://output', 'w');
@@ -247,6 +304,7 @@ class ListingEbayController extends Controller
 
                 $row = [
                     'sku'         => $sku,
+                    'nr_req'      => $status->value['nr_req'] ?? '',
                     'listed'      => $status->value['listed'] ?? '',
                     'buyer_link'  => $status->value['buyer_link'] ?? '',
                     'seller_link' => $status->value['seller_link'] ?? '',
