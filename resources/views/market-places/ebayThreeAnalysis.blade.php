@@ -3894,7 +3894,17 @@
                     $('#price-total').text(metrics.priceTotal.toLocaleString());
                     $('#sales-total').text(metrics.salesTotal.toLocaleString());
 
-
+                    $.ajax({
+                        url: "{{ route('adv-ebay3.total-sale.save-data') }}",
+                        method: 'GET',
+                        data: {
+                            salesTotal: metrics.salesTotal                        
+                        },
+                        success: function(response) {
+                        },
+                        error: function(xhr) {
+                        }
+                    });
 
 
                     // --- Custom PFT TOTAL calculation ---

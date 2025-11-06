@@ -5213,6 +5213,19 @@
                     $('#live-total').text(metrics.liveCount.toLocaleString());
                     $('#sale-total').text(metrics.totalSalesTotal.toLocaleString());
 
+                    $.ajax({
+                        url: "{{ route('adv-ebay.total-sales.save-data') }}",
+                        method: 'GET',
+                        data: {
+                            totalSales: metrics.totalSalesTotal
+                        },
+                        success: function(response) {
+                        },
+                        error: function(xhr) {
+                        }
+                    });
+
+
                     // Calculate and display averages
                     let pftTotal = 0;
                     if (metrics.salesL30Sum > 0) {

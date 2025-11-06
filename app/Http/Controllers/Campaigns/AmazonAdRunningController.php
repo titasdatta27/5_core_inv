@@ -9,6 +9,7 @@ use App\Models\AmazonSbCampaignReport;
 use App\Models\AmazonSpCampaignReport;
 use App\Models\ProductMaster;
 use App\Models\ShopifySku;
+use App\Models\ADVMastersData;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -16,6 +17,11 @@ class AmazonAdRunningController extends Controller
 {
     public function index(){
         return view('campaign.amz-ad-running');
+    }
+
+    public function getAmazonAdRunningSaveAdvMasterData(Request $request)
+    {
+        return ADVMastersData::getAmazonAdRunningSaveAdvMasterDataProceed($request);
     }
 
     public function getAmazonAdRunningData()

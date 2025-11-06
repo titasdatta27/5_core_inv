@@ -9,6 +9,7 @@ use App\Models\EbayMetric;
 use App\Models\EbayPriorityReport;
 use App\Models\ProductMaster;
 use App\Models\ShopifySku;
+use App\Models\ADVMastersData;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -18,6 +19,11 @@ class EbayRunningAdsController extends Controller
     public function index()
     {
         return view('campaign.ebay-running-ads');
+    }
+
+    public function getEbayRunningDataSave(Request $request)
+    {
+        return ADVMastersData::getEbayRunningDataSaveProceed($request);
     }
 
     public function getEbayRunningAdsData()

@@ -7,6 +7,7 @@ use App\Models\EbayDataView;
 use App\Models\EbayPriorityReport;
 use App\Models\ProductMaster;
 use App\Models\ShopifySku;
+use App\Models\ADVMastersData;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -16,6 +17,11 @@ class EbayMissingAdsController extends Controller
     public function index()
     {
         return view('campaign.ebay-missing-ads');
+    }
+
+    public function getEbayMissingSaveData(Request $request)
+    {
+        return ADVMastersData::getEbayMissingSaveDataProceed($request);
     }
 
     public function getEbayMissingAdsData()

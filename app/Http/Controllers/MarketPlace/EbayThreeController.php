@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Cache;
 use App\Models\ProductMaster;
 use App\Models\ShopifySku;
 use App\Models\EbayThreeDataView;
+use App\Models\ADVMastersData;
 use App\Models\Ebay3Metric;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -47,6 +48,10 @@ class EbayThreeController extends Controller
         ]);
     }
 
+    public function getEbay3TotalSaleSaveData(Request $request)
+    {
+        return ADVMastersData::getEbay3TotalSaleSaveDataProceed($request);
+    }
 
     public function ebayThreePricingCVR(Request $request)
     {

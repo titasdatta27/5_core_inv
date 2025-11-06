@@ -633,6 +633,7 @@
                     let totalMissingAds = 0;
                     let totalNRA = 0;
                     let totalRA = 0;
+                    let totalMissingAds2 = 0;
 
                     visibleData.forEach(row => {
                         let kw = row.kw_campaign_name || "";
@@ -656,6 +657,7 @@
                         // Total Missing Ads Count
                         if(nra !== "NRA") {
                             totalMissingAds = `( ${ptMissing + kwMissing + (bothMissing)} ) `;
+                            totalMissingAds2 = parseFloat(ptMissing) + parseFloat(kwMissing) + parseFloat(bothMissing);
                         }
 
                         // Total NRA Count
@@ -676,6 +678,27 @@
                     $("#pt-missing").text(ptMissing);
                     $("#both-running").text(bothRunning);
                     $("#total-missing-ads").text(totalMissingAds);
+
+
+                     $.ajax({
+                        url: "{{ route('adv-ebay3.missing.save-data') }}",
+                        method: 'GET',
+                        data: {
+                            totalMissingAds: totalMissingAds2,
+                            kwMissing: parseFloat(kwMissing) + parseFloat(bothMissing),
+                            ptMissing: parseFloat(ptMissing) + parseFloat(bothMissing),                     
+                        },
+                        success: function(response) {
+                        },
+                        error: function(xhr) {
+                        }
+                    });
+
+
+
+
+
+
 
                     // New stats
                     $("#kw-running").text(kwRunning);

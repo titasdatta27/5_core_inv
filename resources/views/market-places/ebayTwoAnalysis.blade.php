@@ -4955,6 +4955,23 @@
                     $('#price-total').text(metrics.priceTotal.toLocaleString());
                     $('#total-sales').text(metrics.totalSales.toLocaleString());
 
+
+                    $.ajax({
+                        url: "{{ route('adv-ebay2.total-sale.save-data') }}",
+                        method: 'GET',
+                        data: {
+                            totalSales: metrics.totalSales,                
+                        },
+                        success: function(response) {
+                        },
+                        error: function(xhr) {
+                        }
+                    });
+
+
+
+
+
                     // Calculate and display averages
                     let pftTotal = 0;
                     if (metrics.salesL30Sum > 0) {

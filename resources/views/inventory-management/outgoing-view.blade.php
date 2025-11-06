@@ -95,6 +95,16 @@
             opacity: 0.8 !important;
         }
 
+        .is-invalid {
+            border: 2px solid red !important;
+            background-color: #ffe6e6 !important;
+        }
+        .error-message {
+            font-size: 13px;
+            margin-top: 4px;
+        }
+
+
 
     </style>
 @endsection
@@ -447,18 +457,71 @@
                 $('#outgoingForm').on('submit', function (e) {
                     e.preventDefault();
 
+                    $('.error-message').remove();
+                    $('input, select').removeClass('is-invalid');
+
                     const formData = $(this).serialize();
+                    let hasError = false;
+
+                     // Validate each required field
+                    const fields = [
+                        { id: '#sku', name: 'SKU' },
+                        { id: '#qty', name: 'Quantity' },
+                        { id: '#warehouse_id', name: 'Warehouse' },
+                        { id: '#reason', name: 'Reason' },
+                    ];
+
+                    fields.forEach(f => {
+                        const el = $(f.id);
+                        if (!el.val() || el.val() === 'Select SKU' || el.val() === 'Select Warehouse' || el.val() === 'Select Reason') {
+                            hasError = true;
+                            el.addClass('is-invalid');
+                            el.after(`<div class="text-danger error-message">${f.name} is required.</div>`);
+                        }
+                    });
+
+                    if (hasError) return; // stop if validation fails
+
+
+                    // Create overlay loader dynamically
+                    const overlay = document.createElement("div");
+                    overlay.id = "processing-overlay";
+                    overlay.innerHTML = `
+                        <div style="
+                            position:fixed;
+                            top:0; left:0;
+                            width:100%; height:100%;
+                            background:rgba(0,0,0,0.6);
+                            color:white;
+                            display:flex;
+                            align-items:center;
+                            justify-content:center;
+                            flex-direction:column;
+                            z-index:9999;
+                            font-size:20px;
+                        ">
+                            <div style="font-size:28px;">🚀 Processing incoming stock...</div>
+                            <small style="margin-top:10px;font-size:16px;">
+                                Please wait while we update Shopify inventory.
+                            </small>
+                        </div>`;
+                    document.body.appendChild(overlay);
 
                     $.ajax({
                         url: '{{ route("outgoing.store") }}',
                         method: 'POST',
                         data: formData,
                         success: function (response) {
+                            document.getElementById("processing-overlay")?.remove();
+                            alert('Incoming inventory stored and updated in Shopify successfully!');
                             $('#addWarehouseModal').modal('hide');
-                            loadData(); // Reload after store
+                            // loadData(); // Reload after store
                             $('#outgoingForm')[0].reset(); // Optional: clear form
+                            $('#parent').val('');
+                            location.reload();
                         },
                         error: function (xhr) {
+                            document.getElementById("processing-overlay")?.remove();
                             console.log(xhr.responseJSON);
                             alert('Error storing Outgoing.');
                         }
