@@ -202,16 +202,6 @@ class AmazonCampaignReportsController extends Controller
             ->where('campaignStatus', '!=', 'ARCHIVED')
             ->get();
 
-        $amazonSpCampaignReportsL1 = AmazonSpCampaignReport::where('ad_type', 'SPONSORED_PRODUCTS')
-            ->where('report_date_range', 'L1')
-            ->where(function ($q) use ($skus) {
-                foreach ($skus as $sku) $q->orWhere('campaignName', 'LIKE', '%' . $sku . '%');
-            })
-            ->where('campaignName', 'NOT LIKE', '%PT')
-            ->where('campaignName', 'NOT LIKE', '%PT.')
-            ->where('campaignStatus', '!=', 'ARCHIVED')
-            ->get();
-
         $result = [];
 
         foreach ($productMasters as $pm) {
@@ -245,21 +235,15 @@ class AmazonCampaignReportsController extends Controller
                 return $campaignName === $cleanSku;
             });
 
-            $matchedCampaignL1 = $amazonSpCampaignReportsL1->first(function ($item) use ($sku) {
-                $campaignName = strtoupper(trim(rtrim($item->campaignName, '.')));
-                $cleanSku = strtoupper(trim(rtrim($sku, '.')));
-                return $campaignName === $cleanSku;
-            });
-
             $row = [
                 'parent' => $parent,
                 'sku' => $pm->sku,
                 'INV' => $shopify->inv ?? 0,
                 'L30' => $shopify->quantity ?? 0,
                 'A_L30' => $amazonSheet->units_ordered_l30 ?? 0,
-                'campaignName' => $matchedCampaignL7->campaignName ?? ($matchedCampaignL1->campaignName ?? ''),
-                'campaignStatus' => $matchedCampaignL7->campaignStatus ?? ($matchedCampaignL1->campaignStatus ?? ''),
-                'campaignBudgetAmount' => $matchedCampaignL7->campaignBudgetAmount ?? ($matchedCampaignL1->campaignBudgetAmount ?? ''),
+                'campaignName' => $matchedCampaignL7->campaignName ?? '',
+                'campaignStatus' => $matchedCampaignL30->campaignStatus ?? '',
+                'campaignBudgetAmount' => $matchedCampaignL30->campaignBudgetAmount ?? 0,
                 // L60
                 'impressions_l60' => $matchedCampaignL60->impressions ?? 0,
                 'clicks_l60'      => $matchedCampaignL60->clicks ?? 0,
@@ -315,7 +299,7 @@ class AmazonCampaignReportsController extends Controller
                 }
             }
 
-            if($row['NRA'] !== 'NRA' && $row['campaignName'] !== ''){
+            if($row['campaignName'] != ''){
                 $result[] = (object) $row;
             }
         }
@@ -380,7 +364,6 @@ class AmazonCampaignReportsController extends Controller
                     $q->orWhere('campaignName', 'LIKE', '%' . strtoupper($sku) . '%');
                 }
             })
-            ->where('campaignStatus', '!=', 'ARCHIVED')
             ->get();
         
         $amazonSpCampaignReportsL30 = AmazonSpCampaignReport::where('ad_type', 'SPONSORED_PRODUCTS')
@@ -390,7 +373,6 @@ class AmazonCampaignReportsController extends Controller
                     $q->orWhere('campaignName', 'LIKE', '%' . strtoupper($sku) . '%');
                 }
             })
-            ->where('campaignStatus', '!=', 'ARCHIVED')
             ->get();
 
         $amazonSpCampaignReportsL15 = AmazonSpCampaignReport::where('ad_type', 'SPONSORED_PRODUCTS')
@@ -400,7 +382,6 @@ class AmazonCampaignReportsController extends Controller
                     $q->orWhere('campaignName', 'LIKE', '%' . strtoupper($sku) . '%');
                 }
             })
-            ->where('campaignStatus', '!=', 'ARCHIVED')
             ->get();
 
         $amazonSpCampaignReportsL7 = AmazonSpCampaignReport::where('ad_type', 'SPONSORED_PRODUCTS')
@@ -410,17 +391,6 @@ class AmazonCampaignReportsController extends Controller
                     $q->orWhere('campaignName', 'LIKE', '%' . strtoupper($sku) . '%');
                 }
             })
-            ->where('campaignStatus', '!=', 'ARCHIVED')
-            ->get();
-
-        $amazonSpCampaignReportsL1 = AmazonSpCampaignReport::where('ad_type', 'SPONSORED_PRODUCTS')
-            ->where('report_date_range', 'L1')
-            ->where(function ($q) use ($skus) {
-                foreach ($skus as $sku) {
-                    $q->orWhere('campaignName', 'LIKE', '%' . strtoupper($sku) . '%');
-                }
-            })
-            ->where('campaignStatus', '!=', 'ARCHIVED')
             ->get();
 
         $result = [];
@@ -437,6 +407,7 @@ class AmazonCampaignReportsController extends Controller
 
                 return (
                     (str_ends_with($cleanName, $sku . ' PT') || str_ends_with($cleanName, $sku . ' PT.'))
+                    && strtoupper($item->campaignStatus) === 'ENABLED'
                 );
             });
 
@@ -464,23 +435,15 @@ class AmazonCampaignReportsController extends Controller
                 );
             });
 
-            $matchedCampaignL1 = $amazonSpCampaignReportsL1->first(function ($item) use ($sku) {
-                $cleanName = strtoupper(trim($item->campaignName));
-
-                return (
-                    (str_ends_with($cleanName, $sku . ' PT') || str_ends_with($cleanName, $sku . ' PT.'))
-                );
-            });
-
             $row = [
                 'parent' => $parent,
                 'sku' => $pm->sku,
                 'INV' => $shopify->inv ?? 0,
                 'L30' => $shopify->quantity ?? 0,
                 'A_L30' => $amazonSheet->units_ordered_l30 ?? 0,
-                'campaignName' => $matchedCampaignL7->campaignName ?? ($matchedCampaignL1->campaignName ?? ''),
-                'campaignStatus' => $matchedCampaignL7->campaignStatus ?? ($matchedCampaignL1->campaignStatus ?? ''),
-                'campaignBudgetAmount' => $matchedCampaignL7->campaignBudgetAmount ?? ($matchedCampaignL1->campaignBudgetAmount ?? ''),
+                'campaignName' => $matchedCampaignL30->campaignName ?? '',
+                'campaignStatus' => $matchedCampaignL30->campaignStatus ?? '',
+                'campaignBudgetAmount' => $matchedCampaignL30->campaignBudgetAmount ?? 0,
                 
                 // L60
                 'impressions_l60' => $matchedCampaignL60->impressions ?? 0,
@@ -540,7 +503,7 @@ class AmazonCampaignReportsController extends Controller
                 }
             }
 
-            if($row['NRA'] !== 'NRA' && $row['campaignName'] !== ''){
+            if($row['campaignName'] != ''){
                 $result[] = (object) $row;
             }
         }
@@ -580,7 +543,6 @@ class AmazonCampaignReportsController extends Controller
                     $q->orWhere('campaignName', 'LIKE', '%' . strtoupper($sku) . '%');
                 }
             })
-            ->where('campaignStatus', '!=', 'ARCHIVED')
             ->get();
 
         $amazonSpCampaignReportsL30 = AmazonSbCampaignReport::where('ad_type', 'SPONSORED_BRANDS')
@@ -590,7 +552,6 @@ class AmazonCampaignReportsController extends Controller
                     $q->orWhere('campaignName', 'LIKE', '%' . strtoupper($sku) . '%');
                 }
             })
-            ->where('campaignStatus', '!=', 'ARCHIVED')
             ->get();
 
         $amazonSpCampaignReportsL15 = AmazonSbCampaignReport::where('ad_type', 'SPONSORED_BRANDS')
@@ -600,7 +561,6 @@ class AmazonCampaignReportsController extends Controller
                     $q->orWhere('campaignName', 'LIKE', '%' . strtoupper($sku) . '%');
                 }
             })
-            ->where('campaignStatus', '!=', 'ARCHIVED')
             ->get();
 
         $amazonSpCampaignReportsL7 = AmazonSbCampaignReport::where('ad_type', 'SPONSORED_BRANDS')
@@ -610,7 +570,6 @@ class AmazonCampaignReportsController extends Controller
                     $q->orWhere('campaignName', 'LIKE', '%' . strtoupper($sku) . '%');
                 }
             })
-            ->where('campaignStatus', '!=', 'ARCHIVED')
             ->get();
 
         $result = [];
@@ -627,7 +586,8 @@ class AmazonCampaignReportsController extends Controller
                 $expected1 = $sku;                
                 $expected2 = $sku . ' HEAD';      
 
-                return ($cleanName === $expected1 || $cleanName === $expected2);
+                return ($cleanName === $expected1 || $cleanName === $expected2)
+                    && strtoupper($item->campaignStatus) === 'ENABLED';
             });
 
             $matchedCampaignL30 = $amazonSpCampaignReportsL30->first(function ($item) use ($sku) {
@@ -635,7 +595,8 @@ class AmazonCampaignReportsController extends Controller
                 $expected1 = $sku;                
                 $expected2 = $sku . ' HEAD';      
 
-                return ($cleanName === $expected1 || $cleanName === $expected2);
+                return ($cleanName === $expected1 || $cleanName === $expected2)
+                    && strtoupper($item->campaignStatus) === 'ENABLED';
             });
 
             $matchedCampaignL15 = $amazonSpCampaignReportsL15->first(function ($item) use ($sku) {
@@ -643,7 +604,8 @@ class AmazonCampaignReportsController extends Controller
                 $expected1 = $sku;                
                 $expected2 = $sku . ' HEAD';      
 
-                return ($cleanName === $expected1 || $cleanName === $expected2);
+                return ($cleanName === $expected1 || $cleanName === $expected2)
+                    && strtoupper($item->campaignStatus) === 'ENABLED';
             });
 
             $matchedCampaignL7 = $amazonSpCampaignReportsL7->first(function ($item) use ($sku) {
@@ -651,10 +613,11 @@ class AmazonCampaignReportsController extends Controller
                 $expected1 = $sku;                
                 $expected2 = $sku . ' HEAD';      
 
-                return ($cleanName === $expected1 || $cleanName === $expected2);
+                return ($cleanName === $expected1 || $cleanName === $expected2)
+                    && strtoupper($item->campaignStatus) === 'ENABLED';
             });
 
-            if(!$matchedCampaignL30){
+            if(!$matchedCampaignL60 && !$matchedCampaignL30 && !$matchedCampaignL15 && !$matchedCampaignL7){
                 continue;
             }
 

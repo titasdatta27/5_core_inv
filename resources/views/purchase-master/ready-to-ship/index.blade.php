@@ -147,13 +147,9 @@
                                 <i class="mdi mdi-truck-fast"></i>
                                 Move to Transit INV
                             </button>
-                            <button id="delete-selected-btn" class="btn btn-primary text-black d-none" style="border-radius: 6px;">
+                            <button id="delete-selected-btn" class="btn btn-danger d-none" style="border-radius: 6px;">
                                 <i class="mdi mdi-backup-restore"></i>
                                 Revert to MFRG
-                            </button>
-                            <button id="delete-selected-item" class="btn btn-danger d-none" style="border-radius: 6px;">
-                                <i class="mdi mdi-trash-can"></i>
-                                Delete
                             </button>
                         </div>
                     </div>
@@ -185,8 +181,7 @@
                                     <div class="search-results" data-results-column="3"
                                         style="position:relative; z-index:10;"></div>
                                 </th>
-                                <th data-column="4" data-column-name="qty" class="text-center">Or. QTY<div class="resizer"></div></th>
-                                <th data-column="20" data-column-name="rec_qty" class="text-center">Rec. QTY<div class="resizer"></div></th>
+                                <th data-column="4" data-column-name="qty" class="text-center">QTY<div class="resizer"></div></th>
                                 <th data-column="18" data-column-name="qty" class="text-center">Rate<div class="resizer"></div></th>
                                 <th data-column="5" data-column-name="supplier">Supplier<div class="resizer"></div>
                                 </th>
@@ -248,15 +243,12 @@
                                 
                                 <td data-column="2" class="text-center">{{ $item->parent }}</td>
                                 <td data-column="3" class="text-center">{{ $item->sku }}</td>
-                                <td data-column="4" class="text-center">
-                                    {{ $item->qty }}
-                                </td>
-                                <td data-column="20" class="text-center">
+                                <td data-column="4">
                                     <input type="number" 
                                            class="form-control auto-save" 
                                            data-sku="{{ $item->sku }}" 
-                                           data-column="rec_qty" 
-                                           value="{{ $item->rec_qty }}" 
+                                           data-column="qty" 
+                                           value="{{ $item->qty }}" 
                                            min="0"
                                            max="10000"
                                            style="font-size: 0.95rem; height: 36px; width: 90px;">
@@ -542,7 +534,6 @@
 
         // Button visibility for selected rows
         const deleteBtn = document.getElementById('delete-selected-btn');
-        const deleteSelectedItemBtn = document.getElementById('delete-selected-item');
         const moveToTransitBtn = document.querySelector('.move-to-transit-btn');
         const checkboxes = document.querySelectorAll('.row-checkbox');
 
@@ -552,7 +543,6 @@
             const anyChecked = document.querySelectorAll('.row-checkbox:checked').length > 0;
             deleteBtn.classList.toggle('d-none', !anyChecked);
             moveToTransitBtn.classList.toggle('d-none', !anyChecked);
-            deleteSelectedItemBtn.classList.toggle('d-none', !anyChecked);
         }
 
         // Delete selected rows
@@ -618,38 +608,6 @@
                 }
             })
             .catch(() => alert('Error occurred during transit.'));
-        });
-
-        deleteSelectedItemBtn.addEventListener('click', function() {
-            const selectedSkus = Array.from(document.querySelectorAll('.row-checkbox:checked')).map(cb => cb.getAttribute('data-sku')).filter(Boolean);
-
-            if (!selectedSkus.length) return alert("No rows selected.");
-
-            if (!confirm("Are you sure you want to delete the selected items? This action cannot be undone.")) {
-                return;
-            }
-
-            fetch('/ready-to-ship/delete-items', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify({ skus: selectedSkus })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    selectedSkus.forEach(sku => {
-                        const row = document.querySelector(`.row-checkbox[data-sku="${sku}"]`)?.closest('tr');
-                        if (row) row.remove();
-                    });
-                    updateButtonVisibility();
-                } else {
-                    alert('Delete failed');
-                }
-            })
-            .catch(() => alert('Error occurred during deletion.'));
         });
 
         // Helper functions

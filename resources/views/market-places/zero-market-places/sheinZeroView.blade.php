@@ -1015,6 +1015,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
+                    <h4 class="header-title">Amazon Zero View</h4>
 
                     <!-- Custom Dropdown Filters Row -->
                     <div class="d-flex flex-wrap gap-2 mb-3">
@@ -2043,8 +2044,6 @@
                     success: function(response) {
                         if (response && response.data) {
                             tableData = response.data.map((item, index) => {
-                                console.log(item,'dsd');
-                                
                                 // Calculate A Dil% as (A L30 / INV), handle division by zero
                                 const inv = Number(item.inv) || 0;
                                 const aL30 = Number(item['A_L30']) || 0;
@@ -2407,31 +2406,31 @@
                 });
             }
 
-            // $(document).on('change', '.nr-select', function() {
-            //     const sku = $(this).data('sku');
-            //     const nrValue = $(this).val();
-            //     console.log(nrValue, 'nrrr');
+            $(document).on('change', '.nr-select', function() {
+                const sku = $(this).data('sku');
+                const nrValue = $(this).val();
+                console.log(nrValue, 'nrrr');
 
 
-            //     $.ajax({
-            //         // url: '/doba/save-nr',
-            //         type: 'POST',
-            //         data: {
-            //             sku: sku,
-            //             nr: JSON.stringify({
-            //                 NR: nrValue
-            //             }),
-            //             _token: $('meta[name="csrf-token"]').attr('content') // CSRF protection
-            //         },
-            //         success: function(res) {
-            //             showNotification('success', 'NR updated successfully');
-            //         },
-            //         error: function(err) {
-            //             console.error('Error saving NR:', err);
-            //             showNotification('danger', 'Failed to update NR');
-            //         }
-            //     });
-            // });
+                $.ajax({
+                    // url: '/doba/save-nr',
+                    type: 'POST',
+                    data: {
+                        sku: sku,
+                        nr: JSON.stringify({
+                            NR: nrValue
+                        }),
+                        _token: $('meta[name="csrf-token"]').attr('content') // CSRF protection
+                    },
+                    success: function(res) {
+                        showNotification('success', 'NR updated successfully');
+                    },
+                    error: function(err) {
+                        console.error('Error saving NR:', err);
+                        showNotification('danger', 'Failed to update NR');
+                    }
+                });
+            });
 
 
             function initNREditHandlers() {
@@ -2447,16 +2446,18 @@
                     }
 
                     $.ajax({
-                        url: '/shein/save-nr',
+                        // url: '/amazon/save-nr',
                         type: 'POST',
                         data: {
                             sku: sku,
-                            nr: { NR: nrValue },
+                            nr: JSON.stringify({
+                                NR: nrValue
+                            }),
                             _token: $('meta[name="csrf-token"]').attr('content') // CSRF protection
                         },
                         success: function(res) {
                             showNotification('success', 'NR updated successfully');
-                            // Update tableData and filteredData correctly
+                            // ✅ Update tableData and filteredData correctly
                             tableData.forEach(item => {
                                 if (item['sku'] === sku) {
                                     item.NR = nrValue;
@@ -2467,7 +2468,7 @@
                                     item.NR = nrValue;
                                 }
                             });
-                            // Recalculate & re-render
+                            // ✅ Recalculate & re-render
                             updateZeroViewDiv();
                             renderTable();
                         },

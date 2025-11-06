@@ -334,6 +334,32 @@
                 }
             });
 
+            // document.addEventListener("change", function(e){
+            //     if(e.target.classList.contains("editable-select")){
+            //         let sku   = e.target.getAttribute("data-sku");
+            //         let field = e.target.getAttribute("data-field");
+            //         let value = e.target.value;
+
+            //         fetch('/update-amazon-nr-nrl-fba', {
+            //             method: 'POST',
+            //             headers: {
+            //                 'Content-Type': 'application/json',
+            //                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            //             },
+            //             body: JSON.stringify({
+            //                 sku: sku,
+            //                 field: field,
+            //                 value: value
+            //             })
+            //         })
+            //         .then(res => res.json())
+            //         .then(data => {
+            //             console.log(data);
+            //         })
+            //         .catch(err => console.error(err));
+            //     }
+            // });
+
 
             table.on("tableBuilt", function () {
 

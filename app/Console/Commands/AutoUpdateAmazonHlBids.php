@@ -88,7 +88,8 @@ class AutoUpdateAmazonHlBids extends Command
                 $expected1 = $sku;                
                 $expected2 = $sku . ' HEAD';      
 
-                return ($cleanName === $expected1 || $cleanName === $expected2);
+                return ($cleanName === $expected1 || $cleanName === $expected2)
+                    && strtoupper($item->campaignStatus) === 'ENABLED';
             });
 
             $matchedCampaignL1 = $amazonSpCampaignReportsL1->first(function ($item) use ($sku) {
@@ -96,8 +97,14 @@ class AutoUpdateAmazonHlBids extends Command
                 $expected1 = $sku;
                 $expected2 = $sku . ' HEAD';
 
-                return ($cleanName === $expected1 || $cleanName === $expected2);
+                return ($cleanName === $expected1 || $cleanName === $expected2)
+                    && strtoupper($item->campaignStatus) === 'ENABLED';
             });
+
+
+            if (!$matchedCampaignL7 && !$matchedCampaignL1) {
+                continue;
+            }
 
             $row = [];
             $row['INV']    = $shopify->inv ?? 0;
@@ -119,7 +126,7 @@ class AutoUpdateAmazonHlBids extends Command
 
             $l1_cpc = floatval($row['l1_cpc']);
             $l7_cpc = floatval($row['l7_cpc']);
-            $row['sbid'] = floor($l1_cpc * 0.90 * 100) / 100;
+            $row['sbid'] = floor($l1_cpc * 0.20 * 100) / 100;
 
 
             $budget = floatval($row['campaignBudgetAmount']);

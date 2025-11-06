@@ -616,30 +616,28 @@
                     var ub7 = budget > 0 ? (l7_spend / (budget * 7)) * 100 : 0;
                     var ub1 = budget > 0 ? (l1_spend / budget) * 100 : 0;
 
-                    if (!(ub7 >= 70 && ub7 <= 90)) return false;
+                    if (!(ub7 >= 70 && ub7 <= 90 && ub1 >= 70 && ub1 <= 90)) return false;
 
-                    // ✅ SEARCH FILTER
+
                     let searchVal = $("#global-search").val()?.toLowerCase() || "";
                     if (searchVal && !(data.campaignName?.toLowerCase().includes(searchVal))) {
                         return false;
                     }
 
-                    // ✅ STATUS FILTER
                     let statusVal = $("#status-filter").val();
                     if (statusVal && data.campaignStatus !== statusVal) {
                         return false;
                     }
 
                     let invFilterVal = $("#inv-filter").val();
-                    let inv = parseFloat(data.INV || 0);
 
-                    // ALL → no restriction
                     if (invFilterVal === "INV_0") {
-                        if (inv !== 0) return false;
+                        if (parseFloat(data.INV) !== 0) return false;
                     } else if (invFilterVal === "OTHERS") {
-                        if (inv === 0) return false;
+                        if (parseFloat(data.INV) === 0) return false;
+                    } else if (invFilterVal === "ALL" || invFilterVal === "") {
+                        // show all rows → do nothing
                     }
-
 
                     let nrlFilterVal = $("#nrl-filter").val();
                     if (nrlFilterVal) {
@@ -677,10 +675,8 @@
                     return true;
                 }
 
-                // ✅ SET FILTER
                 table.setFilter(combinedFilter);
 
-                // ✅ UPDATE COUNTS
                 function updateCampaignStats() {
                     let allRows = table.getData();
                     let filteredRows = allRows.filter(combinedFilter);
@@ -698,17 +694,14 @@
                 table.on("pageLoaded", updateCampaignStats);
                 table.on("dataProcessed", updateCampaignStats);
 
-                // ✅ SEARCH + FILTER CHANGE HANDLERS
-                $("#global-search").on("keyup", function () {
+                $("#global-search").on("keyup", function() {
                     table.setFilter(combinedFilter);
                 });
 
-                $("#status-filter, #inv-filter, #nrl-filter, #nra-filter, #fba-filter")
-                    .on("change", function () {
-                        table.setFilter(combinedFilter);
-                    });
+                $("#status-filter,#inv-filter, #nrl-filter, #nra-filter, #fba-filter").on("change", function() {
+                    table.setFilter(combinedFilter);
+                });
 
-                // ✅ INITIAL UPDATE
                 updateCampaignStats();
             });
 

@@ -1149,8 +1149,7 @@
 
                                 <a href="{{ asset('sample_excel/sample_listing_file.csv') }}" download class="btn btn-outline-secondary mb-3">📄 Download Sample File</a>
 
-                                <input type="file" id="importFile" name="file" accept=".csv,.txt" class="form-control" />
-                                <small class="text-muted">Only CSV or TXT files are supported</small>
+                                <input type="file" id="importFile" name="file" accept=".xlsx,.xls,.csv" class="form-control" />
                             </div>
 
                             <div class="modal-footer">

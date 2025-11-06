@@ -12,7 +12,6 @@ class ArrivedContainer extends Model
     protected $table = 'arrived_containers';
 
     protected $fillable = [
-        'transit_container_id',
         'tab_name',
         'supplier_name',
         'company_name',

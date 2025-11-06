@@ -209,7 +209,7 @@
             display: inline-block;
         }
 
-        .cdropdownustom--menu {
+        .custom-dropdown-menu {
             display: none;
             position: absolute;
             background-color: white;

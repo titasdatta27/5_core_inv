@@ -14,7 +14,6 @@ use Illuminate\Support\Facades\Cache;
 use App\Http\Controllers\ApiController;
 use App\Jobs\UpdateEbaySPriceJob;
 use App\Models\ChannelMaster;
-use App\Models\ADVMastersData;
 use App\Models\EbayPriorityReport;
 use App\Models\ProductMaster; // Add this at the top with other use statements
 use Illuminate\Support\Facades\DB;
@@ -39,9 +38,22 @@ class EbayController extends Controller
         $mode = $request->query("mode");
         $demo = $request->query("demo");
 
-        $marketplaceData = MarketplacePercentage::where('marketplace', 'Ebay')->first();
+        // Get percentage from cache or database
+        // $percentage = Cache::remember(
+        //     "ebay_marketplace_percentage",
+        //     now()->addDays(30),
+        //     function () {
+        //         $marketplaceData = MarketplacePercentage::where(
+        //             "marketplace",
+        //             "Ebay"
+        //         )->first();
+        //         return $marketplaceData ? $marketplaceData->percentage : 100; // Default to 100 if not set
+        //     }
+        // );
 
-        $percentage = $marketplaceData ? $marketplaceData->percentage : 100;
+        $marketplaceData = ChannelMaster::where('channel', 'eBay')->first();
+
+        $percentage = $marketplaceData ? $marketplaceData->channel_percentage : 100;
         $adUpdates = $marketplaceData ? $marketplaceData->ad_updates : 0;
 
 
@@ -49,13 +61,7 @@ class EbayController extends Controller
             "mode" => $mode,
             "demo" => $demo,
             "ebayPercentage" => $percentage,
-            "ebayAdUpdates" => $adUpdates,
         ]);
-    }
-
-    public function getAdvEbayTotalSaveData(Request $request)
-    {
-        return ADVMastersData::getAdvEbayTotalSaveDataProceed($request);
     }
 
     public function ebayPricingCVR(Request $request)
@@ -181,10 +187,13 @@ class EbayController extends Controller
             ->get()
             ->keyBy("sku");
 
-        $ebayMetrics = DB::connection('apicentral')->table('ebay_one_metrics')->whereIn('sku', $skus)->get()->keyBy('sku');
+        $ebayMetrics = EbayMetric::whereIn("sku", $skus)
+            ->get()
+            ->keyBy("sku");
 
         $nrValues = EbayDataView::whereIn("sku", $skus)->pluck("value", "sku");
 
+        // Fetch LMP data from 5core_repricer database for eBay - get lowest price per SKU (excluding 0 prices)
         $lmpLookup = collect();
         try {
             $lmpLookup = DB::connection('repricer')
@@ -197,13 +206,17 @@ class EbayController extends Controller
                 ->keyBy('sku');
         } catch (Exception $e) {
             Log::warning('Could not fetch LMP data from repricer database: ' . $e->getMessage());
+            // Fallback to empty collection - will use eBay's price_lmpa instead
         }
 
         // 5. Marketplace percentage
-        $marketplaceData = MarketplacePercentage::where('marketplace', 'Ebay')->first();
-
-        $percentage = $marketplaceData ? ($marketplaceData->percentage / 100) : 1; 
-        $adUpdates  = $marketplaceData ? $marketplaceData->ad_updates : 0;   
+        $percentage = Cache::remember(
+            "ebay_marketplace_percentage",
+            now()->addDays(30),
+            function () {
+                return MarketplacePercentage::where("marketplace", "EBay")->value("percentage") ?? 100;
+            }
+        ) / 100;
 
         // 6. Build Result
         $result = [];
@@ -284,7 +297,6 @@ class EbayController extends Controller
                 2
             );
             $row["percentage"] = $percentage;
-            $row['ad_updates'] = $adUpdates;
             $row["LP_productmaster"] = $lp;
             $row["Ship_productmaster"] = $ship;
 
@@ -296,7 +308,6 @@ class EbayController extends Controller
             $row['Listed'] = null;
             $row['Live'] = null;
             $row['APlus'] = null;
-            $row['spend_l30'] = null;
             if (isset($nrValues[$pm->sku])) {
                 $raw = $nrValues[$pm->sku];
                 if (!is_array($raw)) {
@@ -307,7 +318,6 @@ class EbayController extends Controller
                     $row['SPRICE'] = $raw['SPRICE'] ?? null;
                     $row['SPFT'] = $raw['SPFT'] ?? null;
                     $row['SROI'] = $raw['SROI'] ?? null;
-                    $row['spend_l30'] = $raw['Spend_L30'] ?? null;
                     $row['Listed'] = isset($raw['Listed']) ? filter_var($raw['Listed'], FILTER_VALIDATE_BOOLEAN) : null;
                     $row['Live'] = isset($raw['Live']) ? filter_var($raw['Live'], FILTER_VALIDATE_BOOLEAN) : null;
                     $row['APlus'] = isset($raw['APlus']) ? filter_var($raw['APlus'], FILTER_VALIDATE_BOOLEAN) : null;
@@ -372,6 +382,10 @@ class EbayController extends Controller
                     'ad_updates' => $adUpdates,
                 ]
             );
+
+            // Clear the cache
+            Cache::forget('amazon_marketplace_percentage');
+            Cache::forget('amazon_marketplace_ad_updates');
 
             return response()->json([
                 'status' => 200,

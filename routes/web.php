@@ -1,4 +1,3 @@
-
 <?php
 
 use App\Http\Controllers\AdsMaster\AdsMasterController;
@@ -163,7 +162,6 @@ use App\Http\Controllers\AdvertisementMaster\MetaParent\ProductWiseMetaParentCon
 use App\Http\Controllers\ArrivedContainerController;
 use App\Http\Controllers\Campaigns\AmazonAdRunningController;
 use App\Http\Controllers\Campaigns\AmazonCampaignReportsController;
-use App\Http\Controllers\Campaigns\AmazonCPCZeroController;
 use App\Http\Controllers\Campaigns\AmazonFbaAcosController;
 use App\Http\Controllers\Campaigns\AmazonFbaAdsController;
 use App\Http\Controllers\Campaigns\AmazonMissingAdsController;
@@ -173,22 +171,17 @@ use App\Http\Controllers\Campaigns\AmazonSpBudgetController;
 use App\Http\Controllers\Campaigns\AmzCorrectlyUtilizedController;
 use App\Http\Controllers\Campaigns\AmzUnderUtilizedBgtController;
 use App\Http\Controllers\Campaigns\CampaignImportController;
-use App\Http\Controllers\Campaigns\Ebay2MissingAdsController;
-use App\Http\Controllers\Campaigns\Ebay2PMTAdController;
-use App\Http\Controllers\Campaigns\Ebay2RunningAdsController;
 use App\Http\Controllers\Campaigns\Ebay3AcosController;
 use App\Http\Controllers\Campaigns\Ebay3KeywordAdsController;
-use App\Http\Controllers\Campaigns\Ebay3MissingAdsController;
 use App\Http\Controllers\Campaigns\Ebay3PinkDilAdController;
 use App\Http\Controllers\Campaigns\Ebay3PmtAdsController;
-use App\Http\Controllers\Campaigns\Ebay3RunningAdsController;
 use App\Http\Controllers\Campaigns\Ebay3UtilizedAdsController;
 use App\Http\Controllers\Campaigns\EbayKwAdsController;
 use App\Http\Controllers\Campaigns\EbayOverUtilizedBgtController;
 use App\Http\Controllers\Campaigns\EbayPinkDilAdController;
 use App\Http\Controllers\Campaigns\EbayPMPAdsController;
 use App\Http\Controllers\Campaigns\EbayRunningAdsController;
-use App\Http\Controllers\Campaigns\GoogleAdsController;
+use App\Http\Controllers\Campaigns\GoogleShoppingAdsController;
 use App\Http\Controllers\Campaigns\WalmartMissingAdsController;
 use App\Http\Controllers\Campaigns\WalmartUtilisationController;
 use App\Http\Controllers\Channels\ApprovalsChannelMasterController;
@@ -207,9 +200,6 @@ use App\Http\Controllers\Channels\ReviewMaster\ReviewDashboardController;
 use App\Http\Controllers\Channels\SetupAccountChannelController;
 use App\Http\Controllers\Channels\ShippingMasterController;
 use App\Http\Controllers\Channels\TrafficMasterController;
-use App\Http\Controllers\Campaigns\EbayMissingAdsController;
-use App\Http\Controllers\Campaigns\WalmartRunningAdsController;
-use App\Http\Controllers\ChannelWiseReviewsController;
 use App\Http\Controllers\FbaDataController;
 use App\Http\Controllers\InventoryManagement\AutoStockBalanceController;
 use App\Http\Controllers\InventoryManagement\StockBalanceController;
@@ -229,7 +219,7 @@ use App\Http\Controllers\MarketPlace\WalmartControllerMarket;
 use App\Http\Controllers\MarketingMaster\CarouselSalesController;
 use App\Http\Controllers\MarketingMaster\EbayCvrLqsController;
 use App\Http\Controllers\MarketingMaster\ShoppableVideoController;
-use App\Http\Controllers\MarketPlace\ACOSControl\AmazonACOSController; 
+use App\Http\Controllers\MarketPlace\ACOSControl\AmazonACOSController;
 use App\Http\Controllers\MarketPlace\ACOSControl\EbayACOSController;
 use App\Http\Controllers\MarketPlace\AliexpressController;
 use App\Http\Controllers\MarketPlace\Ebay2LowVisibilityController;
@@ -245,27 +235,11 @@ use App\Http\Controllers\PurchaseMaster\QualityEnhanceController;
 use App\Http\Controllers\PurchaseMaster\RFQController;
 use App\Http\Controllers\PurchaseMaster\SourcingController;
 use App\Http\Controllers\MarketingMaster\FacebookAddsManagerController;
-use App\Http\Controllers\MarketingMaster\InstagramAdsManagerController;
-use App\Http\Controllers\MarketingMaster\YoutubeAdsManagerController;
-use App\Http\Controllers\MarketingMaster\TiktokAdsManagerController;
 use App\Http\Controllers\MarketingMaster\MovementPricingMaster;
-use App\Http\Controllers\MarketingMaster\OrganicViewsController;
 use App\Http\Controllers\MarketingMaster\OverallCvrLqsController;
-use App\Http\Controllers\MarketPlace\Business5coreController;
-use App\Http\Controllers\MarketPlace\FaireController;
-use App\Http\Controllers\MarketPlace\FbmarketplaceController;
-use App\Http\Controllers\MarketPlace\FbshopController;
-use App\Http\Controllers\MarketPlace\InstagramController;
-use App\Http\Controllers\MarketPlace\MercariWoShipController;
-use App\Http\Controllers\MarketPlace\MercariWShipController;
-use App\Http\Controllers\MarketPlace\PlsController;
-use App\Http\Controllers\MarketPlace\TiendamiaController;
-use App\Http\Controllers\MarketPlace\TiktokController;
 use App\Http\Controllers\PurchaseMaster\SupplierRFQController;
 use App\Http\Controllers\StockMappingController;
 use App\Http\Controllers\MissingListingController;
-use App\Http\Controllers\ProductMarketing;
-
 /*  
 |--------------------------------------------------------------------------
 | Web Routes
@@ -332,15 +306,13 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     //Channel Ads Master
     Route::get('/channel/ads/master', [ChannelAdsMasterController::class, 'channelAdsMaster'])->name('channel.ads.master');
     Route::get('/channel/ads/data', [ChannelAdsMasterController::class, 'getAdsMasterData'])->name('channel.ads.data');
-    Route::get('/channel/adv/master', [ChannelAdsMasterController::class, 'channelAdvMaster'])->name('channel.adv.master');
+
 
 
     //Zero Visibility Master
     Route::get('/zero-visibility-master', [ZeroVisibilityMasterController::class, 'index'])->name('zero.visibility');
-    Route::get('/live-pending-data', [ZeroVisibilityMasterController::class, 'Zeroviewmasters']);
+    // Route::get('/zero-visibility-data', [ZeroVisibilityMasterController::class, 'getViewChannelData']);
     Route::post('/store-zero-visibility', [ZeroVisibilityMasterController::class, 'store']);
-    Route::post('/save-channel-action', [ZeroVisibilityMasterController::class, 'saveChannelAction'])
-    ->name('save.channel.action');
     Route::get('/show-zero-visibility-data', [ZeroVisibilityMasterController::class, 'getMergedChannelData']);
     Route::get('/export-zero-visibility-csv', [ZeroVisibilityMasterController::class, 'exportCsv'])->name('zero.export.csv');
     Route::post('/update-ra-checkbox', [ZeroVisibilityMasterController::class, 'updateRaCheckbox']);
@@ -674,7 +646,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     //update sku inv and l30
     Route::post('/update-all-amazon-skus', [OverallAmazonController::class, 'updateAllAmazonSkus']);
     Route::post('/update-all-amazon-fba-skus', [OverallAmazonFbaController::class, 'updateAllAmazonfbaSkus']);
-    Route::post('/update-all-ebay1-skus', [EbayController::class, 'updateAllEbaySkus']);
+    Route::post('/update-all-ebay-skus', [EbayController::class, 'updateAllEbaySkus']);
     Route::post('/update-all-ebay-skus', [EbayTwoController::class, 'updateAllEbay2Skus']);
 
     Route::post('/update-all-shopifyB2C-skus', [Shopifyb2cController::class, 'updateAllShopifyB2CSkus']);
@@ -701,9 +673,6 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::get('/amazon/low-visibility/view-data-fbm', [AmazonLowVisibilityController::class, 'getViewAmazonLowVisibilityDataFbm']);
     Route::get('/amazon/low-visibility/view-data-both', [AmazonLowVisibilityController::class, 'getViewAmazonLowVisibilityDataBoth']);
 
-    Route::get('/ad-cvr-ebay', action: [EbayZeroController::class, 'adcvrEbay'])->name('adcvr.ebay');
-    Route::get('/ad-cvr-ebay-data', action: [EbayZeroController::class, 'adcvrEbayData'])->name('adcvr.ebay.data');
-    Route::post('/update-ebay-price', [EbayZeroController::class, 'updateEbayPrice'])->name('update.ebay.price');
 
     Route::get('/ebay/zero/view-data', [EbayZeroController::class, 'getVieweBayZeroData'])->name('ebay.zero.viewData');
     Route::get('/ebay/low-visibility/view-data', [EbayLowVisibilityController::class, 'getVieweBayLowVisibilityData']);
@@ -758,19 +727,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
 
 
     //Marketplace index view routes/
-    Route::get('/ad-cvr-amazon', action: [OverallAmazonController::class, 'adcvrAmazon'])->name('adcvr.amazon');
-    Route::get('/ad-cvr-amazon-data', action: [OverallAmazonController::class, 'adcvrAmazonData'])->name('adcvr.amazon.data');
-    Route::post('/update-amz-price', [OverallAmazonController::class, 'updateAmzPrice'])->name('update.amz.price');
-
-    Route::get('/review-ratings-amazon', action: [OverallAmazonController::class, 'reviewRatingsAmazon'])->name('review-ratings.amazon');
-    Route::get('/review-ratings-amazon-data', action: [OverallAmazonController::class, 'reviewRatingsAmazonData'])->name('review-ratings.amazon.data');
-
-    Route::get('/targeting-amazon', action: [OverallAmazonController::class, 'targetingAmazon'])->name('targeting.amazon');
-    Route::get('/targeting-amazon-data', action: [OverallAmazonController::class, 'targetingAmazonData'])->name('targeting.amazon.data');
-
     Route::get('/overall-amazon', action: [OverallAmazonController::class, 'overallAmazon'])->name('overall.amazon');
-    Route::get('/adv-amazon/total-sales/save-data', action: [OverallAmazonController::class, 'getAmazonTotalSalesSaveData'])->name('adv-amazon.total-sales.save-data');
-
     Route::post('/overallAmazon/saveLowProfit', action: [OverallAmazonController::class, 'saveLowProfit']);
     Route::get('/amazon-pricing-cvr', action: [OverallAmazonController::class, 'amazonPricingCVR'])->name('amazon.pricing.cvr');
     Route::get('/amazon-pricing-increase-decrease', action: [OverallAmazonController::class, 'amazonPriceIncreaseDecrease'])->name('amazon.pricing.increase');
@@ -781,6 +738,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::post('/amazon-analytics/import', [OverallAmazonController::class, 'importAmazonAnalytics'])->name('amazon.analytics.import');
     Route::get('/amazon-analytics/export', [OverallAmazonController::class, 'exportAmazonAnalytics'])->name('amazon.analytics.export');
     Route::get('/amazon-analytics/sample', [OverallAmazonController::class, 'downloadSample'])->name('amazon.analytics.sample');
+
 
     //ebay 2 
     Route::get('/zero-ebay2', [Ebay2ZeroController::class, 'ebay2Zeroview'])->name('zero.ebay2');
@@ -794,7 +752,6 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::get('/listing_ebaytwo/export', [ListingEbayTwoController::class, 'export'])->name('listing_ebaytwo.export');
 
     Route::get('ebayTwoAnalysis', action: [EbayTwoController::class, 'overallEbay']);
-    Route::get('/adv-ebay2/total-sale/save-data', action: [EbayTwoController::class, 'getEbay2TotsalSaleDataSave'])->name('adv-ebay2.total-sale.save-data');
     Route::get('/ebay2/view-data', [EbayTwoController::class, 'getViewEbay2Data']);
     Route::get('ebayTwoPricingCVR', [EbayTwoController::class, 'ebayTwoPricingCVR'])->name('ebayTwo.pricing.cvr');
     Route::post('/update-all-ebay2-skus', [EbayTwoController::class, 'updateAllEbay2Skus']);
@@ -817,7 +774,6 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::get('/listing_ebaythree/export', [ListingEbayThreeController::class, 'export'])->name('listing_ebaythree.export');
 
     Route::get('ebayThreeAnalysis', action: [EbayThreeController::class, 'overallthreeEbay']);
-    Route::get('/adv-ebay3/total-sale/save-data', action: [EbayThreeController::class, 'getEbay3TotalSaleSaveData'])->name('adv-ebay3.total-sale.save-data');
     Route::get('/ebay3/view-data', [EbayThreeController::class, 'getViewEbay3Data']);
     Route::get('ebayThreePricingCVR', [EbayThreeController::class, 'ebayThreePricingCVR'])->name('ebayThree.pricing.cvr');
     Route::post('/update-all-ebay3-skus', [EbayThreeController::class, 'updateAllEbay3Skus']);
@@ -836,10 +792,6 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::post('/listing_walmart/save-status', [ListingWalmartController::class, 'saveStatus']);
     Route::post('/listing_walmart/import', [ListingWalmartController::class, 'import'])->name('listing_walmart.import');
     Route::get('/listing_walmart/export', [ListingWalmartController::class, 'export'])->name('listing_walmart.export');
-
-    Route::get('/ad-cvr-walmart', action: [WalmartZeroController::class, 'adcvrWalmart'])->name('adcvr.walmart');
-    Route::get('/ad-cvr-walmart-data', action: [WalmartZeroController::class, 'adcvrWalmartData'])->name('adcvr.walmart.data');
-    Route::post('/update-walmart-price', [WalmartZeroController::class, 'updateWalmartPrice'])->name('update.walmart.price');
 
     Route::get('walmartAnalysis', action: [WalmartControllerMarket::class, 'overallWalmart']);
     Route::get('/walmart/view-data', [WalmartControllerMarket::class, 'getViewWalmartData']);
@@ -878,7 +830,6 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
 
     //Listing Audit ebay
     Route::get('/ebay', [EbayController::class, 'ebayView'])->name('ebay');
-    Route::get('/adv-ebay/total-sales/save-data', [EbayController::class, 'getAdvEbayTotalSaveData'])->name('adv-ebay.total-sales.save-data');
     Route::post('/ebay/saveLowProfit', [EbayController::class, 'saveLowProfit']);
     Route::post('/ebay-analytics/import', [EbayController::class, 'importEbayAnalytics'])->name('ebay.analytics.import');
     Route::get('/ebay-analytics/export', [EbayController::class, 'exportEbayAnalytics'])->name('ebay.analytics.export');
@@ -1074,13 +1025,12 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     //To Order Analysis routes
     Route::controller(ToOrderAnalysisController::class)->group(function () {
         Route::get('/test', 'test')->name('test');
-        Route::get('/to-order-analysis', 'toOrderAnalysisNew')->name('to.order.analysis');
+        Route::get('/to-order-analysis', 'index')->name('to.order.analysis');
         Route::get('/to-order-analysis-new', 'toOrderAnalysisNew')->name('to.order.analysis.new');
         Route::get('/to-order-analysis/data', 'getToOrderAnalysis')->name('to.order.analysis.data');
         Route::post('/update-link', 'updateLink')->name('update.rfq.link');
         Route::post('/mfrg-progresses/insert', 'storeMFRG')->name('mfrg.progresses.insert');
         Route::post('/save-to-order-review', 'storeToOrderReview')->name('save.to_order_review');
-        Route::post('/to-order-analysis/delete', 'deleteToOrderAnalysis')->name('delete.to_order_analysis');
     });
 
     //Movement Analysis
@@ -1108,7 +1058,6 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::post('/ready-to-ship/inline-update-by-sku', [ReadyToShipController::class, 'inlineUpdateBySku']);
     Route::post('/ready-to-ship/revert-back-mfrg', [ReadyToShipController::class, 'revertBackMfrg']);
     Route::post('/ready-to-ship/move-to-transit', [ReadyToShipController::class, 'moveToTransit']);
-    Route::post('/ready-to-ship/delete-items', [ReadyToShipController::class, 'deleteItems']);
 
 
     //China Load
@@ -1135,13 +1084,11 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
 
     Route::post('/inventory-warehouse/push', [InventoryWarehouseController::class, 'pushInventory'])->name('inventory.push');
     Route::get('/inventory-warehouse', [InventoryWarehouseController::class, 'index'])->name('inventory.index');
-    Route::get('/inventory-warehouse/check-pushed', [InventoryWarehouseController::class, 'checkPushed']);
 
 
     Route::controller(ArrivedContainerController::class)->group(function () {
         Route::get('/arrived/container', 'index')->name('arrived.container');
         Route::post('/arrived/container/push', 'pushArrivedContainer');
-        Route::get('/arrived/container/summary', 'containerSummary')->name('container.summary');
     });
 
 
@@ -1180,12 +1127,6 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
 
     //data delete routes
     Route::delete('/product_master/delete', [ProductMasterController::class, 'destroy'])->name('product_master.destroy');
-
-    //data archive routes
-    // Route::post('/product_master/archive', [ProductMasterController::class, 'archive']);
-    Route::get('/product_master/archived', [ProductMasterController::class, 'getArchived']);
-    Route::post('/product_master/restore', [ProductMasterController::class, 'restore']);
-
 
     //reverb update
     Route::post('/update-reverb-column', [ReverbController::class, 'updateReverbColumn']);
@@ -1230,22 +1171,16 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     // Pricing Master Views Roi Dashboard
 
     Route::get('/pricing-masters.pricing_masters', [PricingMasterViewsController::class, 'pricingMaster']);
-
     Route::get('/inventory-by-sales-value', [PricingMasterViewsController::class, 'inventoryBySalesValue'])->name('inventory.by.sales.value');
     Route::get('/pricing-master-data-views', [PricingMasterViewsController::class, 'getViewPricingAnalysisData']);
-    Route::get('/pricing-master/export', [PricingMasterViewsController::class, 'exportPricingMaster'])->name('pricing-master.export');
-    Route::get('/pricing-master/lmp-history', [PricingMasterViewsController::class, 'getLmpHistory']);
-    Route::post('/pricing-master/import-site-l90', [PricingMasterViewsController::class, 'importSiteL90Data'])->name('pricing-master.import-site-l90');
-    Route::get('/pricing-master/download-site-l90-sample', [PricingMasterViewsController::class, 'downloadSiteL90Sample'])->name('pricing-master.download-site-l90-sample');
     Route::get('/pricing-master/roi-dashboard', [PricingMasterViewsController::class, 'getViewPricingAnalysisROIDashboardData']);
     Route::post('/pricing-master/save', [PricingMasterViewsController::class, 'save']);
-    Route::post('/pricing-master/save-image-url', [PricingMasterViewsController::class, 'saveImageUrl']);
     Route::get('/parent.pricing-masters', [PricingMasterViewsController::class, 'pricingMasterCopy']);
     Route::get('/calculate-cvr-masters', [PricingMasterViewsController::class, 'calculateCVRMasters']);
     Route::get('/calculate-wmp-masters', [PricingMasterViewsController::class, 'calculateWMPMasters']);
     Route::get('/pricing-master-incremental', [PricingMasterViewsController::class, 'pricingMasterIncR']);
     Route::post('/product-master/wmp-mark-as-done', [PricingMasterViewsController::class, 'wmpMarkAsDone']);
-    Route::get('/pricing-masters-l90.pricing_masters-l90', [PricingMasterViewsController::class, 'pricingMasterl90Data']);
+
 
 
 
@@ -1260,25 +1195,6 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::post('/pricing-master/save', [AdsMasterController::class, 'save']);
 
 
-    //organic views routes
-
-    Route::get('/organic-views-amazon-data', action: [OrganicViewsController::class, 'getAmazonOrganicViewsData'])->name('organicviews.amazon.data');
-    Route::get('/organicviews-amazon', action: [OrganicViewsController::class, 'amazonOrganicViews'])->name('organicviews.amazon');
-
-    Route::get('/organic-views-ebay-data', action: [OrganicViewsController::class, 'getEbayOrganicViewsData'])->name('organicviews.ebay.data');
-    Route::get('/organicviews-ebay', action: [OrganicViewsController::class, 'ebayOrganicViews'])->name('organicviews.ebay');
-
-    Route::get('/organic-views-ebay2-data', action: [OrganicViewsController::class, 'getEbay2OrganicViewsData'])->name('organicviews.ebay2.data');
-    Route::get('/organicviews-ebay2', action: [OrganicViewsController::class, 'ebay2OrganicViews'])->name('organicviews.ebay2');
-
-    Route::get('/organic-views-ebay3-data', action: [OrganicViewsController::class, 'getEbay3OrganicViewsData'])->name('organicviews.ebay3.data');
-    Route::get('/organicviews-ebay3', action: [OrganicViewsController::class, 'ebay3OrganicViews'])->name('organicviews.ebay3');
-
-    Route::get('/organic-views-temu-data', action: [OrganicViewsController::class, 'getTemuOrganicViewsData'])->name('organicviews.temu.data');
-    Route::get('/organicviews-temu', action: [OrganicViewsController::class, 'temuOrganicViews'])->name('organicviews.temu');
-
-    Route::get('/organic-views-walmart-data', action: [OrganicViewsController::class, 'getWalmartOrganicViewsData'])->name('organicviews.walmart.data');
-    Route::get('/organicviews-walmart', action: [OrganicViewsController::class, 'walmartOrganicViews'])->name('organicviews.walmart');
 
 
     // Analysis routes
@@ -1545,126 +1461,6 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::get('/shein-analytics/export', [SheinController::class, 'exportSheinAnalytics'])->name('shein.analytics.export');
     Route::get('/shein-analytics/sample', [SheinController::class, 'downloadSample'])->name('shein.analytics.sample');
 
-
-    //faire
-    Route::get('faireAnalysis', action: [FaireController::class, 'overallFaire']);
-    Route::get('/faire/view-data', [FaireController::class, 'getViewFaireData']);
-    Route::get('fairePricingCVR', [FaireController::class, 'fairePricingCVR'])->name('faire.pricing.cvr');
-    Route::post('/update-all-faire-skus', [FaireController::class, 'updateAllFaireSkus']);
-    Route::post('/faire/save-nr', [FaireController::class, 'saveNrToDatabase']);
-    Route::post('/faire/update-listed-live', [FaireController::class, 'updateListedLive']);
-    Route::post('/faire-analytics/import', [FaireController::class, 'importFaireAnalytics'])->name('faire.analytics.import');
-    Route::get('/faire-analytics/export', [FaireController::class, 'exportFaireAnalytics'])->name('faire.analytics.export');
-    Route::get('/faire-analytics/sample', [FaireController::class, 'downloadSample'])->name('faire.analytics.sample');
-
-
-     //pls
-    Route::get('plsAnalysis', action: [PlsController::class, 'overallPls']);
-    Route::get('/pls/view-data', [PlsController::class, 'getViewPlsData']);
-    Route::get('plsPricingCVR', [PlsController::class, 'plsPricingCVR'])->name('pls.pricing.cvr');
-    Route::post('/update-all-pls-skus', [PlsController::class, 'updateAllPlsSkus']);
-    Route::post('/pls/save-nr', [PlsController::class, 'saveNrToDatabase']);
-    Route::post('/pls/update-listed-live', [PlsController::class, 'updateListedLive']);
-    Route::post('/pls-analytics/import', [PlsController::class, 'importPlsAnalytics'])->name('pls.analytics.import');
-    Route::get('/pls-analytics/export', [PlsController::class, 'exportPlsAnalytics'])->name('pls.analytics.export');
-    Route::get('/pls-analytics/sample', [PlsController::class, 'downloadSample'])->name('pls.analytics.sample');
-
-
-    //Business5Core
-    Route::get('business5coreAnalysis', action: [Business5coreController::class, 'overallBusiness5Core']);
-    Route::get('/business5core/view-data', [Business5coreController::class, 'getViewBusiness5CoreData']);
-    Route::get('business5corePricingCVR', [Business5coreController::class, 'business5corePricingCVR'])->name('business5core.pricing.cvr');
-    Route::post('/update-all-business5core-skus', [Business5coreController::class, 'updateAllBusiness5CoreSkus']);
-    Route::post('/business5core/save-nr', [Business5coreController::class, 'saveNrToDatabase']);
-    Route::post('/business5core/update-listed-live', [Business5coreController::class, 'updateListedLive']);
-    Route::post('/business5core-analytics/import', [Business5coreController::class, 'importBusiness5CoreAnalytics'])->name('business5core.analytics.import');
-    Route::get('/business5core-analytics/export', [Business5coreController::class, 'exportBusiness5CoreAnalytics'])->name('business5core.analytics.export');
-    Route::get('/business5core-analytics/sample', [Business5coreController::class, 'downloadSample'])->name('business5core.analytics.sample');
-
-
-      //instagram shop
-    Route::get('instagramAnalysis', action: [InstagramController::class, 'overallInstagram']);
-    Route::get('/instagram/view-data', [InstagramController::class, 'getViewInstagramData']);
-    Route::get('instagramPricingCVR', [InstagramController::class, 'instagramPricingCVR'])->name('instagram.pricing.cvr');
-    Route::post('/update-all-instagram-skus', [InstagramController::class, 'updateAllInstagramSkus']);
-    Route::post('/instagram/save-nr', [InstagramController::class, 'saveNrToDatabase']);
-    Route::post('/instagram/update-listed-live', [InstagramController::class, 'updateListedLive']);
-    Route::post('/instagram-analytics/import', [InstagramController::class, 'importInstagramAnalytics'])->name('instagram.analytics.import');
-    Route::get('/instagram-analytics/export', [InstagramController::class, 'exportInstagramAnalytics'])->name('instagram.analytics.export');
-    Route::get('/instagram-analytics/sample', [InstagramController::class, 'downloadSample'])->name('instagram.analytics.sample');
-
-
-    //tiendamia
-    Route::get('tiendamiaAnalysis', action: [TiendamiaController::class, 'overallTiendamia']);
-    Route::get('/tiendamia/view-data', [TiendamiaController::class, 'getViewTiendamiaData']);
-    Route::get('plsPricingCVR', [TiendamiaController::class, 'tiendamiaPricingCVR'])->name('tiendamia.pricing.cvr');
-    Route::post('/update-all-tiendamia-skus', [TiendamiaController::class, 'updateAllTiendamiaSkus']);
-    Route::post('/tiendamia/save-nr', [TiendamiaController::class, 'saveNrToDatabase']);
-    Route::post('/tiendamia/update-listed-live', [TiendamiaController::class, 'updateListedLive']);
-    Route::post('/tiendamia-analytics/import', [TiendamiaController::class, 'importTiendamiaAnalytics'])->name('tiendamia.analytics.import');
-    Route::get('/tiendamia-analytics/export', [TiendamiaController::class, 'exportTiendamiaAnalytics'])->name('tiendamia.analytics.export');
-    Route::get('/tiendamia-analytics/sample', [TiendamiaController::class, 'downloadSample'])->name('tiendamia.analytics.sample');
-
-
-    //fbshop
-    Route::get('fbshopAnalysis', action: [FbshopController::class, 'overallFbshop']);
-    Route::get('/fbshop/view-data', [FbshopController::class, 'getViewFbshopData']);
-    Route::get('fbshopPricingCVR', [FbshopController::class, 'fbshopPricingCVR'])->name('fbshop.pricing.cvr');
-    Route::post('/update-all-fbshop-skus', [FbshopController::class, 'updateAllFbshopSkus']);
-    Route::post('/fbshop/save-nr', [FbshopController::class, 'saveNrToDatabase']);
-    Route::post('/fbshop/update-listed-live', [FbshopController::class, 'updateListedLive']);
-    Route::post('/fbshop-analytics/import', [FbshopController::class, 'importFbshopAnalytics'])->name('fbshop.analytics.import');
-    Route::get('/fbshop-analytics/export', [FbshopController::class, 'exportFbshopAnalytics'])->name('fbshop.analytics.export');
-    Route::get('/fbshop-analytics/sample', [FbshopController::class, 'downloadSample'])->name('fbshop.analytics.sample');
-
-
-    //fb marketplace
-    Route::get('fbmarketplaceAnalysis', action: [FbmarketplaceController::class, 'overallFbmarketplace']);
-    Route::get('/fbmarketplace/view-data', [FbmarketplaceController::class, 'getViewFbmarketplaceData']);
-    Route::get('fbmarketplacePricingCVR', [FbmarketplaceController::class, 'fbmarketplacePricingCVR'])->name('fbmarketplace.pricing.cvr');
-    Route::post('/update-all-fbmarketplace-skus', [FbmarketplaceController::class, 'updateAllFbmarketplaceSkus']);
-    Route::post('/fbmarketplace/save-nr', [FbmarketplaceController::class, 'saveNrToDatabase']);
-    Route::post('/fbmarketplace/update-listed-live', [FbmarketplaceController::class, 'updateListedLive']);
-    Route::post('/fbmarketplace-analytics/import', [FbmarketplaceController::class, 'importFbmarketplaceAnalytics'])->name('fbmarketplace.analytics.import');
-    Route::get('/fbmarketplace-analytics/export', [FbmarketplaceController::class, 'exportFbmarketplaceAnalytics'])->name('fbmarketplace.analytics.export');
-    Route::get('/fbmarketplace-analytics/sample', [FbmarketplaceController::class, 'downloadSample'])->name('fbmarketplace.analytics.sample');
-
-
-    //mercari w ship
-    Route::get('mercariAnalysis', action: [MercariWShipController::class, 'overallMercariWship']);
-    Route::get('/mercariwship/view-data', [MercariWShipController::class, 'getViewMercariWshipData']);
-    Route::get('mercariWshipPricingCVR', [MercariWShipController::class, 'mercariWshipPricingCVR'])->name('mercariwship.pricing.cvr');
-    Route::post('/update-all-mercariwship-skus', [MercariWShipController::class, 'updateAllMercariWshipSkus']);
-    Route::post('/mercariwship/save-nr', [MercariWShipController::class, 'saveNrToDatabase']);
-    Route::post('/mercariwship/update-listed-live', [MercariWShipController::class, 'updateListedLive']);
-    Route::post('/mercariwship-analytics/import', [MercariWShipController::class, 'importMercariWshipAnalytics'])->name('mercariwship.analytics.import');
-    Route::get('/mercariwship-analytics/export', [MercariWShipController::class, 'exportMercariWshipAnalytics'])->name('mercariwship.analytics.export');
-    Route::get('/mercariwship-analytics/sample', [MercariWShipController::class, 'downloadSample'])->name('mercariwship.analytics.sample');
-
-
-    //tiktok
-    Route::get('tiktokAnalysis', action: [TiktokController::class, 'overallTiktok']);
-    Route::get('/tiktok/view-data', [TiktokController::class, 'getViewTiktokData']);
-    Route::get('fbshopPricingCVR', [TiktokController::class, 'TiktokPricingCVR'])->name('tiktok.pricing.cvr');
-    Route::post('/update-all-tiktok-skus', [TiktokController::class, 'updateAllTiktokSkus']);
-    Route::post('/tiktok/save-nr', [TiktokController::class, 'saveNrToDatabase']);
-    Route::post('/tiktok/update-listed-live', [TiktokController::class, 'updateListedLive']);
-    Route::post('/tiktok-analytics/import', [TiktokController::class, 'importTiktokAnalytics'])->name('tiktok.analytics.import');
-    Route::get('/tiktok-analytics/export', [TiktokController::class, 'exportTiktokAnalytics'])->name('tiktok.analytics.export');
-    Route::get('/tiktok-analytics/sample', [TiktokController::class, 'downloadSample'])->name('tiktok.analytics.sample');
-
-
-    //mercari wo ship
-    Route::get('mercariwoshipAnalysis', action: [MercariWoShipController::class, 'overallMercariWoShip']);
-    Route::get('/mercariwoship/view-data', [MercariWoShipController::class, 'getViewMercariWoShipData']);
-    Route::get('mercariwoshipPricingCVR', [MercariWoShipController::class, 'MercariWoShipPricingCVR'])->name('mercariwoship.pricing.cvr');
-    Route::post('/update-all-mercariwoship-skus', [MercariWoShipController::class, 'updateAllMercariWoShipSkus']);
-    Route::post('/mercariwoship/save-nr', [MercariWoShipController::class, 'saveNrToDatabase']);
-    Route::post('/mercariwoship/update-listed-live', [MercariWoShipController::class, 'updateListedLive']);
-    Route::post('/mercariwoship-analytics/import', [MercariWoShipController::class, 'importMercariWoShipAnalytics'])->name('mercariwoship.analytics.import');
-    Route::get('/mercariwoship-analytics/export', [MercariWoShipController::class, 'exportMercariWoShipAnalytics'])->name('mercariwoship.analytics.export');
-    Route::get('/mercariwoship-analytics/sample', [MercariWoShipController::class, 'downloadSample'])->name('mercariwoship.analytics.sample');
-
     //  Spocket
     Route::get('/zero-spocket', [SpocketZeroController::class, 'spocketZeroview'])->name('zero.spocket');
     Route::get('/zero_spocket/view-data', [SpocketZeroController::class, 'getViewSpocketZeroData']);
@@ -1908,13 +1704,6 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
         Route::get('/youtube-shorts-ad', 'youtubeShortsAdView')->name('youtube.shorts.ads.master');
         Route::get('/youtube-shorts-ads', 'getYoutubeShortsAdsData');
         Route::post('/youtube-shorts-ads/save', 'saveYoutubeShortsAds')->name('youtube_shorts_ads.save');
-
-
-        Route::get('/traffic/dropship', 'getTrafficDropship')->name('traffic.dropship');
-        Route::get('/traffic/caraudio', 'getTrafficCaraudio')->name('traffic.caraudio');
-        Route::get('/traffic/musicinst', 'getTrafficMusicInst')->name('traffic.musicinst');
-        Route::get('/traffic/repaire', 'getTrafficRepaire')->name('traffic.repaire');
-        Route::get('/traffic/musicschool', 'getTrafficMusicSchool')->name('traffic.musicschool');       
     });
 
     Route::controller(ShoppableVideoController::class)->group(function () {
@@ -1994,7 +1783,6 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::controller(AmazonAdRunningController::class)->group(function () {
         Route::get('/amazon/ad-running/list', 'index')->name('amazon.ad-running.list');
         Route::get('/amazon/ad-running/data', 'getAmazonAdRunningData');
-        Route::get('/adv-amazon/ad-running/save-data', 'getAmazonAdRunningSaveAdvMasterData')->name('adv-amazon.ad-running.save-data');
     });
 
     Route::controller(AmazonPinkDilAdController::class)->group(function () {
@@ -2017,30 +1805,6 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
         Route::get('/fb-img-caraousal-to-web-data', 'FbImgCaraousalToWebData')->name('fb.img.caraousal.to.web.data');
     });
 
-    Route::controller(InstagramAdsManagerController::class)->group(function () {
-        Route::get('/instagram-ads-control/data', 'index')->name('instagram.ads.index');
-        Route::get('/instagram-web-to-video', 'instagramWebToVideo')->name('instagram.web.to.video');
-        Route::get('/instagram-web-to-video-data', 'instagramWebToVideoData')->name('instagram.web.to.video.data');
-        Route::get('/insta-img-caraousal-to-web', 'InstaImgCaraousalToWeb')->name('insta.img.caraousal.to.web');
-        Route::get('/insta-img-caraousal-to-web-data', 'InstaImgCaraousalToWebData')->name('insta.img.caraousal.to.web.data');
-    });
-
-    Route::controller(YoutubeAdsManagerController::class)->group(function () {
-        Route::get('/youtube-ads-control/data', 'index')->name('youtube.ads.index');
-        Route::get('/youtube-web-to-video', 'youtubeWebToVideo')->name('youtube.web.to.video');
-        Route::get('/youtube-web-to-video-data', 'youtubeWebToVideoData')->name('youtube.web.to.video.data');
-        Route::get('/yt-img-caraousal-to-web', 'YtImgCaraousalToWeb')->name('yt.img.caraousal.to.web');
-        Route::get('/yt-img-caraousal-to-web-data', 'YtImgCaraousalToWebData')->name('yt.img.caraousal.to.web.data');
-    });
-
-    Route::controller(TiktokAdsManagerController::class)->group(function () {
-        Route::get('/tiktok-ads-control/data', 'index')->name('tiktok.ads.index');
-        Route::get('/tiktok-web-to-video', 'tiktokWebToVideo')->name('tiktok.web.to.video');
-        Route::get('/tiktok-web-to-video-data', 'tiktokWebToVideoData')->name('tiktok.web.to.video.data');
-        Route::get('/tk-img-caraousal-to-web', 'TkImgCaraousalToWeb')->name('tk.img.caraousal.to.web');
-        Route::get('/tk-img-caraousal-to-web-data', 'TkImgCaraousalToWebData')->name('tk.img.caraousal.to.web.data');
-    });
-
     Route::controller(AmazonACOSController::class)->group(function () {
         Route::get('/amazon-acos-control/data', 'index')->name('amazon.acos.index');
         Route::get('/amazon-acos-data', 'getAmzonAcOSData');
@@ -2054,13 +1818,6 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
 
         Route::put('/update-amazon-campaign-bgt-price', 'updateAmazonCampaignBgt');
         Route::put('/update-amazon-sb-campaign-bgt-price', 'updateAmazonSbCampaignBgt');
-    });
-
-    Route::controller(AmazonCPCZeroController::class)->group(function () {
-        Route::get('/amazon-kw-cpc-zero/list', 'getKwCpcZeroView')->name('amazon.kw.cpc.zero.list');
-        Route::get('/amazon-kw-cpc-zero-view-data', 'getKwCpcZeroData');
-        Route::get('/amazon-pt-cpc-zero/list', 'getPtCpcZeroView')->name('amazon.pt.cpc.zero.list');
-        Route::get('/amazon-pt-cpc-zero-view-data', 'getPtCpcZeroData');
     });
 
     Route::controller(AmazonFbaAcosController::class)->group(function () {
@@ -2086,8 +1843,6 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
         Route::get('/amazon/campaign/reports/data', 'getAmazonCampaignsData');
     });
 
-
-    
     Route::controller(AmazonFbaAdsController::class)->group(function () {
         Route::get('/amazon/fba/over/kw/ads', 'amzFbaUtilizedBgtKw')->name('amazon.fba.over.kw.ads');
         Route::get('/amazon/fba/over/pt/ads', 'amzFbaUtilizedBgtPt')->name('amazon.fba.over.pt.ads');
@@ -2103,7 +1858,6 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::controller(AmazonMissingAdsController::class)->group(function () {
         Route::get('/amazon/missing/ads', 'index')->name('amazon.missing.ads');
         Route::get('/amazon/missing/ads/data', 'getAmazonMissingAdsData');
-        Route::get('adv-amazon/missing/save-data', 'getAmzonAdvSaveMissingData')->name('adv-amazon.missing.save-data');
     });
     // ebay ads section
     Route::controller(EbayOverUtilizedBgtController::class)->group(function () {
@@ -2152,34 +1906,6 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::controller(EbayRunningAdsController::class)->group(function () {
         Route::get('/ebay/ad-running/list', 'index')->name('ebay.running.ads');
         Route::get('/ebay/ad-running/data', 'getEbayRunningAdsData');
-        Route::get('/adv-ebay/ad-running/save-data', 'getEbayRunningDataSave')->name('adv-ebay.ad-running.save-data');
-    });
-
-    Route::controller(EbayMissingAdsController::class)->group(function () {
-        Route::get('/ebay/ad-missing/list', 'index')->name('ebay.missing.ads');
-        Route::get('/ebay/ad-missing/data', 'getEbayMissingAdsData');
-        Route::get('/adv-ebay/missing/save-data', 'getEbayMissingSaveData')->name('adv-ebay.missing.save-data');
-    });
-
-    // ebay 2 ads section
-    Route::controller(Ebay2PMTAdController::class)->group(function () {
-        Route::get('/ebay-2/pmt/ads', 'index')->name('ebay2.pmt.ads');
-        Route::get('/ebay-2/pmp/ads/data', 'getEbay2PmtAdsData');
-        Route::post('/update-ebay-2-pmt-percentage', 'updateEbay2Percentage');
-        Route::post('/update-ebay-2-pmt-sprice', 'saveEbay2PMTSpriceToDatabase');
-        Route::post('/update-ebay2-nr-data', 'updateEbay2NrData');
-    });
-
-    Route::controller(Ebay2RunningAdsController::class)->group(function () {
-        Route::get('/ebay-2/ad-running/list', 'index')->name('ebay2.running.ads');
-        Route::get('/ebay-2/ad-running/data', 'getEbay2RunningAdsData');
-        Route::get('/adv-ebay2/ad-running/save-data', 'getEbay2AdvRunningAdDataSave')->name('adv-ebay2.ad-running.save-data');
-    });
-
-    Route::controller(Ebay2MissingAdsController::class)->group(function () {
-        Route::get('/ebay2/ad-missing/list', 'index')->name('ebay2.missing.ads');
-        Route::get('/ebay2/ad-missing/data', 'getEbay2MissingAdsData');
-        Route::get('/adv-ebay2/missing/save-data', 'getAdvEbay2MissingSaveData')->name('adv-ebay2.missing.save-data');
     });
 
     // ebay 3 ads section
@@ -2211,7 +1937,6 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
         Route::get('/ebay-3/under-utilized', 'ebay3UnderUtilizedAdsView')->name('ebay3.under.utilized');
         Route::get('/ebay-3/correctly-utilized', 'ebay3CorrectlyUtilizedAdsView')->name('ebay3.correctly.utilized');
         Route::get('/ebay-3/utilized/ads/data', 'getEbay3UtilizedAdsData');
-        Route::post('/update-ebay3-nr-data', 'updateEbay3NrData');
     });
 
     Route::controller(Ebay3KeywordAdsController::class)->group(function () {
@@ -2223,18 +1948,6 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
 
         Route::get('/ebay-3/make-new/kw-ads', 'ebay3MakeNewKwAdsView')->name('ebay3.make.new.kw.ads');
         Route::get('/ebay-3/make-new/kw-ads/data', 'getEbay3MMakeNewKwAdsData');
-    });
-
-    Route::controller(Ebay3RunningAdsController::class)->group(function () {
-        Route::get('/ebay-3/ad-running/list', 'index')->name('ebay3.running.ads');
-        Route::get('/ebay-3/ad-running/data', 'getEbay3RunningAdsData');
-        Route::get('/adv-ebay3/ad-running/save-data', 'getAdvEbay3AdRunningDataSave')->name('adv-ebay3.ad-running.save-data');
-    });
-
-    Route::controller(Ebay3MissingAdsController::class)->group(function () {
-        Route::get('/ebay-3/ad-missing/list', 'index')->name('ebay3.missing.ads');
-        Route::get('/ebay-3/ad-missing/data', 'getEbay3MissingAdsData');
-        Route::get('/adv-ebay3/missing/save-data', 'getEbay3MissingDataSave')->name('adv-ebay3.missing.save-data');
     });
 
     Route::controller(WalmartUtilisationController::class)->group(function () {
@@ -2250,11 +1963,6 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
         Route::get('/walmart/missing/ads/data', 'getWalmartMissingAdsData');
     });
 
-    Route::controller(WalmartRunningAdsController::class)->group(function () {
-        Route::get('/walmart/running/ads', 'index')->name('walmart.running.ads');
-        Route::get('/walmart/running/ads/data', 'getWalmartRunningAdsData');
-        Route::get('/adv-walmart/ad-running/save-data', 'getAdvWalmartRunningSaveData')->name('adv-walmart.ad-running.save-data');
-    });
     // stock missing listing
     Route::controller(MissingListingController::class)->group(function () {
         Route::get('/stock/missing/listing', 'index')->name('view.missing.listing');
@@ -2281,29 +1989,14 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     // shopify amazon stock mapping
     
 
-    Route::controller(GoogleAdsController::class)->group(function () {
+    Route::controller(GoogleShoppingAdsController::class)->group(function () {
         Route::get('/google/shopping', 'index')->name('google.shopping');
-        Route::get('/google/shopping/running', 'googleShoppingAdsRunning')->name('google.shopping.running');
+        Route::get('/google/shopping/serp', 'googleShoppingSerp')->name('google.shopping.serp');
+        Route::get('/google/shopping/pmax', 'googleShoppingPmax')->name('google.shopping.pmax');
         Route::get('/google/shopping/over/utilize', 'googleOverUtilizeView')->name('google.shopping.over.utilize');
         Route::get('/google/shopping/under/utilize', 'googleUnderUtilizeView')->name('google.shopping.under.utilize');
-        Route::get('/google/shopping/report', 'googleShoppingAdsReport')->name('google.shopping.report');
-
-        Route::get('/google/serp/list', 'googleSerpView')->name('google.serp.list');
-        Route::get('/google/serp/report', 'googleSerpReportView')->name('google.serp.report');
-
-        Route::get('/google/pmax/list', 'googlePmaxView')->name('google.pmax.list');
-
+        Route::get('/google/shopping/running', 'googleShoppingAdsRunning')->name('google.shopping.running');
         Route::get('/google/shopping/data', 'getGoogleShoppingAdsData');
-        Route::get('/google/shopping/ads-report/data', 'getGoogleShoppingAdsReportData');
-        
-        Route::get('/google/search/data', 'getGoogleSearchAdsData');
-        Route::get('/google/search/report/data', 'getGoogleSearchAdsReportData');
-
-        Route::get('/google/shopping-missings/ads', 'googleMissingAdsView')->name('google.shopping.missing.ads');
-        Route::get('/google/shopping-missings/ads/data', 'googleShoppingAdsMissingAds');
-
-        Route::post('/update-google-ads-bid-price', 'updateGoogleAdsCampaignSbid');
-        Route::post('/update-google-nr-data', 'updateGoogleNrData');
     });
 
     Route::controller(FbaDataController::class)->group(function () {
@@ -2315,19 +2008,6 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
 
     Route::post('/channel-promotion/store', [ChannelPromotionMasterController::class, 'storeOrUpdatePromotion']);
 
-
-
-    Route::get('product-market', [ProductMarketing::class, 'product_master']);
-    Route::get('product-market/details', [ProductMarketing::class, 'product_market_details']);
-
-// Shopify All Channels - View + JSON
-Route::get('/shopify-all-channels', [\App\Http\Controllers\SyncShopifyAllChannelDataController::class, 'index']);
-Route::get('/shopify-all-channels-json', [\App\Http\Controllers\SyncShopifyAllChannelDataController::class, 'data']);
-Route::get('/shopify-all-channels-export', [\App\Http\Controllers\SyncShopifyAllChannelDataController::class, 'export']);
-
-    Route::get('channels-reviews-master', [ChannelWiseReviewsController::class, 'reviews_dashboard']);
-    Route::get('channels-reviews/details', [ChannelWiseReviewsController::class, 'reviews_dashboard_details']);
-    Route::post('channels-reviews/save', [ChannelWiseReviewsController::class, 'saveReview']);
 
 
     Route::get('', [RoutingController::class, 'index'])->name('root');

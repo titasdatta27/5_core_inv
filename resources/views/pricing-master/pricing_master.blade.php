@@ -1979,27 +1979,10 @@
 
                     <td>
                         <div class="value-indicator">
-                            ${(() => {
-                                let lmpValue, lmpaLink;
-                                if (r.prefix === 'amz') {
-                                    lmpValue = data.price_lmpa;
-                                    lmpaLink = data.link;
-                                } else if (r.prefix === 'ebay') {
-                                    lmpValue = data.ebay_price_lmpa;
-                                    lmpaLink = data.link;
-                                } else if (r.prefix === 'shein') {
-                                    lmpValue = data.lmp;
-                                    lmpaLink = data.link;
-                                } else {
-                                    lmpValue = null;
-                                    lmpaLink = null;
-                                }
-                                if (lmpValue && lmpaLink) {
-                                    return `<a href="${lmpaLink}" target="_blank" style="color: inherit; text-decoration: underline;">${fmtMoney(lmpValue)}</a>`;
-                                } else {
-                                    return lmpValue ? fmtMoney(lmpValue) : '-';
-                                }
-                            })()}
+                            ${r.prefix === 'amz' ? fmtMoney(data.price_lmpa) 
+                                : r.prefix === 'ebay' ? fmtMoney(data.ebay_price_lmpa) 
+                                : r.prefix === 'shein' ? fmtMoney(data.lmp) 
+                                : '-'}
                         </div>
                     </td>
 

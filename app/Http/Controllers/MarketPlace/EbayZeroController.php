@@ -13,8 +13,6 @@ use App\Models\ShopifySku;
 use App\Models\MarketplacePercentage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
-use App\Models\EbayPriorityReport;
 
 class EbayZeroController extends Controller
 {
@@ -25,219 +23,6 @@ class EbayZeroController extends Controller
         $this->apiController = $apiController;
     }
 
-    public function adcvrEbay(){
-        $marketplaceData = MarketplacePercentage::where('marketplace', 'Ebay')->first();
-
-        $percentage = $marketplaceData ? $marketplaceData->percentage : 100;
-        $adUpdates = $marketplaceData ? $marketplaceData->ad_updates : 0;
-        
-        return view('market-places.adcvrEbay', [
-            'ebayPercentage' => $percentage,
-            'ebayAdUpdates' => $adUpdates
-        ]);
-    }
-
-    public function adcvrEbayData() {
-        $productMasters = ProductMaster::orderBy('parent', 'asc')
-            ->orderByRaw("CASE WHEN sku LIKE 'PARENT %' THEN 1 ELSE 0 END")
-            ->orderBy('sku', 'asc')
-            ->get();
-
-        $skus = $productMasters->pluck('sku')->filter()->unique()->values()->all();
-
-        $marketplaceData = MarketplacePercentage::where('marketplace', 'Ebay')->first();
-
-        $percentage = $marketplaceData ? ($marketplaceData->percentage / 100) : 1;
-
-        $ebayDatasheetsBySku = DB::connection('apicentral')
-            ->table('ebay_one_metrics')
-            ->whereIn('sku', $skus)
-            ->get()
-            ->map(function ($item) {
-                return (object) (array) $item;
-            })
-            ->keyBy(function ($item) {
-                return strtoupper($item->sku);
-            });
-
-        $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy('sku');
-
-        $nrValues = EbayDataView::whereIn('sku', $skus)->pluck('value', 'sku');
-
-        $ebayCampaignReportsL90 = EbayPriorityReport::where('report_range', 'L90')
-            ->where(function ($q) use ($skus) {
-                foreach ($skus as $sku) $q->orWhere('campaign_name', 'LIKE', '%' . $sku . '%');
-            })
-            ->where('campaign_name', 'NOT LIKE', '%PT')
-            ->where('campaign_name', 'NOT LIKE', '%PT.')
-            ->get();
-
-        $result = [];
-
-        foreach ($productMasters as $pm) {
-            $sku = strtoupper($pm->sku);
-            $parent = $pm->parent;
-
-            $ebaySheet = $ebayDatasheetsBySku[$sku] ?? null;
-            $shopify = $shopifyData[$pm->sku] ?? null;
-
-            $matchedCampaignL90 = $ebayCampaignReportsL90->first(function ($item) use ($sku) {
-                $campaignName = strtoupper(trim(rtrim($item->campaignName, '.')));
-                $cleanSku = strtoupper(trim(rtrim($sku, '.')));
-                return $campaignName === $cleanSku;
-            });
-
-            $row = [];
-            $row['parent'] = $parent;
-            $row['sku']    = $pm->sku;
-            $row['INV']    = $shopify->inv ?? 0;
-            $row['L30']    = $shopify->quantity ?? 0;
-            $row['fba']    = $pm->fba ?? null;
-            $row['A_L30']  = $ebaySheet->ebay_l30 ?? 0;
-            $row['A_L90']  = $ebaySheet->ebay_l90 ?? 0;
-            $row['campaign_id'] = $matchedCampaignL90->campaign_id ??  '';
-            $row['campaignName'] = $matchedCampaignL90->campaign_name ?? '';
-            $row['campaignStatus'] = $matchedCampaignL90->campaignStatus ?? '';
-            $row['campaignBudgetAmount'] = $matchedCampaignL90->campaignBudgetAmount ?? 0;
-            $row['spend_l90'] = $matchedCampaignL90->cpc_return_on_ad_spend ?? 0;
-            $row['ad_sales_l90'] = $matchedCampaignL90->cpc_attributed_sales ?? 0;
-
-            if ($ebaySheet) {
-                $row['A_L30'] = $ebaySheet->ebay_l30 ?? 0;
-                $row['A_L90']  = $ebaySheet->ebay_l90 ?? 0;
-                $row['Sess30'] = $ebaySheet->views ?? 0;
-                $row['price'] = $ebaySheet->ebay_price ?? 0;
-                // $row['price_lmpa'] = $ebaySheet->price_lmpa;
-                $row['sessions_l60'] = $ebaySheet->views ?? 0;
-                $row['units_ordered_l60'] = $ebaySheet->ebay_l60;
-            }
-
-            $values = is_array($pm->Values) ? $pm->Values : (is_string($pm->Values) ? json_decode($pm->Values, true) : []);
-
-            $lp = 0;
-            foreach ($values as $k => $v) {
-                if (strtolower($k) === 'lp') {
-                    $lp = floatval($v);
-                    break;
-                }
-            }
-            if ($lp === 0 && isset($pm->lp)) {
-                $lp = floatval($pm->lp);
-            }
-            $ship = isset($values['ship']) ? floatval($values['ship']) : (isset($pm->ship) ? floatval($pm->ship) : 0);
-
-            $row['SHIP'] = $ship;
-            $row['LP'] = $lp;
-            
-            $price = isset($row['price']) ? floatval($row['price']) : 0;
-            
-            $row['PFT_percentage'] = round($price > 0 ? ((($price * $percentage) - $lp - $ship) / $price) * 100 : 0, 2);
-
-            $sales = $matchedCampaignL90->cpc_attributed_sales ?? 0;
-            $spend = $matchedCampaignL90->cpc_return_on_ad_spend ?? 0;
-
-            if ($sales > 0) {
-                $row['acos_L90'] = round(($spend / $sales) * 100, 2);
-            } elseif ($spend > 0) {
-                $row['acos_L90'] = 100;
-            } else {
-                $row['acos_L90'] = 0;
-            }
-
-            $row['clicks_L90'] = $matchedCampaignL90->cpc_clicks ?? 0;
-
-            $row['cvr_l90'] = $row['clicks_L90'] == 0 ? NULL : number_format(($row['A_L90'] / $row['clicks_L90']) * 100, 2);
-
-            $row['NRL']  = '';
-            $row['NRA'] = '';
-            $row['FBA'] = '';
-            if (isset($nrValues[$pm->sku])) {
-                $raw = $nrValues[$pm->sku];
-                if (!is_array($raw)) {
-                    $raw = json_decode($raw, true);
-                }
-                if (is_array($raw)) {
-                    $row['NRL']  = $raw['NRL'] ?? null;
-                    $row['NRA'] = $raw['NRA'] ?? null;
-                    $row['FBA'] = $raw['FBA'] ?? null;
-                    $row['TPFT'] = $raw['TPFT'] ?? null;
-                }
-            }
-
-            $row['ebay_price'] = $ebaySheet ? ($ebaySheet->price ?? 0) : 0;
-            $row['ebay_pft'] = $ebaySheet && ($ebaySheet->price ?? 0) > 0 ? (($ebaySheet->price * 0.70 - $lp - $ship) / $ebaySheet->price) : 0;
-            $row['ebay_roi'] = $ebaySheet && $lp > 0 && ($ebaySheet->price ?? 0) > 0 ? (($ebaySheet->price * 0.70 - $lp - $ship) / $lp) : 0;
-
-            $prices = DB::connection('repricer')
-                ->table('lmp_data')
-                ->where('sku', $sku)
-                ->where('price', '>', 0)
-                ->orderBy('price', 'asc')
-                ->pluck('price')
-                ->toArray();
-
-            for ($i = 0; $i <= 11; $i++) {
-                if ($i == 0) {
-                    $row['lmp'] = $prices[$i] ?? 0;
-                } else {
-                    $row['lmp_' . $i] = $prices[$i] ?? 0;
-                }
-            }
-
-            $result[] = (object) $row;
-        }
-
-        return response()->json([
-            'message' => 'Data fetched successfully',
-            'data'    => $result,
-            'status'  => 200,
-        ]);
-    }
-
-    public function updateEbayPrice(Request $request) {
-        try {
-            $validated = $request->validate([
-            'sku' => 'required|exists:apicentral.ebay_one_metrics,sku',
-            'price' => 'required|numeric',
-        ]);
-
-        $ebayData = DB::connection('apicentral')
-            ->table('ebay_one_metrics')
-            ->where('sku', $validated['sku'])
-            ->first();
-
-        if (!$ebayData) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'SKU not found in ebay_one_metrics.',
-            ], 404);
-        }
-
-        DB::connection('apicentral')
-            ->table('ebay_one_metrics')
-            ->where('sku', $validated['sku'])
-            ->update([
-                'ebay_price' => $validated['price'],
-            ]);
-
-        $updatedData = DB::connection('apicentral')
-            ->table('ebay_one_metrics')
-            ->where('sku', $validated['sku'])
-            ->first();
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Ebay price and metrics updated successfully.',
-            'data' => $updatedData,
-        ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => $e->getMessage()
-            ], 500);
-        }
-    }
     
     public function ebayZero(Request $request)
     {
@@ -460,87 +245,14 @@ class EbayZeroController extends Controller
         ];
     }
 
-    // public function getLivePendingAndZeroViewCounts()
-    // {
-    //     $productMasters = ProductMaster::whereNull('deleted_at')->get();
-    //     $skus = $productMasters->pluck('sku')->unique()->toArray();
-
-    //     $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy('sku');
-    //     $ebayDataViews = EbayListingStatus::whereIn('sku', $skus)->get()->keyBy('sku');
-    //     $ebayMetrics = EbayMetric::whereIn('sku', $skus)->get()->keyBy('sku'); 
-
-    //     $listedCount = 0;
-    //     $zeroInvOfListed = 0;
-    //     $liveCount = 0;
-    //     $zeroViewCount = 0;
-
-    //     foreach ($productMasters as $item) {
-    //         $sku = trim($item->sku);
-    //         $inv = $shopifyData[$sku]->inv ?? 0;
-    //         $isParent = stripos($sku, 'PARENT') !== false;
-    //         if ($isParent) continue;
-
-    //         $status = $ebayDataViews[$sku]->value ?? null;
-    //         if (is_string($status)) {
-    //             $status = json_decode($status, true);
-    //         }
-    //         $listed = $status['listed'] ?? (floatval($inv) > 0 ? 'Pending' : 'Listed');
-    //         $live = $status['live'] ?? null;
-
-    //         // Listed count 
-    //         if ($listed === 'Listed') {
-    //             $listedCount++;
-    //             if (floatval($inv) <= 0) {
-    //                 $zeroInvOfListed++;
-    //             }
-    //         }
-
-    //         // Live count
-    //         if ($live === 'Live') {
-    //             $liveCount++;
-    //         }
-
-    //         // Zero view: INV > 0, views == 0 (from ebay_metric table), not parent SKU (NR ignored)
-    //         $views = $ebayMetrics[$sku]->views ?? null;
-    //         // if (floatval($inv) > 0 && $views !== null && intval($views) === 0) {
-    //         //     $zeroViewCount++;
-    //         // }
-    //         if ($inv > 0) {
-    //             if ($views === null) {
-    //             } elseif (intval($views) === 0) {
-    //                 $zeroViewCount++;
-    //             }
-    //         }
-    //     }
-
-    //     // live pending = listed - 0-inv of listed - live
-    //     $livePending = $listedCount - $zeroInvOfListed - $liveCount;
-
-    //     return [
-    //         'live_pending' => $livePending,
-    //         'zero_view' => $zeroViewCount,
-    //     ];
-    // }
-
-
     public function getLivePendingAndZeroViewCounts()
     {
         $productMasters = ProductMaster::whereNull('deleted_at')->get();
+        $skus = $productMasters->pluck('sku')->unique()->toArray();
 
-        // Normalize SKUs (avoid case/space mismatch)
-        $skus = $productMasters->pluck('sku')->map(fn($s) => strtoupper(trim($s)))->unique()->toArray();
-
-        $shopifyData = ShopifySku::whereIn('sku', $skus)->get()
-            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
-
-        $ebayListingStatus = EbayListingStatus::whereIn('sku', $skus)->get()
-            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
-
-        $ebayDataViews = EbayDataView::whereIn('sku', $skus)->get()
-            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
-
-        $ebayMetrics = EbayMetric::whereIn('sku', $skus)->get()
-            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
+        $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy('sku');
+        $ebayDataViews = EbayListingStatus::whereIn('sku', $skus)->get()->keyBy('sku');
+        $ebayMetrics = EbayMetric::whereIn('sku', $skus)->get()->keyBy('sku'); 
 
         $listedCount = 0;
         $zeroInvOfListed = 0;
@@ -548,31 +260,19 @@ class EbayZeroController extends Controller
         $zeroViewCount = 0;
 
         foreach ($productMasters as $item) {
-            $sku = strtoupper(trim($item->sku));
+            $sku = trim($item->sku);
             $inv = $shopifyData[$sku]->inv ?? 0;
+            $isParent = stripos($sku, 'PARENT') !== false;
+            if ($isParent) continue;
 
-            // Skip parent SKUs
-            if (stripos($sku, 'PARENT') !== false) continue;
-
-            // --- eBay Listing Status ---
-            $status = $ebayListingStatus[$sku]->value ?? null;
+            $status = $ebayDataViews[$sku]->value ?? null;
             if (is_string($status)) {
                 $status = json_decode($status, true);
             }
+            $listed = $status['listed'] ?? (floatval($inv) > 0 ? 'Pending' : 'Listed');
+            $live = $status['live'] ?? null;
 
-            // $listed = $status['listed'] ?? (floatval($inv) > 0 ? 'Pending' : 'Listed');
-            $listed = $status['listed'] ?? null;
-
-            // --- Amazon Live Status ---
-            $dataView = $ebayDataViews[$sku]->value ?? null;
-            if (is_string($dataView)) {
-                $dataView = json_decode($dataView, true);
-            }
-            // $live = ($dataView['Live'] ?? false) === true ? 'Live' : null;
-            $live = (!empty($dataView['Live']) && $dataView['Live'] === true) ? 'Live' : null;
-
-
-            // --- Listed count ---
+            // Listed count 
             if ($listed === 'Listed') {
                 $listedCount++;
                 if (floatval($inv) <= 0) {
@@ -580,42 +280,26 @@ class EbayZeroController extends Controller
                 }
             }
 
-            // --- Live count ---
+            // Live count
             if ($live === 'Live') {
                 $liveCount++;
             }
 
-            // --- Views / Zero-View logic ---
-            $metricRecord = $ebayMetrics[$sku] ?? null;
-            $views = null;
-
-            if ($metricRecord) {
-                // Direct field
-                if (!empty($metricRecord->views) || $metricRecord->views === "0" || $metricRecord->views === 0) {
-                    $views = (int)$metricRecord->views;
-                }
-                // Or inside JSON column `value`
-                elseif (!empty($metricRecord->value)) {
-                    $metricData = json_decode($metricRecord->value, true);
-                    if (isset($metricData['views'])) {
-                        $views = (int)$metricData['views'];
-                    }
+            // Zero view: INV > 0, views == 0 (from ebay_metric table), not parent SKU (NR ignored)
+            $views = $ebayMetrics[$sku]->views ?? null;
+            // if (floatval($inv) > 0 && $views !== null && intval($views) === 0) {
+            //     $zeroViewCount++;
+            // }
+            if ($inv > 0) {
+                if ($views === null) {
+                } elseif (intval($views) === 0) {
+                    $zeroViewCount++;
                 }
             }
-
-            // Normalize $inv to numeric
-            $inv = floatval($inv);
-
-            $hasNR = !empty($dataView['NR']) && strtoupper($dataView['NR']) === 'NR';
-
-            // Count as zero-view if views are exactly 0 and inv > 0
-            if ($inv > 0 && $views === 0  && !$hasNR) {
-                $zeroViewCount++;
-            }
-
         }
 
-        $livePending = $listedCount - $liveCount;
+        // live pending = listed - 0-inv of listed - live
+        $livePending = $listedCount - $zeroInvOfListed - $liveCount;
 
         return [
             'live_pending' => $livePending,

@@ -57,19 +57,10 @@ class AmazonZeroController extends Controller
         });
 
         // 2. Fetch AmazonDatasheet and ShopifySku for those SKUs
-        // Use groupBy to handle duplicate SKUs, then take the earliest record for each (lowest ID)
-        $amazonDatasheetsBySku = AmazonDatasheet::whereIn('sku', $skus)
-            ->get()
-            ->groupBy(function ($item) {
-                return strtoupper($item->sku);
-            })
-            ->map(function ($group) {
-                // Return the record with the lowest ID (earliest/original)
-                return $group->sortBy('id')->first();
-            });
-        $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy(function ($item) {
+        $amazonDatasheetsBySku = AmazonDatasheet::whereIn('sku', $skus)->get()->keyBy(function ($item) {
             return strtoupper($item->sku);
         });
+        $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy('sku');
 
         // 3. JungleScout Data (by parent)
         $parents = $productMasters->pluck('parent')->filter()->unique()->map('strtoupper')->values()->all();
@@ -92,7 +83,7 @@ class AmazonZeroController extends Controller
             $parent = $pm->parent;
 
             $amazonSheet = $amazonDatasheetsBySku[$sku] ?? null;
-            $shopify = $shopifyData[$sku] ?? null;
+            $shopify = $shopifyData[$pm->sku] ?? null;
 
             $row = [];
             $row['Parent'] = $parent;
@@ -215,19 +206,10 @@ class AmazonZeroController extends Controller
         });
 
         // 2. Fetch AmazonDatasheet and ShopifySku for those SKUs
-        // Use groupBy to handle duplicate SKUs, then take the earliest record for each (lowest ID)
-        $amazonDatasheetsBySku = AmazonDatasheet::whereIn('sku', $skus)
-            ->get()
-            ->groupBy(function ($item) {
-                return strtoupper($item->sku);
-            })
-            ->map(function ($group) {
-                // Return the record with the lowest ID (earliest/original)
-                return $group->sortBy('id')->first();
-            });
-        $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy(function ($item) {
+        $amazonDatasheetsBySku = AmazonDatasheet::whereIn('sku', $skus)->get()->keyBy(function ($item) {
             return strtoupper($item->sku);
         });
+        $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy('sku');
 
         // 3. Fetch API data (Google Sheet)
         $response = $this->apiController->fetchDataFromAmazonGoogleSheet();
@@ -245,7 +227,7 @@ class AmazonZeroController extends Controller
             $sku = strtoupper($pm->sku);
             $apiItem = $apiDataBySku[$sku] ?? null;
             $amazonSheet = $amazonDatasheetsBySku[$sku] ?? null;
-            $shopify = $shopifyData[$sku] ?? null;
+            $shopify = $shopifyData[$pm->sku] ?? null;
 
             $row = [];
             $row['NR'] = 'REQ';
@@ -532,63 +514,36 @@ class AmazonZeroController extends Controller
     //     ];
     // }
 
-
     public function getLivePendingAndZeroViewCounts()
     {
         $productMasters = ProductMaster::whereNull('deleted_at')->get();
+        $skus = $productMasters->pluck('sku')->unique()->toArray();
 
-        // Normalize SKUs (avoid case/space mismatch)
-        $skus = $productMasters->pluck('sku')->map(fn($s) => strtoupper(trim($s)))->unique()->toArray();
-
-        $shopifyData = ShopifySku::whereIn('sku', $skus)->get()
-            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
-
-        $amazonListingStatus = AmazonListingStatus::whereIn('sku', $skus)->get()
-            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
-
-        $amazonDataViews = AmazonDataView::whereIn('sku', $skus)->get()
-            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
-
-        // Use groupBy to handle duplicate SKUs, then take the earliest record for each (lowest ID)
-        $amazonMetrics = AmazonDatasheet::whereIn('sku', $skus)
-            ->get()
-            ->groupBy(fn($s) => strtoupper(trim($s->sku)))
-            ->map(function ($group) {
-                // Return the record with the lowest ID (earliest/original)
-                return $group->sortBy('id')->first();
-            });
+        $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy('sku');
+        $amazonDataViews = AmazonListingStatus::whereIn('sku', $skus)->get()->keyBy('sku');
+        $amazonDatasheets = AmazonDatasheet::whereIn('sku', $skus)->get()->keyBy('sku');
 
         $listedCount = 0;
         $zeroInvOfListed = 0;
         $liveCount = 0;
         $zeroViewCount = 0;
-        $listedAndLiveCount = 0; // Items that are both Listed AND Live (Listed but not Pending)
+        $zeroViewNRCount = 0;
 
         foreach ($productMasters as $item) {
-            $sku = strtoupper(trim($item->sku));
+            $sku = trim($item->sku);
             $inv = $shopifyData[$sku]->inv ?? 0;
+            $isParent = stripos($sku, 'PARENT') !== false;
+            if ($isParent) continue;
 
-            // Skip parent SKUs
-            if (stripos($sku, 'PARENT') !== false) continue;
-
-            // --- Amazon Listing Status ---
-            $status = $amazonListingStatus[$sku]->value ?? null;
+            $status = $amazonDataViews[$sku]->value ?? null;
             if (is_string($status)) {
                 $status = json_decode($status, true);
             }
+            $nr = $status['NR'] ?? (floatval($inv) > 0 ? 'REQ' : 'NR');
+            $listed = $status['listed'] ?? (floatval($inv) > 0 ? 'Pending' : 'Listed');
+            $live = $status['live'] ?? null;
 
-            // $listed = $status['listed'] ?? (floatval($inv) > 0 ? 'Pending' : 'Listed');
-            $listed = $status['listed'] ?? null;
-
-            // --- Amazon Live Status ---
-            $dataView = $amazonDataViews[$sku]->value ?? null;
-            if (is_string($dataView)) {
-                $dataView = json_decode($dataView, true);
-            }
-            // $live = ($dataView['Live'] ?? false) === true ? 'Live' : null;
-            $live = (!empty($dataView['Live']) && $dataView['Live'] === true) ? 'Live' : null;
-
-            // --- Listed count ---
+            // Listed count (for live pending)
             if ($listed === 'Listed') {
                 $listedCount++;
                 if (floatval($inv) <= 0) {
@@ -596,70 +551,29 @@ class AmazonZeroController extends Controller
                 }
             }
 
-            // --- Live count ---
+            // Live count
             if ($live === 'Live') {
                 $liveCount++;
             }
 
-            // --- Listed but not Pending count (Listed AND Live) ---
-            if ($listed === 'Listed' && $live === 'Live') {
-                $listedAndLiveCount++;
-            }
-
-            // --- Views / Zero-View logic ---
-            $metricRecord = $amazonMetrics[$sku] ?? null;
-            $views = null;
-
-            if ($metricRecord) {
-                // Direct field
-                if (!empty($metricRecord->sessions_l30) || $metricRecord->sessions_l30 === "0" || $metricRecord->sessions_l30 === 0) {
-                    $views = (int)$metricRecord->sessions_l30;
-                }
-                // Or inside JSON column `value`
-                elseif (!empty($metricRecord->value)) {
-                    $metricData = json_decode($metricRecord->value, true);
-                    if (isset($metricData['sessions_l30'])) {
-                        $views = (int)$metricData['sessions_l30'];
-                    }
-                }
-            }
-
-            // Normalize $inv to numeric
-            $inv = floatval($inv);
-
-            // Count as zero-view if views are exactly 0 and inv > 0
-            if ($inv > 0 && $views === 0) {
+            // Zero view: INV > 0, Sess30 == 0
+            $sess30 = $amazonDatasheets[$sku]->sessions_l30 ?? null;
+            if (floatval($inv) > 0 && $sess30 !== null && intval($sess30) === 0) {
                 $zeroViewCount++;
+                if ($nr === 'NR') {
+                    $zeroViewNRCount++;
+                }
             }
-            // $metricRecord = $amazonMetrics[$sku] ?? null;
-            // $views = null;
-
-            // if ($metricRecord) {
-            //     // Direct field (if column exists)
-            //     if (!empty($metricRecord->sessions_l30)) {
-            //         $views = $metricRecord->sessions_l30;
-            //     }
-            //     // Or inside JSON column `value`
-            //     elseif (!empty($metricRecord->value)) {
-            //         $metricData = json_decode($metricRecord->value, true);
-            //         $views = $metricData['sessions_l30'] ?? null;
-            //     }
-            // }
-
-            // if ($inv > 0 && $views !== null && intval($views) === 0) {
-            //     $zeroViewCount++;
-            // }
         }
 
-        $livePending = $listedCount - $liveCount;
-        $listedButNotPending = $listedAndLiveCount; // Items that are Listed AND Live (not pending anymore)
-        $pendingCount = $livePending; // Items that are Listed but NOT Live yet (still pending)
+        // dd($listedCount, $zeroInvOfListed, $liveCount);
+        // live pending = listed - 0-inv of listed - live
+        $livePending = $listedCount - $zeroInvOfListed - $liveCount;
+        $zeroViewFinal = $zeroViewCount - $zeroViewNRCount;
 
         return [
             'live_pending' => $livePending,
-            'zero_view' => $zeroViewCount,
-            'listed_not_pending' => $listedButNotPending,
-            'pending_count' => $pendingCount,
+            'zero_view' => $zeroViewFinal,
         ];
     }
 

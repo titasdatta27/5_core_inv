@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use App\Models\Ebay2Metric;
-use App\Models\EbayTask;
 use Illuminate\Console\Command;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
@@ -31,46 +30,64 @@ class FetchEbay2Metrics extends Command
      */
     public function handle()
     {
-        $token = $this->getToken();
-        if (! $token) {
-            $this->error('Token error');
+        $token = $this->generateEbayToken();
+
+        if (!$token) {
+            $this->error('Failed to generate token.');
             return;
         }
 
-        $taskId = $this->getInventoryTaskId($token);
-        if (! $taskId) {
-            $this->error('Task error');
+        $rateLimit = $this->getRateLimit();
+        if ($rateLimit) {
+            $this->info('Rate limit data: ' . json_encode($rateLimit));
+        } else {
+            $this->error('Failed to get rate limit data.');
             return;
         }
 
-        $listingData = $this->processTask($taskId, $token);
+        $dateRanges = $this->getDateRanges();
 
-        // Save price + SKU mapping
-        // We'll map itemId => [sku, sku, ...]
+        $listingData = $this->fetchAndParseReport('LMS_ACTIVE_INVENTORY_REPORT', null, $token);
+
+
+          // 1. Gather all item_ids from listingData
         $itemIdToSku = [];
+        foreach ($listingData as $row) {
+            if (!empty($row['item_id']) && !empty($row['sku'])) {
+                $itemIdToSku[$row['item_id']] = $row['sku'];
+            }
+        }
+
+        // 2. Fetch views from eBay Analytics API for all item_ids
+        if (!empty($itemIdToSku)) {
+            $itemIds = array_keys($itemIdToSku);
+            $itemIdChunks = array_chunk($itemIds, 20); // eBay API may have limits
+            $viewsByItemId = [];
+           foreach ($itemIdChunks as $chunk) {
+                $ids = implode('|', $chunk);
+                $dateRange = now()->subDays(30)->format('Ymd') . '..' . now()->format('Ymd');
+                $url = "https://api.ebay.com/sell/analytics/v1/traffic_report?dimension=LISTING&filter=listing_ids:%7B{$ids}%7D,date_range:[{$dateRange}]&metric=LISTING_VIEWS_TOTAL&sort=LISTING_VIEWS_TOTAL";
+                $response = Http::withToken($token)->get($url);
+                if ($response->ok()) {
+                    $data = $response->json();
+                    foreach ($data['records'] ?? [] as $record) {
+                        $itemId = $record['dimensionValues'][0]['value'] ?? null;
+                        $views = $record['metricValues'][0]['value'] ?? null;
+                        if ($itemId && $views !== null) {
+                            $viewsByItemId[$itemId] = $views;
+                        }
+                    }
+                }
+            }
+
+        }
 
         foreach ($listingData as $row) {
             $itemId = $row['item_id'] ?? null;
-            $sku = trim((string)($row['sku'] ?? ''));
-
-            // skip rows with no itemId or no sku (we care about child SKUs)
-            if (! $itemId || $sku === '') {
-                continue;
-            }
-
-            // keep mapping of itemId to array of SKUs
-            if (! isset($itemIdToSku[$itemId])) {
-                $itemIdToSku[$itemId] = [];
-            }
-
-            // avoid duplicates
-            if (! in_array($sku, $itemIdToSku[$itemId])) {
-                $itemIdToSku[$itemId][] = $sku;
-            }
-
-            // Save per SKU (unique by item_id + sku)
+            if (!$itemId) continue;
+        
             Ebay2Metric::updateOrCreate(
-                ['item_id' => $itemId, 'sku' => $sku],
+                ['item_id' => $itemId, 'sku' => $row['sku'] ?? ''],
                 [
                     'ebay_price' => $row['price'] ?? null,
                     'report_range' => now()->toDateString(),
@@ -78,319 +95,344 @@ class FetchEbay2Metrics extends Command
             );
         }
 
-        // Update views per itemId -> sku list
-        $this->updateViews($token, $itemIdToSku);
-
-        // L30 / L60
-        $existingItemIds = array_keys($itemIdToSku);
-        $dateRanges = $this->dateRanges();
-
-        $l30 = $this->orderQty($token, $dateRanges['l30'], $existingItemIds);
-        $l60 = $this->orderQty($token, $dateRanges['l60'], $existingItemIds);
-
-        // Save L30/L60 for each SKU under the item
-        foreach ($existingItemIds as $itemId) {
-            $skus = $itemIdToSku[$itemId] ?? [];
-            foreach ($skus as $sku) {
-                Ebay2Metric::where('item_id', $itemId)
-                    ->where('sku', $sku)
-                    ->update([
-                        'ebay_l30' => $l30[$itemId] ?? 0,
-                        'ebay_l60' => $l60[$itemId] ?? 0,
-                    ]);
+        // 3. Store views in Ebay2Metric table for each item_id
+        if (!empty($viewsByItemId)) {
+            foreach ($viewsByItemId as $itemId => $views) {
+                Ebay2Metric::where('item_id', $itemId)->update(['views' => $views]);
             }
+            logger()->info('Views updated for items', ['count' => count($viewsByItemId)]);
         }
 
-        $this->info('✅ eBay Metrics updated');
+        $existingSkus = Ebay2Metric::pluck('sku')->filter()->toArray();
+        $l30Qty = $this->getQuantityBySkuFromOrders($token, $dateRanges['l30']['start'], $dateRanges['l30']['end'], $existingSkus);
+        $l60Qty = $this->getQuantityBySkuFromOrders($token, $dateRanges['l60']['start'], $dateRanges['l60']['end'], $existingSkus);
+        
+        foreach ($existingSkus as $sku) {
+            $record = Ebay2Metric::where('sku', $sku)->first();
+            if (!$record) continue;
+            
+            $record->ebay_l30 = $l30Qty[$sku] ?? 0;
+            $record->ebay_l60 = $l60Qty[$sku] ?? 0;
+            $record->save();
+        }
+        $this->info('eBay2 metrics fetched and stored successfully.');
     }
 
-    private function dateRanges()
+    private function getDateRanges(): array
     {
         $today = Carbon::today();
-
         return [
             'l30' => [
-                'start' => $today->copy()->subDays(29),
+                'start' => $today->copy()->subDays(30)->addDay(),
                 'end' => $today->copy()->subDay(),
             ],
             'l60' => [
-                'start' => $today->copy()->subDays(59),
-                'end' => $today->copy()->subDays(30),
+                'start' => $today->copy()->subDays(60)->addDay(),
+                'end' => $today->copy()->subDays(31),
             ],
         ];
     }
 
-    private function getToken()
+    private function fetchAndParseReport($reportType, $range, $token): array
     {
-        $id = env('EBAY2_APP_ID');
-        $secret = env('EBAY2_CERT_ID');
-        $rtoken = env('EBAY2_REFRESH_TOKEN');
+        $this->info("Start Processing: $reportType");
 
-        try {
-            $response = Http::asForm()
-                ->withBasicAuth($id, $secret)
-                ->post('https://api.ebay.com/identity/v1/oauth2/token', [
-                    'grant_type' => 'refresh_token',
-                    'refresh_token' => $rtoken,
-                ]);
-
-            if (! $response->successful()) {
-                $this->error('❌ TOKEN FAILED: '.json_encode($response->json()));
-                return null;
-            }
-
-            return $response->json()['access_token'] ?? null;
-
-        } catch (\Throwable $e) {
-            Log::channel('daily')->error('EBAY TOKEN EXCEPTION', [
-                'message' => $e->getMessage(),
-            ]);
-
-            return null;
-        }
-    }
-
-    private function getInventoryTaskId($token)
-    {
-        $type = 'LMS_ACTIVE_INVENTORY_REPORT';
-
-        $task = EbayTask::where('type', $type)
-            ->where('ebay_account', 'Ebay2')
-            ->latest()
-            ->first();
-
-        // reuse last task if created less than 24h ago
-        if ($task && now()->diffInHours($task->created_at) < 24) {
-            $this->info('✅ Reusing existing Task: '.$task->task_id.' (created: '.$task->created_at.')');
-            return $task->task_id;
-        }
-
-        $this->info('⏳ Creating new task...');
+        $apiUrl = 'https://api.ebay.com/sell/feed/v1/inventory_task';
 
         $payload = [
-            'feedType' => $type,
+            'feedType' => $reportType,
             'format' => 'TSV_GZIP',
             'schemaVersion' => '1.0',
         ];
 
-        $response = Http::withToken($token)
-            ->post('https://api.ebay.com/sell/feed/v1/inventory_task', $payload);
+        info('Request Payload:', [$payload]);
 
-        if (! $response->successful()) {
-            $this->error('❌ Task API failed: '.$response->body());
-            return null;
-        }
-
-        $location = $response->header('Location');
-        if (! $location) {
-            $this->error('❌ Location header not found!');
-            return null;
-        }
-
-        $taskId = basename($location);
-
-        EbayTask::create([
-            'ebay_account' => 'Ebay2',
-            'task_id' => $taskId,
-            'type' => $type,
-        ]);
-
-        $this->info("✅ New Task Created: $taskId");
-
-        return $taskId;
-    }
-
-    private function processTask($taskId, $token)
-    {
-        while (true) {
-            $check = Http::withToken($token)
-                ->get("https://api.ebay.com/sell/feed/v1/inventory_task/{$taskId}");
-
-            $status = $check['status'] ?? 'UNKNOWN';
-
-            if (in_array($status, ['COMPLETED', 'COMPLETED_WITH_ERROR', 'FAILED'])) {
-                break;
-            }
-            sleep(10);
-        }
-
-        return $this->downloadReport($taskId, $token);
-    }
-
-    private function downloadReport($taskId, $token)
-    {
-        $url = "https://api.ebay.com/sell/feed/v1/task/{$taskId}/download_result_file";
-
-        $response = Http::withToken($token)->get($url);
-        $content = $response->body();
-        $magic = substr($content, 0, 2);
-
-        // ZIP
-        if ($magic === 'PK') {
-            $zipPath = storage_path("app/{$taskId}.zip");
-            file_put_contents($zipPath, $content);
-
-            $zip = new ZipArchive;
-            $ok = $zip->open($zipPath);
-            if ($ok === true) {
-                $zip->extractTo(storage_path('app/'));
-                $zip->close();
-            }
-
-            $xml = glob(storage_path('app/*.xml'));
-            if (! $xml) {
-                return [];
-            }
-
-            $xmlObj = simplexml_load_file($xml[0]);
-            @unlink($zipPath);
-            @unlink($xml[0]);
-
-            return $this->parseXml($xmlObj);
-        }
-
-        // GZIP
-        if (substr($content, 0, 2) === "\x1f\x8b") {
-            return $this->parseGzip($taskId, $content);
-        }
-
-        return [];
-    }
-
-    private function parseXml($xml)
-    {
-        $out = [];
-
-        foreach ($xml->ActiveInventoryReport->SKUDetails as $item) {
-            $itemId = (string) $item->ItemID;
-            if (! $itemId) {
-                continue;
-            }
-
-            // capture primary SKU (if present) and variations
-            $primarySku = trim((string) ($item->SKU ?? ''));
-            $price = isset($item->Price) ? (float) $item->Price : null;
-
-            if ($primarySku !== '') {
-                $out[] = [
-                    'item_id' => $itemId,
-                    'sku' => $primarySku,
-                    'price' => $price,
-                ];
-            }
-
-            foreach ($item->Variations->Variation ?? [] as $v) {
-                $out[] = [
-                    'item_id' => $itemId,
-                    'sku' => (string) $v->SKU,
-                    'price' => isset($v->Price) ? (float) $v->Price : $price,
-                ];
-            }
-        }
-
-        return $out;
-    }
-
-    private function parseGzip($taskId, $content)
-    {
-        $gz = storage_path("app/{$taskId}.tsv.gz");
-        $tsv = storage_path("app/{$taskId}.tsv");
-
-        file_put_contents($gz, $content);
-
-        $in = gzopen($gz, 'rb');
-        $out = fopen($tsv, 'wb');
-        while (! gzeof($in)) {
-            fwrite($out, gzread($in, 4096));
-        }
-        gzclose($in);
-        fclose($out);
-
-        $lines = file($tsv, FILE_SKIP_EMPTY_LINES);
-        @unlink($gz);
-        @unlink($tsv);
-
-        if (! $lines) {
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $token,
+            'Content-Type' => 'application/json',
+        ])->post($apiUrl, $payload);
+                
+        if (!$response->successful()) {
+            $this->error("Task creation failed: " . $response->body());
+            logger()->error("Task creation error", ['response' => $response->json()]);
             return [];
         }
 
-        $rows = array_map(fn ($l) => str_getcsv($l, "\t"), $lines);
-        $headers = array_shift($rows);
-
-        $data = [];
-        foreach ($rows as $row) {
-            if (count($headers) != count($row)) {
-                continue;
-            }
-            $d = array_combine($headers, $row);
-            $itemId = $d['itemId'] ?? null;
-            $sku = trim((string) ($d['sku'] ?? ''));
-            if (! $itemId || $sku === '') {
-                continue;
-            }
-            $data[] = [
-                'item_id' => $itemId,
-                'sku' => $sku,
-                'price' => $d['price'] ?? null,
-            ];
+        $location = $response->header('Location');
+        info('location', [$location]);
+        if (!$location) {
+            $this->error("No 'Location' header returned. Can't extract task ID.");
+            logger()->error("Missing Location header", ['headers' => $response->headers()]);
+            logger()->info('response', [$response]);
+            return [];
         }
 
+        // Step 2: Extract the task ID from URL
+        $taskId = basename($location); 
+        $this->info("Task ID: $taskId");
+
+        $this->info("Task/Report ID: $taskId");
+
+        $status = null;
+        $downloadUrl = null;
+
+        do {
+            sleep(10);
+        
+            $statusResponse = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $token,
+            ])->get("https://api.ebay.com/sell/feed/v1/inventory_task/{$taskId}");
+        
+            $status = $statusResponse['status'] ?? 'PENDING';
+            $this->info("Status: $status");
+        
+        } while (!in_array($status, ['COMPLETED', 'COMPLETED_WITH_ERROR', 'FAILED']));
+        
+        if ($status === 'FAILED') {
+            logger()->error("Inventory report task failed.");
+            return [];
+        }
+
+        $data = $this->downloadAndParseEbayReport($taskId, $token);
+        
         return $data;
     }
 
-    private function updateViews($token, $map)
-    {
-        // $map = [ itemId => [sku,sku,...], ... ]
-        $chunks = array_chunk(array_keys($map), 20);
+    private function downloadAndParseEbayReport(string $taskId, string $token): array
+    {   
+        info('downloadAndParseEbayReport');
+        $baseTaskUrl = "https://api.ebay.com/sell/feed/v1/task/{$taskId}/download_result_file";
+        $filePath = storage_path("app/inventory_{$taskId}");
+        $zipPath = $filePath . ".zip";
+        $xmlPath = $filePath . ".xml";
 
-        foreach ($chunks as $chunk) {
-            $ids = implode('|', $chunk);
-            $range = now()->subDays(30)->format('Ymd').'..'.now()->format('Ymd');
+        $this->info("Downloading report from: $baseTaskUrl");
 
-            $url = "https://api.ebay.com/sell/analytics/v1/traffic_report?dimension=LISTING&filter=listing_ids:%7B{$ids}%7D,date_range:[{$range}]&metric=LISTING_VIEWS_TOTAL";
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $token,
+            ])->get($baseTaskUrl);
 
-            $r = Http::withToken($token)->get($url);
+            $content = $response->body();
+            $magic = substr($content, 0, 2);
 
-            foreach ($r['records'] ?? [] as $rec) {
-                $id = $rec['dimensionValues'][0]['value'] ?? null;
-                $v = $rec['metricValues'][0]['value'] ?? null;
-                if (! $id) {
-                    continue;
-                }
+            // ZIP file: starts with "PK"
+            if ($magic === "PK") {
+                file_put_contents($zipPath, $content);
 
-                $skus = $map[$id] ?? [];
-                foreach ($skus as $sku) {
-                    Ebay2Metric::where('item_id', $id)
-                        ->where('sku', $sku)
-                        ->update(['views' => $v]);
+                $zip = new ZipArchive;
+                if ($zip->open($zipPath) === TRUE) {
+                    $zip->extractTo(storage_path('app/'));
+                    $zip->close();
+
+                    // Find extracted XML file
+                    $extractedFiles = glob(storage_path('app/*.xml'));
+                    if (empty($extractedFiles)) {
+                        logger()->error("No XML file found in zip.");
+                        return [];
+                    }
+
+                    $xmlPath = $extractedFiles[0];
+                    $xml = simplexml_load_file($xmlPath);
+                    if (!$xml) {
+                        logger()->error("Failed to parse XML.");
+                        return [];
+                    }
+
+                    logger()->info("Root Element: " . $xml->getName());
+                    
+
+                    // Example conversion (customize based on XML structure)
+
+                    $data = [];
+                    foreach ($xml->ActiveInventoryReport->SKUDetails as $item) {
+                        $itemId = (string) $item->ItemID ?? null;
+                        if (!$itemId) continue;
+                    
+                        $data[] = [
+                            'item_id' => $itemId,
+                            'sku' => $item->SKU ?? '',
+                            'price' => (float) ($item->Price ?? 0),
+                        ];
+
+                        
+                        // Handle variations if any
+                        if (!empty($item->Variations->Variation)) {
+                            foreach ($item->Variations->Variation as $variation) {
+                                $itemId = (string) $item->ItemID ?? null;
+                                $data[] = [
+                                    'item_id' => $itemId,
+                                    'sku' => $variation->SKU ?? '',
+                                    'price' => (float) ($variation->Price ?? 0),
+                                ];
+                            }
+                        }
+                    }
+
+                    @unlink($zipPath);
+                    @unlink($xmlPath);
+                    
+                    return $data;
+                } else {
+                    logger()->error("Failed to open ZIP file.");
+                    return [];
                 }
             }
+
+            // If not ZIP, check for GZ
+            if (substr($content, 0, 2) === "\x1f\x8b") {
+                $gzPath = $filePath . ".tsv.gz";
+                $tsvPath = $filePath . ".tsv";
+                file_put_contents($gzPath, $content);
+
+                $gz = gzopen($gzPath, 'rb');
+                $tsv = fopen($tsvPath, 'wb');
+                while (!gzeof($gz)) {
+                    fwrite($tsv, gzread($gz, 4096));
+                }
+                fclose($tsv);
+                gzclose($gz);
+
+                $lines = file($tsvPath, FILE_SKIP_EMPTY_LINES);
+                if (!$lines || count($lines) < 2) return [];
+
+                $rows = array_map('str_getcsv', $lines, array_fill(0, count($lines), "\t"));
+                $headers = array_shift($rows);
+                $data = [];
+
+                foreach ($rows as $row) {
+                    if (count($headers) !== count($row)) continue;
+                    $item = array_combine($headers, $row);
+                    $itemId = $item['itemId'] ?? null;
+                    if (!$itemId) continue;
+
+                    $data[$itemId] = [
+                        'price' => $item['price'] ?? null,
+                        'sku' => $item['sku'] ?? null,
+                    ];
+                }
+
+                @unlink($gzPath);
+                @unlink($tsvPath);
+                $this->info("Parsed " . count($data) . " TSV items.");
+                return $data;
+            }
+
+            // Unknown content
+            logger()->error("Unknown file type", [
+                'first_bytes' => bin2hex(substr($content, 0, 4)),
+                'taskId' => $taskId,
+            ]);
+            return [];
+
+        } catch (\Throwable $e) {
+            logger()->error("Exception: " . $e->getMessage());
+            return [];
         }
     }
 
-    private function orderQty($token, $range, $validIds)
+    
+
+
+    private function getQuantityBySkuFromOrders($token, Carbon $from, Carbon $to, array $onlyTheseSkus = [])
     {
-        $qty = [];
-        $from = $range['start']->format('Y-m-d\TH:i:s.000\Z');
-        $to = $range['end']->format('Y-m-d\TH:i:s.000\Z');
+        $allQuantities = [];
 
-        $url = "https://api.ebay.com/sell/fulfillment/v1/order?filter=creationdate:[{$from}..{$to}]&limit=200";
-
+        $url = "https://api.ebay.com/sell/fulfillment/v1/order?filter=creationdate:[{$from->format('Y-m-d\TH:i:s.000\Z')}..{$to->format('Y-m-d\TH:i:s.000\Z')}]&limit=200";
+    
         do {
-            $r = Http::withToken($token)->get($url);
-            foreach ($r['orders'] ?? [] as $o) {
-                foreach ($o['lineItems'] ?? [] as $li) {
-                    $id = $li['legacyItemId'] ?? null;
-                    $q = (int) $li['quantity'];
-                    if (! $id || ! in_array($id, $validIds)) {
-                        continue;
-                    }
-                    $qty[$id] = ($qty[$id] ?? 0) + $q;
+            $response = Http::withToken($token)->get($url);
+            
+            if (!$response->ok()) {
+                logger()->error("Fulfillment fetch failed: " . $response->body());
+                break;
+            }
+    
+            $data = $response->json();
+            foreach ($data['orders'] ?? [] as $order) {
+                
+                foreach ($order['lineItems'] ?? [] as $line) {
+                    
+                    $sku = $line['sku'] ?? null;
+                    $qty = (int) ($line['quantity'] ?? 0);
+                    if (!$sku || !in_array($sku, $onlyTheseSkus)) continue;
+    
+                    $allQuantities[$sku] = ($allQuantities[$sku] ?? 0) + $qty;
                 }
             }
-            $url = $r['next'] ?? null;
+    
+            $url = $data['next'] ?? null;
+    
         } while ($url);
-
-        return $qty;
+    
+        return $allQuantities;
     }
+
+    public function generateEbayToken(): ?string
+    {
+        $clientId = env('EBAY2_APP_ID');
+        $clientSecret = env('EBAY2_CERT_ID');
+
+        $scope = implode(' ', [
+            'https://api.ebay.com/oauth/api_scope',
+            'https://api.ebay.com/oauth/api_scope/sell.account',
+            'https://api.ebay.com/oauth/api_scope/sell.inventory',
+            'https://api.ebay.com/oauth/api_scope/sell.account',
+            'https://api.ebay.com/oauth/api_scope/sell.fulfillment',
+            'https://api.ebay.com/oauth/api_scope/sell.analytics.readonly',
+            'https://api.ebay.com/oauth/api_scope/sell.stores',
+            'https://api.ebay.com/oauth/api_scope/sell.finances',
+            'https://api.ebay.com/oauth/api_scope/sell.marketing',
+            'https://api.ebay.com/oauth/api_scope/commerce.identity.readonly',
+        ]);
+
+        try {
+            $response = Http::asForm()
+                ->withBasicAuth($clientId, $clientSecret)
+                ->post('https://api.ebay.com/identity/v1/oauth2/token', [
+                    'grant_type' => 'refresh_token',
+                    'refresh_token' => env('EBAY2_REFRESH_TOKEN'),
+                    'scope' => $scope,
+                ]);
+
+            if ($response->successful()) {
+                Log::error('eBay2 token', ['response' => 'Token generated!']);
+                $token = $response->json()['access_token'];
+                
+                $sellerResponse = Http::withToken($token)->get('https://api.ebay.com/sell/account/v1/seller');
+                Log::info('eBay2 Seller info', $sellerResponse->json());
+                
+                return $token;
+            }
+
+            Log::error('eBay2 token refresh error', ['response' => $response->json()]);
+        } catch (\Exception $e) {
+            Log::error('eBay2 token refresh exception: ' . $e->getMessage());
+        }
+
+        return null;
+    }
+
+
+    public function getRateLimit()
+    {
+        $token = $this->generateEbayToken();
+        if (!$token) {
+            return null;
+        }
+
+        try {
+            $response = Http::withToken($token)->get('https://api.ebay.com/developer/analytics/v1_beta/rate_limit/');
+            if ($response->successful()) {
+                return $response->json();
+            }
+        } catch (\Exception $e) {
+            Log::error('eBay2 getRateLimit exception: ' . $e->getMessage());
+        }
+
+        return null;
+    }
+
+
+
 }

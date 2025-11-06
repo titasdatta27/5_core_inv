@@ -1515,35 +1515,6 @@
                                         </div>
                                     </th>
 
-                                    <th data-field="ebay3l30" style="vertical-align: middle; white-space: nowrap;">
-                                        <div class="d-flex flex-column align-items-center" style="gap: 4px">
-                                            <div class="d-flex align-items-center">
-                                                EL 30 <span class="sort-arrow">↓</span>
-                                            </div>
-                                            <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
-                                            <div class="metric-total" id="el30-total">0</div>
-                                        </div>
-                                    </th>
-
-                                    <th data-field="price" style="vertical-align: middle; white-space: nowrap;">
-                                        <div class="d-flex flex-column align-items-center" style="gap: 4px">
-                                            <div class="d-flex align-items-center">
-                                                PRICE <span class="sort-arrow">↓</span>
-                                            </div>
-                                            <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
-                                            <div class="metric-total" id="price-total">0</div>
-                                        </div>
-                                    </th>
-
-                                    <th data-field="salesTotal" style="vertical-align: middle; white-space: nowrap;">
-                                        <div class="d-flex flex-column align-items-center" style="gap: 4px">
-                                            <div class="d-flex align-items-center">
-                                                TOTAL SALES <span class="sort-arrow">↓</span>
-                                            </div>
-                                            <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
-                                            <div class="metric-total" id="sales-total">0</div>
-                                        </div>
-                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -2232,8 +2203,6 @@
                                     NR: item.NR !== undefined ? item.NR : '',
                                     listed: listedVal,
                                     live: liveVal,
-                                    'eBay L30': item['eBay L30'] || 0,
-                                    'eBay Price': item['eBay Price'] || 0,
                                 };
                             });
 
@@ -2454,9 +2423,6 @@
 
                     $row.append($('<td>').append($liveCb));
 
-                    $row.append($('<td>').text(item['eBay L30']));    
-                    $row.append($('<td>').html('$'+item['eBay Price'])); 
-                    $row.append($('<td>').html( parseFloat(item['eBay Price']) * parseFloat(item['eBay L30']) ));
 
                     $tbody.append($row);
                 });
@@ -3806,10 +3772,7 @@
                         totalSalesL30Sum: 0,
                         totalCogsSum: 0,
                         listedCount: 0,
-                        liveCount: 0,
-                        el30Total2: 0,
-                        priceTotal: 0,
-                        salesTotal: 0,
+                        liveCount: 0
                     };
 
                     filteredData.forEach(item => {
@@ -3870,11 +3833,6 @@
                             metrics.totalSalesL30Sum += parseFloat(item['T Sales L30']) || 0;
                             metrics.totalCogsSum += parseFloat(item.COGS) || 0;
                         }
-
-                        metrics.el30Total2 += parseFloat(item['eBay L30']) || 0;
-                        metrics.priceTotal += parseFloat(item['eBay Price']) || 0;
-                        metrics.salesTotal += ((parseFloat(item['eBay L30']) || 0) * (parseFloat(item['eBay Price']) || 0));
-
                     });
 
                     metrics.ovDilTotal = metrics.invTotal > 0 ?
@@ -3890,21 +3848,6 @@
                     $('#views-total').text(metrics.viewsTotal.toLocaleString());
                     $('#listed-total').text(metrics.listedCount.toLocaleString());
                     $('#live-total').text(metrics.liveCount.toLocaleString());
-                    $('#el30-total').text(metrics.el30Total2.toLocaleString());
-                    $('#price-total').text(metrics.priceTotal.toLocaleString());
-                    $('#sales-total').text(metrics.salesTotal.toLocaleString());
-
-                    $.ajax({
-                        url: "{{ route('adv-ebay3.total-sale.save-data') }}",
-                        method: 'GET',
-                        data: {
-                            salesTotal: metrics.salesTotal                        
-                        },
-                        success: function(response) {
-                        },
-                        error: function(xhr) {
-                        }
-                    });
 
 
                     // --- Custom PFT TOTAL calculation ---

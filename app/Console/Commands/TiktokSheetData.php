@@ -2,11 +2,11 @@
 
 namespace App\Console\Commands;
 
+use App\Http\Controllers\ApiController;
 use App\Models\TiktokSheet;
-use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class TiktokSheetData extends Command
 {
@@ -15,7 +15,7 @@ class TiktokSheetData extends Command
      *
      * @var string
      */
-    protected $signature = 'sync:tiktok-sheet-data';
+   protected $signature = 'sync:tiktok-sheet-data';
 
     /**
      * The console command description.
@@ -29,378 +29,182 @@ class TiktokSheetData extends Command
      */
     public function handle()
     {
-        $url = 'https://script.google.com/macros/s/AKfycbzRCPSyZt1sRoEODQhg6YjvPyyMTNeXfW_z--xS3QQ1dLEnKYLm70l5ut4q8VzsuQaD/exec';
+        $url = 'https://script.google.com/macros/s/AKfycbyj1Z0xGDKHOWZvqj1fdnBi02abq67NzwBc7fj0XckA9O3zGbZOyHnLLDXuOPnTLC3E/exec';
 
         try {
-            $response = Http::timeout(120)->get($url);
-
-            if (! $response->successful()) {
-                $this->error('Failed to fetch data. Status: '.$response->status());
-
+            $response = Http::timeout(seconds: 120)->get($url);
+            if ($response->successful()) {
+                $data = $response->json();
+                $this->info('Fetched data: ' . json_encode($data));
+                $rows = collect($data['data'] ?? $data ?? []);
+                $this->info('Rows count: ' . $rows->count());
+            } else {
+                $this->error('Failed to fetch data from Google Sheet. Status: ' . $response->status());
                 return;
             }
-
-            $rows = collect($response->json());   // ✅ Direct array parsing
-            $this->info('Rows count: '.$rows->count());
-
         } catch (\Exception $e) {
-            $this->error('Exception while fetching data: '.$e->getMessage());
-
+            $this->error('Exception while fetching data: ' . $e->getMessage());
             return;
         }
 
         foreach ($rows as $row) {
-
-            $sku = trim($row['childSku'] ?? '');
-            if (! $sku) {
-                continue;
-            }
+            $sku = trim($row['SKU'] ?? '');
+            if (!$sku) continue;
 
             TiktokSheet::updateOrCreate(
                 ['sku' => $sku],
                 [
-                    'price' => $this->toDecimalOrNull($row['price'] ?? null),
-                    'l30' => $this->toIntOrNull($row['l30'] ?? null),
-                    'l60' => $this->toIntOrNull($row['l60'] ?? null),
-                    'views' => $this->toDecimalOrNull($row['views'] ?? null),
+                    'price'     => $this->toDecimalOrNull($row['live price '] ?? null),
+                    'l30'       => $this->toIntOrNull($row['TL30'] ?? null),
+                    'l60'       => $this->toIntOrNull($row['TL60'] ?? null),
+                    'views'       => $this->toDecimalOrNull($row['P Views'] ?? null),
+                   
                 ]
             );
         }
 
-        $this->info('✅ TikTok sheet synced successfully!');
+        $this->info('tiktok sheet data synced successfully!');
 
+        // Fetch L30 and L60 from Shopify for TikTok SKUs
         $this->fetchShopifyTiktokData();
     }
 
     private function fetchShopifyTiktokData()
     {
-        $this->info('Fetching Shopify TikTok L30/L60 (robust mode)...');
+        $this->info('Fetching Shopify data for TikTok L30/L60...');
 
-        // Use UTC everywhere for consistent comparisons
-        $now = Carbon::now('UTC');
+        $now = Carbon::now();
         $sixtyDaysAgo = $now->copy()->subDays(60);
         $thirtyDaysAgo = $now->copy()->subDays(30);
 
-        $skuCountsL60 = [];
-        $skuCountsL30 = [];
-        $skuPrices = []; // ['SKU' => ['price' => float, 'date' => Carbon]]
-
-        $baseUrl = 'https://'.env('SHOPIFY_STORE_URL').'/admin/api/2024-10/orders.json';
-
-        // initial params: use created_at_min to restrict to last 60 days (server side)
+        $baseUrl = "https://" . env('SHOPIFY_STORE_URL') . "/admin/api/2024-10/orders.json";
         $params = [
             'status' => 'any',
-            'limit' => 250,
-            'created_at_min' => $sixtyDaysAgo->toIsoString(),
-            'created_at_max' => $now->toIsoString(),
+            'created_at_min' => $sixtyDaysAgo->toISOString(),
+            'created_at_max' => $now->toISOString(),
+            'limit' => 250 
         ];
 
-        // Start with first URL
-        $nextUrl = $baseUrl.'?'.http_build_query($params);
+        $allOrders = [];
         $page = 1;
 
-        $totalOrdersSeen = 0;
-        $tiktokOrdersSeen = 0;
+        do {
+            $url = $baseUrl . '?' . http_build_query($params);
 
-        while ($nextUrl) {
-            $this->info("Requesting page {$page} → {$nextUrl}");
-
-            // perform request with retry/backoff
-            $response = $this->shopifyGetWithRetry($nextUrl, 5);
-
-            if (! $response) {
-                $this->error("Failed all retries for {$nextUrl}");
-                break;
-            }
-
-            // handle rate-limit status just in case
-            if ($response->status() == 429) {
-                $this->warn("Rate limited on page {$page}; sleeping 2s and retrying");
-                sleep(2);
-
-                continue;
-            }
+            $response = Http::withHeaders([
+                'X-Shopify-Access-Token' => env('SHOPIFY_ACCESS_TOKEN')
+            ])->get($url);
 
             if ($response->failed()) {
-                $this->error('Shopify request failed: '.$response->body());
-                break;
+                $this->error('Failed to fetch Shopify orders: ' . $response->body());
+                return;
             }
 
             $data = $response->json();
             $orders = $data['orders'] ?? [];
+            $allOrders = array_merge($allOrders, $orders);
 
-            $this->info("Page {$page} fetched: ".count($orders).' orders');
-            $totalOrdersSeen += count($orders);
+            $this->info("Fetched page {$page}: " . count($orders) . " orders");
 
-            foreach ($orders as $order) {
-                // parse created_at in UTC
-                try {
-                    $createdAt = Carbon::parse($order['created_at'])->setTimezone('UTC');
-                } catch (\Exception $e) {
-                    // skip malformed dates
-                    $this->warn('Skipping order with invalid date: '.($order['id'] ?? 'unknown'));
-
-                    continue;
-                }
-
-                // More robust TikTok detection:
-                // - source_name contains 'tiktok'
-                // - OR app_id matches env TIKTOK_APP_ID (if set)
-                // - OR source_identifier contains 'tiktok'
-                // - OR tags contain 'tiktok'
-                $sourceName = strtolower($order['source_name'] ?? '');
-                $sourceIdentifier = strtolower($order['source_identifier'] ?? '');
-                $appId = $order['app_id'] ?? null;
-                $envTiktokAppId = env('TIKTOK_APP_ID');
-                
-                // Handle tags - can be array or string
-                $tagsRaw = $order['tags'] ?? null;
-                $tags = '';
-                if (is_array($tagsRaw)) {
-                    $tags = strtolower(implode(' ', $tagsRaw));
-                } elseif (is_string($tagsRaw)) {
-                    $tags = strtolower($tagsRaw);
-                }
-
-                $isTiktok = false;
-                if ($sourceName && str_contains($sourceName, 'tiktok')) {
-                    $isTiktok = true;
-                } elseif ($sourceIdentifier && str_contains($sourceIdentifier, 'tiktok')) {
-                    $isTiktok = true;
-                } elseif ($tags && str_contains($tags, 'tiktok')) {
-                    $isTiktok = true;
-                } elseif ($envTiktokAppId && $appId && (string) $appId === (string) $envTiktokAppId) {
-                    $isTiktok = true;
-                }
-
-                if (! $isTiktok) {
-                    continue;
-                }
-
-                $tiktokOrdersSeen++;
-
-                // iterate line items
-                foreach ($order['line_items'] as $item) {
-                    $sku = trim($item['sku'] ?? '');
-                    if (! $sku) {
-                        continue;
-                    }
-
-                    // Normalize SKU: trim, normalize spaces (multiple spaces -> single space), uppercase
-                    $sku = preg_replace('/\s+/', ' ', trim($sku));
-                    $sku = strtoupper($sku);
-
-                    // Prefer `quantity` (official) then fallback to `current_quantity`
-                    $quantity = 0;
-                    if (isset($item['quantity']) && is_numeric($item['quantity'])) {
-                        $quantity = (int) $item['quantity'];
-                    } elseif (isset($item['current_quantity']) && is_numeric($item['current_quantity'])) {
-                        $quantity = (int) $item['current_quantity'];
-                    }
-
-                    // Skip if quantity is 0 or negative
-                    if ($quantity <= 0) {
-                        continue;
-                    }
-
-                    // price might be string — cast to float
-                    $price = isset($item['price']) ? (float) $item['price'] : null;
-
-                    // Count L60 / L30 based on createdAt (both in UTC)
-                    // Note: Orders in last 30 days should be counted in both L30 and L60
-                    if ($createdAt->greaterThanOrEqualTo($sixtyDaysAgo)) {
-                        $skuCountsL60[$sku] = ($skuCountsL60[$sku] ?? 0) + $quantity;
-                    }
-
-                    if ($createdAt->greaterThanOrEqualTo($thirtyDaysAgo)) {
-                        $skuCountsL30[$sku] = ($skuCountsL30[$sku] ?? 0) + $quantity;
-                    }
-
-                    // Track latest price by createdAt (prefer most recent)
-                    if ($price !== null && $price > 0) {
-                        if (! isset($skuPrices[$sku]) || $createdAt->greaterThan($skuPrices[$sku]['date'])) {
-                            $skuPrices[$sku] = [
-                                'price' => $price,
-                                'date' => $createdAt,
-                            ];
-                        }
-                    }
-                } // end line_items
-            } // end orders
-
-            // Next page via Link header
+            // Check for next page
             $linkHeader = $response->header('Link');
             $nextUrl = $this->getNextPageUrl($linkHeader);
 
-            // throttle to respect 2 req/sec limit
-            usleep(600000); // 0.6s
-
-            $page++;
-        } // end while
-
-        $this->info("Total orders scanned: {$totalOrdersSeen}");
-        $this->info("Total TikTok orders scanned: {$tiktokOrdersSeen}");
-        $this->info('Unique SKUs L60: '.count($skuCountsL60));
-        $this->info('Unique SKUs L30: '.count($skuCountsL30));
-        $this->info('SKUs with price found: '.count($skuPrices));
-        
-        // ---------- LOG SKU-WISE DATA ----------
-        $this->info('Logging SKU-wise Shopify TikTok data...');
-        
-        // Merge all SKUs
-        $allSkus = array_unique(array_merge(array_keys($skuCountsL60), array_keys($skuCountsL30), array_keys($skuPrices)));
-        
-        // Sort SKUs for better readability
-        sort($allSkus);
-        
-        // Prepare log data
-        $logData = [];
-        $logData[] = "=== Shopify TikTok SKU-wise Orders Data (L30/L60) ===";
-        $logData[] = "Date: ".Carbon::now()->toDateTimeString();
-        $logData[] = "Total Orders Scanned: {$totalOrdersSeen}";
-        $logData[] = "Total TikTok Orders: {$tiktokOrdersSeen}";
-        $logData[] = "Total Unique SKUs: ".count($allSkus);
-        $logData[] = "";
-        $logData[] = "SKU | L30 | L60 | Price";
-        $logData[] = str_repeat('-', 80);
-        
-        foreach ($allSkus as $sku) {
-            $l30 = $skuCountsL30[$sku] ?? 0;
-            $l60 = $skuCountsL60[$sku] ?? 0;
-            $price = isset($skuPrices[$sku]) ? $skuPrices[$sku]['price'] : 'N/A';
-            
-            $logData[] = sprintf("%-40s | %5d | %5d | %s", $sku, $l30, $l60, $price);
-            
-            // Also output to console for important SKUs (non-zero counts)
-            if ($l30 > 0 || $l60 > 0) {
-                $this->line("SKU: {$sku} | L30: {$l30} | L60: {$l60} | Price: {$price}");
-            }
-        }
-        
-        $logData[] = "";
-        $logData[] = "=== End of SKU Data ===";
-        
-        // Write to log file
-        $logMessage = implode("\n", $logData);
-        Log::info($logMessage);
-        
-        // Also write to a dedicated file for easier access
-        $logFile = storage_path('logs/shopify_tiktok_sku_data.log');
-        file_put_contents($logFile, $logMessage."\n\n", FILE_APPEND);
-        
-        $this->info("SKU data logged to: {$logFile}");
-        
-        // Debug: Check specific SKU if mentioned
-        $debugSku = 'SP 12120 8OHMS';
-        $normalizedDebugSku = strtoupper(preg_replace('/\s+/', ' ', trim($debugSku)));
-        if (isset($skuCountsL30[$normalizedDebugSku])) {
-            $this->info("DEBUG: Found SKU '{$debugSku}' (normalized: '{$normalizedDebugSku}') with L30: ".($skuCountsL30[$normalizedDebugSku] ?? 0).", L60: ".($skuCountsL60[$normalizedDebugSku] ?? 0));
-        } else {
-            $this->warn("DEBUG: SKU '{$debugSku}' (normalized: '{$normalizedDebugSku}') NOT found in counts");
-        }
-
-        // ---------- DB UPDATES ----------
-        // Merge all SKUs that need to be updated (from counts or prices)
-        $allSkusToUpdate = array_unique(array_merge(array_keys($skuCountsL60), array_keys($skuCountsL30), array_keys($skuPrices)));
-        
-        // Get all SKUs from database and create a normalized map (normalized SKU -> actual DB SKU)
-        $allDbSkus = TiktokSheet::pluck('sku')->toArray();
-        $skuNormalizedMap = [];
-        foreach ($allDbSkus as $dbSku) {
-            $normalized = strtoupper(preg_replace('/\s+/', ' ', trim($dbSku)));
-            $skuNormalizedMap[$normalized] = $dbSku; // Store original SKU for exact update
-        }
-        
-        $updatedCount = 0;
-        $notFoundSkus = [];
-        
-        foreach ($allSkusToUpdate as $sku) {
-            $updateData = [];
-            
-            // Update price if available
-            if (isset($skuPrices[$sku])) {
-                $updateData['shopify_tiktok_price'] = $skuPrices[$sku]['price'];
-            }
-            
-            // Update L60 count (always set, even if 0)
-            $updateData['shopify_tiktokl60'] = $skuCountsL60[$sku] ?? 0;
-            
-            // Update L30 count (always set, even if 0)
-            $updateData['shopify_tiktokl30'] = $skuCountsL30[$sku] ?? 0;
-            
-            // Normalize SKU for matching (already normalized in processing, but ensure consistency)
-            $normalizedSku = strtoupper(preg_replace('/\s+/', ' ', trim($sku)));
-            
-            // Find matching DB SKU using normalized map
-            if (isset($skuNormalizedMap[$normalizedSku])) {
-                // Use exact DB SKU for update
-                $dbSku = $skuNormalizedMap[$normalizedSku];
-                $affected = TiktokSheet::where('sku', $dbSku)->update($updateData);
-                
-                if ($affected > 0) {
-                    $updatedCount++;
-                }
+            if ($nextUrl) {
+                // Extract query params from next URL
+                $parsedUrl = parse_url($nextUrl);
+                parse_str($parsedUrl['query'], $params);
+                $page++;
             } else {
-                // SKU not found in database - log for debugging
-                $notFoundSkus[] = $sku;
+                break;
             }
-        }
-        
-        if (!empty($notFoundSkus)) {
-            $this->warn('SKUs not found in database (may need to be added first): '.implode(', ', array_slice($notFoundSkus, 0, 10)));
-            if (count($notFoundSkus) > 10) {
-                $this->warn('... and '. (count($notFoundSkus) - 10) .' more');
-            }
-        }
+        } while (true);
 
-        $this->info("Updated {$updatedCount} SKUs with Shopify TikTok data.");
-        $this->info('✅ Shopify TikTok L30/L60 sync completed.');
-    }
+        $this->info('Total orders fetched: ' . count($allOrders));
 
-    private function shopifyGetWithRetry(string $url, int $maxAttempts = 5)
-    {
-        $attempt = 0;
-        $delay = 500000; // microseconds initial delay (0.5s)
+        $skuCountsL60 = [];
+        $skuCountsL30 = [];
+        $skuPrices = [];
+        $totalItems = 0;
+        $tiktokItems = 0;
+        $tiktokOrders = 0;
+        $totalOrders = count($allOrders);
 
-        while ($attempt < $maxAttempts) {
-            try {
-                $attempt++;
-                $response = Http::withHeaders([
-                    'X-Shopify-Access-Token' => env('SHOPIFY_ACCESS_TOKEN'),
-                ])->get($url);
+        foreach ($allOrders as $order) {
+            $createdAt = Carbon::parse($order['created_at']);
+            $sourceName = $order['source_name'] ?? null;
+            
+            // Only process TikTok orders
+            if (strtolower($sourceName) === 'tiktok') {
+                $tiktokOrders++;
+                
+                foreach ($order['line_items'] as $item) {
+                    $sku = $item['sku'] ?? null;
+                    $totalItems++;
+                    
+                    if ($sku) {
+                        $tiktokItems++;
+                        $quantity = $item['current_quantity'] ?? 0;
+                        $price = $item['price'] ?? 0;
 
-                // If 429 — wait and retry
-                if ($response->status() == 429) {
-                    usleep($delay * 3); // longer backoff on 429
-                    $delay *= 2;
+                        if ($createdAt >= $sixtyDaysAgo) {
+                            $skuCountsL60[$sku] = ($skuCountsL60[$sku] ?? 0) + $quantity;
+                        }
 
-                    continue;
+                        if ($createdAt >= $thirtyDaysAgo) {
+                            $skuCountsL30[$sku] = ($skuCountsL30[$sku] ?? 0) + $quantity;
+                        }
+
+                        // Track the latest price for each SKU
+                        if (!isset($skuPrices[$sku]) || $createdAt > $skuPrices[$sku]['date']) {
+                            $skuPrices[$sku] = [
+                                'price' => $price,
+                                'date' => $createdAt
+                            ];
+                        }
+                    }
                 }
-
-                // For 500-range errors, do exponential backoff and retry
-                if ($response->serverError()) {
-                    usleep($delay);
-                    $delay *= 2;
-
-                    continue;
-                }
-
-                return $response;
-            } catch (\Throwable $e) {
-                // network/timeout issues — backoff and retry
-                usleep($delay);
-                $delay *= 2;
-
-                continue;
             }
         }
 
-        return null;
+        $this->info("Total orders processed: {$totalOrders}");
+        $this->info("TikTok orders found: {$tiktokOrders}");
+        $this->info("Non-TikTok orders filtered: " . ($totalOrders - $tiktokOrders));
+        $this->info("Total line items in TikTok orders: {$totalItems}");
+        $this->info("TikTok items with SKUs: {$tiktokItems}");
+
+        // Update TiktokSheet with the counts and prices - for SKUs that have prices
+        foreach ($skuPrices as $sku => $priceData) {
+            $updateData = [
+                'shopify_tiktok_price' => $priceData['price'],
+            ];
+
+            // Only add L30/L60 if they exist for this SKU
+            if (isset($skuCountsL60[$sku])) {
+                $updateData['shopify_tiktokl60'] = $skuCountsL60[$sku];
+                $updateData['shopify_tiktokl30'] = $skuCountsL30[$sku] ?? 0;
+            }
+
+            TiktokSheet::where('sku', $sku)->update($updateData);
+        }
+
+        // Update L30/L60 for all SKUs that have sales data but no prices
+        foreach ($skuCountsL60 as $sku => $l60) {
+            if (!isset($skuPrices[$sku])) {
+                $updateData = [
+                    'shopify_tiktokl60' => $l60,
+                    'shopify_tiktokl30' => $skuCountsL30[$sku] ?? 0,
+                ];
+                TiktokSheet::where('sku', $sku)->update($updateData);
+            }
+        }
+
+        $this->info('Shopify TikTok data updated successfully!');
     }
 
     private function getNextPageUrl($linkHeader)
     {
-        if (! $linkHeader) {
+        if (!$linkHeader) {
             return null;
         }
 
@@ -409,7 +213,6 @@ class TiktokSheetData extends Command
         foreach ($links as $link) {
             if (strpos($link, 'rel="next"') !== false) {
                 preg_match('/<([^>]+)>/', $link, $matches);
-
                 return $matches[1] ?? null;
             }
         }
@@ -419,24 +222,15 @@ class TiktokSheetData extends Command
 
     private function toDecimalOrNull($value)
     {
-        if ($value === null || $value === '') {
-            return null;
-        }
-        if (! is_numeric($value)) {
-            return null;
-        }
-
-        return (string) $value; // Keep as string to preserve exact decimal representation
+        if ($value === null || $value === '') return null;
+        if (!is_numeric($value)) return null;
+        return (string)$value; // Keep as string to preserve exact decimal representation
     }
 
     private function toIntOrNull($value)
     {
-        if ($value === null || $value === '') {
-            return null;
-        }
+        if ($value === null || $value === '') return null;
         $value = str_replace(',', '', $value);
-
-        return is_numeric($value) ? (int) $value : null;
+        return is_numeric($value) ? (int)$value : null;
     }
-
 }

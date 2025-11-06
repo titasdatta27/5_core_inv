@@ -2,8 +2,7 @@
 
 @section('css')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('assets/css/styles.css') }}">
     <style>
         #image-hover-preview {
@@ -294,8 +293,6 @@
             border: none;
             border-radius: 8px;
         }
-
-        /* (Removed resizable styles per request) */
 
         .modal-header.bg-gradient {
             background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
@@ -670,23 +667,6 @@
                         </div>
                     </div>
                 </div>
-    
-                            <!-- LMP Data Modal -->
-                            <div class="modal fade" id="lmpDataModal" tabindex="-1" aria-labelledby="lmpDataModalLabel" aria-hidden="true">
-                                <div class="modal-dialog modal-lg">
-                                    <div class="modal-content">
-                                        <div class="modal-header bg-gradient">
-                                            <h5 class="modal-title" id="lmpDataModalLabel">LMP History</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <div id="lmpDataContent">
-                                                <!-- Rows inserted via JS -->
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
             </div>
         </div>
     </div>
@@ -917,7 +897,7 @@
        
             const ebay3Profit = data.ebay3_price ? ((parseFloat(data.ebay3_price) * 0.71) - LP - SHIP) * (parseFloat(data
                 .ebay3_l30) || 0) : 0;
-            const ebay2Profit = data.ebay2_price ? ((parseFloat(data.ebay2_price) * 0.80) - LP - (parseFloat(data.ebay2_ship) || SHIP)) * (parseFloat(data
+            const ebay2Profit = data.ebay2_price ? ((parseFloat(data.ebay2_price) * 0.80) - LP - SHIP) * (parseFloat(data
                 .ebay2_l30) || 0) : 0;
             const walmartProfit = data.walmart_price ? ((parseFloat(data.walmart_price) * 0.80) - LP - SHIP) * (parseFloat(
                 data.walmart_l30) || 0) : 0;
@@ -928,7 +908,7 @@
             const tiendamiaProfit = data.tiendamia_price ? ((parseFloat(data.tiendamia_price) * 0.83) - LP - SHIP) * (parseFloat(data
                 .tiendamia_l30) || 0) : 0;
 
-            const tiktokProfit = data.tiktok_price ? ((parseFloat(data.tiktok_price) * 0.80) - LP - SHIP) * (parseFloat(data
+            const tiktokProfit = data.tiktok_price ? ((parseFloat(data.tiktok_price) * 0.64) - LP - SHIP) * (parseFloat(data
                 .tiktok_l30) || 0) : 0;
 
             const aliexpressProfit = data.aliexpress_price ? ((parseFloat(data.aliexpress_price) * 0.89) - LP - SHIP) * (parseFloat(data
@@ -956,12 +936,12 @@
                 { name: "doba", price: data.doba_price, l30: data.doba_l30, percent: 0.95 },
                 { name: "temu", price: data.temu_price, l30: data.temu_l30, percent: 0.87 }, // 👈 Temu special case
                 { name: "ebay3", price: data.ebay3_price, l30: data.ebay3_l30, percent: 0.72 },
-                { name: "ebay2", price: data.ebay2_price, l30: data.ebay2_l30, percent: 0.80, ship: data.ebay2_ship },
+                { name: "ebay2", price: data.ebay2_price, l30: data.ebay2_l30, percent: 0.80 },
                 { name: "walmart", price: data.walmart_price, l30: data.walmart_l30, percent: 0.89 },
                 { name: "shein", price: data.shein_price, l30: data.shein_l30, percent: 0.89 },
                 { name: "tiendamia", price: data.tiendamia_price, l30: data.tiendamia_l30, percent: 0.83 },
                 { name: "bestbuy", price: data.bestbuy_price, l30: data.bestbuy_l30, percent: 0.80 },
-                { name: "tiktok", price: data.tiktok_price, l30: data.tiktok_l30, percent: 0.80 },
+                { name: "tiktok", price: data.tiktok_price, l30: data.tiktok_l30, percent: 0.64 },
                 { name: "aliexpress", price: data.aliexpress_price, l30: data.aliexpress_l30, percent: 0.89 }
             ];
 
@@ -972,7 +952,7 @@
                 const price = parseFloat(mp.price) || 0;
                 const l30 = parseFloat(mp.l30) || 0;
                 if (price && l30) {
-                    const shippingCost = mp.name === "temu" ? temuship : (mp.ship ? parseFloat(mp.ship) : SHIP);
+                    const shippingCost = mp.name === "temu" ? temuship : SHIP;
 
                     totalProfit += ((price * mp.percent) - LP - shippingCost) * l30;
                     totalRevenue += price * l30;
@@ -1156,23 +1136,8 @@
                     field: "shopifyb2c_image",
                     formatter: function(cell) {
                         const value = cell.getValue();
-                        const rowData = cell.getRow().getData();
-                        const sku = rowData.SKU;
-                        const imageUrl = rowData.image_url;
-
-                        // Priority: 1) Shopify image, 2) Product Master image_url, 3) Input field
-                        if (value) {
-                            // Show Shopify image
-                            return `<img src="${value}" width="40" height="40" class="product-thumb" onmouseover="showImagePreview(this)" onmouseout="hideImagePreview()" style="cursor: pointer">`;
-                        } else if (imageUrl) {
-                            // Show Product Master image_url
-                            return `<img src="${imageUrl}" width="40" height="40" class="product-thumb" onmouseover="showImagePreview(this)" onmouseout="hideImagePreview()" style="cursor: pointer">`;
-                        } else {
-                            // Show input field for URL when no image exists
-                            return `<input type="text" class="form-control form-control-sm image-url-input"
-                                placeholder="Enter image URL" data-sku="${sku}"
-                                style="width: 120px; font-size: 11px;">`;
-                        }
+                        if (!value) return "";
+                        return `<img src="${value}" width="40" height="40" class="product-thumb" onmouseover="showImagePreview(this)" onmouseout="hideImagePreview()" style="cursor: pointer">`;
                     },
                     headerSort: false,
                     width: 70,
@@ -1508,12 +1473,12 @@
                         const dobaProfit = ((dobaPrice * 0.95) - LP - SHIP) ;
                         const temuProfit = ((temuPrice * 0.87) - LP - temuship) ;
                         const ebay3Profit = ((ebay3Price * 0.71) - LP - SHIP);
-                        const ebay2Profit = ((ebay2Price * 0.80) - LP - (parseFloat(data.ebay2_ship) || SHIP)) ;
+                        const ebay2Profit = ((ebay2Price * 0.80) - LP - SHIP) ;
                         const walmartProfit = ((walmartPrice * 0.80) - LP - SHIP) ;
                         const sheinProfit = ((sheinPrice * 0.89) - LP - SHIP) ;
                         const bestbuyProfit = ((bestbuyPrice * 0.80) - LP - SHIP) ;
                         const tiendamiaProfit = ((tiendamiaPrice * 0.83) - LP - SHIP) ;
-                        const tiktokProfit = ((tiktokPrice * 0.80) - LP - SHIP) ;
+                        const tiktokProfit = ((tiktokPrice * 0.64) - LP - SHIP) ;
                         const aliexpressProfit = ((aliexpressPrice * 0.89) - LP - SHIP) ;
 
  
@@ -1668,12 +1633,12 @@
                             const dobaProfit    = data.doba_price       ? ((parseFloat(data.doba_price) * 0.95) - LP - SHIP) * dobaL30 : 0;
                             const temuProfit    = data.temu_price       ? ((parseFloat(data.temu_price) * 0.87) - LP - temuship) * temuL30 : 0;
                             const ebay3Profit   = data.ebay3_price      ? ((parseFloat(data.ebay3_price) * 0.71) - LP - SHIP) * ebay3L30 : 0;
-                            const ebay2Profit   = data.ebay2_price      ? ((parseFloat(data.ebay2_price) * 0.80) - LP - (parseFloat(data.ebay2_ship) || SHIP)) * ebay2L30 : 0;
+                            const ebay2Profit   = data.ebay2_price      ? ((parseFloat(data.ebay2_price) * 0.80) - LP - SHIP) * ebay2L30 : 0;
                             const walmartProfit = data.walmart_price    ? ((parseFloat(data.walmart_price) * 0.80) - LP - SHIP) * walmartL30 : 0;
                             const sheinProfit   = data.shein_price      ? ((parseFloat(data.shein_price) * 0.89) - LP - SHIP) * sheinL30 : 0;
                             const bestbuyProfit  = data.bestbuy_price    ? ((parseFloat(data.bestbuy_price) * 0.80) - LP - SHIP) * bestbuyL30 : 0;
                             const tiendamiaProfit = data.tiendamia_price ? ((parseFloat(data.tiendamia_price) * 0.83) - LP - SHIP) * tiendamiaL30 : 0;
-                            const tiktokProfit    = data.tiktok_price    ? ((parseFloat(data.tiktok_price) * 0.80) - LP - SHIP) * tiktokL30 : 0;
+                            const tiktokProfit    = data.tiktok_price    ? ((parseFloat(data.tiktok_price) * 0.64) - LP - SHIP) * tiktokL30 : 0;
                             const aliexpressProfit = data.aliexpress_price ? ((parseFloat(data.aliexpress_price) * 0.89) - LP - SHIP) * aliexpressL30 : 0;
                             // Total profit
                             const totalProfit = amzProfit + ebayProfit + shopifyProfit + macyProfit +
@@ -1952,11 +1917,11 @@
                 { price: parent.doba_price, l30: parent.doba_l30, factor: 0.95 },
                 { price: parent.temu_price, l30: parent.temu_l30, factor: 0.87, ship: parent.temu_ship },
                 { price: parent.ebay3_price, l30: parent.ebay3_l30, factor: 0.71 },
-                { price: parent.ebay2_price, l30: parent.ebay2_l30, factor: 0.80, ship: parent.ebay2_ship },
+                { price: parent.ebay2_price, l30: parent.ebay2_l30, factor: 0.80 },
                 { price: parent.walmart_price, l30: parent.walmart_l30, factor: 0.80 },
                 { price: parent.shein_price, l30: parent.shein_l30, factor: 0.89 },
                 { price: parent.aliexpress_price, l30: parent.aliexpress_l30, factor: 0.89 },
-                { price: parent.tiktok_price, l30: parent.tiktok_price, factor: 0.80 },
+                { price: parent.tiktok_price, l30: parent.tiktok_price, factor: 0.64 },
                 { price: parent.bestbuy_price, l30: parent.bestbuy_price, factor: 0.80 },
                 { price: parent.tiendamia_price, l30: parent.tiendamia_price, factor: 0.83 },
                 { price: parent.aliexpress_price, l30: parent.aliexpress_price, factor: 0.89 }
@@ -2145,18 +2110,8 @@
             return "$" + num.toFixed(2);
         }
 
-        // Copy SKU to clipboard function
-        function copySkuToClipboard(sku) {
-            navigator.clipboard.writeText(sku).then(() => {
-                // SKU copied to clipboard
-            }).catch(err => {
-                console.error('Failed to copy: ', err);
-            });
-        }
-
         // Marketplace table generator
         function buildOVL30Table(data) {
-         
           const rows = [
                 { label: "Amazon", prefix: "amz", logo: "{{ asset('uploads/amazon.png') }}" },
                 { label: "eBay", prefix: "ebay", logo:  "{{ asset('uploads/1.png') }}" },
@@ -2165,12 +2120,6 @@
                 { label: "Reverb", prefix: "reverb", logo: "{{ asset('uploads/reverb.png') }}" },
                 { label: "Temu", prefix: "temu", logo: "{{ asset('uploads/temu.jpeg') }}" },
                 { label: "Walmart", prefix: "walmart", logo: "{{ asset('uploads/walmart.png') }}" },
-                { label: "Wayfair", prefix: "wayfair", logo: "{{ asset('uploads/wayfair.png') }}" },
-                { label: "Mercari WO Ship", prefix: "mercariwoship", logo: "{{ asset('assets/5core.png') }}" },
-                { label: "Mercari W Ship", prefix: "mercariwship", logo: "{{ asset('assets/5core.png') }}" },
-                { label: "FB Marketplace", prefix: "fbmarketplace", logo: "{{ asset('assets/5core.png') }}" },
-                { label: "Business 5Core", prefix: "business5core", logo: "{{ asset('assets/5core.png') }}" },
-                { label: "PLS", prefix: "pls", logo: "{{ asset('assets/5core.png') }}" },
                 { label: "eBay2", prefix: "ebay2", logo: "{{ asset('uploads/2.png') }}" },
                 { label: "eBay3", prefix: "ebay3", logo: "{{ asset('uploads/3.png') }}" },
                 { label: "Shopify B2C", prefix: "shopifyb2c", logo: "{{ asset('uploads/shopify.png') }}" },
@@ -2223,7 +2172,7 @@
                 const hasAny = price != null || l30 != null || l60 != null || pft != null || roi != null;
                 if (!hasAny) return;
 
-                const getColor = (value) => {
+               const getColor = (value) => {
                     // Convert to number and handle percentage values
                     const val = typeof value === 'string' ? parseFloat(value.replace('%', '')) : Number(value);
                     console.log('Color value:', value, 'Parsed:', val); // Debug log
@@ -2232,8 +2181,7 @@
                     if (!isFinite(val) || isNaN(val)) return '#000000'; // default black
                     
                     // Handle percentage ranges
-                    if (val <= 0) return '#ff0000';                     // red for 0 or negative
-                    if (val > 0 && val <= 10) return '#ff0000';         // red (<=10)
+                    if (val >= 0 && val <= 10) return '#ff0000';        // red
                     if (val > 10 && val <= 14) return '#fd7e14';       // orange
                     if (val > 14 && val <= 19) return '#0d6efd';       // blue
                     if (val > 19 && val <= 40) return '#198754';       // green
@@ -2312,30 +2260,6 @@
                                     ${data.aliexpress_seller_link ? `<div><strong>SL:</strong> <a href="${data.aliexpress_seller_link}" target="_blank" class="text-info">Seller Link</a></div>` : ''}
                                     ${data.aliexpress_buyer_link ? `<div><strong>BL:</strong> <a href="${data.aliexpress_buyer_link}" target="_blank" class="text-success">Buyer Link</a></div>` : ''}
                                 ` : ''}
-                                ${r.prefix === 'wayfair' ? `
-                                    ${data.wayfair_seller_link ? `<div><strong>SL:</strong> <a href="${data.wayfair_seller_link}" target="_blank" class="text-info">Seller Link</a></div>` : ''}
-                                    ${data.wayfair_buyer_link ? `<div><strong>BL:</strong> <a href="${data.wayfair_buyer_link}" target="_blank" class="text-success">Buyer Link</a></div>` : ''}
-                                ` : ''}
-                                ${r.prefix === 'fbmarketplace' ? `
-                                    ${data.fbmarketplace_seller_link ? `<div><strong>SL:</strong> <a href="${data.fbmarketplace_seller_link}" target="_blank" class="text-info">Seller Link</a></div>` : ''}
-                                    ${data.fbmarketplace_buyer_link ? `<div><strong>BL:</strong> <a href="${data.fbmarketplace_buyer_link}" target="_blank" class="text-success">Buyer Link</a></div>` : ''}
-                                ` : ''}
-                                ${r.prefix === 'mercariwoship' ? `
-                                    ${data.mercariwoship_seller_link ? `<div><strong>SL:</strong> <a href="${data.mercariwoship_seller_link}" target="_blank" class="text-info">Seller Link</a></div>` : ''}
-                                    ${data.mercariwoship_buyer_link ? `<div><strong>BL:</strong> <a href="${data.mercariwoship_buyer_link}" target="_blank" class="text-success">Buyer Link</a></div>` : ''}
-                                ` : ''}
-                                ${r.prefix === 'mercariwship' ? `
-                                    ${data.mercariwship_seller_link ? `<div><strong>SL:</strong> <a href="${data.mercariwship_seller_link}" target="_blank" class="text-info">Seller Link</a></div>` : ''}
-                                    ${data.mercariwship_buyer_link ? `<div><strong>BL:</strong> <a href="${data.mercariwship_buyer_link}" target="_blank" class="text-success">Buyer Link</a></div>` : ''}
-                                ` : ''}
-                                ${r.prefix === 'business5core' ? `
-                                    ${data.business5core_seller_link ? `<div><strong>SL:</strong> <a href="${data.business5core_seller_link}" target="_blank" class="text-info">Seller Link</a></div>` : ''}
-                                    ${data.business5core_buyer_link ? `<div><strong>BL:</strong> <a href="${data.business5core_buyer_link}" target="_blank" class="text-success">Buyer Link</a></div>` : ''}
-                                ` : ''}
-                                ${r.prefix === 'pls' ? `
-                                    ${data.pls_seller_link ? `<div><strong>SL:</strong> <a href="${data.pls_seller_link}" target="_blank" class="text-info">Seller Link</a></div>` : ''}
-                                    ${data.pls_buyer_link ? `<div><strong>BL:</strong> <a href="${data.pls_buyer_link}" target="_blank" class="text-success">Buyer Link</a></div>` : ''}
-                                ` : ''}
 
                             </div>
                         </div>
@@ -2380,26 +2304,38 @@
                                 : r.prefix === 'shein' ? (data.views_clicks ?? "-")
                                 : r.prefix === 'reverb' ? (data.reverb_views ?? "-")
                                 : r.prefix === 'temu' ? (data.temu_views ?? "-")
-                                : r.prefix === 'wayfair' ? (data.wayfair_views ?? "-")
-                                : r.prefix === 'fbmarketplace' ? (data.fbmarketplace_views ?? "-")
-                                : r.prefix === 'mercariwoship' ? (data.mercariwoship_views ?? "-")
-                                : r.prefix === 'mercariwship' ? (data.mercariwship_views ?? "-")
                                 : r.prefix === 'tiktok' ? (data.tiktok_views ?? "-")
                                 : r.prefix === 'aliexpress' ? (data.aliexpress_views ?? "-")
                                 : "-" }
                         </div>
                     </td>
                     <td>
-                    <div class="value-indicator">
-                    ${(() => {
-                        if (cvr && ['amz','ebay','ebay3','shein','reverb','temu','tiktok','aliexpress'].includes(r.prefix)) {
-                            const val = Number(cvr.value) || 0; // convert to number safely
-                            return `<span style="color: ${cvr.color}">${val.toFixed(1)}%</span>`;
-                        }
-                        return "N/A";
-                    })()} 
-                    </div>
+                        <div class="value-indicator">
+                            ${(() => {
+                                if (r.prefix === 'amz' && cvr) {
+                                    return `<span style="color: ${cvr.color}">${Math.round(cvr.value)}%</span>`;
+                                } else if (r.prefix === 'ebay' && cvr) {
+                                    return `<span style="color: ${cvr.color}">${Math.round(cvr.value)}%</span>`;
+                                } else if (r.prefix === 'ebay3' && cvr) {
+                                    return `<span style="color: ${cvr.color}">${Math.round(cvr.value)}%</span>`;
+                                }
+                                else if (r.prefix === 'shein' && cvr) {
+                                    return `<span style="color: ${cvr.color}">${Math.round(cvr.value)}%</span>`;
+                                } else if (r.prefix === 'reverb' && cvr) {
+                                    return `<span style="color: ${cvr.color}">${Math.round(cvr.value)}%</span>`;
+                                } else if (r.prefix === 'temu' && cvr) {
+                                    return `<span style="color: ${cvr.color}">${Math.round(cvr.value)}%</span>`;
+                                }
+                                else if (r.prefix === 'tiktok' && cvr) {
+                                    return `<span style="color: ${cvr.color}">${Math.round(cvr.value)}%</span>`;
+                                }
+                                else if (r.prefix === 'aliexpress' && cvr) {
+                                    return `<span style="color: ${cvr.color}">${Math.round(cvr.value)}%</span>`;
+                                }
 
+                                return "N/A";
+                            })()} 
+                        </div>
                     </td>
                       <td>
                         <div class="value-indicator">
@@ -2418,47 +2354,13 @@
                     </td>
 
                     <td>
-                        <div class="value-indicator d-flex align-items-center">
-                            ${(() => {
-                                // Only show LMP for specific channels with their rightful sources
-                                if (r.prefix === 'amz') {
-                                    const priceValue = data.price_lmpa;
-                                    const link = data.link_amz;
-                                    if (priceValue && Number(priceValue) > 0) {
-                                        return `
-                                            <div>${fmtMoney(priceValue)}</div>
-                                            ${link ? `<a href="${link}" target="_blank" class="ms-1"><i class=\"bi bi-link\"></i></a>` : ''}
-                                            <button class="btn btn-link btn-sm p-0 ms-2" onclick="event.stopPropagation(); showLmpData('${data.SKU}', 'amz')" title="View LMP History"><i class="fas fa-eye"></i></button>
-                                        `;
-                                    }
-                                    return '-';
-                                }
-                                if (r.prefix === 'ebay') {
-                                    const priceValue = data.ebay_price_lmpa;
-                                    const link = data.link_ebay;
-                                    if (priceValue && Number(priceValue) > 0) {
-                                        return `
-                                            <div>${fmtMoney(priceValue)}</div>
-                                            ${link ? `<a href="${link}" target="_blank" class="ms-1"><i class=\"bi bi-link\"></i></a>` : ''}
-                                            <button class="btn btn-link btn-sm p-0 ms-2" onclick="event.stopPropagation(); showLmpData('${data.SKU}', 'ebay')" title="View LMP History"><i class="fas fa-eye"></i></button>
-                                        `;
-                                    }
-                                    return '-';
-                                }
-                                if (r.prefix === 'shein') {
-                                    const priceValue = data.lmp;
-                                    const link = data.link_shein;
-                                    if (priceValue && Number(priceValue) > 0) {
-                                        return `
-                                            <div>${fmtMoney(priceValue)}</div>
-                                            ${link ? `<a href="${link}" target="_blank" class="ms-1"><i class=\"bi bi-link\"></i></a>` : ''}
-                                        `; // No eye button for Shein (sheet-based, not repricer history)
-                                    }
-                                    return '-';
-                                }
-                                // Other channels: no LMP history shown
-                                return '-';
-                            })()}
+                        <div class="value-indicator">
+                            ${r.prefix === 'amz' ? fmtMoney(data.price_lmpa) 
+                                : r.prefix === 'ebay' ? fmtMoney(data.ebay_price_lmpa) 
+                                : r.prefix === 'shein' ? fmtMoney(data.lmp) 
+                                : r.prefix === 'tiktok' ? fmtMoney(data.tiktok_price_lmpa) 
+                                : r.prefix === 'aliexpress' ? fmtMoney(data.aliexpress_price_lmpa) 
+                                : '-'}
                         </div>
                     </td>
 
@@ -2549,9 +2451,7 @@
                             }
 
                             if (value !== undefined) {
-                                if (value <= 0) {
-                                    textColor = '#ff0000';
-                                } else if (value < 11) {
+                                if (value < 11) {
                                     textColor = '#ff0000';
                                 } else if (value >= 10 && value < 15) {
                                     bgColor = 'yellow';
@@ -2610,9 +2510,7 @@
 
 
                             if (value !== undefined) {
-                                if (value <= 0) {
-                                    textColor = '#ff0000';
-                                } else if (value < 11) {
+                                if (value < 11) {
                                     textColor = '#ff0000';
                                 } else if (value >= 10 && value < 15) {
                                     bgColor = 'yellow';
@@ -2647,9 +2545,6 @@
         function showOVL30Modal(row) {
             const data = row.getData();
             
-            console.log('OVL30 Data:', data);
-            console.log('Link:', data.link);
-            
             // Initialize top push button
             const topPushPrice = document.getElementById('topPushPrice');
             const topPushBtn = document.getElementById('topPushBtn');
@@ -2661,7 +2556,7 @@
             topSaveBtn.dataset.ship = data.SHIP || 0;
             topSaveBtn.dataset.temuShip = data.temu_ship || 0;
             topPushPrice.value = data.shopifyb2c_price || data.ebay_price || data.amz_price || '';
-            document.getElementById('ovl30SkuLabel').innerHTML = `${data.SKU || "0"} <button class="btn btn-sm btn-outline-primary ms-2" onclick="copySkuToClipboard('${data.SKU || "0"}')"><i class="bi bi-clipboard"></i></button>`;     
+            document.getElementById('ovl30SkuLabel').textContent = data.SKU ? `${data.SKU}` : "0";     
             document.getElementById('ovl30InvLabel').textContent = data.INV ? `${data.INV}` : "0"; 
             document.getElementById('ovl30').textContent = data.shopifyb2c_l30 ? `${data.shopifyb2c_l30}` : "0";    
             document.getElementById('total_views').textContent = data.total_views ? `${data.total_views}` : "0";  
@@ -2801,33 +2696,32 @@
             let xOffset = 0;
             let yOffset = 0;
 
-            dialogEl.addEventListener('mousedown', function dragStart(e) {
-                if (!(e.target.closest('.modal-header') && !e.target.closest('button'))) return;
-                e.preventDefault();
-                e.stopPropagation();
-                if (e.target.closest('.modal-header') && !e.target.closest('button')) {
+            dialogEl.addEventListener('mousedown', dragStart);
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', dragEnd);
+
+            function dragStart(e) {
+                if (e.target.closest('.modal-header')) {
                     isDragging = true;
                     initialX = e.clientX - xOffset;
                     initialY = e.clientY - yOffset;
-
-                    const onMove = (me) => {
-                        if (!isDragging) return;
-                        me.preventDefault();
-                        currentX = me.clientX - initialX;
-                        currentY = me.clientY - initialY;
-                        xOffset = currentX;
-                        yOffset = currentY;
-                        dialogEl.style.transform = `translate(${currentX}px, ${currentY}px)`;
-                    };
-                    const onUp = () => {
-                        isDragging = false;
-                        document.removeEventListener('mousemove', onMove);
-                        document.removeEventListener('mouseup', onUp);
-                    };
-                    document.addEventListener('mousemove', onMove);
-                    document.addEventListener('mouseup', onUp);
                 }
-            });
+            }
+
+            function drag(e) {
+                if (isDragging) {
+                    e.preventDefault();
+                    currentX = e.clientX - initialX;
+                    currentY = e.clientY - initialY;
+                    xOffset = currentX;
+                    yOffset = currentY;
+                    dialogEl.style.transform = `translate(${currentX}px, ${currentY}px)`;
+                }
+            }
+
+            function dragEnd() {
+                isDragging = false;
+            }
 
             // Reset position when modal is hidden
             modalEl.addEventListener('hidden.bs.modal', function() {
@@ -2960,27 +2854,24 @@
             header.style.cursor = "move";
 
             header.addEventListener("mousedown", (e) => {
-                e.preventDefault();
-                e.stopPropagation();
                 isDragging = true;
                 const rect = modal.getBoundingClientRect();
                 offsetX = e.clientX - rect.left;
                 offsetY = e.clientY - rect.top;
                 modal.style.position = "absolute";
                 modal.style.margin = "0";
+            });
 
-                const onMove = (me) => {
-                    if (!isDragging) return;
-                    modal.style.left = me.clientX - offsetX + "px";
-                    modal.style.top = me.clientY - offsetY + "px";
-                };
-                const onUp = () => {
-                    isDragging = false;
-                    document.removeEventListener("mousemove", onMove);
-                    document.removeEventListener("mouseup", onUp);
-                };
-                document.addEventListener("mousemove", onMove);
-                document.addEventListener("mouseup", onUp);
+            document.addEventListener("mousemove", (e) => {
+                if (isDragging) {
+                    modal.style.left = e.clientX - offsetX + "px";
+                    modal.style.top = e.clientY - offsetY + "px";
+                }
+            });
+
+
+            document.addEventListener("mouseup", () => {
+                isDragging = false;
             });
 
             // Reset position when modal is closed
@@ -2990,54 +2881,6 @@
                 modal.style.top = "";
                 modal.style.margin = "";
             });
-        });
-
-        // Draggable Modal for LMP Data
-        document.addEventListener("DOMContentLoaded", function () {
-            const lmpModal = document.querySelector("#lmpDataModal .modal-dialog");
-            const lmpHeader = document.querySelector("#lmpDataModal .modal-header");
-
-            if (!lmpModal || !lmpHeader) return;
-
-            let isDragging = false;
-            let offsetX, offsetY;
-
-            lmpHeader.style.cursor = "move";
-
-            lmpHeader.addEventListener("mousedown", (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                isDragging = true;
-                const rect = lmpModal.getBoundingClientRect();
-                offsetX = e.clientX - rect.left;
-                offsetY = e.clientY - rect.top;
-                lmpModal.style.position = "absolute";
-                lmpModal.style.margin = "0";
-
-                const onMove = (me) => {
-                    if (!isDragging) return;
-                    lmpModal.style.left = me.clientX - offsetX + "px";
-                    lmpModal.style.top = me.clientY - offsetY + "px";
-                };
-                const onUp = () => {
-                    isDragging = false;
-                    document.removeEventListener("mousemove", onMove);
-                    document.removeEventListener("mouseup", onUp);
-                };
-                document.addEventListener("mousemove", onMove);
-                document.addEventListener("mouseup", onUp);
-            });
-
-            // Reset position when modal is closed
-            const lmpModalEl = document.getElementById("lmpDataModal");
-            if (lmpModalEl) {
-                lmpModalEl.addEventListener("hidden.bs.modal", function () {
-                    lmpModal.style.position = "";
-                    lmpModal.style.left = "";
-                    lmpModal.style.top = "";
-                    lmpModal.style.margin = "";
-                });
-            }
         });
 
 
@@ -3080,9 +2923,7 @@
                         function getColoredSpan(value) {
                             let textColor, bgColor;
 
-                            if (value <= 0) {
-                                textColor = '#ff0000';
-                            } else if (value < 11) {
+                            if (value < 11) {
                                 textColor = '#ff0000';
                             } else if (value >= 10 && value < 15) {
                                 bgColor = 'yellow';
@@ -3128,9 +2969,6 @@
                 return;
             }
 
-            const $pushBtn = $('#topPushBtn');
-            $pushBtn.prop('disabled', true).css('opacity', '0.6');
-            
             $.ajax({
                 url: '/pricing-master/save-sprice',
                 type: 'POST',
@@ -3146,19 +2984,13 @@
                 success: function(res) {
                     if (res.status === 200) {
                         alert('Price saved to all marketplaces successfully');
-                        // Set a 7-second timer to re-enable the push button
-                        setTimeout(function() {
-                            $pushBtn.prop('disabled', false).css('opacity', '1');
-                        }, 7000);
                     } else {
                         alert('Failed to save price');
-                        $pushBtn.prop('disabled', false).css('opacity', '1');
                     }
                 },
                 error: function(err) {
                     console.error('Error saving price:', err);
                     alert('Error saving price');
-                    $pushBtn.prop('disabled', false).css('opacity', '1');
                 }
             });
         });
@@ -3520,90 +3352,5 @@ function hideTooltip(img) {
         tooltip.style.visibility = 'hidden';
     }
 }
-
-// Show LMP data modal for a SKU - shows all LMP values > 0 sorted desc
-function showLmpData(sku, channel) {
-    if (!sku) return;
-    // Ensure we get table instance
-    const tab = Tabulator.findTable("#forecast-table")[0];
-    if (!tab) {
-        console.warn('Tabulator table not initialized yet');
-        return;
-    }
-
-    // Fetch from backend (repricer): exclude zero, sorted asc
-    $.ajax({
-        url: '/pricing-master/lmp-history',
-        type: 'GET',
-        data: { sku: sku, channel: channel },
-        success: function(res) {
-            let html = '<div class="table-responsive"><table class="table table-sm table-bordered"><thead><tr><th>SKU</th><th>LMP</th><th>Link</th></tr></thead><tbody>';
-            if (!res.success || !res.data || res.data.length === 0) {
-                html += '<tr><td colspan="3" class="text-center">No LMP values found &gt; 0 for this SKU</td></tr>';
-            } else {
-                res.data.forEach(item => {
-                    const price = item.price || 0;
-                    const link = item.link || null;
-                    html += `<tr><td>${sku}</td><td>${fmtMoney(price)}</td><td>${link ? `<a href="${link}" target="_blank"><i class=\"bi bi-link\"></i></a>` : '-'}</td></tr>`;
-                });
-            }
-            html += '</tbody></table></div>';
-
-            const container = document.getElementById('lmpDataContent');
-            if (container) container.innerHTML = html;
-
-            const modalEl = document.getElementById('lmpDataModal');
-            if (modalEl) {
-                const modal = new bootstrap.Modal(modalEl);
-                modal.show();
-            }
-        },
-        error: function() {
-            const container = document.getElementById('lmpDataContent');
-            if (container) container.innerHTML = '<div class="p-2 text-danger">Failed to load LMP history.</div>';
-            const modalEl = document.getElementById('lmpDataModal');
-            if (modalEl) {
-                const modal = new bootstrap.Modal(modalEl);
-                modal.show();
-            }
-        }
-    });
-}
-
-// Handle image URL input blur event
-$(document).on('blur', '.image-url-input', function() {
-    const $input = $(this);
-    const imageUrl = $input.val().trim();
-    const sku = $input.data('sku');
-
-    if (!sku) return;
-
-    // If URL is empty, do nothing
-    if (!imageUrl) return;
-
-    // Save the image URL via AJAX
-    $.ajax({
-        url: '/pricing-master/save-image-url',
-        type: 'POST',
-        data: {
-            _token: $('meta[name="csrf-token"]').attr('content'),
-            sku: sku,
-            image_url: imageUrl
-        },
-        success: function(response) {
-            if (response.success) {
-                // Replace input field with image
-                const imageHtml = `<img src="${imageUrl}" width="40" height="40" class="product-thumb" onmouseover="showImagePreview(this)" onmouseout="hideImagePreview()" style="cursor: pointer">`;
-                $input.replaceWith(imageHtml);
-            } else {
-                alert('Failed to save image URL: ' + (response.message || 'Unknown error'));
-            }
-        },
-        error: function(xhr, status, error) {
-            console.error('Error saving image URL:', error);
-            alert('Error saving image URL. Please try again.');
-        }
-    });
-});
 </script>
 @endsection

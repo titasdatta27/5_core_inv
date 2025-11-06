@@ -570,20 +570,12 @@
 
                     // Inventory filter
                     let invFilterVal = $("#inv-filter").val();
-                    if (invFilterVal) {
-                        const inv = parseFloat(data.INV || 0);
-
-                        if (invFilterVal === "INV_0" && inv !== 0) {
-                            // Show only rows where inventory = 0
-                            return false;
-                        } 
-                        else if (invFilterVal === "OTHERS" && inv === 0) {
-                            // Show only rows where inventory > 0
-                            return false;
-                        } 
-                        else if (invFilterVal === "ALL") {
-                            // Show all — no filter
-                        }
+                    if (!invFilterVal) {
+                        if (parseFloat(data.INV) === 0) return false;
+                    } else if (invFilterVal === "INV_0") {
+                        if (parseFloat(data.INV) !== 0) return false;
+                    } else if (invFilterVal === "OTHERS") {
+                        if (parseFloat(data.INV) === 0) return false;
                     }
 
                     // NR filter (use only data object)

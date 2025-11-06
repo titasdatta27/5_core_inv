@@ -7,7 +7,6 @@ use App\Http\Controllers\ApiController;
 use App\Http\Controllers\ProductMaster\ProductMasterController;
 use App\Http\Controllers\PricingMaster\PricingMasterViewsController;
 use App\Http\Controllers\PurchaseMaster\SupplierRFQController;
-use App\Http\Controllers\MarketingMaster\ZeroVisibilityMasterController;
 
 /*
 |--------------------------------------------------------------------------
@@ -57,16 +56,3 @@ Route::prefix('rfq-form')->group(function() {
     Route::post('/{slug}/submit', [SupplierRFQController::class, 'submitRfqForm'])->name('rfq-form.submit');
     Route::get('/{slug}', [SupplierRFQController::class, 'showRfqForm'])->name('rfq-form.show');
 });
-
-// api for task manager
-Route::get('/l30-total-sales', [ApiController::class, 'l30totalsales']);
-
-// Channel chart data for live pending trends
-Route::get('/channel-chart-data', [ZeroVisibilityMasterController::class, 'getChannelChartData']);
-Route::get('/all-channels-chart-data', [ZeroVisibilityMasterController::class, 'getAllChannelsChartData']);
-Route::post('/save-channel-action', [ZeroVisibilityMasterController::class, 'saveChannelAction']);
-Route::get('/test-channel-data', [ZeroVisibilityMasterController::class, 'testChannelData']);
-
-// TikTok Shop Webhook
-Route::post('/webhooks/tiktok/orders', [\App\Http\Controllers\Api\TiktokWebhookController::class, 'handleOrderWebhook']);
-Route::get('/webhooks/tiktok/test', [\App\Http\Controllers\Api\TiktokWebhookController::class, 'testWebhook']);

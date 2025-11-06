@@ -248,75 +248,23 @@ class WalmartControllerMarket extends Controller
     }
 
     // Save NR value for a SKU
-    // public function saveNrToDatabase(Request $request)
-    // {
-    //     $sku = $request->input('sku');
-    //     $nr = $request->input('nr');
-
-    //     if (!$sku || $nr === null) {
-    //         return response()->json(['error' => 'SKU and nr are required.'], 400);
-    //     }
-
-    //     $dataView = WalmartDataView::firstOrNew(['sku' => $sku]);
-    //     $value = is_array($dataView->value) ? $dataView->value : (json_decode($dataView->value, true) ?: []);
-    //     $value['NR'] = $nr;
-    //     $dataView->value = $value;
-    //     $dataView->save();
-
-    //     return response()->json(['success' => true, 'data' => $dataView]);
-    // }
-
-    // public function saveNrToDatabase(Request $request)
-    // {
-    //     $sku = $request->input('sku');
-    //     $nr = $request->input('nr');
-
-    //     if (!$sku || $nr === null) {
-    //         return response()->json(['error' => 'SKU and nr are required.'], 400);
-    //     }
-
-    //     $dataView = WalmartDataView::firstOrNew(['sku' => $sku]);
-    //     $value = is_array($dataView->value) ? $dataView->value : (json_decode($dataView->value, true) ?: []);
-    //     if ($nr !== null) {
-    //         $value["NR"] = $nr;
-    //     }
-    //     $dataView->value = $value;
-    //     $dataView->save();
-
-    //     return response()->json(['success' => true, 'data' => $dataView]);
-    // }
-
     public function saveNrToDatabase(Request $request)
     {
         $sku = $request->input('sku');
-        $nrValue = $request->input('nr');
+        $nr = $request->input('nr');
 
-        if (empty($sku) || $nrValue === null || $nrValue === '') {
-            return response()->json(['error' => 'SKU and NR are required.'], 400);
+        if (!$sku || $nr === null) {
+            return response()->json(['error' => 'SKU and nr are required.'], 400);
         }
 
         $dataView = WalmartDataView::firstOrNew(['sku' => $sku]);
-        $existingValue = $dataView->value;
-
-        $value = is_array($existingValue)
-            ? $existingValue
-            : (json_decode($existingValue, true) ?: []);
-
-        $value['NR'] = $nrValue;
-
-        // ✅ assign array directly (no json_encode)
+        $value = is_array($dataView->value) ? $dataView->value : (json_decode($dataView->value, true) ?: []);
+        $value['NR'] = $nr;
         $dataView->value = $value;
         $dataView->save();
 
-        return response()->json([
-            'success' => true,
-            'data' => $dataView,
-            'stored_value' => $value
-        ]);
+        return response()->json(['success' => true, 'data' => $dataView]);
     }
-
-
-
 
     public function updateListedLive(Request $request)
     {

@@ -1,4 +1,4 @@
-@extends('layouts.vertical', ['title' => 'Instagram Shop Zero View', 'mode' => $mode ?? '', 'demo' => $demo ?? ''])
+@extends('layouts.vertical', ['title' => 'Doba Zero View', 'mode' => $mode ?? '', 'demo' => $demo ?? ''])
 
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -1009,7 +1009,7 @@
 @endsection
 
 @section('content')
-    @include('layouts.shared/page-title', ['page_title' => 'Instagram Shop Zero View', 'sub_title' => 'Instagram Shop'])
+    @include('layouts.shared/page-title', ['page_title' => 'Doba Zero View', 'sub_title' => 'Doba'])
 
     <div class="row">
         <div class="col-12">
@@ -2131,9 +2131,9 @@
                     if (item.is_parent) {
                         $row.addClass('parent-row');
                     }
-                    // if (item.NR === 'NR') {
-                    //     $row.addClass('nr-hide');
-                    // }
+                    if (item.NR === 'NR') {
+                        $row.addClass('nr-hide');
+                    }
                     // Helper functions for color coding
                     const getDilColor = (value) => {
                         const percent = parseFloat(value) * 100;
@@ -2446,11 +2446,13 @@
                     }
 
                     $.ajax({
-                        url: '/instagram/save-nr',
+                        // url: '/amazon/save-nr',
                         type: 'POST',
                         data: {
                             sku: sku,
-                            nr: { NR: nrValue },
+                            nr: JSON.stringify({
+                                NR: nrValue
+                            }),
                             _token: $('meta[name="csrf-token"]').attr('content') // CSRF protection
                         },
                         success: function(res) {
@@ -2477,7 +2479,6 @@
                     });
                 });
             }
-
 
             window.openModal = function(selectedItem, type) {
                 try {

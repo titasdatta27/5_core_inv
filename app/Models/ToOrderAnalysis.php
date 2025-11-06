@@ -25,7 +25,6 @@ class ToOrderAnalysis extends Model
         'supplier_name',
         'advance_date',
         'order_qty',
-        'auth_user',
     ];
     
     public function supplier()

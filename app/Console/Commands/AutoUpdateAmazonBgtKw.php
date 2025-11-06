@@ -75,9 +75,7 @@ class AutoUpdateAmazonBgtKw extends Command
             $shopify = $shopifyData[$pm->sku] ?? null;
 
             $matchedCampaignL30 = $amazonSpCampaignReportsL30->first(function ($item) use ($sku) {
-                $campaignName = strtoupper(trim(rtrim($item->campaignName, '.')));
-                $cleanSku = strtoupper(trim(rtrim($sku, '.')));
-                return $campaignName === $cleanSku;
+                return strcasecmp(trim($item->campaignName), $sku) === 0;
             });
 
             if (!$matchedCampaignL30) {
@@ -96,17 +94,9 @@ class AutoUpdateAmazonBgtKw extends Command
 
             $row = [];
             $row['campaign_id'] = $matchedCampaignL30->campaign_id ?? '';
-
-            $sales = $matchedCampaignL30->sales30d ?? 0;
-            $spend = $matchedCampaignL30->spend ?? 0;
-
-            if ($sales > 0) {
-                $row['acos_L30'] = round(($spend / $sales) * 100, 2);
-            } elseif ($spend > 0) {
-                $row['acos_L30'] = 100;
-            } else {
-                $row['acos_L30'] = 0;
-            }
+            $row['acos_L30'] = ($matchedCampaignL30 && ($matchedCampaignL30->sales30d ?? 0) > 0)
+                ? round(($matchedCampaignL30->spend / $matchedCampaignL30->sales30d) * 100, 2)
+                : 0;
             
             $tpft = 0;
             if (isset($nrValues[$pm->sku])) {
@@ -120,12 +110,12 @@ class AutoUpdateAmazonBgtKw extends Command
 
             // Basic SBGT
             if ($acos >= 100) $sbgt = 1;
-            elseif ($acos >= 50) $sbgt = 1;
-            elseif ($acos >= 40) $sbgt = 1;
-            elseif ($acos >= 35) $sbgt = 2;
-            elseif ($acos >= 30) $sbgt = 3;
-            elseif ($acos >= 25) $sbgt = 5;
-            elseif ($acos >= 20) $sbgt = 6;
+            elseif ($acos >= 50) $sbgt = 2;
+            elseif ($acos >= 40) $sbgt = 3;
+            elseif ($acos >= 35) $sbgt = 4;
+            elseif ($acos >= 30) $sbgt = 5;
+            elseif ($acos >= 25) $sbgt = 6;
+            elseif ($acos >= 20) $sbgt = 7;
             elseif ($acos >= 15) $sbgt = 8;
             elseif ($acos >= 10) $sbgt = 9;
             elseif ($acos > 0) $sbgt = 10;
@@ -141,12 +131,12 @@ class AutoUpdateAmazonBgtKw extends Command
             }
 
             // Double SBGT ONLY for exact thresholds
-            // if (($dilColor === "red" && $tpft > 18) ||
-            //     ($dilColor === "yellow" && $tpft > 22) ||
-            //     ($dilColor === "green" && $tpft > 26) ||
-            //     ($dilColor === "pink" && $tpft > 30)) {
-            //     $sbgt = $sbgt * 2;
-            // }
+            if (($dilColor === "red" && $tpft > 18) ||
+                ($dilColor === "yellow" && $tpft > 22) ||
+                ($dilColor === "green" && $tpft > 26) ||
+                ($dilColor === "pink" && $tpft > 30)) {
+                $sbgt = $sbgt * 2;
+            }
 
             $row['sbgt'] = $sbgt;
 

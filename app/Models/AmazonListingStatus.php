@@ -9,8 +9,6 @@ class AmazonListingStatus extends Model
 {
     use HasFactory;
 
-    protected $table = 'amazon_listing_statuses';
-
     protected $fillable = ['sku', 'value'];
 
     protected $casts = [

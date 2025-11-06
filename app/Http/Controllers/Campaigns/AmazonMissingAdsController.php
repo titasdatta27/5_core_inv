@@ -7,7 +7,6 @@ use App\Models\AmazonDatasheet;
 use App\Models\AmazonDataView;
 use App\Models\AmazonSpCampaignReport;
 use App\Models\ProductMaster;
-use App\Models\ADVMastersData;
 use App\Models\ShopifySku;
 use Illuminate\Http\Request;
 
@@ -16,11 +15,6 @@ class AmazonMissingAdsController extends Controller
     public function index()
     {
         return view('campaign.amazon-missing-ads');
-    }
-
-    public function getAmzonAdvSaveMissingData(Request $request)
-    {
-        return ADVMastersData::getAmzonAdvSaveMissingDataProceed($request);
     }
 
     public function getAmazonMissingAdsData(Request $request)
@@ -107,9 +101,10 @@ class AmazonMissingAdsController extends Controller
                     $row['TPFT'] = $raw['TPFT'] ?? null;
                 }
             }
-            
-            $result[] = (object) $row;
-            
+
+            if($row['INV'] > 0 && $row['NRA'] != 'NRA'){
+                $result[] = (object) $row;
+            }
         }
 
         return response()->json([

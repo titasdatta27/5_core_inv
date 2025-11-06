@@ -1149,8 +1149,7 @@
 
                                 <a href="{{ asset('sample_excel/sample_listing_file.csv') }}" download class="btn btn-outline-secondary mb-3">📄 Download Sample File</a>
 
-                                <input type="file" id="importFile" name="file" accept=".csv,.txt" class="form-control" />
-                                <small class="text-muted">Only CSV or TXT files are supported.</small>
+                                <input type="file" id="importFile" name="file" accept=".xlsx,.xls,.csv" class="form-control" />
                             </div>
 
                             <div class="modal-footer">
@@ -1548,39 +1547,21 @@
 
                 // NR/REQ dropdown only for non-parent rows
                 if (!item.sku.includes('PARENT')) {
+                    const $dropdown = $('<select>')
+                        .addClass('nr-req-dropdown form-control form-control-sm')
+                        .append('<option value="REQ" class="req-option">REQ</option>')
+                        .append('<option value="NR" class="nr-option">NRL</option>');
+
                     const initialValue = item.nr_req || 'REQ';
-                    
-                    if (initialValue === 'NR') {
-                        // Show NRL button for NR items - make it clickable to change back to REQ
-                        const $badge = $('<button>').text('NRL')
-                            .addClass('nrl-badge')
-                            .attr('data-sku', item.sku)
-                            .css({
-                                'color': 'white',
-                                'background-color': '#dc3545',
-                                'padding': '6px 8px',
-                                'border': 'none',
-                                'cursor': 'pointer',
-                                'font-size': '14px',
-                                'width': '100%',
-                                'text-align': 'center'
-                            });
-                        $row.append($('<td>').append($badge));
-                    } else {
-                        // Show dropdown for REQ items
-                        const $dropdown = $('<select>')
-                            .addClass('nr-req-dropdown form-control form-control-sm')
-                            .append('<option value="REQ" class="req-option">REQ</option>')
-                            .append('<option value="NR" class="nr-option">NRL</option>');
+                    $dropdown.val(initialValue);
 
-                        $dropdown.val(initialValue);
-
-                        if (initialValue === 'REQ') {
-                            $dropdown.css('background-color', '#28a745').css('color', 'white');
-                        }
-
-                        $row.append($('<td>').append($dropdown));
+                    if (initialValue === 'REQ') {
+                        $dropdown.css('background-color', '#28a745').css('color', 'white');
+                    } else if (initialValue === 'NR') {
+                        $dropdown.css('background-color', '#dc3545').css('color', 'white');
                     }
+
+                    $row.append($('<td>').append($dropdown));
                 } else {
                     $row.append($('<td>').text('')); // Empty cell for parent rows
                 }
@@ -1620,42 +1601,21 @@
 
                 // Listed/Pending dropdown only for non-parent rows
                 if (!item.sku.includes('PARENT')) {
-                    const initialValue = item.nr_req || 'REQ';
-                    
-                    if (initialValue === 'NR') {
-                        // Show NRL button in Listed/Pending column when nr_req is NR - make it clickable
-                        const $badge = $('<button>').text('NRL')
-                            .addClass('nrl-badge-listed')
-                            .attr('data-sku', item.sku)
-                            .css({
-                                'color': 'white',
-                                'background-color': '#dc3545',
-                                'padding': '6px 8px',
-                                'border': 'none',
-                                'cursor': 'pointer',
-                                'font-size': '14px',
-                                'width': '100%',
-                                'text-align': 'center'
-                            });
-                        $row.append($('<td>').append($badge));
-                    } else {
-                        // Show dropdown for REQ items
-                        const $listedDropdown = $('<select>')
-                            .addClass('listed-dropdown form-control form-control-sm')
-                            .append('<option value="Listed" class="listed-option">Listed</option>')
-                            .append('<option value="Pending" class="pending-option">Pending</option>');
+                    const $listedDropdown = $('<select>')
+                        .addClass('listed-dropdown form-control form-control-sm')
+                        .append('<option value="Listed" class="listed-option">Listed</option>')
+                        .append('<option value="Pending" class="pending-option">Pending</option>');
 
-                        const listedValue = item.listed || 'Pending';
-                        $listedDropdown.val(listedValue);
+                    const listedValue = item.listed || 'Pending';
+                    $listedDropdown.val(listedValue);
 
-                        if (listedValue === 'Listed') {
-                            $listedDropdown.css('background-color', '#28a745').css('color', 'white');
-                        } else if (listedValue === 'Pending') {
-                            $listedDropdown.css('background-color', '#dc3545').css('color', 'white');
-                        }
-
-                        $row.append($('<td>').append($listedDropdown));
+                    if (listedValue === 'Listed') {
+                        $listedDropdown.css('background-color', '#28a745').css('color', 'white');
+                    } else if (listedValue === 'Pending') {
+                        $listedDropdown.css('background-color', '#dc3545').css('color', 'white');
                     }
+
+                    $row.append($('<td>').append($listedDropdown));
                 } else {
                     $row.append($('<td>').text('')); // Empty cell for parent rows
                 }
@@ -2281,86 +2241,9 @@
                 const sku = $row.find('td').eq(2).text().trim();
                 const nr_req = $(this).val();
 
-                // Dynamically replace dropdown with button or vice versa
-                const $nrReqCell = $row.find('td').eq(4); // NR/REQ column
-                const $listedCell = $row.find('td').eq(6); // Listed/Pending column
-
-                if (nr_req === 'NR') {
-                    // Save the current listed value before replacing with NRL button
-                    const item = tableData.find(row => row.sku === sku);
-                    const currentListed = $listedCell.find('select').val() || (item ? item.listed : 'Pending');
-                    
-                    // Update tableData to preserve the listed value
-                    if (item) {
-                        item.listed = currentListed;
-                    }
-
-                    saveStatusToDB(sku, {
-                        nr_req,
-                        listed: currentListed
-                    });
-
-                    // Replace NR/REQ dropdown with NRL button
-                    const $nrBadge = $('<button>').text('NRL').css({
-                        'color': 'white',
-                        'background-color': '#dc3545',
-                        'padding': '6px 8px',
-                        'border': 'none',
-                        'cursor': 'default',
-                        'font-size': '14px',
-                        'width': '100%',
-                        'text-align': 'center'
-                    });
-                    $nrReqCell.empty().append($nrBadge);
-
-                    // Replace Listed/Pending dropdown with NRL button
-                    const $listedBadge = $('<button>').text('NRL').css({
-                        'color': 'white',
-                        'background-color': '#dc3545',
-                        'padding': '6px 8px',
-                        'border': 'none',
-                        'cursor': 'default',
-                        'font-size': '14px',
-                        'width': '100%',
-                        'text-align': 'center'
-                    });
-                    $listedCell.empty().append($listedBadge);
-                } else {
-                    saveStatusToDB(sku, {
-                        nr_req
-                    });
-
-                    // Replace NR/REQ button with dropdown (if needed)
-                    if (!$nrReqCell.find('select').length) {
-                        const $dropdown = $('<select>')
-                            .addClass('nr-req-dropdown form-control form-control-sm')
-                            .append('<option value="REQ" class="req-option">REQ</option>')
-                            .append('<option value="NR" class="nr-option">NRL</option>')
-                            .val('REQ')
-                            .css('background-color', '#28a745').css('color', 'white');
-                        $nrReqCell.empty().append($dropdown);
-                    }
-
-                    // Replace Listed/Pending button with dropdown (if needed) - restore original value
-                    if (!$listedCell.find('select').length) {
-                        const item = tableData.find(row => row.sku === sku);
-                        const listedValue = item ? (item.listed || 'Pending') : 'Pending';
-                        
-                        const $listedDropdown = $('<select>')
-                            .addClass('listed-dropdown form-control form-control-sm')
-                            .append('<option value="Listed" class="listed-option">Listed</option>')
-                            .append('<option value="Pending" class="pending-option">Pending</option>')
-                            .val(listedValue);
-
-                        if (listedValue === 'Listed') {
-                            $listedDropdown.css('background-color', '#28a745').css('color', 'white');
-                        } else {
-                            $listedDropdown.css('background-color', '#dc3545').css('color', 'white');
-                        }
-                        
-                        $listedCell.empty().append($listedDropdown);
-                    }
-                }
+                saveStatusToDB(sku, {
+                    nr_req
+                });
             });
 
             $(document).on('change', '.listed-dropdown', function() {
@@ -2371,52 +2254,6 @@
                 saveStatusToDB(sku, {
                     listed
                 });
-            });
-
-            // Click handler for NRL badge to change back to REQ
-            $(document).on('click', '.nrl-badge, .nrl-badge-listed', function() {
-                const $row = $(this).closest('tr');
-                const sku = $(this).attr('data-sku') || $row.find('td').eq(2).text().trim();
-                
-                // Find the item in tableData to get the preserved listed value
-                const item = tableData.find(row => row.sku === sku);
-                const listedValue = item ? (item.listed || 'Pending') : 'Pending';
-
-                // Save the change to REQ
-                saveStatusToDB(sku, {
-                    nr_req: 'REQ'
-                });
-
-                // Update tableData
-                if (item) {
-                    item.nr_req = 'REQ';
-                }
-
-                // Replace NRL button in NR/REQ column with dropdown
-                const $nrReqCell = $row.find('td').eq(4);
-                const $dropdown = $('<select>')
-                    .addClass('nr-req-dropdown form-control form-control-sm')
-                    .append('<option value="REQ" class="req-option">REQ</option>')
-                    .append('<option value="NR" class="nr-option">NRL</option>')
-                    .val('REQ')
-                    .css('background-color', '#28a745').css('color', 'white');
-                $nrReqCell.empty().append($dropdown);
-
-                // Replace NRL button in Listed/Pending column with dropdown
-                const $listedCell = $row.find('td').eq(6);
-                const $listedDropdown = $('<select>')
-                    .addClass('listed-dropdown form-control form-control-sm')
-                    .append('<option value="Listed" class="listed-option">Listed</option>')
-                    .append('<option value="Pending" class="pending-option">Pending</option>')
-                    .val(listedValue);
-
-                if (listedValue === 'Listed') {
-                    $listedDropdown.css('background-color', '#28a745').css('color', 'white');
-                } else {
-                    $listedDropdown.css('background-color', '#dc3545').css('color', 'white');
-                }
-                
-                $listedCell.empty().append($listedDropdown);
             });
 
             $('#nr-req-filter').on('change', function() {

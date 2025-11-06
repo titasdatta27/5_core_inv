@@ -206,24 +206,13 @@ class SheinController extends Controller
             return response()->json(['error' => 'SKU and nr are required.'], 400);
         }
 
-        // Flatten properly
-        $nrValue = is_array($nr) && isset($nr['NR']) ? $nr['NR'] : $nr;
-
         $dataView = SheinDataView::firstOrNew(['sku' => $sku]);
-        $value = is_array($dataView->value)
-            ? $dataView->value
-            : (json_decode($dataView->value, true) ?: []);
-
-        // Save correctly
-        $value['NR'] = $nrValue;
-
+        $value = is_array($dataView->value) ? $dataView->value : (json_decode($dataView->value, true) ?: []);
+        $value['NR'] = filter_var($nr, FILTER_VALIDATE_BOOLEAN);
         $dataView->value = $value;
         $dataView->save();
 
-        return response()->json([
-            'success' => true,
-            'data' => $dataView
-        ]);
+        return response()->json(['success' => true, 'data' => $dataView]);
     }
 
     public function updateListedLive(Request $request)

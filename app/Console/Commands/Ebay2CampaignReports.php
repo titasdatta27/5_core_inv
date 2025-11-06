@@ -37,11 +37,8 @@ class Ebay2CampaignReports extends Command
 
         // Step 1
         $ranges = [
+            'L30' => [Carbon::today()->subDays(30), Carbon::today()->subDay()->endOfDay()],
             'L60' => [Carbon::today()->subDays(60), Carbon::today()->subDays(31)->endOfDay()],
-            'L30' => [Carbon::today()->subDays(30), Carbon::today()->subDays(1)->endOfDay()],
-            'L15' => [Carbon::today()->subDays(15), Carbon::today()->subDays(1)->endOfDay()],
-            'L7' => [Carbon::today()->subDays(7), Carbon::today()->subDays(1)->endOfDay()],
-            'L1' => [Carbon::yesterday()->startOfDay(), Carbon::yesterday()->endOfDay()],
         ];
         
         foreach ($ranges as $rangeKey => [$from, $to]) {
@@ -202,8 +199,8 @@ class Ebay2CampaignReports extends Command
 
     private function getAccessToken()
     {
-        $clientId = env('EBAY2_APP_ID');
-        $clientSecret = env('EBAY2_CERT_ID');
+        $clientId = env('EBAY_2_APP_ID');
+        $clientSecret = env('EBAY_2_CERT_ID');
 
         $scope = implode(' ', [
             'https://api.ebay.com/oauth/api_scope',
@@ -223,7 +220,7 @@ class Ebay2CampaignReports extends Command
                 ->withBasicAuth($clientId, $clientSecret)
                 ->post('https://api.ebay.com/identity/v1/oauth2/token', [
                     'grant_type' => 'refresh_token',
-                    'refresh_token' => env('EBAY2_REFRESH_TOKEN'),
+                    'refresh_token' => env('EBAY_2_REFRESH_TOKEN'),
                     'scope' => $scope,
                 ]);
 

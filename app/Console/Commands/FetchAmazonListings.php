@@ -71,51 +71,24 @@ class FetchAmazonListings extends Command
         }
 
         // Step 3: Download and parse the data
-        $compressedData = file_get_contents($url);
-        
-        // Decompress the gzip data
-        $csv = gzdecode($compressedData);
-        
-        if ($csv === false) {
-            $this->error('Failed to decompress the data.');
-            return;
-        }
-        
+        $csv = file_get_contents($url);
         $lines = explode("\n", $csv);
-        $headers = str_getcsv(array_shift($lines), "\t");
+        $headers = explode("\t", array_shift($lines));
 
-        $this->info('Total headers: ' . count($headers));
-        $this->info('Total lines: ' . count($lines));
-        
-        $processedCount = 0;
-        $skippedCount = 0;
-        $defaultChannelCount = 0;
-
-        foreach ($lines as $index => $line) {
-            if (empty(trim($line))) continue;
-            
+        foreach ($lines as $line) {
             $row = str_getcsv($line, "\t");
-            
-            // Skip rows that don't have the exact same number of columns as headers
-            if (count($row) !== count($headers)) {
-                $skippedCount++;
-                continue;
-            }
+            if (count($row) < count($headers)) continue;
 
             $data = array_combine($headers, $row);
 
             // Fulfillment channel filter
-            if (($data['fulfillment-channel'] ?? '') !== 'DEFAULT') {
-                continue;
-            }
-            
-            $defaultChannelCount++;
+            if (($data['fulfillment-channel'] ?? '') !== 'DEFAULT') continue;
 
             $asin = $data['asin1'] ?? null;
             $sku = isset($data['seller-sku']) ? preg_replace('/[^\x20-\x7E]/', '', trim($data['seller-sku'])) : null;
             $price = isset($data['price']) && is_numeric($data['price']) ? $data['price'] : null;
 
-            if ($asin) {
+            if ($asin) {                
                 AmazonDatasheet::updateOrCreate(
                     ['asin' => $asin],
                     [
@@ -123,11 +96,9 @@ class FetchAmazonListings extends Command
                         'price' => $price,
                     ]
                 );
-                $processedCount++;
             }
         }
 
-        $this->info("Processed: $processedCount | DEFAULT channel: $defaultChannelCount | Skipped: $skippedCount");
         $this->info('ASIN and price and sku data imported successfully.');
 
         $this->getUnitOrderedAndSessionsData();
@@ -155,13 +126,9 @@ class FetchAmazonListings extends Command
         $l60End = $l30Start->copy()->subDay(2)->endOfDay();
         $l60Start = $l60End->copy()->subDays(30)->startOfDay();
 
-        $l90End = $l60Start->copy()->subDay(2)->endOfDay();
-        $l90Start = $l90End->copy()->subDays(30)->startOfDay();
-
         $dateRanges = [
             'l30' => [$l30Start->toIso8601ZuluString(), $l30End->toIso8601ZuluString()],
             'l60' => [$l60Start->toIso8601ZuluString(), $l60End->toIso8601ZuluString()],
-            'l90' => [$l90Start->toIso8601ZuluString(), $l90End->toIso8601ZuluString()],
         ];
 
         info('$dateRanges', [$dateRanges]);

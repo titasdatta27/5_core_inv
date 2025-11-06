@@ -28,14 +28,6 @@
 @section('content')
 @include('layouts.shared.page-title', ['page_title' => 'Purchase', 'sub_title' => 'Purchase'])
 
-@if (Session::has('flash_message'))
-    <div class="alert alert-primary bg-primary text-white alert-dismissible fade show" role="alert"
-        style="background-color: #169e28 !important; color: #fff !important;">
-        {{ Session::get('flash_message') }}
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-@endif
-
 <div class="row">
     <div class="col-12">
         <div class="card shadow-sm">
@@ -78,7 +70,6 @@
 
             <form id="purchaseForm" method="POST" action="{{ route('purchase.store') }}" enctype="multipart/form-data" autocomplete="off">
                 @csrf
-                <input type="hidden" id="purchase_id" name="purchase_id">
                 <div class="modal-body">
                     {{-- Purchase Header Section --}}
                     <div class="row g-2">
@@ -259,21 +250,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
                 hozAlign: "center",
                 headerHozAlign: "center",
-            },
-            {
-                title: "Action",
-                hozAlign: "center",
-                formatter: function(cell){
-                    return `
-                        <button class="btn btn-sm btn-info edit-btn">
-                            <i class="fa fa-edit"></i>
-                        </button>
-                    `;
-                },
-                cellClick: function(e, cell){
-                    let rowData = cell.getRow().getData();
-                    openEditModal(rowData);
-                }
             }
         ]
     });
@@ -521,83 +497,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-    function openEditModal(rowData) {
-
-        //-- Fill header section
-        $("#purchase_id").val(rowData.id ?? "");
-
-        // supplier select
-        $('select[name="supplier"]').val(rowData.supplier_id ?? "").trigger("change");
-
-        // warehouse select
-        $('select[name="warehouse"]').val(rowData.warehouse_id ?? "").trigger("change");
-
-        $('input[name="vo_number"]').val(rowData.vo_number ?? "");
-        $('input[name="purchase_date"]').val(rowData.purchase_date ?? "");
-
-        //-- Parse ITEMS
-        let items = rowData.items;
-
-        try {
-            if (typeof items === "string") {
-                items = JSON.parse(items);
-            }
-        } catch (err) {
-            console.error("Items JSON parsing error:", err);
-            items = [];
-        }
-
-        if (!Array.isArray(items)) {
-            items = [];
-        }
-
-        console.log("Final items:", items);
-
-        $("#productRowsWrapper").html("");
-
-        //-- If items available → add rows
-        if (items.length > 0) {
-
-            items.forEach(item => {
-                const parent = item.parent ?? item.parent_name ?? item.parentSku ?? "";
-
-                const sku     = item.sku ?? "";
-                const qty     = parseFloat(item.qty ?? 0) || 0;
-                const rate    = parseFloat(item.price ?? item.rate ?? 0) || 0;
-                const amount  = parseFloat(item.amount ?? qty * rate) || 0;
-
-                $("#productRowsWrapper").append(`
-                    <tr>
-                        <td>
-                            <input type="text" class="form-control" name="parent[]" value="${parent}">
-                        </td>
-                        <td>
-                            <input type="text" class="form-control" name="sku[]" value="${sku}">
-                        </td>
-                        <td>
-                            <input type="number" class="form-control qty-input" name="qty[]" value="${qty}">
-                        </td>
-                        <td>
-                            <input type="number" class="form-control rate-input" name="rate[]" value="${rate}">
-                        </td>
-                        <td>
-                            <input type="number" class="form-control amount-input" name="amount[]" value="${amount.toFixed(2)}" readonly>
-                        </td>
-
-                        <td class="text-center">
-                            <i class="fas fa-trash-alt text-danger delete-product-row-btn" style="cursor:pointer;"></i>
-                        </td>
-                    </tr>
-                `);
-            });
-
-        } else {
-            $("#productRowsWrapper").append(createProductRow());
-        }
-
-        updateTotals();
-        $("#createPurchaseModal").modal("show");
-    }
 
     // Initial totals
     updateTotals();

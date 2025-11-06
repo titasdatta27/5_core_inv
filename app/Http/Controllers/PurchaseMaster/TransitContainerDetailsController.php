@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\PurchaseMaster;
 
 use App\Http\Controllers\Controller;
-use App\Models\InventoryWarehouse;
 use App\Models\TransitContainerDetail;
 use App\Models\Supplier;
 use App\Models\ProductMaster;
@@ -53,43 +52,9 @@ class TransitContainerDetailsController extends Controller
             return [$normSku => $value];
         })->toArray();
 
-        // $pushedMap = InventoryWarehouse::select('tab_name', 'our_sku', 'pushed', 'created_at','transit_container_id')
-        //     ->whereNotNull('transit_container_id')
-        //     ->whereNotNull('tab_name')
-        //     ->orderBy('created_at', 'desc')
-        //     ->get()
-        //     ->unique(function ($item) {
-        //         return strtoupper(trim($item->tab_name)) . '|' . (int) $item->transit_container_id;
-        //     })
-        //     ->mapWithKeys(function ($item) {
-        //         $normTab = strtoupper(trim(preg_replace('/\s+/', ' ', $item->tab_name)));
-        //         // $normSku = strtoupper(trim(preg_replace('/\s+/', ' ', $item->our_sku)));
-        //         return ["{$normTab}|{$item->row_id}" => (int) $item->pushed];
-        //     })
-        // ->toArray();
-        $pushedMap = InventoryWarehouse::select('tab_name', 'transit_container_id', 'our_sku', 'pushed', 'created_at')
-        ->whereNotNull('transit_container_id')
-        ->whereNotNull('tab_name')
-        ->orderBy('created_at', 'desc')
-        ->get()
-        ->unique(function ($item) {
-            return strtoupper(trim($item->tab_name)) . '|' . (int)$item->transit_container_id;
-        })
-        ->mapWithKeys(function ($item) {
-            $normTab = strtoupper(trim(preg_replace('/\s+/', ' ', $item->tab_name)));
-            $rowId = (int)$item->transit_container_id;
-            return ["{$normTab}|{$rowId}" => (int) $item->pushed];
-        })
-        ->toArray();
-
-
-        // Transform TransitContainerDetail Records
-        $allRecords->transform(function ($record) use ($skuParentMap, $parentSupplierMap, $shopifyImages, $productValuesMap, $pushedMap) {
+        // 🔥 Transform TransitContainerDetail Records
+        $allRecords->transform(function ($record) use ($skuParentMap, $parentSupplierMap, $shopifyImages, $productValuesMap) {
             $sku = strtoupper(trim(preg_replace('/\s+/', ' ', $record->our_sku ?? '')));
-            $tabKey = strtoupper(trim(preg_replace('/\s+/', ' ', $record->tab_name ?? '')));
-            // $rowId = $record->id; 
-
-            $key = "{$tabKey}|{$record->id}";
 
             $parent = $skuParentMap[$sku] ?? null;
 
@@ -103,9 +68,6 @@ class TransitContainerDetailsController extends Controller
             $record->image_src = $shopifyImages[$sku] ?? null;
             $record->Values = $productValuesMap[$sku] ?? null;
 
-            $record->pushed = isset($pushedMap[$key]) ? (int) $pushedMap[$key] : 0;
-            // $record->pushed = isset($pushedMap[$sku]) ? (int) $pushedMap[$sku] : 0;
-            
             return $record;
         });
 
@@ -232,29 +194,17 @@ class TransitContainerDetailsController extends Controller
 
     public function deleteTransitItem(Request $request)
     {
-        try {
-            $ids = $request->ids;
+        $ids = $request->ids;
 
-            $authUser = auth()->check() ? auth()->user()->name : 'system';
+        TransitContainerDetail::whereIn('id', $ids)->update([
+            'status' => 'inactive'
+        ]);
 
-            TransitContainerDetail::whereIn('id', $ids)->update([
-                'auth_user' => $authUser,
-            ]);
-
-            TransitContainerDetail::whereIn('id', $ids)->delete();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Records deleted successfully by ' . $authUser,
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error deleting records: ' . $e->getMessage(),
-            ], 500);
-        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Rows marked as inactive successfully.'
+        ]);
     }
-
 
     //transit container changes
     public function transitContainerChanges(){

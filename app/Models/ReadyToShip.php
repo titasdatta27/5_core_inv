@@ -4,21 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes; // ✅ Correct import
 
 class ReadyToShip extends Model
 {
-    use HasFactory, SoftDeletes; // ✅ Add trait here
+    use HasFactory;
 
     protected $table = 'ready_to_ship';
 
     protected $fillable = [
         'parent',
         'sku',
-        'qty',
-        'rate',
         'supplier',
-        'rec_qty',
         'cbm',
         'area',
         'shipd_cbm_in_cont',
@@ -32,9 +28,6 @@ class ReadyToShip extends Model
         'quote_result',
         'pay_term',
         'transit_inv_status',
-        'auth_user',
     ];
-
-    protected $dates = ['deleted_at']; 
     
 }

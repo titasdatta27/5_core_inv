@@ -922,19 +922,6 @@
                             <i class="fa fa-pen"></i>
                         </button>
                     </div>
-
-                    <!-- 🔹 Ads Percentage Edit -->
-                    <div id="ads-edit-div" class="d-flex align-items-center ms-4">
-                        <div class="input-group" style="width: 120px;">
-                            <input type="number" id="updateAllSkusAds" class="form-control" min="0" max="1000"
-                                value="{{ $ebayAdUpdates }}" step="0.01" placeholder="Ads Percentage" disabled />
-                            <span class="input-group-text"></span>
-                        </div>
-                        <button id="editAdsBtn" class="btn btn-outline-primary ms-2">
-                            <i class="fa fa-pen"></i>
-                        </button>
-                    </div>
-
                     <div class="d-inline-flex align-items-center ms-2">
                         <div class="badge bg-danger text-white px-3 py-2 me-2" style="font-size: 1rem; border-radius: 8px;">
                             0 SOLD - <span id="zero-sold-count">0</span>
@@ -1580,36 +1567,10 @@
                                     <th data-field="pft" style="vertical-align: middle; white-space: nowrap;">
                                         <div class="d-flex flex-column align-items-center" style="gap: 4px">
                                             <div class="d-flex align-items-center">
-                                                GRPFT
+                                                PFT <span class="sort-arrow">↓</span>
                                             </div>
-                                        </div>
-                                    </th>
-                                    <th data-field="gpft" style="vertical-align: middle; white-space: nowrap;">
-                                        <div class="d-flex flex-column align-items-center" style="gap: 4px">
-                                            <div class="d-flex align-items-center">
-                                                PFT
-                                            </div>
-                                        </div>
-                                    </th>
-                                    <th data-field="tprft" style="vertical-align: middle; white-space: nowrap;">
-                                        <div class="d-flex flex-column align-items-center" style="gap: 4px">
-                                            <div class="d-flex align-items-center">
-                                                TPRFT
-                                            </div>
-                                        </div>
-                                    </th>
-                                    <th data-field="ad-spend" style="vertical-align: middle; white-space: nowrap;">
-                                        <div class="d-flex flex-column align-items-center" style="gap: 4px">
-                                            <div class="d-flex align-items-center">
-                                                Ad Spend
-                                            </div>
-                                        </div>
-                                    </th>
-                                    <th data-field="cps" style="vertical-align: middle; white-space: nowrap;">
-                                        <div class="d-flex flex-column align-items-center" style="gap: 4px">
-                                            <div class="d-flex align-items-center">
-                                                CPS
-                                            </div>
+                                            <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
+                                            <div class="metric-total" id="pft-total">0%</div>
                                         </div>
                                     </th>
                                     <th data-field="roi" style="vertical-align: middle; white-space: nowrap;">
@@ -1665,15 +1626,6 @@
                                             </div>
                                             <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
                                             <div class="metric-total" id="pft-total">0%</div>
-                                        </div>
-                                    </th>
-                                    <th data-field="salesTotal" style="vertical-align: middle; white-space: nowrap;">
-                                        <div class="d-flex flex-column align-items-center" style="gap: 4px">
-                                            <div class="d-flex align-items-center">
-                                                TOTAL SALES <span class="sort-arrow">↓</span>
-                                            </div>
-                                            <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
-                                            <div class="metric-total" id="sale-total">0</div>
                                         </div>
                                     </th>
                                 </tr>
@@ -1803,19 +1755,16 @@
                     }
 
                     $.ajax({
-                        url: '/update-all-ebay1-skus',
+                        url: '/update-all-ebay-skus',
                         type: 'POST',
                         data: {
-                            type: 'percentage',
-                            value: percent,
+                            percent: percent,
                             _token: $('meta[name="csrf-token"]').attr('content')
                         },
                         success: function(response) {
                             showNotification('success', 'Percentage updated successfully!');
                             $input.prop('disabled', true);
                             $icon.removeClass('fa-check').addClass('fa-pen');
-                            // Reload the data table if needed
-                            loadData();
                         },
                         error: function(xhr) {
                             showNotification('danger', 'Error updating percentage.');
@@ -1827,53 +1776,6 @@
                 }
             });
 
-            // Ad Updates update
-            $('#editAdsBtn').on('click', function() {
-                var $input = $('#updateAllSkusAds');
-                var $icon = $(this).find('i');
-                var originalValue = $input.val();
-
-                if ($icon.hasClass('fa-pen')) {
-                    $input.prop('disabled', false).focus();
-                    $icon.removeClass('fa-pen').addClass('fa-check');
-                } else {
-                    var adUpdates = parseFloat($input.val());
-
-                    if (isNaN(adUpdates) || adUpdates < 0 || adUpdates > 1000) {
-                        showNotification('danger', 'Invalid ad updates value. Must be between 0 and 1000.');
-                        $input.val(originalValue);
-                        return;
-                    }
-
-                    // Ad Updates
-                    $.ajax({
-                        url: '/update-all-ebay1-skus',
-                        type: 'POST',
-                        data: {
-                            type: 'ad_updates',
-                            value: adUpdates,
-                            _token: $('meta[name="csrf-token"]').attr('content')
-                        },
-                        success: function(response) {
-                            if (response.status === 200) {
-                                showNotification('success', 'Ad Updates updated successfully!');
-                                $input.prop('disabled', true);
-                                $icon.removeClass('fa-check').addClass('fa-pen');
-                                // Update the input value with the new value from server
-                                $input.val(response.data.ad_updates);
-                                // Reload the data table if needed
-                                loadData();
-                            }
-                        },
-                        error: function() {
-                            showNotification('danger', 'Error updating Ad Updates.');
-                            $input.val(originalValue);
-                            $input.prop('disabled', true);
-                            $icon.removeClass('fa-check').addClass('fa-pen');
-                        }
-                    });
-                }
-            });
 
             // Cache system
             const ebayViewDataCache = {
@@ -2473,10 +2375,8 @@
                                         .SPFT))) ? parseFloat(item.SPFT) : 0,
                                     SROI: (item.SROI !== null && !isNaN(parseFloat(item
                                         .SROI))) ? parseFloat(item.SROI) : 0,
-
                                     LP: item.LP_productmaster || 0,
                                     SHIP: item.Ship_productmaster || 0,
-                                    spend_l30: item.spend_l30 || 0,
                                 };
                             });
 
@@ -2857,79 +2757,13 @@
                             </span>
                         </div>`
                     ));
-                    
-                    const price = Number(item['eBay Price']) || 0;
-                    const ship = Number(item.SHIP) || 0;
-                    const lp = Number(item.LP) || 0;
-                    const spend = Number(item.spend_l30) || 0;
-                    const eL30 = Number(item['eBay L30']) || 0;
-                    const ebayPercentage = {{ $ebayPercentage ?? 0}};
-                    const ebayAdPercentage = {{ $ebayAdUpdates ?? 0}};
 
-                    const totalEbayPercentage = (ebayPercentage - ebayAdPercentage) / 100;
-
-                    const netPft = (price * (ebayPercentage / 100)) - ship - lp - (spend / eL30);
-                    const netGpft = (price * totalEbayPercentage) - ship - lp;
-                    let gPft = (netGpft / price) * 100;
 
                     // PFT with color coding
                     $row.append($('<td>').html(
                         typeof item['PFT %'] === 'number' && !isNaN(item['PFT %']) ?
                         `<span class="dil-percent-value ${getPftColor(item['PFT %'])}">${Math.round(item['PFT %'] * 100)}%</span>` :
                         ''
-                    ));
-
-                    // GPFT with color coding
-                    if(isNaN(gPft) || !isFinite(gPft)) {
-                        gPft = 0;
-                    }
-                    $row.append($('<td>').html(
-                        `
-                            <span class="dil-percent-value ${getPftColor(gPft)}">
-                                ${gPft.toFixed(0)}%
-                            </span>
-                        ` 
-                    ));
-
-                    // TPRFT with color coding
-                    let tpft = (netPft / price) * 100;
-                    
-                    if(isNaN(tpft) || !isFinite(tpft)) {
-                        tpft = 0;
-                    }
-                    
-                    $.ajax({
-                        url: '/update-ebay-nr-data',
-                        type: 'POST',
-                        data: {
-                            sku: item['(Child) sku'],
-                            field: 'TPFT',
-                            value: tpft.toFixed(2),
-                            _token: $('meta[name="csrf-token"]').attr('content')
-                        },
-                        success: function(res) {
-
-                        },
-                        error: function(err) {
-                            console.error("Auto-save failed:", err);
-                        }
-                    });
-
-                    $row.append($('<td>').html(
-                        `
-                            <span class="dil-percent-value ${getPftColor(tpft)}">
-                                ${tpft.toFixed(0)}%
-                            </span>
-                        ` 
-                    ));
-
-                    $row.append($('<td>').html(
-                        `${item.spend_l30.toFixed(2)}`
-                    ));
-                    // Cost per sale (CPS) calculation
-                    let cps = item['eBay L30'] > 0 ? (item.spend_l30 / item['eBay L30']).toFixed(2) : 0;
-                    $row.append($('<td>').html(
-                        `${cps}`
                     ));
 
                     // ROI with color coding
@@ -2972,24 +2806,24 @@
                     $row.append($('<td>').html(
                         item.SPRICE !== null && !isNaN(parseFloat(item.SPRICE)) ?
                         `
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="badge bg-primary s_price" 
-                                style="font-size:16px; padding:8px 14px; border-radius:8px;">
-                                $${Math.round(parseFloat(item.SPRICE))}
-                            </span>
-                            <div class="btn-group" role="group">
-                                <!-- Edit Button -->
-                                <button class="btn btn-outline-primary openPricingBtn"
-                                    style="font-size:15px; padding:6px 12px; border-radius:8px;"
-                                    title="Edit SPRICE"
-                                    data-lp="${item.LP}"
-                                    data-ship="${item.SHIP}"
-                                    data-sku="${item["(Child) sku"]}">
-                                    <i class="fa fa-edit"></i>
-                                </button>
-                            </div>
-                        </div>
-                        ` : ''
+    <div class="d-flex align-items-center gap-2">
+        <span class="badge bg-primary s_price" 
+              style="font-size:16px; padding:8px 14px; border-radius:8px;">
+            $${Math.round(parseFloat(item.SPRICE))}
+        </span>
+        <div class="btn-group" role="group">
+            <!-- Edit Button -->
+            <button class="btn btn-outline-primary openPricingBtn"
+                style="font-size:15px; padding:6px 12px; border-radius:8px;"
+                title="Edit SPRICE"
+                data-lp="${item.LP}"
+                data-ship="${item.SHIP}"
+                data-sku="${item["(Child) sku"]}">
+                <i class="fa fa-edit"></i>
+            </button>
+        </div>
+    </div>
+    ` : ''
                     ));
 
 
@@ -2997,23 +2831,23 @@
                     $row.append($('<td>').attr('id', `spft-${item["(Child) sku"]}`).html(
                         item.SPFT !== null && !isNaN(parseFloat(item.SPFT)) ?
                         `<span style="
-                            font-size:14px; 
-                            padding:6px 12px; 
-                            border-radius:8px; 
-                            color:#fff; 
-                            background-color:${
-                                parseFloat(item.SPFT) <= 10 
-                                    ? '#dc3545'   // 🔴 red
-                                    : parseFloat(item.SPFT) <= 15 
-                                        ? '#ffc107'   // 🟡 yellow
-                                        : parseFloat(item.SPFT) <= 20 
-                                            ? '#0d6efd'   // 🔵 blue
-                                            : '#198754'   // 🟢 green
-                            };">
-                            ${(parseFloat(item.SPFT) - Math.floor(parseFloat(item.SPFT)) >= 0.5 
-                                ? Math.ceil(parseFloat(item.SPFT)) 
-                                : Math.floor(parseFloat(item.SPFT)))}%
-                        </span>` :
+        font-size:14px; 
+        padding:6px 12px; 
+        border-radius:8px; 
+        color:#fff; 
+        background-color:${
+            parseFloat(item.SPFT) <= 10 
+                ? '#dc3545'   // 🔴 red
+                : parseFloat(item.SPFT) <= 15 
+                    ? '#ffc107'   // 🟡 yellow
+                    : parseFloat(item.SPFT) <= 20 
+                        ? '#0d6efd'   // 🔵 blue
+                        : '#198754'   // 🟢 green
+        };">
+        ${(parseFloat(item.SPFT) - Math.floor(parseFloat(item.SPFT)) >= 0.5 
+            ? Math.ceil(parseFloat(item.SPFT)) 
+            : Math.floor(parseFloat(item.SPFT)))}%
+     </span>` :
                         ''
                     ));
 
@@ -3021,28 +2855,27 @@
                     $row.append($('<td>').attr('id', `sroi-${item["(Child) sku"]}`).html(
                         item.SROI !== null && !isNaN(parseFloat(item.SROI)) ?
                         `<span style="
-                            font-size:14px; 
-                            padding:6px 12px; 
-                            border-radius:8px; 
-                            color:#fff; 
-                            background-color:${
-                                parseFloat(item.SROI) <= 50 
-                                    ? '#dc3545'   // 🔴 red
-                                    : parseFloat(item.SROI) <= 100 
-                                        ? '#ffc107'   // 🟡 yellow
-                                        : parseFloat(item.SROI) <= 150 
-                                            ? '#198754'   // 🟢 green
-                                            : '#6f42c1'   // 🟣 purple
-                            };">
-                            ${(parseFloat(item.SROI) - Math.floor(parseFloat(item.SROI)) >= 0.5 
-                                ? Math.ceil(parseFloat(item.SROI)) 
-                                : Math.floor(parseFloat(item.SROI)))}%
-                        </span>` : ''
+        font-size:14px; 
+        padding:6px 12px; 
+        border-radius:8px; 
+        color:#fff; 
+        background-color:${
+            parseFloat(item.SROI) <= 50 
+                ? '#dc3545'   // 🔴 red
+                : parseFloat(item.SROI) <= 100 
+                    ? '#ffc107'   // 🟡 yellow
+                    : parseFloat(item.SROI) <= 150 
+                        ? '#198754'   // 🟢 green
+                        : '#6f42c1'   // 🟣 purple
+        };">
+        ${(parseFloat(item.SROI) - Math.floor(parseFloat(item.SROI)) >= 0.5 
+            ? Math.ceil(parseFloat(item.SROI)) 
+            : Math.floor(parseFloat(item.SROI)))}%
+     </span>` :
+                        ''
                     ));
 
-                    $row.append($('<td>').attr('id', `total-sales`).html(
-                        ((item['eBay L30']) * (parseFloat(item['eBay Price']) || 0).toFixed(2))
-                    ));
+
 
                     $tbody.append($row);
                 });
@@ -5142,8 +4975,7 @@
                         scvrSum: 0,
                         rowCount: 0,
                         listedCount: 0,
-                        liveCount: 0,
-                        totalSalesTotal: 0,
+                        liveCount: 0
                     };
 
                     filteredData.forEach(item => {
@@ -5188,7 +5020,6 @@
                         }
                         metrics.roiSum += parseFloat(item.Roi) || 0;
                         metrics.tacosTotal += parseFloat(item.Tacos30) || 0;
-                        metrics.totalSalesTotal += ((item['eBay L30']) * (parseFloat(item['eBay Price']) || 0));
                         metrics.scvrSum += (Number(item['views']) > 0) ?
                             (Number(item['eBay L30']) / Number(item['views'])) :
                             0;
@@ -5211,20 +5042,6 @@
                     $('#views-total').text(metrics.viewsTotal.toLocaleString());
                     $('#listed-total').text(metrics.listedCount.toLocaleString());
                     $('#live-total').text(metrics.liveCount.toLocaleString());
-                    $('#sale-total').text(metrics.totalSalesTotal.toLocaleString());
-
-                    $.ajax({
-                        url: "{{ route('adv-ebay.total-sales.save-data') }}",
-                        method: 'GET',
-                        data: {
-                            totalSales: metrics.totalSalesTotal
-                        },
-                        success: function(response) {
-                        },
-                        error: function(xhr) {
-                        }
-                    });
-
 
                     // Calculate and display averages
                     let pftTotal = 0;

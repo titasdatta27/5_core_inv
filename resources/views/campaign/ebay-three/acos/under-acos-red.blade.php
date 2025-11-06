@@ -247,7 +247,7 @@
 
             var table = new Tabulator("#budget-under-table", {
                 index: "Sku",
-                ajaxURL: "/ebay-3/acos/control/data",
+                ajaxURL: "/ebay-uti-acos/control/data",
                 layout: "fitData",
                 movableColumns: true,
                 resizableColumns: true,
@@ -501,7 +501,7 @@
                     let field = e.target.getAttribute("data-field");
                     let value = e.target.value;
 
-                    fetch('/update-ebay3-nr-data', {
+                    fetch('/update-ebay-nr-data', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

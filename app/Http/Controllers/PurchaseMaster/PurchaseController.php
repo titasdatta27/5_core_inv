@@ -10,7 +10,6 @@ use App\Models\Supplier;
 use App\Models\Warehouse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class PurchaseController extends Controller
@@ -24,46 +23,29 @@ class PurchaseController extends Controller
 
     public function store(Request $request)
     {
-        // Build items array
         $items = [];
         $count = count($request->sku ?? []);
 
         for ($i = 0; $i < $count; $i++) {
             $items[] = [
-                'sku'    => $request->sku[$i],
-                'qty'    => $request->qty[$i],
-                'price'  => $request->rate[$i],
+                'sku' => $request->sku[$i],
+                'qty' => $request->qty[$i],
+                'price' => $request->rate[$i],
                 'amount' => $request->qty[$i] * $request->rate[$i],
             ];
         }
 
-        // If id exists → UPDATE
-        if ($request->purchase_id) {
-
-            $purchase = Purchase::findOrFail($request->purchase_id);
-
-            $purchase->update([
-                'vo_number'     => $request->vo_number,
-                'purchase_date' => $request->purchase_date ?? now()->toDateString(),
-                'supplier_id'   => $request->supplier,
-                'warehouse_id'  => $request->warehouse,
-                'items'         => json_encode($items),
-            ]);
-
-            return redirect()->back()->with('flash_message', 'Purchase updated successfully ✅');
-        }
-
-        // Else → CREATE new
         Purchase::create([
-            'vo_number'     => $request->vo_number,
+            'vo_number' => $request->vo_number,
             'purchase_date' => now()->toDateString(),
-            'supplier_id'   => $request->supplier,
-            'warehouse_id'  => $request->warehouse,
-            'items'         => json_encode($items),
+            'supplier_id' => $request->supplier,
+            'warehouse_id' => $request->warehouse,
+            'items' => json_encode($items),
         ]);
 
-        return redirect()->back()->with('flash_message', 'Purchase saved successfully ✅');
+        return redirect()->back()->with('success', 'Purchase order saved successfully.');
     }
+
 
     function generateVoucherNumber()
     {
@@ -96,8 +78,6 @@ class PurchaseController extends Controller
                 'vo_number'      => $purchase->vo_number,
                 'purchase_date'  => $purchase->purchase_date,
                 'supplier_name'  => $purchase->supplier->name ?? '',
-                'supplier_id'    => $purchase->supplier_id,
-                'warehouse_id'   => $purchase->warehouse_id,
                 'warehouse_name' => $purchase->warehouse->name ?? '',
                 'items'          => $purchase->items,
             ];
@@ -139,19 +119,9 @@ class PurchaseController extends Controller
     public function deletePurchase(Request $request)
     {
         $ids = $request->ids;
-
-        $userName = Auth::user()->name;
-
-        Purchase::whereIn('id', $ids)
-            ->update(['deleted_by' => $userName]);
-
         Purchase::whereIn('id', $ids)->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Deleted successfully.'
-        ]);
+        return response()->json(['success' => true, 'message' => 'Deleted successfully.']);
     }
-
 
 }

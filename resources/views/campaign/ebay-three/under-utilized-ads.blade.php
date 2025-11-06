@@ -246,7 +246,7 @@
             };
 
             var table = new Tabulator("#budget-under-table", {
-                index: "sku",
+                index: "Sku",
                 ajaxURL: "/ebay-3/utilized/ads/data",
                 layout: "fitData",
                 movableColumns: true,
@@ -509,7 +509,7 @@
                     let field = e.target.getAttribute("data-field");
                     let value = e.target.value;
 
-                    fetch('/update-ebay3-nr-data', {
+                    fetch('/update-ebay-nr-data', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -543,6 +543,12 @@
 
                     if (!(ub7 < 70)) return false;
 
+                    // price < 20
+                    // let price = parseFloat(data.price || 0);
+                    // if (price < 30) {
+                    //     return false;
+                    // }
+
                     // Pink DIL filter (exclude pink rows)
                     let l30 = parseFloat(data.L30);
                     let inv = parseFloat(data.INV);
@@ -564,12 +570,12 @@
 
                     // Inventory filter
                     let invFilterVal = $("#inv-filter").val();
-                    if (invFilterVal && invFilterVal !== 'ALL') {
-                        if (invFilterVal === "INV_0") {
-                            if (parseFloat(data.INV) !== 0) return false;
-                        } else if (invFilterVal === "OTHERS") {
-                            if (parseFloat(data.INV) === 0) return false;
-                        }
+                    if (!invFilterVal) {
+                        if (parseFloat(data.INV) === 0) return false;
+                    } else if (invFilterVal === "INV_0") {
+                        if (parseFloat(data.INV) !== 0) return false;
+                    } else if (invFilterVal === "OTHERS") {
+                        if (parseFloat(data.INV) === 0) return false;
                     }
 
                     // NR filter (use only data object)

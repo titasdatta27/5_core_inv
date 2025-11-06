@@ -36,10 +36,7 @@ class Ebay3PmtAdsController extends Controller
 
         $shopifyData = ShopifySku::whereIn("sku", $skus)->get()->keyBy("sku");
         $ebayMetrics = Ebay3Metric::whereIn("sku", $skus)->get()->keyBy("sku");
-        $matchedSkus = $ebayMetrics->keys()->all();
-        $productMasters = $productMasters->whereIn('sku', $matchedSkus)->values();
-
-        $nrValues = EbayThreeDataView::whereIn("sku", $matchedSkus)->pluck("value", "sku");
+        $nrValues = EbayThreeDataView::whereIn("sku", $skus)->pluck("value", "sku");
 
         $itemIdToSku = $ebayMetrics->pluck('sku', 'item_id')->toArray();
         $campaignIdToSku = $ebayMetrics->pluck('sku', 'campaign_id')->toArray();
@@ -93,7 +90,7 @@ class Ebay3PmtAdsController extends Controller
                 ($adMetricsBySku[$sku][$range]['PRIORITY_SPENT'] ?? 0) + $this->extractNumber($report->cpc_ad_fees_payout_currency);
         }
 
-        $marketplaceData = MarketplacePercentage::where("marketplace", "Ebay3")->first();
+        $marketplaceData = MarketplacePercentage::where("marketplace", "Ebay" )->first();
         $percentage = $marketplaceData ? ($marketplaceData->percentage / 100) : 1;
         $adPercentage = $marketplaceData ? ($marketplaceData->ad_updates / 100) : 1;
 

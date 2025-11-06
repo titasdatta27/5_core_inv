@@ -49,7 +49,7 @@ class MovementAnalysisController extends Controller
             ->get();
 
         $filteredData = $productData->filter(function ($item) {
-            return !(empty(trim($item->sku ?? '')));
+            return !(empty(trim($item->parent ?? '')) && empty(trim($item->sku ?? '')));
         });
 
         $skus = $filteredData->filter(function ($item) {
@@ -62,9 +62,9 @@ class MovementAnalysisController extends Controller
             return $item->parent . '||' . $item->sku;
         });
 
-        $processedData = $filteredData->map(function ($item) use ($productData, $shopifyData, $movementData) {
+        $processedData = $filteredData->map(function ($item) use ($shopifyData, $movementData) {
+            $parent = trim($item->parent ?? '');
             $childSku = trim($item->sku ?? '');
-            $parent = trim($productData[$childSku]->parent ?? '');
             $key = $parent . '||' . $childSku;
 
             if (!empty($childSku) && stripos($childSku, 'PARENT') === false) {

@@ -321,25 +321,16 @@ class BestbuyUSAZeroController extends Controller
         exit;
     }
 
-
     public function getLivePendingAndZeroViewCounts()
     {
         $productMasters = ProductMaster::whereNull('deleted_at')->get();
+        $skus = $productMasters->pluck('sku')->unique()->toArray();
 
-        // Normalize SKUs (avoid case/space mismatch)
-        $skus = $productMasters->pluck('sku')->map(fn($s) => strtoupper(trim($s)))->unique()->toArray();
+        $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy('sku');
+        $bestbuyusaDataViews = BestbuyUSAListingStatus::whereIn('sku', $skus)->get()->keyBy('sku');
 
-        $shopifyData = ShopifySku::whereIn('sku', $skus)->get()
-            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
+        $bestbuyusaMetrics = BestbuyUsaProduct::whereIn('sku', $skus)->get()->keyBy('sku');
 
-        $bestbuyUsaListingStatus = BestbuyUSAListingStatus::whereIn('sku', $skus)->get()
-            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
-
-        $bestbuyUsaDataViews = BestbuyUSADataView::whereIn('sku', $skus)->get()
-            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
-
-        $bestbuyUsaMetrics = BestbuyUsaProduct::whereIn('sku', $skus)->get()
-            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
 
         $listedCount = 0;
         $zeroInvOfListed = 0;
@@ -347,31 +338,19 @@ class BestbuyUSAZeroController extends Controller
         $zeroViewCount = 0;
 
         foreach ($productMasters as $item) {
-            $sku = strtoupper(trim($item->sku));
+            $sku = trim($item->sku);
             $inv = $shopifyData[$sku]->inv ?? 0;
+            $isParent = stripos($sku, 'PARENT') !== false;
+            if ($isParent) continue;
 
-            // Skip parent SKUs
-            if (stripos($sku, 'PARENT') !== false) continue;
-
-            // --- Amazon Listing Status ---
-            $status = $bestbuyUsaListingStatus[$sku]->value ?? null;
+            $status = $bestbuyusaDataViews[$sku]->value ?? null;
             if (is_string($status)) {
                 $status = json_decode($status, true);
             }
+            $listed = $status['listed'] ?? (floatval($inv) > 0 ? 'Pending' : 'Listed');
+            $live = $status['live'] ?? null;
 
-            // $listed = $status['listed'] ?? (floatval($inv) > 0 ? 'Pending' : 'Listed');
-            $listed = $status['listed'] ?? null;
-
-            // --- Amazon Live Status ---
-            $dataView = $bestbuyUsaDataViews[$sku]->value ?? null;
-            if (is_string($dataView)) {
-                $dataView = json_decode($dataView, true);
-            }
-            // $live = ($dataView['Live'] ?? false) === true ? 'Live' : null;
-            $live = (!empty($dataView['Live']) && $dataView['Live'] === true) ? 'Live' : null;
-
-
-            // --- Listed count ---
+            // Listed count (for live pending)
             if ($listed === 'Listed') {
                 $listedCount++;
                 if (floatval($inv) <= 0) {
@@ -379,38 +358,31 @@ class BestbuyUSAZeroController extends Controller
                 }
             }
 
-            // --- Live count ---
+            // Live count
             if ($live === 'Live') {
                 $liveCount++;
             }
 
-            // --- Views / Zero-View logic ---
-            $metricRecord = $aliexpressMetrics[$sku] ?? null;
-            $views = null;
-
-            if ($metricRecord) {
-                // Direct field (if column exists)
-                if (!empty($metricRecord->views)) {
-                    $views = $metricRecord->views;
+            // Zero view: INV > 0, views == 0 (from ebay_metric table), not parent SKU (NR ignored)
+            $views = $bestbuyusaMetrics[$sku]->views ?? null;
+            // if (floatval($inv) > 0 && $views !== null && intval($views) === 0) {
+            //     $zeroViewCount++;
+            // }
+            if ($inv > 0) {
+                if ($views === null) {
+                    // Do nothing, ignore null
+                } elseif (intval($views) === 0) {
+                    $zeroViewCount++;
                 }
-                // Or inside JSON column `value`
-                elseif (!empty($metricRecord->value)) {
-                    $metricData = json_decode($metricRecord->value, true);
-                    $views = $metricData['views'] ?? null;
-                }
-            }
-
-            if ($inv > 0 && $views !== null && intval($views) === 0) {
-                $zeroViewCount++;
             }
         }
 
-        $livePending = $listedCount - $liveCount;
+        // live pending = listed - 0-inv of listed - live
+        $livePending = $listedCount - $zeroInvOfListed - $liveCount;
 
         return [
             'live_pending' => $livePending,
             'zero_view' => $zeroViewCount,
         ];
     }
-
 }

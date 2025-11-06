@@ -2038,14 +2038,12 @@
             function loadData() {
                 showLoader();
                 return $.ajax({
-                    url: '/zero_aliexpress/view-data',
+                    url: '/zero_walmart/view-data',
                     type: 'GET',
                     dataType: 'json',
                     success: function(response) {
                         if (response && response.data) {
                             tableData = response.data.map((item, index) => {
-                                console.log(item,'dfd');
-                                
                                 // Calculate A Dil% as (A L30 / INV), handle division by zero
                                 const inv = Number(item.inv) || 0;
                                 const aL30 = Number(item['A_L30']) || 0;
@@ -2133,9 +2131,9 @@
                     if (item.is_parent) {
                         $row.addClass('parent-row');
                     }
-                    // if (item.NR === 'NR') {
-                    //     $row.addClass('nr-hide');
-                    // }
+                    if (item.NR === 'NR') {
+                        $row.addClass('nr-hide');
+                    }
                     // Helper functions for color coding
                     const getDilColor = (value) => {
                         const percent = parseFloat(value) * 100;
@@ -2408,31 +2406,31 @@
                 });
             }
 
-            // $(document).on('change', '.nr-select', function() {
-            //     const sku = $(this).data('sku');
-            //     const nrValue = $(this).val();
-            //     console.log(nrValue, 'nrrr');
+            $(document).on('change', '.nr-select', function() {
+                const sku = $(this).data('sku');
+                const nrValue = $(this).val();
+                console.log(nrValue, 'nrrr');
 
 
-            //     $.ajax({
-            //         // url: '/doba/save-nr',
-            //         type: 'POST',
-            //         data: {
-            //             sku: sku,
-            //             nr: JSON.stringify({
-            //                 NR: nrValue
-            //             }),
-            //             _token: $('meta[name="csrf-token"]').attr('content') // CSRF protection
-            //         },
-            //         success: function(res) {
-            //             showNotification('success', 'NR updated successfully');
-            //         },
-            //         error: function(err) {
-            //             console.error('Error saving NR:', err);
-            //             showNotification('danger', 'Failed to update NR');
-            //         }
-            //     });
-            // });
+                $.ajax({
+                    // url: '/doba/save-nr',
+                    type: 'POST',
+                    data: {
+                        sku: sku,
+                        nr: JSON.stringify({
+                            NR: nrValue
+                        }),
+                        _token: $('meta[name="csrf-token"]').attr('content') // CSRF protection
+                    },
+                    success: function(res) {
+                        showNotification('success', 'NR updated successfully');
+                    },
+                    error: function(err) {
+                        console.error('Error saving NR:', err);
+                        showNotification('danger', 'Failed to update NR');
+                    }
+                });
+            });
 
 
             function initNREditHandlers() {
@@ -2448,16 +2446,18 @@
                     }
 
                     $.ajax({
-                        url: '/aliexpress/save-nr',
+                        // url: '/amazon/save-nr',
                         type: 'POST',
                         data: {
                             sku: sku,
-                            nr: { NR: nrValue },
+                            nr: JSON.stringify({
+                                NR: nrValue
+                            }),
                             _token: $('meta[name="csrf-token"]').attr('content') // CSRF protection
                         },
                         success: function(res) {
                             showNotification('success', 'NR updated successfully');
-                            // Update tableData and filteredData correctly
+                            // ✅ Update tableData and filteredData correctly
                             tableData.forEach(item => {
                                 if (item['sku'] === sku) {
                                     item.NR = nrValue;
@@ -2468,7 +2468,7 @@
                                     item.NR = nrValue;
                                 }
                             });
-                            // Recalculate & re-render
+                            // ✅ Recalculate & re-render
                             updateZeroViewDiv();
                             renderTable();
                         },

@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\Cache;
 use App\Http\Controllers\ApiController;
 use App\Models\ChannelMaster;
 use App\Models\Ebay2GeneralReport;
-use App\Models\ADVMastersData;
 use App\Models\Ebay2Metric;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -60,10 +59,6 @@ class EbayTwoController extends Controller
         ]);
     }
 
-    public function getEbay2TotsalSaleDataSave(Request $request)
-    {
-        return ADVMastersData::getEbay2TotsalSaleDataSaveProceed($request);
-    }
 
     public function EbayTwoPricingCVR(Request $request)
     {
@@ -94,24 +89,15 @@ class EbayTwoController extends Controller
             ->unique()
             ->values()
             ->all();
-        
+
         // 3. Related Models
         $shopifyData = ShopifySku::whereIn("sku", $skus)
             ->get()
             ->keyBy("sku");
 
-        /*    
         $ebayMetrics = Ebay2Metric::whereIn("sku", $skus)
             ->get()
-            ->keyBy("sku"); 
-        */
-            
-        $ebayMetrics = DB::connection('apicentral')
-            ->table('ebay2_metrics')
-            ->select('sku', 'ebay_price', 'ebay_l30', 'ebay_l60', 'views', 'item_id')
-            ->whereIn('sku', $skus)
-            ->get()
-            ->keyBy('sku');  
+            ->keyBy("sku");
 
         $nrValues = EbayTwoDataView::whereIn("sku", $skus)->pluck("value", "sku");
 

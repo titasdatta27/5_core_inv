@@ -272,17 +272,6 @@
 
         .custom-toast {
             z-index: 2000;
-            max-width: 400px;
-            width: auto;
-            min-width: 300px;
-            font-size: 16px;
-        }
-        
-        /* Toast styling to ensure visibility */
-        .toast-body {
-            padding: 12px 15px;
-            word-wrap: break-word;
-            white-space: normal;
         }
 
         /* Add to your CSS section */
@@ -368,7 +357,6 @@
                                         <option value="frght">FRGHT</option>
                                         <option value="ship">SHIP</option>
                                         <option value="temu_ship">TEMU SHIP</option>
-                                        <option value="moq">MOQ</option>
                                         <option value="ebay2_ship">EBAY2 SHIP</option>
                                         <option value="initial_quantity">INITIAL QTY</option>
                                         <option value="label_qty">Label QTY</option>
@@ -412,98 +400,9 @@
                         <button type="button" class="btn btn-success ms-2" id="downloadExcel">
                             <i class="fas fa-file-excel me-1"></i> Download Excel
                         </button>
-
-                        <button id="missingImagesBtn" class="btn btn-success ms-2">
-                            <i class="bi bi-image"></i> Show Missing Data
-                        </button>
-
-                        <button type="button" class="btn btn-success ms-2" id="viewArchivedBtn">
-                            <i class="fas fa-box-archive me-1"></i> View Archived Products
-                        </button>
-
                         <button type="button" class="btn btn-warning ms-2" id="importFromApiBtn" hidden>
                             <i class="fas fa-cloud-download-alt me-1"></i> Import from API Sheet
                         </button>
-                    </div>
-
-
-                    <div class="modal fade" id="archivedProductsModal" tabindex="-1" aria-labelledby="archivedProductsModalLabel" aria-hidden="true">
-                        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-                            <div class="modal-content border-0" style="border-radius: 18px; overflow: hidden;">
-                            <div class="modal-header bg-primary text-white">
-                                <h5 class="modal-title" id="archivedProductsModalLabel">
-                                <i class="fas fa-box-archive me-2"></i>Archived Products
-                                </h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <!-- Search Bar -->
-                            <div class="px-4 pt-3 pb-2 bg-light border-bottom">
-                                <div class="input-group">
-                                    <span class="input-group-text bg-success border-0">
-                                        <i class="fas fa-search"></i>
-                                    </span>
-                                    <input type="text" id="archivedSearch" class="form-control border-0 shadow-none" placeholder="Search by SKU...">
-                                </div>
-                            </div>
-                            <div class="modal-body p-0">
-                                <div class="table-responsive">
-                                <table class="table table-striped table-hover mb-0" id="archivedProductsTable">
-                                    <thead class="table-primary">
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>SKU</th>
-                                        {{-- <th>Product Name</th> --}}
-                                        <th>Archived By</th>
-                                        <th>Archived At</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    <!-- Dynamic rows will load here -->
-                                    </tbody>
-                                </table>
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button class="btn btn-secondary" data-bs-dismiss="modal">
-                                <i class="fas fa-times me-1"></i>Close
-                                </button>
-                            </div>
-                            </div>
-                        </div>
-                    </div>
-
-
-                    <!-- Missing Images Modal -->
-                    <div class="modal fade" id="missingImagesModal" tabindex="-1" aria-labelledby="missingImagesModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-xl modal-dialog-scrollable">
-                        <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="missingImagesModalLabel">Products Missing Images</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <table class="table table-bordered table-striped">
-                            <thead>
-                                <tr>
-                                <th>Parent</th>
-                                <th>SKU</th>
-                                <th>Status</th>
-                                {{-- <th>LP</th> --}}
-                                <th>CP$</th>
-                                {{-- <th>INV</th>
-                                <th>OV L30</th> --}}
-                                <th>Image</th>
-                                <th>Dimensions (L×W×H)</th>
-                                </tr>
-                            </thead>
-                            <tbody id="missingImagesTableBody">
-                                <!-- Rows will be filled dynamically -->
-                            </tbody>
-                            </table>
-                        </div>
-                        </div>
-                    </div>
                     </div>
 
                     <!-- Permission Modal -->
@@ -719,18 +618,6 @@
                                                         style="color: #4A5568;">TEMU SHIP</label>
                                                     <input type="text" class="form-control" id="temu_ship"
                                                         placeholder="Enter TEMU SHIP"
-                                                        style="border: 2px solid #E2E8F0; border-radius: 6px; padding: 0.75rem; background-color: white;">
-                                                </div>
-                                            </div>
-
-                                    
-
-                                            <div class="col-md-3">
-                                                <div class="form-group">
-                                                    <label for="moq" class="form-label fw-bold"
-                                                        style="color: #4A5568;">MOQ</label>
-                                                    <input type="text" class="form-control" id="moq"
-                                                        placeholder="Enter MOQ"
                                                         style="border: 2px solid #E2E8F0; border-radius: 6px; padding: 0.75rem; background-color: white;">
                                                 </div>
                                             </div>
@@ -970,7 +857,6 @@
                                                         <option value="frght">FRGHT</option>
                                                         <option value="ship">SHIP</option>
                                                         <option value="temu_ship">TEMU SHIP</option>
-                                                        <option value="moq">MOQ</option>
                                                         <option value="ebay2_ship">EBAY2 SHIP</option>
                                                         <option value="initial_quantity">INITIAL QUANTITY</option>
                                                         <option value="label_qty">Label QTY</option>
@@ -1065,7 +951,6 @@
                                     <th>FRGHT</th>
                                     <th>SHIP</th>
                                     <th>TEMU SHIP</th>
-                                    <th>MOQ</th>
                                     <th>EBAY2 SHIP</th>
                                     <th>INITIAL QUANTITY</th>
                                     <th>Label QTY</th>
@@ -1111,7 +996,7 @@
             // Emails and columns setup
             const emails = @json($emails ?? []);
             const columns = ["UPC","INV", "OV L30", "STATUS", "Unit", "LP", "CP$", "FRGHT", "SHIP",
-                "TEMU SHIP", "MOQ", "EBAY2 SHIP", "INITIAL QUANTITY", "Label QTY", "WT ACT", "WT DECL", "L", "W", "H", "CBM", "L(2)", "Action"
+                "TEMU SHIP", "EBAY2 SHIP", "INITIAL QUANTITY", "Label QTY", "WT ACT", "WT DECL", "L", "W", "H", "CBM", "L(2)", "Action"
             ];
             let selectedColumns = [];
             let selectedEmail = '';
@@ -1366,7 +1251,6 @@
                             });
                             document.getElementById('parentCount').textContent = `(${parentSet.size})`;
                             document.getElementById('skuCount').textContent = `(${skuCount})`;
-                            setupHeaderColumnSearch();
 
                         } else {
                             showError('Invalid data format received from server');
@@ -1381,7 +1265,6 @@
 
             // Modified renderTable function to respect column permissions
             function renderTable(data) {
-                
                 const tbody = document.getElementById('table-body');
                 tbody.innerHTML = '';
 
@@ -1400,7 +1283,7 @@
                 // All available columns
                 const allColumns = [
                     "Parent", "SKU", "UPC", "INV", "OV L30", "STATUS", "Unit", "LP", "CP$",
-                "FRGHT", "SHIP", "TEMU SHIP", "MOQ", "EBAY2 SHIP", "INITIAL QUANTITY", "Label QTY", "WT ACT", "WT DECL", "L", "W", "H",
+                    "FRGHT", "SHIP", "TEMU SHIP", "EBAY2 SHIP", "INITIAL QUANTITY", "Label QTY", "WT ACT", "WT DECL", "L", "W", "H",
                     "CBM", "L(2)", "Action"
                 ];
 
@@ -1507,9 +1390,6 @@
                                     case "TEMU SHIP":
                                     cell.textContent = escapeHtml(item.temu_ship) || '-';
                                     break;
-                                    case "MOQ":
-                                    cell.textContent = escapeHtml(item.moq) || '-';
-                                    break;
                                     case "EBAY2 SHIP":
                                     cell.textContent = escapeHtml(item.ebay2_ship) || '-';
                                     break;
@@ -1560,8 +1440,8 @@
                                     : ''
                                 }
                                 ${hasDeletePermission ? 
-                                    `<button class="btn btn-sm btn-outline-warning delete-btn" data-id="${escapeHtml(item.id)}" data-sku="${escapeHtml(item.SKU)}">
-                                                            <i class="bi bi-archive"></i>
+                                    `<button class="btn btn-sm btn-outline-danger delete-btn" data-id="${escapeHtml(item.id)}" data-sku="${escapeHtml(item.SKU)}">
+                                                            <i class="bi bi-trash"></i>
                                                         </button>` 
                                     : ''
                                 }
@@ -1627,27 +1507,11 @@
                                 cell.textContent = formatNumber(item.upc, 0);
                                 break;
                             case "INV":
-                                if (item.shopify_inv === 0 || item.shopify_inv === "0") {
-                                    cell.textContent = "0";
-                                } else if (item.shopify_inv === null || item.shopify_inv === undefined || item.shopify_inv === "") {
-                                    cell.textContent = "-";
-                                } else {
-                                    cell.textContent = escapeHtml(item.shopify_inv);
-                                }
+                                cell.textContent = escapeHtml(item.shopify_inv) || '-';
                                 break;
-                                // cell.textContent = escapeHtml(item.shopify_inv) || '-';
-                                // break;
                             case "OV L30":
-                                if (item.shopify_quantity === 0 || item.shopify_quantity === "0") {
-                                    cell.textContent = "0";
-                                } else if (item.shopify_quantity === null || item.shopify_quantity === undefined || item.shopify_quantity === "") {
-                                    cell.textContent = "-";
-                                } else {
-                                    cell.textContent = escapeHtml(item.shopify_quantity);
-                                }
+                                cell.textContent = escapeHtml(item.shopify_quantity) || '-';
                                 break;
-                                // cell.textContent = escapeHtml(item.shopify_quantity) || '-';
-                                // break;
                             case "STATUS":
                                 cell.textContent = escapeHtml(item.status) || '-';
                                 break;
@@ -1671,9 +1535,6 @@
                                 break;
                             case "TEMU SHIP":
                                 cell.textContent = escapeHtml(item.temu_ship) || '-';
-                                break;
-                            case "MOQ":
-                                cell.textContent = escapeHtml(item.moq) || '-';
                                 break;
                             case "EBAY2 SHIP":
                                 cell.textContent = escapeHtml(item.ebay2_ship) || '-';
@@ -1725,8 +1586,8 @@
                                 : ''
                             }
                             ${hasDeletePermission ? 
-                                `<button class="btn btn-sm btn-outline-warning delete-btn" data-id="${escapeHtml(item.id)}" data-sku="${escapeHtml(item.SKU)}">
-                                                        <i class="bi bi-archive"></i>
+                                `<button class="btn btn-sm btn-outline-danger delete-btn" data-id="${escapeHtml(item.id)}" data-sku="${escapeHtml(item.SKU)}">
+                                                        <i class="bi bi-trash"></i>
                                                     </button>` 
                                 : ''
                             }
@@ -1758,101 +1619,9 @@
             }
 
 
-            // Handle Missing Images / Dimensions / CP  on Button Click
-            document.getElementById('missingImagesBtn').addEventListener('click', function() {
-                if (!Array.isArray(tableData) || tableData.length === 0) {
-                    showError('No data loaded yet.');
-                    return;
-                }
-
-                // Filter SKUs that are missing image OR missing dimension OR missing CP
-                const missingData = tableData.filter(item => {
-                    const sku = String(item.SKU || '').trim().toUpperCase();
-                    const isNotParent = !sku.startsWith('PARENT');
-
-                    // Missing image
-                    const hasNoImage = !item.image_path || item.image_path.trim() === '';
-
-                    // Missing or zero dimensions
-                    const l = parseFloat(item.l);
-                    const w = parseFloat(item.w);
-                    const h = parseFloat(item.h);
-                    const missingDimensions = (
-                        isNaN(l) || isNaN(w) || isNaN(h) || l <= 0 || w <= 0 || h <= 0
-                    );
-
-                    // Missing or invalid CP
-                    const cpRaw = (item.cp || '').toString().trim();
-                    const cpValue = parseFloat(cpRaw);
-                    const missingCP = (
-                        cpRaw === '' || cpRaw === '-' || isNaN(cpValue) || cpValue <= 0
-                    );
-
-                    // Include if any missing condition is true (and not a parent SKU)
-                    return isNotParent && (hasNoImage || missingDimensions || missingCP);
-                });
-
-                const tbody = document.getElementById('missingImagesTableBody');
-                tbody.innerHTML = '';
-
-                if (missingData.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="7" class="text-center text-success">All child products have images, dimensions, and CP values 🎉</td></tr>';
-                } else {
-                    missingData.forEach(item => {
-                        const cpRaw = (item.cp || '').toString().trim();
-                        const cpValue = parseFloat(cpRaw);
-                        const isMissingCP = (cpRaw === '' || cpRaw === '-' || isNaN(cpValue) || cpValue <= 0);
-
-                        const hasImage = item.image_path && item.image_path.trim() !== '';
-                        const hasValidDims = (
-                            parseFloat(item.l) > 0 && parseFloat(item.w) > 0 && parseFloat(item.h) > 0
-                        );
-
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `
-                            <td>${escapeHtml(item.Parent || '-')}</td>
-                            <td>${escapeHtml(item.SKU || '-')}</td>
-                            <td>${escapeHtml(item.status || '-')}</td>
-
-                            <td class="${isMissingCP ? 'text-danger fw-bold' : ''}">
-                                ${isMissingCP ? 'Missing CP' : formatNumber(item.cp, 2)}
-                            </td>
-
-                            <td>${hasImage ? '<span class="text-success">✔</span>' : '<span class="text-danger"> Missing Image</span>'}</td>
-
-                            <td>${hasValidDims 
-                                ? `${formatNumber(item.l, 2)} × ${formatNumber(item.w, 2)} × ${formatNumber(item.h, 2)}`
-                                : '<span class="text-danger"> Missing Dimensions</span>'}
-                            </td>
-                        `;
-                        tbody.appendChild(tr);
-                    });
-                }
-
-                // Update modal title with count
-                document.getElementById('missingImagesModalLabel').textContent = 
-                    `Products Missing Image / Dimensions / CP (${missingData.length})`;
-
-                // Show the modal
-                const modal = new bootstrap.Modal(document.getElementById('missingImagesModal'));
-                modal.show();
-            });
-
-
             // Updated function to show all columns except those in the hidden list
             function updateTableHeader(hiddenColumns) {
                 const thead = document.querySelector('#row-callback-datatable thead tr');
-
-                // Preserve current search input values so re-rendering header doesn't clear them
-                const existingParentVal = document.getElementById('parentSearch')?.value || '';
-                const existingSkuVal = document.getElementById('skuSearch')?.value || '';
-                const existingCustomVal = document.getElementById('customSearch')?.value || '';
-
-                // Preserve focus and selection so user's typing isn't interrupted
-                const activeEl = document.activeElement;
-                const activeId = (activeEl && ['parentSearch', 'skuSearch', 'customSearch'].includes(activeEl.id)) ? activeEl.id : null;
-                const activeSelectionStart = activeEl && activeId ? activeEl.selectionStart : null;
-                const activeSelectionEnd = activeEl && activeId ? activeEl.selectionEnd : null;
 
                 // Store the checkbox column if it exists
                 const checkboxTh = thead.querySelector('.checkbox-column');
@@ -1868,7 +1637,7 @@
                 // All available columns
                 const allColumns = [
                     "Parent", "SKU", "UPC", "INV", "OV L30", "STATUS", "Unit", "LP", "CP$",
-                    "FRGHT", "SHIP", "TEMU SHIP", "MOQ", "EBAY2 SHIP", "INITIAL QUANTITY", "Label QTY", "WT ACT", "WT DECL", "L", "W", "H",
+                    "FRGHT", "SHIP", "TEMU SHIP", "EBAY2 SHIP", "INITIAL QUANTITY", "Label QTY", "WT ACT", "WT DECL", "L", "W", "H",
                     "CBM", "L(2)", "Action"
                 ];
 
@@ -1917,26 +1686,6 @@
                 // Update parent and SKU counts if they're visible
                 const parentCount = document.getElementById('parentCount');
                 const skuCount = document.getElementById('skuCount');
-
-                // Restore any preserved search values to inputs that were recreated
-                if (document.getElementById('parentSearch')) document.getElementById('parentSearch').value = existingParentVal;
-                if (document.getElementById('skuSearch')) document.getElementById('skuSearch').value = existingSkuVal;
-                if (document.getElementById('customSearch')) document.getElementById('customSearch').value = existingCustomVal;
-
-                // Restore focus and cursor position if applicable
-                if (activeId) {
-                    const restored = document.getElementById(activeId);
-                    if (restored) {
-                        restored.focus();
-                        try {
-                            if (typeof activeSelectionStart === 'number' && typeof activeSelectionEnd === 'number') {
-                                restored.setSelectionRange(activeSelectionStart, activeSelectionEnd);
-                            }
-                        } catch (err) {
-                            // ignore (some browsers may throw if input type doesn't support selection)
-                        }
-                    }
-                }
 
                 if (parentCount && skuCount) {
                     const parentSet = new Set();
@@ -2009,8 +1758,8 @@
                             : ''
                         }
                         ${hasDeletePermission ? 
-                            `<button class="btn btn-sm btn-outline-warning delete-btn" data-id="${escapeHtml(item.id)}" data-sku="${escapeHtml(item.SKU)}">
-                                                                            <i class="bi bi-archive"></i>
+                            `<button class="btn btn-sm btn-outline-danger delete-btn" data-id="${escapeHtml(item.id)}" data-sku="${escapeHtml(item.SKU)}">
+                                                                            <i class="bi bi-trash"></i>
                                                                         </button>` 
                             : ''
                         }
@@ -2071,102 +1820,6 @@
                 setupBatchProcessing();
             }
 
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-
-            //archive functionality
-            $('#viewArchivedBtn').on('click', function() {
-                $.ajax({
-                    url: '/product_master/archived',
-                    method: 'GET',
-                    beforeSend: function() {
-                        $('#archivedProductsTable tbody').html(`
-                            <tr><td colspan="5" class="text-center py-3">
-                                <div class="spinner-border text-primary" role="status"></div>
-                            </td></tr>
-                        `);
-                    },
-                    success: function(res) {
-                        const tableBody = $('#archivedProductsTable tbody');
-                        tableBody.empty();
-
-                        if (res.data.length === 0) {
-                            tableBody.append(`
-                                <tr><td colspan="5" class="text-center py-3 text-muted">
-                                    No archived products found.
-                                </td></tr>
-                            `);
-                            return;
-                        }
-
-                        res.data.sort((a, b) => new Date(b.deleted_at) - new Date(a.deleted_at));
-
-                        res.data.forEach(product => {
-                            tableBody.append(`
-                                <tr>
-                                    <td>${product.id}</td>
-                                    <td>${product.sku}</td>
-                                    <td>${product.deleted_by_name || '-'}</td> 
-                                    <td>${product.deleted_at ? new Date(product.deleted_at).toLocaleString() : '-'}</td>
-                                    <td>
-                                        <button class="btn btn-sm btn-success restore-btn" data-id="${product.id}">
-                                            <i class="fas fa-undo me-1"></i>Restore
-                                        </button>
-                                    </td>
-                                </tr>
-                            `);
-                        });
-
-                        // Attach restore button events
-                        $('.restore-btn').off('click').on('click', function() {
-                            const id = $(this).data('id');
-                            $.ajax({
-                                url: '/product_master/restore',
-                                method: 'POST',
-                                data: { ids: [id] },
-                                success: function(res) {
-                                    if (res.success) {
-                                        showToast('success', res.message || 'Product restored successfully!');
-                                        $('#viewArchivedBtn').trigger('click'); // reload modal list
-                                        loadData(); // reload main table
-                                    } else {
-                                        showToast('danger', res.message || 'Failed to restore.');
-                                    }
-                                },
-                                error: function() {
-                                    showToast('danger', 'Restore failed.');
-                                }
-                            });
-                        });
-                    },
-                    error: function() {
-                        $('#archivedProductsTable tbody').html(`
-                            <tr><td colspan="5" class="text-center text-danger py-3">
-                                Failed to load archived products.
-                            </td></tr>
-                        `);
-                    }
-                });
-
-                const modal = new bootstrap.Modal(document.getElementById('archivedProductsModal'));
-                modal.show();
-            });
-
-            // Live search for archived products
-            $(document).on('keyup', '#archivedSearch', function() {
-                const searchValue = $(this).val().toLowerCase().trim();
-
-                $('#archivedProductsTable tbody tr').each(function() {
-                    const sku = $(this).find('td:nth-child(2)').text().toLowerCase();
-                    $(this).toggle(sku.includes(searchValue));
-                });
-            });
-
-
-
             function setupSelectFilter(){
                 const fieldSelect = document.querySelector('.field-selector-wrapper select');
                 let fieldInput = null; 
@@ -2207,30 +1860,109 @@
             }
             
             function setupSearch() {
-                // Centralized filter logic that reads current values from DOM and filters tableData
+                const searchInput = document.getElementById('customSearch');
+                
+                const skuSearchInput = document.getElementById('skuSearch');
+                
+                const parentSearchInput = document.getElementById('parentSearch');
+
+                const clearButton = document.getElementById('clearSearch');
+
+                // Global search (search all columns)
+                if (searchInput) {
+                    searchInput.addEventListener('input', debounce(function () {
+                        const searchTerm = searchInput.value.toLowerCase().trim();
+
+                        let filteredData = [...tableData];
+                        if (searchTerm) {
+                            filteredData = filteredData.filter(item =>
+                                Object.values(item).some(value =>
+                                    String(value).toLowerCase().includes(searchTerm)
+                                )
+                            );
+                        }
+
+                        renderTable(filteredData);
+                    }, 300));
+                }
+
+                // SKU search (only filter by SKU)
+                if (skuSearchInput) {
+                    
+                    skuSearchInput.addEventListener('input', debounce(function () {
+                        const skuValue = skuSearchInput.value.toLowerCase().trim();
+
+                        let filteredData = [...tableData];
+                        if (skuValue) {
+                            filteredData = filteredData.filter(item =>
+                                (item.SKU || item.sku || '').toLowerCase().includes(skuValue)
+                            );
+                        }
+
+                        renderTable(filteredData);
+                    }, 300));
+                }
+
+                // Parent search (only filter by Parent)
+                if (parentSearchInput) {
+                    parentSearchInput.addEventListener('input', debounce(function () {
+                        const parentValue = parentSearchInput.value.toLowerCase().trim();
+
+                        let filteredData = [...tableData];
+                        if (parentValue) {
+                            filteredData = filteredData.filter(item =>
+                                (item.Parent || item.parent || '').toLowerCase().includes(parentValue)
+                            );
+                        }
+
+                        renderTable(filteredData);
+                    }, 300));
+                }
+
+                // Clear all searches
+                if (clearButton) {
+                    clearButton.addEventListener('click', function () {
+                        if (searchInput) searchInput.value = '';
+                        if (skuSearchInput) skuSearchInput.value = '';
+                        if (parentSearchInput) parentSearchInput.value = '';
+                        renderTable(tableData);
+                    });
+                }
+            }
+
+            // Setup header column search
+            function setupHeaderColumnSearch() {
+                const parentSearch = document.getElementById('parentSearch');
+                const skuSearch = document.getElementById('skuSearch');
+                const globalSearch = document.getElementById('customSearch');
+
                 function applyFilters() {
-                    const parentValue = (document.getElementById('parentSearch')?.value || '').toLowerCase().trim();
-                    const skuValue = (document.getElementById('skuSearch')?.value || '').toLowerCase().trim();
-                    const globalValue = (document.getElementById('customSearch')?.value || '').toLowerCase().trim();
+                    const parentValue = parentSearch ? parentSearch.value.toLowerCase().trim() : '';
+                    const skuValue = skuSearch ? skuSearch.value.toLowerCase().trim() : '';
+                    const globalValue = globalSearch ? globalSearch.value.toLowerCase().trim() : '';
+
+                    console.log('Header Parent Search:', parentValue);
+                    console.log('Header SKU Search:', skuValue);
+                    console.log('Header Global Search:', globalValue);
 
                     let filteredData = [...tableData];
 
                     if (parentValue) {
                         filteredData = filteredData.filter(item =>
-                            ((item.Parent || item.parent || '') + '').toLowerCase().includes(parentValue)
+                            (item.Parent || item.parent || '').toLowerCase().includes(parentValue)
                         );
                     }
 
                     if (skuValue) {
                         filteredData = filteredData.filter(item =>
-                            ((item.SKU || item.sku || '') + '').toLowerCase().includes(skuValue)
+                            (item.SKU || item.sku || '').toLowerCase().includes(skuValue)
                         );
                     }
 
                     if (globalValue) {
                         filteredData = filteredData.filter(item =>
                             Object.values(item).some(value =>
-                                String(value || '').toLowerCase().includes(globalValue)
+                                String(value).toLowerCase().includes(globalValue)
                             )
                         );
                     }
@@ -2238,35 +1970,8 @@
                     renderTable(filteredData);
                 }
 
-                // Use event delegation so listeners survive header re-rendering
-                document.addEventListener('input', debounce(function (e) {
-                    const id = e.target && e.target.id;
-                    if (!id) return;
-                    if (id === 'customSearch' || id === 'skuSearch' || id === 'parentSearch') {
-                        applyFilters();
-                    }
-                }, 250));
-
-                // Clear button (delegated click) - resets inputs and renders full table
-                document.addEventListener('click', function (e) {
-                    const target = e.target.closest ? e.target.closest('#clearSearch') : (e.target.id === 'clearSearch' ? e.target : null);
-                    if (!target) return;
-                    const custom = document.getElementById('customSearch');
-                    const sku = document.getElementById('skuSearch');
-                    const parent = document.getElementById('parentSearch');
-                    if (custom) custom.value = '';
-                    if (sku) sku.value = '';
-                    if (parent) parent.value = '';
-                    renderTable(tableData);
-                });
-            }
-
-            // Header column search is intentionally a no-op because we handle header inputs
-            // via delegated listeners inside setupSearch() above. Keeping this function
-            // prevents other code from breaking if it's called elsewhere.
-            function setupHeaderColumnSearch() {
-                // No-op: listeners are attached by setupSearch using delegation so they
-                // survive dynamic header updates.
+                if (parentSearch) parentSearch.addEventListener('input', debounce(applyFilters, 300));
+                if (skuSearch) skuSearch.addEventListener('input', debounce(applyFilters, 300));
             }
 
 
@@ -2288,7 +1993,7 @@
                     const hiddenColumns = getUserHiddenColumns();
                     const allColumns = [
                         "Parent", "SKU", "UPC", "INV", "OV L30", "STATUS", "Unit", "LP", "CP$",
-                        "FRGHT", "SHIP", "TEMU SHIP", "MOQ", "EBAY2 SHIP", "INITIAL QUANTITY", "Label QTY", "WT ACT", "WT DECL", "L", "W", "H",
+                        "FRGHT", "SHIP", "TEMU SHIP", "EBAY2 SHIP", "INITIAL QUANTITY", "Label QTY", "WT ACT", "WT DECL", "L", "W", "H",
                         "CBM", "L(2)", "DC", "Pcs/Box", "L1", "B", "H1", "Weight", "MSRP", "MAP", "UPC"
                     ];
 
@@ -2332,9 +2037,6 @@
                         },
                         "TEMU SHIP": {
                             key: "temu_ship"
-                        },
-                        "MOQ": {
-                            key: "moq"
                         },
                         "EBAY2 SHIP": {
                             key: "ebay2_ship"
@@ -2521,28 +2223,11 @@
                 document.getElementById('l')?.addEventListener('input', calculateCBM);
                 document.getElementById('h')?.addEventListener('input', calculateCBM);
                 document.getElementById('cp')?.addEventListener('input', calculateLP);
-                
-                // Add SKU availability check on input
-                document.getElementById('sku')?.addEventListener('input', function() {
-                    const skuField = this;
-                    const sku = skuField.value.trim();
-                    const saveBtn = document.getElementById('saveProductBtn');
-                    const originalSku = saveBtn.getAttribute('data-original-sku') || null;
-                    
-                    // Only validate if SKU has actual content and isn't a PARENT
-                    if (sku && !sku.toUpperCase().includes('PARENT')) {
-                        if (!checkSkuAvailability(sku, originalSku)) {
-                            showFieldError(skuField, 'This SKU already exists. Please use a different SKU.');
-                        } else {
-                            clearFieldError(skuField);
-                        }
-                    }
-                });
 
                 refreshParentsBtn.addEventListener('click', updateParentOptions);
 
                 saveBtn.addEventListener('click', async function() {
-                    if (!validateProductForm(false)) return;
+                    if (!validateProductForm()) return;
 
                     const formData = getFormData();
                     formData.append('operation', 'create');
@@ -2558,35 +2243,10 @@
                         });
                         const data = await response.json();
 
-                        if (!response.ok) {
-                            // Check if it's a duplicate entry error
-                            if (response.status === 409 || 
-                                (data.message && data.message.includes('already exists')) ||
-                                (data.message && data.message.includes('Duplicate entry'))) {
-                                
-                                // Show clear error message with SKU information
-                                showToast('warning', data.message || 'This SKU already exists in the database!');
-                                
-                                // Highlight the SKU field to draw attention
-                                const skuField = document.getElementById('sku');
-                                skuField.classList.add('is-invalid');
-                                
-                                // Create a feedback div if it doesn't exist
-                                let feedback = skuField.nextElementSibling;
-                                if (!feedback || !feedback.classList.contains('invalid-feedback')) {
-                                    feedback = document.createElement('div');
-                                    feedback.className = 'invalid-feedback';
-                                    skuField.parentNode.appendChild(feedback);
-                                }
-                                feedback.textContent = 'This SKU already exists. Please use a different SKU.';
-                                
-                                return;
-                            }
-                            throw new Error(data.message || `Server returned status ${response.status}`);
-                        }
-                        
-                        // Show success message
-                        showToast('success', 'Product successfully added to database!');
+                        if (!response.ok) throw new Error(data.message ||
+                            `Server returned status ${response.status}`);
+
+                        showAlert('success', 'Product saved to database!');
                         bootstrap.Modal.getInstance(modal).hide();
                         loadData();
                         resetProductForm();
@@ -2641,25 +2301,10 @@
                 const lp = cp + frght;
                 document.getElementById('lp').value = lp.toFixed(2);
             }
-            
-            // Function to check if SKU already exists in our data
-            function checkSkuAvailability(sku, originalSku = null) {
-                // If we're editing and the SKU hasn't changed, it's available
-                if (originalSku && sku === originalSku) {
-                    return true;
-                }
-                
-                // Check if SKU exists in current table data
-                const exists = tableData.some(product => product.SKU === sku);
-                return !exists;
-            }
 
             // Validate the product form
-            function validateProductForm(isUpdate = false) {
+            function validateProductForm() {
                 const sku = document.getElementById('sku').value;
-                // Get original SKU if in edit mode
-                const originalSku = isUpdate ? document.getElementById('saveProductBtn').getAttribute('data-original-sku') : null;
-                
                 // If SKU contains 'PARENT', skip required validation
                 if (sku && sku.toUpperCase().includes('PARENT')) {
                     // Clear any previous errors
@@ -2671,16 +2316,6 @@
 
                 let isValid = true;
                 const requiredFields = ['sku', 'labelQty', 'cp', 'ship', 'wtAct', 'wtDecl', 'w', 'l', 'h', 'unit'];
-                const skuField = document.getElementById('sku');
-                
-                // Check if SKU already exists (front-end validation)
-                if (sku && !checkSkuAvailability(sku, originalSku)) {
-                    showFieldError(skuField, 'This SKU already exists in the database. Please use a different SKU.');
-                    isValid = false;
-                    
-                    // Show toast with more detailed message
-                    showToast('warning', `Product with SKU "${sku}" already exists. Please use a different SKU.`);
-                }
 
                 requiredFields.forEach(id => {
                     const field = document.getElementById(id);
@@ -2690,7 +2325,7 @@
                     } else if (isNaN(field.value) && id !== 'sku' && id !== 'unit') {
                         showFieldError(field, 'Must be a number');
                         isValid = false;
-                    } else if (id !== 'sku' || isValid) { // Only clear if not already marked as duplicate
+                    } else {
                         clearFieldError(field);
                     }
                 });
@@ -2715,7 +2350,6 @@
                     lps: document.getElementById('lps').value || null,
                     ship: document.getElementById('ship').value || null,
                     temu_ship: document.getElementById('temu_ship').value || null,
-                    moq: document.getElementById('moq').value || null,
                     ebay2_ship: document.getElementById('ebay2_ship').value || null,
                     initial_quantity: document.getElementById('initial_quantity').value || null,
                     label_qty: document.getElementById('labelQty').value || null,
@@ -2793,7 +2427,7 @@
                 newSaveBtn.innerHTML = '<i class="fas fa-save me-2"></i> Update Product';
 
                 newSaveBtn.addEventListener('click', async function() {
-                    if (!validateProductForm(true)) return;
+                    if (!validateProductForm()) return;
 
                     const formData = getFormData();
                     formData.append('operation', 'update');
@@ -2811,35 +2445,11 @@
                         const data = await response.json();
 
                         if (!response.ok) {
-                            // Check if it's a duplicate entry error
-                            if (response.status === 409 || 
-                                (data.message && data.message.includes('already exists')) ||
-                                (data.message && data.message.includes('Duplicate entry'))) {
-                                
-                                // Show clear error message with SKU information
-                                showToast('warning', data.message || 'Another product with this SKU already exists!');
-                                
-                                // Highlight the SKU field to draw attention
-                                const skuField = document.getElementById('sku');
-                                skuField.classList.add('is-invalid');
-                                
-                                // Create a feedback div if it doesn't exist
-                                let feedback = skuField.nextElementSibling;
-                                if (!feedback || !feedback.classList.contains('invalid-feedback')) {
-                                    feedback = document.createElement('div');
-                                    feedback.className = 'invalid-feedback';
-                                    skuField.parentNode.appendChild(feedback);
-                                }
-                                feedback.textContent = 'This SKU already exists. Please use a different SKU.';
-                                
-                                return;
-                            }
                             throw new Error(data.message ||
                                 `Server returned status ${response.status}`);
                         }
 
-                        // Show specific success message for update
-                        showToast('success', `Product ${formData.get('sku')} updated successfully!`);
+                        showAlert('success', 'Product updated successfully!');
                         modal.hide();
                         loadData();
                         resetProductForm();
@@ -2879,7 +2489,6 @@
                     cp: product.cp || '',
                     ship: product.ship || '',
                     temu_ship: product.temu_ship || '',
-                    moq: product.moq || '',
                     ebay2_ship: product.ebay2_ship || '',
                     initial_quantity: product.initial_quantity || '',
                     wtAct: product.wt_act || '',
@@ -3291,10 +2900,6 @@
                     {
                         value: 'temu_ship',
                         text: 'TEMU SHIP'
-                    },
-                    {
-                        value: 'moq',
-                        text: 'MOQ'
                     },
                     {
                         value: 'ebay2_ship',
@@ -3714,32 +3319,36 @@
                             <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered">
                                 <div class="modal-content border-0" style="border-radius: 18px; overflow: hidden;">
-                                <div class="modal-header" style="background: linear-gradient(135deg, #facc15 0%, #eab308 100%); color: #fff;">
+                                <div class="modal-header" style="background: linear-gradient(135deg, #ff6b6b 0%, #ff0000 100%); color: #fff;">
                                     <div class="d-flex align-items-center w-100">
                                     <div class="me-3" style="font-size: 2.5rem;">
                                         <i class="fas fa-exclamation-triangle fa-shake"></i>
                                     </div>
                                     <div>
                                         <h5 class="modal-title mb-0" id="deleteConfirmModalLabel" style="font-weight: 800; letter-spacing: 1px;">
-                                        Archive Product?
+                                        Delete Product?
                                         </h5>
+                                        <small class="text-white-50">This action cannot be undone!</small>
                                     </div>
                                     <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
                                 </div>
                                 <div class="modal-body text-center py-4">
                                     <div class="mb-3" style="font-size: 1.2rem;">
-                                    Are you sure you want to <span class="fw-bold text-warning">Archive</span> product<br>
-                                    <span class="badge bg-warning fs-6 px-3 py-2 mt-2" style="font-size:1.1rem;">SKU: ${escapeHtml(sku)}</span>?
+                                    Are you sure you want to <span class="fw-bold text-danger">delete</span> product<br>
+                                    <span class="badge bg-danger fs-6 px-3 py-2 mt-2" style="font-size:1.1rem;">SKU: ${escapeHtml(sku)}</span>?
                                     </div>
-                                    
+                                    <div class="mb-2 text-warning" style="font-size: 1rem;">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    This will move the product to trash (soft delete).
+                                    </div>
                                 </div>
                                 <div class="modal-footer justify-content-center" style="background: #fff;">
                                     <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">
                                     <i class="fas fa-times me-1"></i>Cancel
                                     </button>
-                                    <button type="button" class="btn btn-warning px-4" id="confirmDeleteBtn">
-                                    <i class="fas fa-archive me-1"></i> Archive
+                                    <button type="button" class="btn btn-danger px-4" id="confirmDeleteBtn">
+                                    <i class="fas fa-trash me-1"></i>Yes, Delete
                                     </button>
                                 </div>
                                 </div>
@@ -3761,15 +3370,15 @@
                                     .then(data => {
                                         if (data.success) {
                                             showToast('success', data.message ||
-                                                'Product archived successfully!');
+                                                'Product deleted successfully!');
                                             loadData();
                                         } else {
                                             showToast('danger', data.message ||
-                                                'Archive failed');
+                                                'Delete failed');
                                         }
                                     })
                                     .catch(() => {
-                                        showToast('danger', 'Archive failed');
+                                        showToast('danger', 'Delete failed');
                                     })
                                     .finally(() => {
                                         modal.hide();
@@ -3793,31 +3402,28 @@
 
                 const toast = document.createElement('div');
                 toast.className =
-                    `custom-toast toast align-items-center text-bg-${type} border-0 show position-fixed bottom-0 start-50 translate-middle-x mb-4`;
+                    `custom-toast toast align-items-center text-bg-${type} border-0 show position-fixed top-0 end-0 m-4`;
                 toast.style.zIndex = 2000;
                 toast.setAttribute('role', 'alert');
                 toast.setAttribute('aria-live', 'assertive');
                 toast.setAttribute('aria-atomic', 'true');
                 toast.innerHTML = `
                     <div class="d-flex">
-                        <div class="toast-body" style="font-size: 15px; padding: 12px 15px;">${escapeHtml(message)}</div>
+                        <div class="toast-body">${escapeHtml(message)}</div>
                         <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
                     </div>
                 `;
-                
-                // Make toast wider to accommodate longer messages and more noticeable
-                toast.style.minWidth = '350px';
-                toast.style.maxWidth = '450px';
-                toast.style.boxShadow = '0 5px 15px rgba(0,0,0,0.3)';
-                toast.style.borderRadius = '8px';
                 document.body.appendChild(toast);
 
                 setTimeout(() => {
                     toast.classList.remove('show');
                     setTimeout(() => toast.remove(), 500);
-                }, 5000);
+                }, 3000);
 
-                // Removed duplicate timeout
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 500);
+                }, 3000);
 
                 toast.querySelector('[data-bs-dismiss="toast"]').onclick = () => {
                     toast.classList.remove('show');

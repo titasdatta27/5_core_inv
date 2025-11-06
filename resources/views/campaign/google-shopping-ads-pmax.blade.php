@@ -316,10 +316,6 @@
                         field: "campaignName"
                     },
                     {
-                        title: "STATUS",
-                        field: "status"
-                    },
-                    {
                         title: "BGT",
                         field: "campaignBudgetAmount",
                         hozAlign: "right",
@@ -327,13 +323,13 @@
                     },
                     {
                         title: "7 UB%",
-                        field: "spend_L7",
+                        field: "l7_spend",
                         hozAlign: "right",
                         formatter: function(cell) {
                             var row = cell.getRow().getData();
-                            var spend_L7 = parseFloat(row.spend_L7) || 0;
+                            var l7_spend = parseFloat(row.l7_spend) || 0;
                             var budget = parseFloat(row.campaignBudgetAmount) || 0;
-                            var ub7 = budget > 0 ? (spend_L7 / (budget * 7)) * 100 : 0;
+                            var ub7 = budget > 0 ? (l7_spend / (budget * 7)) * 100 : 0;
 
                             var td = cell.getElement();
                             td.classList.remove('green-bg', 'pink-bg', 'red-bg');
@@ -350,13 +346,13 @@
                     },
                     {
                         title: "1 UB%",
-                        field: "spend_L1",
+                        field: "l1_spend",
                         hozAlign: "right",
                         formatter: function(cell) {
                             var row = cell.getRow().getData();
-                            var spend_L1 = parseFloat(row.spend_L1) || 0;
+                            var l1_spend = parseFloat(row.l1_spend) || 0;
                             var budget = parseFloat(row.campaignBudgetAmount) || 0;
-                            var ub1 = budget > 0 ? (spend_L1 / budget) * 100 : 0;
+                            var ub1 = budget > 0 ? (l1_spend / budget) * 100 : 0;
 
                             var td = cell.getElement();
                             td.classList.remove('green-bg', 'pink-bg', 'red-bg');
@@ -373,22 +369,22 @@
                     },
                     {
                         title: "L7 CPC",
-                        field: "cpc_L7",
+                        field: "l7_cpc",
                         hozAlign: "center",
                         formatter: function(cell) {
                             var row = cell.getRow().getData();
-                            var cpc_L7 = parseFloat(row.cpc_L7) || 0;
-                            return cpc_L7.toFixed(2);
+                            var l7_cpc = parseFloat(row.l7_cpc) || 0;
+                            return l7_cpc.toFixed(2);
                         }
                     },
                     {
                         title: "L1 CPC",
-                        field: "cpc_L1",
+                        field: "l1_cpc",
                         hozAlign: "center",
                         formatter: function(cell) {
                             var row = cell.getRow().getData();
-                            var cpc_L1 = parseFloat(row.cpc_L1) || 0;
-                            return cpc_L1.toFixed(2);
+                            var l1_cpc = parseFloat(row.l1_cpc) || 0;
+                            return l1_cpc.toFixed(2);
                         }
                     },
                     {
@@ -397,13 +393,13 @@
                         hozAlign: "center",
                         formatter: function(cell) {
                             var row = cell.getRow().getData();
-                            var cpc_L1 = parseFloat(row.cpc_L1) || 0;
-                            var cpc_L7 = parseFloat(row.cpc_L7) || 0;
+                            var l1_cpc = parseFloat(row.l1_cpc) || 0;
+                            var l7_cpc = parseFloat(row.l7_cpc) || 0;
                             var sbid;
-                            if(cpc_L1 > cpc_L7) {
-                                sbid = (cpc_L1 * 0.9).toFixed(2);
+                            if(l1_cpc > l7_cpc) {
+                                sbid = (l1_cpc * 0.9).toFixed(2);
                             }else{
-                                sbid = (cpc_L7 * 0.9).toFixed(2);
+                                sbid = (l7_cpc * 0.9).toFixed(2);
                             }
                             return sbid;
                         },
@@ -423,13 +419,13 @@
                         cellClick: function(e, cell) {
                             if (e.target.classList.contains("update-row-btn")) {
                                 var row = cell.getRow().getData();
-                                var cpc_L1 = parseFloat(row.cpc_L1) || 0;
-                                var cpc_L7 = parseFloat(row.cpc_L7) || 0;
+                                var l1_cpc = parseFloat(row.l1_cpc) || 0;
+                                var l7_cpc = parseFloat(row.l7_cpc) || 0;
                                 var sbid;
-                                if(cpc_L1 > cpc_L7) {
-                                    sbid = (cpc_L1 * 0.9).toFixed(2);
+                                if(l1_cpc > l7_cpc) {
+                                    sbid = (l1_cpc * 0.9).toFixed(2);
                                 }else{
-                                    sbid = (cpc_L7 * 0.9).toFixed(2);
+                                    sbid = (l7_cpc * 0.9).toFixed(2);
                                 }
                                 updateBid(sbid, rowData.campaign_id);
                             }

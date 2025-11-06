@@ -328,86 +328,30 @@ class Ebay3CampaignReports extends Command
     private function getAllCampaigns($token)
     {
         $campaigns = [];
-        $limit = 200;
+        $limit = 50;
         $offset = 0;
-        $maxRetries = 3;
 
-        while (true) {
-            $res = Http::withToken($token)
-                ->timeout(120)
-                ->retry(3, 5000)
-                ->get('https://api.ebay.com/sell/marketing/v1/ad_campaign', [
-                    'limit' => $limit,
-                    'offset' => $offset,
-                ]);
+        do {
+            $res = Http::withToken($token)->get('https://api.ebay.com/sell/marketing/v1/ad_campaign', [
+                'limit' => $limit,
+                'offset' => $offset,
+            ]);
 
-            if (!$res->ok()) {
-                $statusCode = $res->status();
-                $errorBody = $res->body();
-                
-                // If token expired, try to refresh
-                if ($statusCode === 401) {
-                    $this->warn("Access token expired while fetching campaigns, refreshing...");
-                    $token = $this->getAccessToken();
-                    if (!$token) {
-                        $this->error("Failed to refresh access token.");
-                        break;
-                    }
-                    // Retry the same request with new token
-                    continue;
-                }
-                
-                $this->error("Failed to fetch campaigns at offset {$offset}. Status: {$statusCode}, Response: {$errorBody}");
-                Log::error("eBay3 getAllCampaigns failed", [
-                    'offset' => $offset,
-                    'status' => $statusCode,
-                    'response' => $errorBody
-                ]);
-                break;
-            }
+            if (!$res->ok()) break;
 
             $data = $res->json();
-            $pageCampaigns = $data['campaigns'] ?? [];
-
-            if (empty($pageCampaigns)) {
-                $this->info("No campaigns found at offset {$offset}. Stopping pagination.");
-                break;
-            }
-
-            foreach ($pageCampaigns as $c) {
-                // Safely access budget structure
-                $budgetValue = null;
-                $budgetCurrency = null;
-                
-                if (isset($c['budget']['daily']['amount']['value'])) {
-                    $budgetValue = $c['budget']['daily']['amount']['value'];
-                }
-                if (isset($c['budget']['daily']['amount']['currency'])) {
-                    $budgetCurrency = $c['budget']['daily']['amount']['currency'];
-                }
-                
+            foreach ($data['campaigns'] ?? [] as $c) {
                 $campaigns[$c['campaignId']] = [
                     'name' => $c['campaignName'] ?? null,
                     'status' => $c['campaignStatus'] ?? null,
-                    'daily_budget' => $budgetValue,
-                    'currency' => $budgetCurrency,
+                    'daily_budget' => $c['budget']['daily']['amount']['value'] ?? null,
+                    'currency' => $c['budget']['daily']['amount']['currency'] ?? null,
                 ];
             }
 
-            $count = count($pageCampaigns);
-            $this->info("Fetched {$count} campaigns at offset {$offset}. Total so far: " . count($campaigns));
-            
-            if ($count < $limit) {
-                $this->info("Last page reached. Total campaigns fetched: " . count($campaigns));
-                break;
-            }
-
+            $total = $data['total'] ?? 0;
             $offset += $limit;
-        }
-
-        $totalCampaigns = count($campaigns);
-        $this->info("✅ Total campaigns fetched: {$totalCampaigns}");
-        Log::info("eBay3 getAllCampaigns completed", ['total_campaigns' => $totalCampaigns]);
+        } while ($offset < $total);
 
         return $campaigns;
     }

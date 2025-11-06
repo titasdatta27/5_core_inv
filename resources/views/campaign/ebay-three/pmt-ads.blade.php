@@ -1658,7 +1658,7 @@
 
 
                 $.ajax({
-                    url: "/update-ebay3-sku-pricing",
+                    url: "/update-ebay-sku-pricing",
                     type: "POST",
                     data: {
                         "_token": "{{ csrf_token() }}",
@@ -4352,7 +4352,7 @@
 
                 // 5. Send the update to the server
                 // If eBay Price, use a separate route
-                let ajaxUrl = '/api/update-ebay3-column';
+                let ajaxUrl = '/api/update-ebay-column';
                 let ajaxData = JSON.stringify(data);
                 let ajaxContentType = 'application/json';
 
@@ -4379,7 +4379,7 @@
                     }
 
                     // Direct POST to the correct route
-                    ajaxUrl = '/ebay3-product-price-update';
+                    ajaxUrl = '/ebay-product-price-update';
                     ajaxData = JSON.stringify({
                         item_id: ebayItemId,
                         price: updatedValue

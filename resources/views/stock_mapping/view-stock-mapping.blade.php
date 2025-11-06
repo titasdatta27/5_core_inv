@@ -1659,14 +1659,8 @@ tableData = sheetData.map((item, index) => {
       : 0;
 
     row[`INV_${platform}`] = parsed;
-    
-    // Calculate ±1% tolerance for matching
-    const tolerance = INV_shopify * 0.01;
-    const difference = Math.abs(parsed - INV_shopify);
-    const isWithinTolerance = difference <= tolerance;
-    
     row[`is_notmatching_${platform}`] =
-      parsed !== 0 && INV_shopify !== 0 && parsed !== INV_shopify && !isWithinTolerance
+      parsed !== 0 && INV_shopify !== 0 && parsed !== INV_shopify
         ? 'notmatching'
         : 'matching';
   });
@@ -1696,29 +1690,19 @@ tableData = sheetData.map((item, index) => {
             }
 
             data.forEach(item => {
-                // Helper function to check if values match within ±1% tolerance
-                const isMatchWithTolerance = (shopifyVal, platformVal) => {
-                    if (platformVal === 'Not Listed' || platformVal === 'NRL') return false;
-                    const shopify = parseFloat(shopifyVal);
-                    const platform = parseFloat(platformVal);
-                    if (isNaN(shopify) || isNaN(platform)) return false;
-                    const tolerance = shopify * 0.01;
-                    const difference = Math.abs(platform - shopify);
-                    return difference <= tolerance;
-                };
-
-               const isMismatchAmz = item.INV_amazon !== 'Not Listed' && (parseFloat(item.INV_shopify) === parseFloat(item.INV_amazon) || isMatchWithTolerance(item.INV_shopify, item.INV_amazon)) ? true:false;
-               const isMismatchwal = item.INV_walmart !== 'Not Listed' && (parseFloat(item.INV_shopify) === parseFloat(item.INV_walmart) || isMatchWithTolerance(item.INV_shopify, item.INV_walmart)) ? true:false;
-               const isMismatchRev = item.INV_reverb !== 'Not Listed' && (parseFloat(item.INV_shopify) === parseFloat(item.INV_reverb) || isMatchWithTolerance(item.INV_shopify, item.INV_reverb)) ? true:false;
-               const isMismatchShein = item.INV_shein !== 'Not Listed' && (parseFloat(item.INV_shopify) === parseFloat(item.INV_shein) || isMatchWithTolerance(item.INV_shopify, item.INV_shein)) ? true:false;
-               const isMismatchDoba = item.INV_doba !== 'Not Listed' && (parseFloat(item.INV_shopify) === parseFloat(item.INV_doba) || isMatchWithTolerance(item.INV_shopify, item.INV_doba)) ? true:false;
-               const isMismatchTemu = item.INV_temu !== 'Not Listed' && (parseFloat(item.INV_shopify) === parseFloat(item.INV_temu) || isMatchWithTolerance(item.INV_shopify, item.INV_temu)) ? true:false;
-               const isMismatchMacy = item.INV_macy !== 'Not Listed' && (parseFloat(item.INV_shopify) === parseFloat(item.INV_macy) || isMatchWithTolerance(item.INV_shopify, item.INV_macy)) ? true:false;
-               const isMismatchEbay1 = item.INV_ebay1 !== 'Not Listed' && (parseFloat(item.INV_shopify) === parseFloat(item.INV_ebay1) || isMatchWithTolerance(item.INV_shopify, item.INV_ebay1)) ? true:false;
-               const isMismatchEbay2 = item.INV_ebay2 !== 'Not Listed' && (parseFloat(item.INV_shopify) === parseFloat(item.INV_ebay2) || isMatchWithTolerance(item.INV_shopify, item.INV_ebay2)) ? true:false;
-               const isMismatchEbay3 = item.INV_ebay3 !== 'Not Listed' && (parseFloat(item.INV_shopify) === parseFloat(item.INV_ebay3) || isMatchWithTolerance(item.INV_shopify, item.INV_ebay3)) ? true:false;
-               const isMismatchbestbuy = item.INV_bestbuy !== 'Not Listed' && (parseFloat(item.INV_shopify) === parseFloat(item.INV_bestbuy) || isMatchWithTolerance(item.INV_shopify, item.INV_bestbuy)) ? true:false;
-               const isMismatchtiendamia = item.INV_tiendamia !== 'Not Listed' && (parseFloat(item.INV_shopify) === parseFloat(item.INV_tiendamia) || isMatchWithTolerance(item.INV_shopify, item.INV_tiendamia)) ? true:false;
+                // const isMismatch = item.INV_shopify !== item.INV_amazon!='Not Listed'?parseFloat(item.INV_amazon):item.INV_amazon;
+               const isMismatchAmz = item.INV_amazon !== 'Not Listed' && parseFloat(item.INV_shopify) === parseFloat(item.INV_amazon) ? true:false;
+               const isMismatchwal = item.INV_walmart !== 'Not Listed' && parseFloat(item.INV_shopify) === parseFloat(item.INV_walmart) ? true:false;
+               const isMismatchRev = item.INV_reverb !== 'Not Listed' && parseFloat(item.INV_shopify) === parseFloat(item.INV_reverb) ? true:false;
+               const isMismatchShein = item.INV_shein !== 'Not Listed' && parseFloat(item.INV_shopify) === parseFloat(item.INV_shein) ? true:false;
+               const isMismatchDoba = item.INV_doba !== 'Not Listed' && parseFloat(item.INV_shopify) === parseFloat(item.INV_doba) ? true:false;
+               const isMismatchTemu = item.INV_temu !== 'Not Listed' && parseFloat(item.INV_shopify) === parseFloat(item.INV_temu) ? true:false;
+               const isMismatchMacy = item.INV_macy !== 'Not Listed' && parseFloat(item.INV_shopify) === parseFloat(item.INV_macy) ? true:false;
+               const isMismatchEbay1 = item.INV_ebay1 !== 'Not Listed' && parseFloat(item.INV_shopify) === parseFloat(item.INV_ebay1) ? true:false;
+               const isMismatchEbay2 = item.INV_ebay2 !== 'Not Listed' && parseFloat(item.INV_shopify) === parseFloat(item.INV_ebay2) ? true:false;
+               const isMismatchEbay3 = item.INV_ebay3 !== 'Not Listed' && parseFloat(item.INV_shopify) === parseFloat(item.INV_ebay3) ? true:false;
+               const isMismatchbestbuy = item.INV_bestbuy !== 'Not Listed' && parseFloat(item.INV_shopify) === parseFloat(item.INV_bestbuy) ? true:false;
+               const isMismatchtiendamia = item.INV_tiendamia !== 'Not Listed' && parseFloat(item.INV_shopify) === parseFloat(item.INV_tiendamia) ? true:false;
 
 
 

@@ -4,11 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Purchase extends Model
 {
-    use SoftDeletes, HasFactory;
+    use HasFactory;
 
     protected $fillable = [ 
         'vo_number',
@@ -16,7 +15,6 @@ class Purchase extends Model
         'supplier_id', 
         'warehouse_id',
         'items',
-        'deleted_by',
     ];
 
     public function supplier()

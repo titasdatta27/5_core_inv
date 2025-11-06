@@ -2191,9 +2191,9 @@
                     if (item.is_parent) {
                         $row.addClass('parent-row');
                     }
-                    // if(item.NR === 'NR'){
-                    //     $row.addClass('nr-hide');
-                    // }
+                    if(item.NR === 'NR'){
+                        $row.addClass('nr-hide');
+                    }
 
                     // Updated color coding functions
                     const getDilColor = (value) => {

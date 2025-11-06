@@ -54,24 +54,8 @@ class ShopifyApiInventoryController extends Controller
             $simplifiedData = $this->processSimplifiedData($ordersData['orders'], $inventoryData);
             $this->saveSkus($simplifiedData);
 
-            $liveInventory = $this->fetchInventoryWithCommitment();
-            if (!empty($liveInventory)) {
-                DB::transaction(function () use ($liveInventory) {
-                    foreach ($liveInventory as $sku => $data) {
-                        ShopifySku::where('sku', $sku)->update([
-                            'available_to_sell' => $data['available_to_sell'] ?? 0,
-                            'committed'        => $data['committed'] ?? 0,
-                            'on_hand'          => $data['on_hand'] ?? 0,
-                            'updated_at'       => now(),
-                        ]);
-                    }
-                });
-                Cache::forget('shopify_skus_list');
-            } else {
-                Log::warning('No live inventory returned from Shopify to update live values.');
-            }
-
             $duration = round(microtime(true) - $startTime, 2);
+            Log::info("Successfully synced " . count($simplifiedData) . " SKUs in {$duration}s");
             return true;
         } catch (\Exception $e) {
             Log::error('Shopify Inventory Error: ' . $e->getMessage());
@@ -88,6 +72,7 @@ class ShopifyApiInventoryController extends Controller
         $totalProducts = 0;
         $totalVariants = 0;
 
+        Log::info("🔄 Starting Shopify inventory fetch...");
 
         while ($hasMore) {
             $pageCount++;
@@ -105,7 +90,7 @@ class ShopifyApiInventoryController extends Controller
                 ->get("https://{$this->shopifyStoreUrl}/admin/api/2025-01/products.json", $queryParams);
 
             if (!$response->successful()) {
-                Log::error("Failed to fetch products (Page {$pageCount}): " . $response->body());
+                Log::error("❌ Failed to fetch products (Page {$pageCount}): " . $response->body());
                 break;
             }
 
@@ -113,7 +98,7 @@ class ShopifyApiInventoryController extends Controller
             $productCount = count($products);
             $totalProducts += $productCount;
 
-            Log::info("Page {$pageCount} fetched successfully. Products: {$productCount}");
+            Log::info("✅ Page {$pageCount} fetched successfully. Products: {$productCount}");
 
             foreach ($products as $product) {
                 foreach ($product['variants'] as $variant) {
@@ -139,14 +124,14 @@ class ShopifyApiInventoryController extends Controller
 
                         // Log first 3 SKUs + images per page (to avoid huge logs)
                         if ($totalVariants <= 3 || $totalVariants % 500 === 0) {
-                            Log::info("Variant preview", [
+                            Log::info("🖼️ Variant preview", [
                                 'product_title' => $product['title'] ?? '',
                                 'sku'           => $variant['sku'],
                                 'image'         => $imageUrl,
                             ]);
                         }
                     } else {
-                        Log::warning('Variant without SKU', [
+                        Log::warning('⚠️ Variant without SKU', [
                             'product_id' => $product['id'],
                             'variant_id' => $variant['id'],
                             'on_hand'    => $variant['old_inventory_quantity'] ?? 0,
@@ -161,13 +146,14 @@ class ShopifyApiInventoryController extends Controller
             $pageInfo = $this->getNextPageInfo($response);
             $hasMore = (bool) $pageInfo;
 
-            // Avoid rate limiting - increased delay to 1 second
+            // Avoid rate limiting
             if ($hasMore) {
-                Log::info("Waiting 1s before next page...");
-                usleep(1000000); // 1s delay
+                Log::info("⏳ Waiting 0.5s before next page...");
+                usleep(500000); // 0.5s delay
             }
         }
 
+        Log::info("✅ Finished fetching Shopify inventory. Pages: {$pageCount}, Products: {$totalProducts}, Variants: {$totalVariants}");
 
         return $inventoryData;
     }
@@ -191,10 +177,12 @@ class ShopifyApiInventoryController extends Controller
     }
 
 
+
+
     public function fetchInventoryWithCommitment(): array
     {
-        set_time_limit(500);
-        $shopUrl = 'https://' . env('SHOPIFY_STORE_URL');
+        set_time_limit(60);
+        $shopUrl = 'https://' . env('SHOPIFY_STORE_URL'); 
         $token = env('SHOPIFY_PASSWORD'); 
 
         // Step 1: Get Ohio Location ID
@@ -212,9 +200,6 @@ class ShopifyApiInventoryController extends Controller
                 }
             }
         }
-
-        // Rate limiting delay
-        usleep(1000000); // 1s delay
 
         if (!$locationId) {
             Log::error('Ohio location not found.');
@@ -268,11 +253,6 @@ class ShopifyApiInventoryController extends Controller
             if ($linkHeader && preg_match('/<([^>]+)>; rel="next"/', $linkHeader, $matches)) {
                 $nextPageUrl = $matches[1];
             }
-
-            // Rate limiting delay between product pages
-            if ($nextPageUrl) {
-                usleep(1000000); // 1s delay
-            }
         } while ($nextPageUrl);
 
         // Step 3: Fetch Inventory Levels (only from Ohio)
@@ -296,9 +276,6 @@ class ShopifyApiInventoryController extends Controller
                 $iid = $level['inventory_item_id'];
                 $availableByIid[$iid] = ($availableByIid[$iid] ?? 0) + $level['available'];
             }
-
-            // Rate limiting delay between inventory chunks
-            usleep(1000000); // 1s delay
         }
 
         // Step 4: Fetch Committed Quantities from Orders
@@ -326,9 +303,6 @@ class ShopifyApiInventoryController extends Controller
             Log::error('Failed to fetch orders');
         }
 
-        // Rate limiting delay before final processing
-        usleep(1000000); // 1s delay
-
         // Step 5: Merge Final Inventory
         $final = [];
         foreach ($skuMap as $sku => $iid) {
@@ -344,6 +318,7 @@ class ShopifyApiInventoryController extends Controller
             ];
         }
 
+        Log::info('Final inventory data (Ohio only):', $final);
 
         return $final;
     }
@@ -379,7 +354,7 @@ class ShopifyApiInventoryController extends Controller
                 $attempts = 0;
 
                 if ($hasMore) {
-                    usleep(1000000); // 1s delay
+                    usleep(500000); // 0.5s delay
                 }
             } else {
                 $attempts++;
@@ -523,54 +498,6 @@ class ShopifyApiInventoryController extends Controller
         Cache::forget('shopify_skus_list');
     }
 
-    /**
-     * Fetch live inventory (available_to_sell, committed, on_hand) from Shopify
-     * and persist those values into `shopify_skus` table.
-     *
-     * This uses the existing fetchInventoryWithCommitment() which returns
-     * an array keyed by normalized SKU.
-     */
-    public function syncLiveInventoryToDb(): bool
-    {
-        try {
-            $live = $this->fetchInventoryWithCommitment();
-
-            if (empty($live)) {
-                Log::warning('No live inventory returned from Shopify (sync skipped).');
-                return false;
-            }
-
-            DB::transaction(function () use ($live) {
-                // Process in chunks for memory safety
-                $chunks = array_chunk($live, 1000, true);
-                foreach ($chunks as $chunk) {
-                    foreach ($chunk as $sku => $data) {
-                        // Normalize SKU to uppercase trimmed form (Shopify fetch already uppercases, but be safe)
-                        $normSku = strtoupper(preg_replace('/\s+/u', ' ', trim($sku)));
-
-                        ShopifySku::updateOrCreate(
-                            ['sku' => $normSku],
-                            [
-                                'available_to_sell' => $data['available_to_sell'] ?? 0,
-                                'committed' => $data['committed'] ?? 0,
-                                'on_hand' => $data['on_hand'] ?? 0,
-                                'image_src' => $data['image_url'] ?? null,
-                                'updated_at' => now(),
-                            ]
-                        );
-                    }
-                }
-            });
-
-            Cache::forget('shopify_skus_list');
-            Log::info('Synced live inventory to shopify_skus table', ['count' => count($live)]);
-            return true;
-        } catch (\Exception $e) {
-            Log::error('Failed to sync live inventory to DB: ' . $e->getMessage());
-            return false;
-        }
-    }
-
     protected function getInventoryLevels(array $inventoryItemIds): array
     {
         $inventoryLevels = [];
@@ -593,9 +520,6 @@ class ShopifyApiInventoryController extends Controller
                     ];
                 }
             }
-
-            // Rate limiting delay between chunks
-            usleep(1000000); // 1s delay
         }
 
         return $inventoryLevels;
@@ -632,11 +556,6 @@ class ShopifyApiInventoryController extends Controller
 
             $pageInfo = $this->getNextPageInfo($response);
             $hasMore = (bool) $pageInfo;
-
-            // Rate limiting delay
-            if ($hasMore) {
-                usleep(1000000); // 1s delay
-            }
         }
 
         return $committed;

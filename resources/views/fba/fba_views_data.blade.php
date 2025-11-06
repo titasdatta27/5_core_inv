@@ -20,14 +20,8 @@
                         <h4>FBA Data </h4>
 
                     </div>
-                    <div class="card-body" style="padding: 0;">
-                        <div id="fba-table-wrapper"
-                         style="height: calc(100vh - 200px); display: flex; flex-direction: column;">
-
-                            <!--Table body (scrollable section) -->
-                            <div id="fba-table" style="flex: 1;"></div>
-
-                        </div>
+                    <div class="card-body">
+                        <div id="fba-table"></div>
                     </div>
                 </div>
             </div>
@@ -85,7 +79,7 @@
                         title: "FBA Price",
                         field: "FBA_Price",
                         hozAlign: "center",
-                        // formatter: "dollar"
+                        formatter: "dollar"
                     },
                     {
                         title: "L30 Units",
@@ -103,72 +97,6 @@
                         title: "Views",
                         field: "Current_Month_Views",
                         hozAlign: "center"
-                    },
-                    {
-                        title: "Pft%",
-                        field: "Pft%",
-                        hozAlign: "center"
-                    },
-                    {
-                        title: "ROI%",
-                        field: "ROI%",
-                        hozAlign: "center"
-                    },
-                    {
-                        title: "S Price",
-                        field: "S_Price",
-                        hozAlign: "center",
-                        editor: "input",
-                        cellEdited: function(cell) {
-                            var data = cell.getRow().getData();
-                            var value = cell.getValue();
-
-                            $.ajax({
-                            url: '/update-fba-manual-data',
-                            method: 'POST',
-                            data: {
-                                sku: data.FBA_SKU,
-                                field: 's_price',
-                                value: value,
-                                _token: '{{ csrf_token() }}'
-                            },
-                            success: function() {
-                                table.replaceData(); // reload to recalc PFT, ROI etc.
-                            }
-                            });
-                        }
-                    },
-                    {
-                        title: "SPft%",
-                        field: "SPft%",
-                        hozAlign: "center"
-                    },
-                    {
-                        title: "SROI%",
-                        field: "SROI%",
-                        hozAlign: "center"
-                    },
-                    {
-                        title: "Listed",
-                        field: "Listed",
-                        formatter: "tickCross",
-                        hozAlign: "center",
-                        editor: true,
-                        cellClick: function(e, cell) {
-                            var currentValue = cell.getValue();
-                            cell.setValue(!currentValue);
-                        }
-                    },
-                    {
-                        title: "Live",
-                        field: "Live",
-                        formatter: "tickCross",
-                        hozAlign: "center",
-                        editor: true,
-                        cellClick: function(e, cell) {
-                            var currentValue = cell.getValue();
-                            cell.setValue(!currentValue);
-                        }
                     },
                     {
                         title: "FBA Fee",
@@ -280,7 +208,7 @@
                     {
                         title: "L x W x H",
                         field: "Dimensions",
-                        // placeholder: "Length x Width x Height",
+                        placeholder: "Length x Width x Height",
                         hozAlign: "center",
                         editor: "input"
                     },
@@ -353,7 +281,7 @@
                 var field = cell.getColumn().getField();
                 var value = cell.getValue();
 
-                if (field === 'Barcode' || field === 'Done' || field === 'Listed' || field === 'Live' || field === 'Dispatch_Date' || field === 'Weight' || field === 'Quantity_in_each_box' || field === 'Total_quantity_sent' || field === 'Send_Cost' || field === 'IN_Charges' || field === 'Warehouse_INV_Reduction' || field === 'Shipping_Amount' || field === 'Inbound_Quantity' || field === 'FBA_Send' || field === 'Dimensions') {
+                if (field === 'Barcode' || field === 'Done' || field === 'Dispatch_Date' || field === 'Weight' || field === 'Quantity_in_each_box' || field === 'Total_quantity_sent' || field === 'Send_Cost' || field === 'IN_Charges' || field === 'Warehouse_INV_Reduction' || field === 'Shipping_Amount' || field === 'Inbound_Quantity' || field === 'FBA_Send' || field === 'Dimensions') {
                     $.ajax({
                         url: '/update-fba-manual-data',
                         method: 'POST',

@@ -139,22 +139,10 @@ private function generateSignValue($requestBody)
         Log::info("======================= Ended Inventory Sync =======================");
         Log::info("Total Temu inventory items collected: " . count($this->allItems));
         foreach($this->allItems as $titem){    
-            $sku = $titem['outSkuSnList'][0] ?? null;
-            $qty = $titem['quantity'] ?? 0;
-            if (!$sku) {
-                Log::warning("Skipping item with null SKU", $titem);
-                continue;
-            }
-            Log::info("Updating SKU: {$sku} with inventory_temu: {$qty}");
-            try {
-                ProductStockMapping::updateOrCreate(
-                    ['sku' => $sku],
-                    ['inventory_temu' => $qty]
-                );
-                Log::info("Successfully updated/created for SKU: {$sku}");
-            } catch (\Exception $e) {
-                Log::error("Failed to update SKU: {$sku} - Error: " . $e->getMessage());
-            }
+            ProductStockMapping::updateOrCreate(
+                ['sku' => $titem['outSkuSnList'][0]],
+                ['inventory_temu' => $titem['quantity']]
+            );
         }
         Log::info($this->allItems);
         return $this->allItems;
@@ -284,7 +272,7 @@ public function getInventory1()
         $response = $request->post('https://openapi-b-us.temu.com/openapi/router', $signedRequest);
 
         if ($response->failed()) {
-            Log::error("Temu API request failed (Page {$pageNumber})", [
+            \Log::error("Temu API request failed (Page {$pageNumber})", [
                 'status' => $response->status(),
                 'body' => $response->body(),
             ]);
@@ -295,7 +283,7 @@ public function getInventory1()
         
 
         if (!($data['success'] ?? false)) {
-            Log::error("Temu API error (Page {$pageNumber})", [
+            \Log::error("Temu API error (Page {$pageNumber})", [
                 'errorCode' => $data['errorCode'] ?? null,
                 'errorMsg' => $data['errorMsg'] ?? 'Unknown error',
             ]);
@@ -340,7 +328,7 @@ public function getInventory1()
 
     } while ($pageNumber <= $maxPages);
 
-    Log::info('Total Temu inventory items collected: ' . count($allItems));
+    \Log::info('Total Temu inventory items collected: ' . count($allItems));
 
     return $allItems;
 }

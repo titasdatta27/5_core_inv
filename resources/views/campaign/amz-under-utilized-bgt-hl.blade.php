@@ -580,9 +580,9 @@
                             var sbid;
 
                             if(l1_cpc > l7_cpc) {
-                                sbid = Math.floor(l1_cpc * 1.1 * 100) / 100;
+                                sbid = Math.floor(l1_cpc * 1.05 * 100) / 100;
                             }else{
-                                sbid = Math.floor(l7_cpc * 1.1 * 100) / 100;
+                                sbid = Math.floor(l7_cpc * 1.05 * 100) / 100;
                             }
                             sbid = sbid.toFixed(2);
                             return sbid;
@@ -608,9 +608,9 @@
                                 var sbid;
 
                                 if(l1_cpc > l7_cpc) {
-                                    sbid = Math.floor(l1_cpc * 1.1 * 100) / 100;
+                                    sbid = Math.floor(l1_cpc * 1.05 * 100) / 100;
                                 }else{
-                                    sbid = Math.floor(l7_cpc * 1.1 * 100) / 100;
+                                    sbid = Math.floor(l7_cpc * 1.05 * 100) / 100;
                                 }
                                 sbid = sbid.toFixed(2);
                                 updateBid(sbid, rowData.campaign_id);
@@ -725,27 +725,26 @@
 
                     if (!(ub7 < 70)) return false;
 
-                    // ✅ SEARCH FILTER
                     let searchVal = $("#global-search").val()?.toLowerCase() || "";
                     if (searchVal && !(data.campaignName?.toLowerCase().includes(searchVal))) {
                         return false;
                     }
 
-                    // ✅ STATUS FILTER
                     let statusVal = $("#status-filter").val();
                     if (statusVal && data.campaignStatus !== statusVal) {
                         return false;
                     }
 
                     let invFilterVal = $("#inv-filter").val();
-                    let inv = parseFloat(data.INV || 0);
 
-                    // ALL → no restriction
                     if (invFilterVal === "INV_0") {
-                        if (inv !== 0) return false;
+                        if (parseFloat(data.INV) !== 0) return false;
                     } else if (invFilterVal === "OTHERS") {
-                        if (inv === 0) return false;
+                        if (parseFloat(data.INV) === 0) return false;
+                    } else if (invFilterVal === "ALL" || invFilterVal === "") {
+                        // show all rows → do nothing
                     }
+
 
                     let nrlFilterVal = $("#nrl-filter").val();
                     if (nrlFilterVal) {
@@ -783,20 +782,16 @@
                     return true;
                 }
 
-                // ✅ SET FILTER
                 table.setFilter(combinedFilter);
 
-                // ✅ UPDATE COUNTS
                 function updateCampaignStats() {
-                    let allRows = table.getData();
-                    let filteredRows = allRows.filter(combinedFilter);
-
-                    let total = allRows.length;
-                    let filtered = filteredRows.length;
+                    let total = table.getDataCount();
+                    let filtered = table.getDataCount("active");
+                    let currentPage = table.getRows("active").length;
 
                     let percentage = total > 0 ? ((filtered / total) * 100).toFixed(0) : 0;
 
-                    document.getElementById("total-campaigns").innerText = filtered; 
+                    document.getElementById("total-campaigns").innerText = currentPage;
                     document.getElementById("percentage-campaigns").innerText = percentage + "%";
                 }
 
@@ -804,17 +799,14 @@
                 table.on("pageLoaded", updateCampaignStats);
                 table.on("dataProcessed", updateCampaignStats);
 
-                // ✅ SEARCH + FILTER CHANGE HANDLERS
-                $("#global-search").on("keyup", function () {
+                $("#global-search").on("keyup", function() {
                     table.setFilter(combinedFilter);
                 });
 
-                $("#status-filter, #inv-filter, #nrl-filter, #nra-filter, #fba-filter")
-                    .on("change", function () {
-                        table.setFilter(combinedFilter);
-                    });
+                $("#status-filter, #inv-filter, #nrl-filter, #nra-filter, #fba-filter").on("change", function() {
+                    table.setFilter(combinedFilter);
+                });
 
-                // ✅ INITIAL UPDATE
                 updateCampaignStats();
             });
 
@@ -879,9 +871,9 @@
                         var sbid;
 
                         if(l1_cpc > l7_cpc) {
-                            sbid = Math.floor(l1_cpc * 1.1 * 100) / 100;
+                            sbid = Math.floor(l1_cpc * 1.05 * 100) / 100;
                         }else{
-                            sbid = Math.floor(l7_cpc * 1.1 * 100) / 100;
+                            sbid = Math.floor(l7_cpc * 1.05 * 100) / 100;
                         }
                         sbid = sbid.toFixed(2);
 

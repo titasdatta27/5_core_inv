@@ -72,19 +72,19 @@ class StockMappingController extends Controller
             $data = ProductStockMapping::all()->groupBy('sku')->map(function ($items) {return $items->first(); });
             $skusforNR = array_values(array_filter(array_map(function ($item) { return $item['sku'] ?? null; }, $data->toArray())));
             $marketplaces = [
-            'amazon'  => [AmazonListingStatus::class,  'inventory_amazon'],
-            'walmart' => [WalmartListingStatus::class, 'inventory_walmart'],
-            'reverb'  => [ReverbListingStatus::class,  'inventory_reverb'],
-            'shein'   => [SheinListingStatus::class,   'inventory_shein'],
-            'doba'    => [DobaListingStatus::class,    'inventory_doba'],
-            'temu'    => [TemuListingStatus::class,    'inventory_temu'],
-            'macy'    => [MacysListingStatus::class,   'inventory_macy'],
-            'ebay1'   => [EbayListingStatus::class,    'inventory_ebay1'],
-            'ebay2'   => [EbayTwoListingStatus::class, 'inventory_ebay2'],
-            'ebay3'   => [EbayThreeListingStatus::class,'inventory_ebay3'],
-            'bestbuy' => [BestbuyUSAListingStatus::class,'inventory_bestbuy'],
-            'tiendamia' => [TiendamiaListingStatus::class,'inventory_tiendamia'],
-        ];
+    'amazon'  => [AmazonListingStatus::class,  'inventory_amazon'],
+    'walmart' => [WalmartListingStatus::class, 'inventory_walmart'],
+    'reverb'  => [ReverbListingStatus::class,  'inventory_reverb'],
+    'shein'   => [SheinListingStatus::class,   'inventory_shein'],
+    'doba'    => [DobaListingStatus::class,    'inventory_doba'],
+    'temu'    => [TemuListingStatus::class,    'inventory_temu'],
+    'macy'    => [MacysListingStatus::class,   'inventory_macy'],
+    'ebay1'   => [EbayListingStatus::class,    'inventory_ebay1'],
+    'ebay2'   => [EbayTwoListingStatus::class, 'inventory_ebay2'],
+    'ebay3'   => [EbayThreeListingStatus::class,'inventory_ebay3'],
+     'bestbuy' => [BestbuyUSAListingStatus::class,'inventory_bestbuy'],
+    'tiendamia' => [TiendamiaListingStatus::class,'inventory_tiendamia'],
+];
 
 
             foreach ($marketplaces as $key => [$model, $inventoryField]) {
@@ -144,12 +144,6 @@ protected function getDataInfo($data)
     foreach ($data as $item) {
         $shopifyInventoryRaw = $item['inventory_shopify'] ?? 0;
         $shopifyInventory = is_numeric($shopifyInventoryRaw) ? (int)$shopifyInventoryRaw : 0;
-        
-        // If Shopify inventory is negative, set it to 0
-        if ($shopifyInventory < 0) {
-            $shopifyInventory = 0;
-            $item['inventory_shopify'] = 0;
-        }
 
         foreach ($platforms as $platform) {
             if ($platform === 'shopify') {
@@ -164,12 +158,7 @@ protected function getDataInfo($data)
                 continue;
             }
 
-            // Calculate ±1% tolerance (applies to all platforms automatically)
-            $tolerance = $shopifyInventory * 0.01;
-            $difference = abs($platformInventory - $shopifyInventory);
-            
-            // Match if exact or within ±1% tolerance
-            if ($platformInventory === $shopifyInventory || $difference <= $tolerance) {
+            if ($platformInventory === $shopifyInventory) {
                 $info[$platform]['matching']++;
             } else {
                 $info[$platform]['notmatching']++;

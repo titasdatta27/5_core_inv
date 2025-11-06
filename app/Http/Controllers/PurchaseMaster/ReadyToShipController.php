@@ -92,19 +92,9 @@ class ReadyToShipController extends Controller
         $sku = $request->input('sku');
         $column = $request->input('column');
         $value = $request->input('value');
-        $item = ReadyToShip::where('sku', $sku)->first();
-        $qty = $item->qty;
-
-        if($column === 'rec_qty'){
-            $value = is_numeric($value) ? (int)$value : null;
-            if($value !== null) {
-                $item->qty = $qty - $value;
-                $item->save();
-            }
-        }
 
         if (!in_array($column, [
-            'rec_qty',
+            'qty',
             'rate',
             'area',
             'pay_term',
@@ -154,72 +144,30 @@ class ReadyToShipController extends Controller
         $readyItems = ReadyToShip::whereIn('sku', $skus)->get();
 
         foreach ($readyItems as $item) {
-            $existing = TransitContainerDetail::where('our_sku', $item->sku)->where('tab_name', $tabName)->first();
+            $existing = TransitContainerDetail::where('our_sku', $item->sku)->first();
+
             if ($existing) {
                 $existing->update([
                     'our_sku'       => $item->sku,
                     'tab_name'      => $tabName,
-                    'rec_qty'       => $item->rec_qty,
                     'updated_at'    => now(),
-                ]);
-                $item->update([
-                    'rec_qty' => NULL,
-                    'updated_at' => now(),
                 ]);
             } else {
                 TransitContainerDetail::create([
                     'our_sku'       => $item->sku,
                     'tab_name'      => $tabName,
-                    'rec_qty'       => $item->rec_qty,
                     'created_at'    => now(),
                     'updated_at'    => now(),
                 ]);
-                $item->update([
-                    'rec_qty' => NULL,
-                    'updated_at' => now(),
-                ]);
             }
 
-            if($item->qty === 0){
-                $item->update([
-                    'transit_inv_status' => 1,
-                    'updated_at' => now(),
-                ]);
-            }
+            $item->update([
+                'transit_inv_status' => 1,
+                'updated_at' => now(),
+            ]);
         }
 
         return response()->json(['success' => true, 'message' => 'Data moved to TransitContainerDetail.']);
-    }
-
-    public function deleteItems(Request $request)
-    {
-        try {
-            $ids = $request->input('skus', []);
-
-            if (!empty($ids)) {
-                $user = auth()->check() ? auth()->user()->name : 'System';
-
-                ReadyToShip::whereIn('sku', $ids)->update([
-                    'auth_user' => $user,
-                    'deleted_at' => now(),
-                ]);
-
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Records soft-deleted successfully by ' . $user,
-                ]);
-            }
-
-            return response()->json([
-                'success' => false,
-                'message' => 'No IDs provided',
-            ], 400);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error deleting records: ' . $e->getMessage(),
-            ], 500);
-        }
     }
 
 
