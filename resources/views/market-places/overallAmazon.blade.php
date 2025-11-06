@@ -5601,6 +5601,22 @@
                     $('#total-sales-total').text(metrics.totalSalesL30Sum.toLocaleString());
 
 
+
+                    $.ajax({
+                        url: "{{ route('adv-amazon.total-sales.save-data') }}",
+                        method: 'GET',
+                        data: {
+                            totalSales: metrics.totalSalesL30Sum
+                        },
+                        success: function(response) {
+                        },
+                        error: function(xhr) {
+                        }
+                    });
+
+
+
+
                     // --- Custom PFT TOTAL calculation  ---
                     let pftTotalDisplay = '0%';
                     if (metrics.totalSalesL30Sum > 0) {

@@ -800,6 +800,22 @@
                     let kwImpL7Total = calculateTotal('kw_impr_L7');
 
 
+                    $.ajax({
+                        url: "{{ route('adv-walmart.ad-running.save-data') }}",
+                        method: 'GET',
+                        data: {
+                            spendL30Total: spendL30Total,
+                            clicksL30Total:clicksL30Total,
+                            salesL30Total:salesL30Total,
+                            soldL30Total:soldL30Total,                       
+                        },
+                        success: function(response) {
+                        },
+                        error: function(xhr) {
+                        }
+                    });
+
+
                     document.getElementById("imp-l7-total").innerText = impL7Total > 0 ? ` (${impL7Total.toFixed(0)})` : "";
                     document.getElementById("imp-l7-total").style.display = impL7Total > 0 ? "inline" : "none";
 

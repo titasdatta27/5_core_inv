@@ -7,6 +7,7 @@ use App\Models\Ebay2GeneralReport;
 use App\Models\EbayTwoDataView;
 use App\Models\ProductMaster;
 use App\Models\ShopifySku;
+use App\Models\ADVMastersData;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -15,6 +16,11 @@ class Ebay2RunningAdsController extends Controller
     public function index()
     {
         return view('campaign.ebay-two.running-ads');
+    }
+
+    public function getEbay2AdvRunningAdDataSave(Request $request)
+    {
+        return ADVMastersData::getEbay2AdvRunningAdDataSaveProceed($request);
     }
 
     public function getEbay2RunningAdsData()

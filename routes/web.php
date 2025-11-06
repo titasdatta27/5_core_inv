@@ -769,6 +769,8 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::get('/targeting-amazon-data', action: [OverallAmazonController::class, 'targetingAmazonData'])->name('targeting.amazon.data');
 
     Route::get('/overall-amazon', action: [OverallAmazonController::class, 'overallAmazon'])->name('overall.amazon');
+    Route::get('/adv-amazon/total-sales/save-data', action: [OverallAmazonController::class, 'getAmazonTotalSalesSaveData'])->name('adv-amazon.total-sales.save-data');
+
     Route::post('/overallAmazon/saveLowProfit', action: [OverallAmazonController::class, 'saveLowProfit']);
     Route::get('/amazon-pricing-cvr', action: [OverallAmazonController::class, 'amazonPricingCVR'])->name('amazon.pricing.cvr');
     Route::get('/amazon-pricing-increase-decrease', action: [OverallAmazonController::class, 'amazonPriceIncreaseDecrease'])->name('amazon.pricing.increase');
@@ -792,6 +794,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::get('/listing_ebaytwo/export', [ListingEbayTwoController::class, 'export'])->name('listing_ebaytwo.export');
 
     Route::get('ebayTwoAnalysis', action: [EbayTwoController::class, 'overallEbay']);
+    Route::get('/adv-ebay2/total-sale/save-data', action: [EbayTwoController::class, 'getEbay2TotsalSaleDataSave'])->name('adv-ebay2.total-sale.save-data');
     Route::get('/ebay2/view-data', [EbayTwoController::class, 'getViewEbay2Data']);
     Route::get('ebayTwoPricingCVR', [EbayTwoController::class, 'ebayTwoPricingCVR'])->name('ebayTwo.pricing.cvr');
     Route::post('/update-all-ebay2-skus', [EbayTwoController::class, 'updateAllEbay2Skus']);
@@ -814,6 +817,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::get('/listing_ebaythree/export', [ListingEbayThreeController::class, 'export'])->name('listing_ebaythree.export');
 
     Route::get('ebayThreeAnalysis', action: [EbayThreeController::class, 'overallthreeEbay']);
+    Route::get('/adv-ebay3/total-sale/save-data', action: [EbayThreeController::class, 'getEbay3TotalSaleSaveData'])->name('adv-ebay3.total-sale.save-data');
     Route::get('/ebay3/view-data', [EbayThreeController::class, 'getViewEbay3Data']);
     Route::get('ebayThreePricingCVR', [EbayThreeController::class, 'ebayThreePricingCVR'])->name('ebayThree.pricing.cvr');
     Route::post('/update-all-ebay3-skus', [EbayThreeController::class, 'updateAllEbay3Skus']);
@@ -874,6 +878,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
 
     //Listing Audit ebay
     Route::get('/ebay', [EbayController::class, 'ebayView'])->name('ebay');
+    Route::get('/adv-ebay/total-sales/save-data', [EbayController::class, 'getAdvEbayTotalSaveData'])->name('adv-ebay.total-sales.save-data');
     Route::post('/ebay/saveLowProfit', [EbayController::class, 'saveLowProfit']);
     Route::post('/ebay-analytics/import', [EbayController::class, 'importEbayAnalytics'])->name('ebay.analytics.import');
     Route::get('/ebay-analytics/export', [EbayController::class, 'exportEbayAnalytics'])->name('ebay.analytics.export');
@@ -1989,6 +1994,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::controller(AmazonAdRunningController::class)->group(function () {
         Route::get('/amazon/ad-running/list', 'index')->name('amazon.ad-running.list');
         Route::get('/amazon/ad-running/data', 'getAmazonAdRunningData');
+        Route::get('/adv-amazon/ad-running/save-data', 'getAmazonAdRunningSaveAdvMasterData')->name('adv-amazon.ad-running.save-data');
     });
 
     Route::controller(AmazonPinkDilAdController::class)->group(function () {
@@ -2097,6 +2103,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::controller(AmazonMissingAdsController::class)->group(function () {
         Route::get('/amazon/missing/ads', 'index')->name('amazon.missing.ads');
         Route::get('/amazon/missing/ads/data', 'getAmazonMissingAdsData');
+        Route::get('adv-amazon/missing/save-data', 'getAmzonAdvSaveMissingData')->name('adv-amazon.missing.save-data');
     });
     // ebay ads section
     Route::controller(EbayOverUtilizedBgtController::class)->group(function () {
@@ -2145,11 +2152,13 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::controller(EbayRunningAdsController::class)->group(function () {
         Route::get('/ebay/ad-running/list', 'index')->name('ebay.running.ads');
         Route::get('/ebay/ad-running/data', 'getEbayRunningAdsData');
+        Route::get('/adv-ebay/ad-running/save-data', 'getEbayRunningDataSave')->name('adv-ebay.ad-running.save-data');
     });
 
     Route::controller(EbayMissingAdsController::class)->group(function () {
         Route::get('/ebay/ad-missing/list', 'index')->name('ebay.missing.ads');
         Route::get('/ebay/ad-missing/data', 'getEbayMissingAdsData');
+        Route::get('/adv-ebay/missing/save-data', 'getEbayMissingSaveData')->name('adv-ebay.missing.save-data');
     });
 
     // ebay 2 ads section
@@ -2164,11 +2173,13 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::controller(Ebay2RunningAdsController::class)->group(function () {
         Route::get('/ebay-2/ad-running/list', 'index')->name('ebay2.running.ads');
         Route::get('/ebay-2/ad-running/data', 'getEbay2RunningAdsData');
+        Route::get('/adv-ebay2/ad-running/save-data', 'getEbay2AdvRunningAdDataSave')->name('adv-ebay2.ad-running.save-data');
     });
 
     Route::controller(Ebay2MissingAdsController::class)->group(function () {
         Route::get('/ebay2/ad-missing/list', 'index')->name('ebay2.missing.ads');
         Route::get('/ebay2/ad-missing/data', 'getEbay2MissingAdsData');
+        Route::get('/adv-ebay2/missing/save-data', 'getAdvEbay2MissingSaveData')->name('adv-ebay2.missing.save-data');
     });
 
     // ebay 3 ads section
@@ -2217,11 +2228,13 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::controller(Ebay3RunningAdsController::class)->group(function () {
         Route::get('/ebay-3/ad-running/list', 'index')->name('ebay3.running.ads');
         Route::get('/ebay-3/ad-running/data', 'getEbay3RunningAdsData');
+        Route::get('/adv-ebay3/ad-running/save-data', 'getAdvEbay3AdRunningDataSave')->name('adv-ebay3.ad-running.save-data');
     });
 
     Route::controller(Ebay3MissingAdsController::class)->group(function () {
         Route::get('/ebay-3/ad-missing/list', 'index')->name('ebay3.missing.ads');
         Route::get('/ebay-3/ad-missing/data', 'getEbay3MissingAdsData');
+        Route::get('/adv-ebay3/missing/save-data', 'getEbay3MissingDataSave')->name('adv-ebay3.missing.save-data');
     });
 
     Route::controller(WalmartUtilisationController::class)->group(function () {
@@ -2240,6 +2253,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::controller(WalmartRunningAdsController::class)->group(function () {
         Route::get('/walmart/running/ads', 'index')->name('walmart.running.ads');
         Route::get('/walmart/running/ads/data', 'getWalmartRunningAdsData');
+        Route::get('/adv-walmart/ad-running/save-data', 'getAdvWalmartRunningSaveData')->name('adv-walmart.ad-running.save-data');
     });
     // stock missing listing
     Route::controller(MissingListingController::class)->group(function () {
