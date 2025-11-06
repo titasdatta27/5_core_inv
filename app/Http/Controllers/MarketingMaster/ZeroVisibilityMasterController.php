@@ -153,10 +153,14 @@ class ZeroVisibilityMasterController extends Controller
         ];
 
         $livePendingData = [];
+        $listedNotPendingData = []; // For Amazon's Listed but not Pending count
+        $pendingCountData = []; // For Amazon's Pending count
 
         foreach ($channels as $channelName) {
             $livePending = null;
             $zeroView = null;
+            $listedNotPending = null;
+            $pendingCount = null;
 
             // Check if channel has special mapping
             $key = strtolower(str_replace([' ', '&', '-', '/'], '', trim($channelName)));
@@ -180,9 +184,11 @@ class ZeroVisibilityMasterController extends Controller
                         $counts = $controller->getLivePendingAndZeroViewCounts();
                         $livePending = $counts['live_pending'] ?? null;
                         $zeroView = $counts['zero_view'] ?? null;
+                        $listedNotPending = $counts['listed_not_pending'] ?? null;
+                        $pendingCount = $counts['pending_count'] ?? null;
                         
                         // Debug logging
-                        Log::info("Channel: {$channelName}, Live Pending: {$livePending}, Zero View: {$zeroView}");
+                        Log::info("Channel: {$channelName}, Live Pending: {$livePending}, Zero View: {$zeroView}, Listed Not Pending: {$listedNotPending}, Pending: {$pendingCount}");
                     } else {
                         Log::warning("Method getLivePendingAndZeroViewCounts not found for controller: {$controllerClass}");
                     }
@@ -195,6 +201,14 @@ class ZeroVisibilityMasterController extends Controller
 
             // Use 0 as fallback if livePending is null
             $livePendingData[$channelName] = $livePending ?? 0;
+            
+            // Store listed_not_pending and pending_count for Amazon
+            if ($listedNotPending !== null) {
+                $listedNotPendingData[$channelName] = $listedNotPending;
+            }
+            if ($pendingCount !== null) {
+                $pendingCountData[$channelName] = $pendingCount;
+            }
         }
 
         // Save today's counts for each channel
@@ -276,13 +290,15 @@ class ZeroVisibilityMasterController extends Controller
             ->pluck('correction', 'channel_name')
             ->toArray();
 
-        $data = array_map(function ($channelName) use ($livePendingData, $channelUpdateData, $actionData, $correctionData) {
+        $data = array_map(function ($channelName) use ($livePendingData, $channelUpdateData, $actionData, $correctionData, $listedNotPendingData, $pendingCountData) {
             return [
                 'Channel ' => $channelName,
                 'R&A' => false, // placeholder
                 'Live Pending' => $livePendingData[$channelName] ?? 0,
                 'Updated Today' => $channelUpdateData[$channelName]['updated'] ?? false,
                 'Diff' => $channelUpdateData[$channelName]['diff'] ?? 0,
+                'Listed Not Pending' => $listedNotPendingData[$channelName] ?? null, // Only for Amazon
+                'Pending Count' => $pendingCountData[$channelName] ?? null, // Only for Amazon
                 'Action' => $actionData[$channelName] ?? '',
                 'Correction action' => $correctionData[$channelName] ?? '',
             ];

@@ -562,6 +562,7 @@ class AmazonZeroController extends Controller
         $zeroInvOfListed = 0;
         $liveCount = 0;
         $zeroViewCount = 0;
+        $listedAndLiveCount = 0; // Items that are both Listed AND Live (Listed but not Pending)
 
         foreach ($productMasters as $item) {
             $sku = strtoupper(trim($item->sku));
@@ -598,6 +599,11 @@ class AmazonZeroController extends Controller
             // --- Live count ---
             if ($live === 'Live') {
                 $liveCount++;
+            }
+
+            // --- Listed but not Pending count (Listed AND Live) ---
+            if ($listed === 'Listed' && $live === 'Live') {
+                $listedAndLiveCount++;
             }
 
             // --- Views / Zero-View logic ---
@@ -646,10 +652,14 @@ class AmazonZeroController extends Controller
         }
 
         $livePending = $listedCount - $liveCount;
+        $listedButNotPending = $listedAndLiveCount; // Items that are Listed AND Live (not pending anymore)
+        $pendingCount = $livePending; // Items that are Listed but NOT Live yet (still pending)
 
         return [
             'live_pending' => $livePending,
             'zero_view' => $zeroViewCount,
+            'listed_not_pending' => $listedButNotPending,
+            'pending_count' => $pendingCount,
         ];
     }
 

@@ -655,11 +655,27 @@
                         hozAlign: "center",
                         formatter: function(cell) {
                             const isUpdated = cell.getValue();
+                            const rowData = cell.getRow().getData();
+                            const channel = (rowData['Channel '] || '').trim().toLowerCase();
+                            const listedNotPending = rowData['Listed Not Pending'];
+                            const pendingCount = rowData['Pending Count'];
+                            
+                            let html = '';
+                            
                             if (isUpdated) {
-                                return '<span style="color: green; font-size: 18px;">✓</span>';
+                                html += '<span style="color: green; font-size: 18px;">✓</span>';
                             } else {
-                                return '<span style="color: red; font-size: 18px;">❌</span>';
+                                html += '<span style="color: red; font-size: 18px;">❌</span>';
                             }
+                            
+                            // Show detailed breakdown for Amazon only
+                            if (channel === 'amazon' && listedNotPending !== null && listedNotPending !== undefined && pendingCount !== null && pendingCount !== undefined) {
+                                const subtraction = listedNotPending - pendingCount;
+                                html += `<br><span style="font-size: 10px; color: #666; font-weight: bold;">Listed: ${listedNotPending} | Pending: ${pendingCount}</span>`;
+                                html += `<br><span style="font-size: 10px; color: ${subtraction >= 0 ? 'green' : 'red'}; font-weight: bold;">Diff: ${subtraction}</span>`;
+                            }
+                            
+                            return html;
                         }
                     },
                     {
