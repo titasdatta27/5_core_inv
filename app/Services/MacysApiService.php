@@ -61,13 +61,14 @@ class MacysApiService
              $page++;
         } while ($pageToken);
         foreach ($allProducts as $sku => $data) {
-      $sku = $data['sku'] ?? null;
+        $sku = $data['sku'] ?? null;
         $quantity =$data['quantity'];
         
-            ProductStockMapping::updateOrCreate(
-                ['sku' => $sku],
-                ['inventory_macy'=>$quantity,]
-            );
+            // ProductStockMapping::updateOrCreate(
+            //     ['sku' => $sku],
+            //     ['inventory_macy'=>$quantity,]
+            // );
+             ProductStockMapping::where('sku', $sku)->update(['inventory_temu' => (int) $quantity]);    
         }
         return $allProducts;
     }

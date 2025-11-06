@@ -20,8 +20,6 @@ class ShopifyApiService
 
     public function getInventory()
     {
-
-        
         $inventoryData = [];
         $parentVariants = [];
         $pageInfo = null;
@@ -29,20 +27,7 @@ class ShopifyApiService
         $pageCount = 0;
         $totalProducts = 0;
         $totalVariants = 0;
- $validSkus = ProductMaster::query()
-    ->selectRaw('DISTINCT TRIM(sku) as sku')
-    ->whereNotNull('sku')
-    ->whereNull('deleted_at')
-    ->whereRaw("TRIM(sku) != ''")
-    ->whereRaw("LOWER(sku) NOT LIKE '%parent%'")
-    ->orderBy('sku')
-    ->pluck('sku')
-    ->map(fn($sku) => trim($sku))
-    ->filter()
-    ->unique()
-    ->values()
-    ->toArray();
-   $validSkuLookup = array_flip($validSkus);
+
         while ($hasMore) {
             $pageCount++;
             $queryParams = [
@@ -87,28 +72,23 @@ class ShopifyApiService
                         $sku
                     );
 
-                    // Ensure SKU is properly formatted but preserve original case
-                    $sku = trim((string) $sku);
-                    
-                    // Skip empty SKUs or SKUs containing 'PARENT'
-                    if ($sku === '' || stripos($sku, 'PARENT') !== false) {
-                        continue;
-                    }
+                    if (! empty($sku)) {
+                        $inventoryData[$sku] = [
+                            'variant_id' => $variant['id'],
+                            'product_id' => $product['id'],
+                            'inventory' => $variant['inventory_quantity'] ?? 0,
+                            'product_title' => $product['title'] ?? '',
+                            'sku' => $sku,
+                            'variant_title' => $variant['title'] ?? '',
+                            'inventory_item_id' => $variant['inventory_item_id'],
+                            'on_hand' => $variant['old_inventory_quantity'] ?? 0,
+                            'available_to_sell' => $variant['inventory_quantity'] ?? 0,
+                            'price' => $variant['price'],
+                            'image_src' => $imageUrl,
+                            'is_parent' => $isParent,
+                        ];
 
-                    $inventoryData[$sku] = [
-                        'variant_id' => $variant['id'],
-                        'product_id' => $product['id'],
-                        'inventory' => (int) ($variant['inventory_quantity'] ?? 0),
-                        'product_title' => $product['title'] ?? '',
-                        'sku' => $sku,
-                        'variant_title' => $variant['title'] ?? '',
-                        'inventory_item_id' => $variant['inventory_item_id'],
-                        'on_hand' => (int) ($variant['old_inventory_quantity'] ?? 0),
-                        'available_to_sell' => (int) ($variant['inventory_quantity'] ?? 0),
-                        'price' => $variant['price'],
-                        'image_src' => $imageUrl,
-                        'is_parent' => $isParent,
-                    ];
+                    } 
                 }
             }
 
@@ -121,47 +101,49 @@ class ShopifyApiService
             }
         }
 
-
+        // ✅ Update all SKUs in DB
+        // $existingSkus = $allSku->pluck('sku')->toArray();
+        // $allSku = ProductMaster::where('sku', 'not like', '%PARENT%')->get('sku');
+        //     $allSku=$allSku->toArray();
         foreach ($inventoryData as $sku => $data) {
-            // Check if SKU exists in our valid SKUs list
-            if (!isset($validSkuLookup[$sku])) {
-                Log::info("Skipping SKU not in ProductMaster or contains 'PARENT': $sku");
-                continue;
-            }
-
-            // Ensure inventory values are integers
-            $inventory = (int) $data['inventory'];
-
+            // if (in_array($sku, $allSku)) {
+            //         dd($data);
             ProductStockMapping::updateOrCreate(
-                ['sku' => $sku],  // Use exact SKU from ProductMaster
+                ['sku' => $sku],
                 [
-                    'image' => $data['image_src'],
-                    'inventory_shopify' => $inventory,
-                    'inventory_amazon' => 'Not Listed',
-                    'inventory_walmart' => 'Not Listed',
-                    'inventory_reverb' => 'Not Listed',
-                    'inventory_shein' => 'Not Listed',
-                    'inventory_doba' => 'Not Listed',
-                    'inventory_temu' => 'Not Listed',
-                    'inventory_macy' => 'Not Listed',
-                    'inventory_ebay1' => 'Not Listed',
-                    'inventory_ebay2' => 'Not Listed',
-                    'inventory_ebay3' => 'Not Listed',
-                    'inventory_bestbuy' => 'Not Listed',
-                    'tiendamia' => 'Not Listed',
+                    'image' =>$data['image_src'],
+                    'inventory_shopify' => $data['inventory'],
+                    'inventory_amazon'=>'Not Listed',
+                    'inventory_walmart'=>'Not Listed',
+                    'inventory_reverb'=>'Not Listed',
+                    'inventory_shein'=>'Not Listed',
+                    'inventory_doba'=>'Not Listed',
+                    'inventory_temu'=>'Not Listed',
+                    'inventory_macy'=>'Not Listed',
+                    'inventory_ebay1'=>'Not Listed',
+                    'inventory_ebay2'=>'Not Listed',
+                    'inventory_ebay3'=>'Not Listed',
+                    'inventory_bestbuy'=>'Not Listed',
+                    'tiendamia'=>'Not Listed',
                 ]
             );
+            // }
         }
+
         return $inventoryData;
     }
 
     protected function sanitizeImageUrl(?string $url,$sku): ?string
-    {                     
-        if (empty($url)) {return null;}      
+    {
+                     
+        if (empty($url)) {return null;}
+      
         // Remove line breaks and spaces
         $cleanUrl = trim(preg_replace('/\s+/', '', $url));
+
         // Remove ?v= query string (Shopify versioning param)
         $cleanUrl = strtok($cleanUrl, '?');
+
         return $cleanUrl;
     }
       

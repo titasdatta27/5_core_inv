@@ -271,12 +271,13 @@ class EbayApiService
         $sku = $data['sku'] ?? null;
         $quantity = $data['quantity'];
         
-            ProductStockMapping::updateOrCreate(
-                ['sku' => $sku],
-                ['inventory_ebay1'=>$quantity,]
-            );
+            // ProductStockMapping::updateOrCreate(
+            //     ['sku' => $sku],
+            //     ['inventory_ebay1'=>$quantity,]
+            // );
+            ProductStockMapping::where('sku', $sku)->update(['inventory_ebay1' => (int) $quantity]);    
         }
-        return $listingData;
+            return $listingData;
 
         $itemIdToSku = [];
         // foreach ($listingData as $row) {

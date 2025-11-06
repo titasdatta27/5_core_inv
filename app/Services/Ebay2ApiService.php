@@ -84,19 +84,20 @@ class Ebay2ApiService
     }
     public function getEbayInventory(){
         $token = $this->generateEbayToken();
-         if (!$token) {
-            Log::error('Failed to generate token.');
-            return;
-        }
+            if (!$token) {
+                Log::error('Failed to generate token.');
+                return;
+            }
         $listingData = $this->fetchAndParseReport('LMS_ACTIVE_INVENTORY_REPORT', null, $token);
         foreach ($listingData as $sku => $data) {
         $sku = $data['sku'] ?? null;
         $quantity = $data['quantity'];
         
-            ProductStockMapping::updateOrCreate(
-                ['sku' => $sku],
-                ['inventory_ebay2'=>$quantity,]
-            );
+            // ProductStockMapping::updateOrCreate(
+            //     ['sku' => $sku],
+            //     ['inventory_ebay2'=>$quantity,]
+            // );
+            ProductStockMapping::where('sku', $sku)->update(['inventory_ebay2' => (int) $quantity]);    
         }
         return $listingData;
         $itemIdToSku = [];
