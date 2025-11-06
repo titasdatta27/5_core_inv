@@ -18,6 +18,8 @@ return new class extends Migration
             $table->decimal('pft', 5, 2)->nullable();
             $table->decimal('roi', 5, 2)->nullable();
             $table->integer('l30')->nullable();
+            $table->integer('l60')->nullable();
+            $table->integer('l90')->nullable();
             $table->decimal('dil', 5, 2)->nullable();
             $table->string('buy_link')->nullable();
             $table->timestamps();

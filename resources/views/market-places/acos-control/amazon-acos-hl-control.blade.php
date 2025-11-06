@@ -189,6 +189,9 @@
                             <!-- Stats -->
                             <div class="col-md-6">
                                 <div class="d-flex gap-2 justify-content-end">
+                                    <a href="javascript:void(0)" id="export-btn" class="btn btn-sm btn-success d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-file-export me-1"></i> Export Excel/CSV
+                                    </a>
                                     <button id="apr-all-sbid-btn" class="btn btn-info btn-sm d-none">
                                         APR ALL SBID
                                     </button>
@@ -248,6 +251,8 @@
 @section('script')
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://unpkg.com/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
+    <!-- SheetJS for Excel Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
 
@@ -461,6 +466,26 @@
                         }
                     },
                     {
+                        title: "SPEND L30",
+                        field: "spend_l30",
+                        hozAlign: "right",
+                        formatter: function(cell) {
+                            return `
+                                <span>${parseFloat(cell.getValue() || 0).toFixed(0)}</span>
+                            `;
+                        }
+                    },
+                    {
+                        title: "SALES L30",
+                        field: "ad_sales_l30",
+                        hozAlign: "right",
+                        formatter: function(cell) {
+                            return `
+                                <span>${parseFloat(cell.getValue() || 0).toFixed(0)}</span>
+                            `;
+                        }
+                    },
+                    {
                         title: "Clicks L30",
                         field: "clicks_L30",
                         hozAlign: "right",
@@ -492,35 +517,23 @@
 
                             const spend = parseFloat(row.spend_L30) || 0;
                             const sales = parseFloat(row.ad_sales_L30) || 0;
+                            const clicks = parseFloat(row.clicks_L30) || 0;
                             
-                            if (spend > 0 && sales === 0) {
-                                sbgt = 1;
-                            } else if (acos < 10) {
-                                sbgt = 10;        
-                            } else if (acos >= 10 && acos < 15) {
-                                sbgt = 9;         
-                            } else if (acos >= 15 && acos < 20) {
-                                sbgt = 8;         
-                            } else if (acos >= 20 && acos <= 50) {
-                                sbgt = 2;        
-                            } else {  
-                                sbgt = 1;
+                            if(clicks > 25){
+                                if (spend > 0 && sales === 0) {
+                                    sbgt = 1;
+                                } else if (acos < 10) {
+                                    sbgt = 10;        
+                                } else if (acos >= 10 && acos < 15) {
+                                    sbgt = 8;         
+                                } else if (acos >= 15 && acos < 20) {
+                                    sbgt = 6;         
+                                } else {  
+                                    sbgt = 1;
+                                }
+                            }else{
+                                sbgt = 5;
                             }
-                            // console.log("Initial SBGT for campaign", row.sku, "with ACOS", acos, "is:", sbgt);
-                            // const l30 = parseFloat(row.L30);
-                            // const inv = parseFloat(row.INV);
-                            // let dilColor = "";
-                            // if (!isNaN(l30) && !isNaN(inv) && inv !== 0) {
-                            //     const dilDecimal = l30 / inv;
-                            //     dilColor = getDilColor(dilDecimal);
-                            // }
-
-                            // if ((dilColor === "red" && tpftInt > 18) ||
-                            //     (dilColor === "yellow" && tpftInt > 22) ||
-                            //     (dilColor === "green" && tpftInt > 26) ||
-                            //     (dilColor === "pink" && tpftInt > 30)) {
-                            //     sbgt = sbgt * 2;
-                            // }
 
                             return `
                                 <input type="number" class="form-control form-control-sm text-center sbgt-input"  value="${sbgt}" min="1" max="10"  data-campaign-id="${row.campaign_id}">
@@ -863,6 +876,23 @@
                     overlay.style.display = "none";
                 });
             }
+
+            document.getElementById("export-btn").addEventListener("click", function () {
+                let allData = table.getData("active"); 
+
+                if (allData.length === 0) {
+                    alert("No data available to export!");
+                    return;
+                }
+
+                let exportData = allData.map(row => ({ ...row }));
+
+                let ws = XLSX.utils.json_to_sheet(exportData);
+                let wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Campaigns");
+
+                XLSX.writeFile(wb, "amazon_acos_hl_ads.xlsx");
+            });
 
 
             document.body.style.zoom = "78%";

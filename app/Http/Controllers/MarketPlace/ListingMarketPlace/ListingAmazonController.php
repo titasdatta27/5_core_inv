@@ -92,8 +92,10 @@ class ListingAmazonController extends Controller
         ]);
 
         $sku = $validated['sku'];
+        
         $status = AmazonListingStatus::where('sku', $sku)->first();
 
+        
         $existing = $status ? $status->value : [];
 
         // Only update the fields that are present in the request

@@ -47,6 +47,7 @@ use App\Models\SheinListingStatus;
 use App\Models\BestbuyUsaProduct;
 use App\Models\BestbuyUSADataView;
 use App\Models\BestbuyUSAListingStatus;
+use App\Models\BusinessFiveCoreSheetdata;
 use App\Models\CvrLqs;
 use App\Models\TemuMetric;
 use App\Models\TiendamiaProduct;
@@ -55,6 +56,7 @@ use App\Models\TiendamiaListingStatus;
 use App\Models\TiktokShopDataView;
 use App\Models\TiktokShopListingStatus;
 use App\Models\TiktokSheet;
+use App\Models\WayfairListingStatus;
 use App\Services\AmazonSpApiService;
 use App\Services\DobaApiService;
 use App\Services\EbayApiService;
@@ -65,6 +67,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\ViewServiceProvider;
 use Jasara\AmznSPA\AmznSPA;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class PricingMasterViewsController extends Controller
 {
@@ -81,6 +86,20 @@ class PricingMasterViewsController extends Controller
         $this->ebay = new EbayApiService();
     }
 
+    private function getListingStatusLink($record, string $key)
+    {
+        if (!$record) return null;
+        $val = $record->value ?? null;
+        if (is_array($val)) {
+            $arr = $val;
+        } elseif (is_string($val)) {
+            $arr = json_decode($val, true) ?: [];
+        } else {
+            $arr = [];
+        }
+        return $arr[$key] ?? null;
+    }
+
 
     public function pricingMaster(Request $request)
     {
@@ -90,6 +109,21 @@ class PricingMasterViewsController extends Controller
         $processedData = $this->processPricingData();
 
         return view('pricing-master.pricing_masters_view', [
+            'mode' => $mode,
+            'demo' => $demo,
+            'records' => $processedData,
+        ]);
+    }
+
+
+        public function pricingMasterl90Data(Request $request)
+    {
+        $mode = $request->query('mode');
+        $demo = $request->query('demo');
+
+        $processedData = $this->processPricingData();
+
+        return view('pricing-master.pricing_masters_l90_views', [
             'mode' => $mode,
             'demo' => $demo,
             'records' => $processedData,
@@ -235,7 +269,20 @@ class PricingMasterViewsController extends Controller
 
         $ebayListingData = EbayListingStatus::whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
         // $dobaData    = DobaMetric::whereIn('sku', $skus)->get()->keyBy('sku');
-        $ebayData    = EbayMetric::whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
+       $ebayData = DB::connection('apicentral')
+        ->table('ebay_one_metrics')
+        ->select(
+            'sku',
+            'ebay_l30',
+            'ebay_l60',
+            'ebay_price',
+            'views',
+
+        )
+        ->whereIn('sku', $nonParentSkus)
+        ->get()
+        ->keyBy('sku');
+
         $temuListingData = TemuListingStatus::whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
         $ebayTwoListingData = EbayTwoListingStatus::whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
         $ebayThreeListingData = EbayThreeListingStatus::whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
@@ -249,6 +296,9 @@ class PricingMasterViewsController extends Controller
         $tiendamiaListingData = TiendamiaListingStatus::whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
         $tiktokListingData = TiktokShopListingStatus::whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
         $aliexpressListingData = AliexpressListingStatus::whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
+        $wayfairListingData = WayfairListingStatus::whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
+
+
 
         $pricingData = PricingMaster::whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
         $macyData = MacyProduct::whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
@@ -304,35 +354,68 @@ class PricingMasterViewsController extends Controller
         $tiendamiaDataView = TiendamiaDataView::whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
         $aliexpressDataView = AliexpressDataView::whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
         $aliexpressLookup = AliExpressSheetData::whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
+        $walmartProductSheetLookup = DB::table('walmart_product_sheet')->whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
+        $dobaProductSheetLookup = DB::table('doba_sheet_data')->whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
+        // Wayfair sheet lookup
+        $wayfairSheetLookup = DB::table('wayfair_product_sheets')
+            ->select('sku', 'price', 'l30', 'l60', 'views')
+            ->whereIn('sku', $nonParentSkus)
+            ->get()
+            ->keyBy('sku');
+        // Mercari without ship
+        $mercariWoShipSheet = DB::table('mercari_wo_ship_sheet_data')
+            ->select('sku', 'price', 'l30', 'l60', 'views')
+            ->whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
+        $mercariWoShipStatuses = DB::table('mercari_wo_ship_listing_statuses')->whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
+        // Mercari with ship
+        $mercariWShipSheet = DB::table('mercari_w_ship_sheet_data')
+            ->select('sku', 'price', 'l30', 'l60', 'views')
+            ->whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
+        $mercariWShipStatuses = DB::table('mercari_w_ship_listing_statuses')->whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
+        // FB Marketplace
+        $fbMarketplaceSheet = DB::table('fb_marketplace_sheet_data')
+            ->select('sku', 'price', 'l30', 'l60', 'views')
+            ->whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
+        $fbMarketplaceStatuses = DB::table('fb_marketplace_listing_statuses')->whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
+        // Business Five Core
+        $businessFiveCoreSheet = BusinessFiveCoreSheetdata::whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
+        $businessFiveCoreStatuses = DB::table('business5core_listing_statuses')->whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
+        // PLS
+        $plsProducts = DB::table('pls_products')
+            ->select('sku', 'price', 'p_l30', 'p_l60')
+            ->whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
+        $plsStatuses = DB::table('pls_listing_statuses')->whereIn('sku', $nonParentSkus)->get()->keyBy('sku');
 
         // Fetch LMPA and LMP data
-        $lmpaLookup = collect();
-        try {
-            $lmpaLookup = DB::connection('repricer')
-                ->table('lmpa_data')
-                ->select('sku', DB::raw('MIN(price) as lowest_price'))
-                ->where('price', '>', 0)
-                ->whereIn('sku', $nonParentSkus)
-                ->groupBy('sku')
-                ->get()
-                ->keyBy('sku');
-        } catch (Exception $e) {
-            Log::warning('Could not fetch LMPA data from repricer database: ' . $e->getMessage());
-        }
-
         $lmpLookup = collect();
         try {
             $lmpLookup = DB::connection('repricer')
-                ->table('lmp_data')
-                ->select('sku', DB::raw('MIN(price) as lowest_price'))
-                ->where('price', '>', 0)
-                ->whereIn('sku', $nonParentSkus)
-                ->groupBy('sku')
+                ->table('lmp_data as l1')
+                ->select('l1.sku', 'l1.price as lowest_price', 'l1.link')
+                ->where('l1.price', '>', 0)
+                ->whereIn('l1.sku', $nonParentSkus)
+                ->whereRaw('l1.price = (SELECT MIN(l2.price) FROM lmp_data l2 WHERE l2.sku = l1.sku AND l2.price > 0)')
                 ->get()
                 ->keyBy('sku');
         } catch (Exception $e) {
-            Log::warning('Could not fetch LMP data from repricer database: ' . $e->getMessage());
+            Log::warning('Could not fetch LMP data: ' . $e->getMessage());
         }
+
+            $lmpaLookup = collect();
+            try {
+                $lmpaLookup = DB::connection('repricer')
+                    ->table('lmpa_data as l1')
+                    ->select('l1.sku', 'l1.price as lowest_price', 'l1.link')
+                    ->where('l1.price', '>', 0)
+                    ->whereIn('l1.sku', $nonParentSkus)
+                    ->whereRaw('l1.price = (SELECT MIN(l2.price) FROM lmpa_data l2 WHERE l2.sku = l1.sku AND l2.price > 0)')
+                    ->get()
+                    ->keyBy('sku');
+            } catch (Exception $e) {
+                Log::warning('Could not fetch LMPA data: ' . $e->getMessage());
+            }
+
+
 
         $processedData = [];
 
@@ -380,6 +463,9 @@ class PricingMasterViewsController extends Controller
             $tiktok = $tiktokLookup[$sku] ?? null;
             $aliexpress = $aliexpressLookup[$sku] ?? null;
 
+            $walmartSheet = $walmartProductSheetLookup[$sku] ?? null;
+            $dobaSheet = $dobaProductSheetLookup[$sku] ?? null;
+
             // Get Shopify data for L30 and INV
             $shopifyItem = $shopifyData[trim(strtoupper($sku))] ?? null;
             $inv = $shopifyItem ? ($shopifyItem->inv ?? 0) : 0;
@@ -394,7 +480,13 @@ class PricingMasterViewsController extends Controller
                 ($shein ? ($shein->views_clicks ?? 0) : 0) +
                 ($reverb ? ($reverb->views ?? 0) : 0) +
                 ($temuMetric ? ($temuMetric->product_clicks_l30 ?? 0) : 0) +
-                ($tiktok ? ($tiktok->views ?? 0) : 0);
+                ($tiktok ? ($tiktok->views ?? 0) : 0) +
+                ($wayfairSheetLookup[$sku]->views ?? 0) +
+                ($fbMarketplaceSheet[$sku]->views ?? 0) +
+                ($mercariWoShipSheet[$sku]->views ?? 0) +
+                ($mercariWShipSheet[$sku]->views ?? 0) +
+                ($walmartSheet ? ($walmartSheet->views ?? 0) : 0) +
+                ($dobaSheet ? ($dobaSheet->views ?? 0) : 0);
 
             // Calculate total L30 and L60 counts
             $total_l30_count = ($tiktok ? ($tiktok->shopify_tiktokl30 ?? 0) : 0) +
@@ -406,6 +498,10 @@ class PricingMasterViewsController extends Controller
                 ($temuMetric ? ($temuMetric->quantity_purchased_l30 ?? 0) : 0) +
                 ($reverb ? ($reverb->r_l30 ?? 0) : 0) +
                 ($walmart ? ($walmart->l30 ?? 0) : 0) +
+                (($wayfairSheetLookup[$sku]->l30 ?? 0)) +
+                (($fbMarketplaceSheet[$sku]->l30 ?? 0)) +
+                (($mercariWoShipSheet[$sku]->l30 ?? 0)) +
+                (($mercariWShipSheet[$sku]->l30 ?? 0)) +
                 ($macy ? ($macy->m_l30 ?? 0) : 0) +
                 ($bestbuyUsa ? ($bestbuyUsa->m_l30 ?? 0) : 0) +
                 ($tiendamia ? ($tiendamia->m_l30 ?? 0) : 0) +
@@ -421,6 +517,10 @@ class PricingMasterViewsController extends Controller
                 ($temuMetric ? ($temuMetric->quantity_purchased_l60 ?? 0) : 0) +
                 ($reverb ? ($reverb->r_l60 ?? 0) : 0) +
                 ($walmart ? ($walmart->l60 ?? 0) : 0) +
+                (($wayfairSheetLookup[$sku]->l60 ?? 0)) +
+                (($fbMarketplaceSheet[$sku]->l60 ?? 0)) +
+                (($mercariWoShipSheet[$sku]->l60 ?? 0)) +
+                (($mercariWShipSheet[$sku]->l60 ?? 0)) +
                 ($macy ? ($macy->m_l60 ?? 0) : 0) +
                 ($bestbuyUsa ? ($bestbuyUsa->m_l60 ?? 0) : 0) +
                 ($tiendamia ? ($tiendamia->m_l60 ?? 0) : 0) +
@@ -431,12 +531,15 @@ class PricingMasterViewsController extends Controller
             $channels = [
                 ['data' => $amazon, 'l30' => 'units_ordered_l30', 'views' => 'sessions_l30'],
                 ['data' => $ebay, 'l30' => 'ebay_l30', 'views' => 'views'],
+                ['data'=> $reverb, 'l30' => 'r_l30', 'views' => 'views'],
                 ['data' => $ebay2, 'l30' => 'ebay_l30', 'views' => 'views'],
                 ['data' => $ebay3, 'l30' => 'ebay_l30', 'views' => 'views'],
                 ['data' => $temuMetric, 'l30' => 'quantity_purchased_l30', 'views' => 'product_clicks_l30'],
                 ['data' => $walmart,    'l30' => 'l30',                    'views' => 'views'],
                 ['data' => $tiktok,     'l30' => 'shopify_tiktokl30',                    'views' => 'views'],
                 ['data' => $shein,      'l30' => 'shopify_sheinl30',       'views' => 'views_clicks'],
+                ['data' => $walmart, 'l30' => 'l30', 'views' => $walmartSheet ? 'views' : null],
+                ['data' => $doba, 'l30' => 'l30', 'views' => $dobaSheet ? 'views' : null],
             ];
 
             $l30_sum = 0;        // Sum of L30 for channels where L30 > 0 and views > 0
@@ -448,54 +551,17 @@ class PricingMasterViewsController extends Controller
                     $l30 = $obj->{$channel['l30']} ?? 0;
                     $views = $obj->{$channel['views']} ?? 0;
 
-                    if ($l30 > 0 && $views > 0) {
+                    if ($l30 > 0) {
                         $l30_sum += $l30;           // sum l30
-                        $views_sum += $views;   // sum views
+                        $views_sum += $views;       // sum views
                     }
                 }
             }
 
-            $total_l30_count_data = 0;
-            if ($amazon && ($amazon->units_ordered_l30 ?? 0) > 0) {
-                $total_l30_count_data++;
-            }
-            if ($ebay && ($ebay->ebay_l30 ?? 0) > 0) {
-                $total_l30_count_data++;
-            }
-            if ($ebay2 && ($ebay2->ebay_l30 ?? 0) > 0) {
-                $total_l30_count_data++;
-            }
-            if ($ebay3 && ($ebay3->ebay_l30 ?? 0) > 0) {
-                $total_l30_count_data++;
-            }
-            if ($temuMetric && ($temuMetric->{'quantity_purchased_l30'} ?? 0) > 0) {
-                $total_l30_count_data++;
-            }
-            if ($reverb && ($reverb->r_l30 ?? 0) > 0) {
-                $total_l30_count_data++;
-            }
-            if ($tiktok && ($tiktok->shopify_tiktokl30 ?? 0) > 0) {
-                $total_l30_count_data++;
-            }
-            if ($shein && ($shein->shopify_sheinl30 ?? 0) > 0) {
-                $total_l30_count_data++;
-            }
-            if ($aliexpress && ($aliexpress->aliexpress_l30 ?? 0) > 0) {
-                $total_l30_count_data++;
-            }
+           
 
-            // For $avgCvr, use views only from qualifying channels (same as l30_sum)
-            $views_sum =
-                (($amazon && ($amazon->units_ordered_l30 ?? 0) > 0 && ($amazon->sessions_l30 ?? 0) > 0) ? ($amazon->sessions_l30 ?? 0) : 0) +
-                (($ebay && ($ebay->ebay_l30 ?? 0) > 0 && ($ebay->views ?? 0) > 0) ? ($ebay->views ?? 0) : 0) +
-                (($ebay2 && ($ebay2->ebay_l30 ?? 0) > 0 && ($ebay2->views ?? 0) > 0) ? ($ebay2->views ?? 0) : 0) +
-                (($ebay3 && ($ebay3->ebay_l30 ?? 0) > 0 && ($ebay3->views ?? 0) > 0) ? ($ebay3->views ?? 0) : 0) +
-                (($temuMetric && ($temuMetric->{'quantity_purchased_l30'} ?? 0) > 0 && ($temuMetric->{'product_clicks_l30'} ?? 0) > 0) ? ($temuMetric->{'product_clicks_l30'} ?? 0) : 0) +
-                (($tiktok && ($tiktok->shopify_tiktokl30 ?? 0) > 0 && ($tiktok->views ?? 0) > 0) ? ($tiktok->views ?? 0) : 0) +
-                (($shein && ($shein->shopify_sheinl30 ?? 0) > 0 && ($shein->views_clicks ?? 0) > 0) ? ($shein->views_clicks ?? 0) : 0);
-
-            $avgCvr = $views_sum > 0
-                ? number_format(($l30_sum / $views_sum) * 100, 1) . ' %'
+            $avgCvr = $views_sum
+                ? number_format(($total_l30_count / $total_views) * 100, 1) . ' %'
                 : '0.0 %';
 
             $item = (object) [
@@ -521,7 +587,7 @@ class PricingMasterViewsController extends Controller
                 'inv' => $shopifyData[trim(strtoupper($sku))]->inv ?? 0,
                 'avgCvr' => $avgCvr,
                 'total_l30_count' => $total_l30_count,
-                'total_l30_count_data' => $total_l30_count_data,
+            
                 'total_l60_count' => $total_l60_count,
                 'initial_cogs' => $lp != 0 ? $initialQuantity * $lp : 0,
                 'current_cogs' => $lp != 0 ? $inv * $lp : 0,
@@ -557,6 +623,7 @@ class PricingMasterViewsController extends Controller
                 'doba_price' => $doba ? ($doba->doba_price ?? 0) : 0,
                 'doba_l30' => $doba ? ($doba->l30 ?? 0) : 0,
                 'doba_l60' => $doba ? ($doba->l60 ?? 0) : 0,
+                'doba_views' => $dobaSheet ? ($dobaSheet->views ?? 0) : 0,
                 'doba_pft' => $doba && ($doba->doba_price ?? 0) > 0 ? (($doba->doba_price * 0.95 - $lp - $ship) / $doba->doba_price) : 0,
                 'doba_roi' => $doba && $lp > 0 && ($doba->doba_price ?? 0) > 0 ? (($doba->doba_price * 0.95 - $lp - $ship) / $lp) : 0,
                 'doba_buyer_link' => isset($dobaListingData[$sku]) ? ($dobaListingData[$sku]->value['buyer_link'] ?? null) : null,
@@ -596,6 +663,7 @@ class PricingMasterViewsController extends Controller
                 'walmart_l30' => $walmart ? ($walmart->l30 ?? 0) : 0,
                 'walmart_l60' => $walmart ? ($walmart->l60 ?? 0) : 0,
                 'walmart_dil' => $walmart ? ($walmart->dil ?? 0) : 0,
+                'walmart_views' => $walmartSheet ? ($walmartSheet->views ?? 0) : 0,
                 'walmart_pft' => $walmart && ($walmart->price ?? 0) > 0 ? (($walmart->price * 0.80 - $lp - $ship) / $walmart->price) : 0,
                 'walmart_roi' => $walmart && $lp > 0 && ($walmart->price ?? 0) > 0 ? (($walmart->price * 0.80 - $lp - $ship) / $lp) : 0,
                 'walmart_buyer_link' => isset($walmartListingData[$sku]) ? ($walmartListingData[$sku]->value['buyer_link'] ?? null) : null,
@@ -663,8 +731,8 @@ class PricingMasterViewsController extends Controller
                 'tiktok_l30' => $tiktok ? ($tiktok->shopify_tiktokl30 ?? 0) : 0,
                 'tiktok_l60' => $tiktok ? ($tiktok->shopify_tiktokl60 ?? 0) : 0,
                 'tiktok_views' => $tiktok ? ($tiktok->views ?? 0) : 0,
-                'tiktok_pft' => $tiktok && ($tiktok->price ?? 0) > 0 ? (($tiktok->price * 0.64 - $lp - $ship) / $tiktok->price) : 0,
-                'tiktok_roi' => $tiktok && $lp > 0 && ($tiktok->price ?? 0) > 0 ? (($tiktok->price * 0.64 - $lp - $ship) / $lp) : 0,
+                'tiktok_pft' => $tiktok && ($tiktok->price ?? 0) > 0 ? (($tiktok->price * 0.80 - $lp - $ship) / $tiktok->price) : 0,
+                'tiktok_roi' => $tiktok && $lp > 0 && ($tiktok->price ?? 0) > 0 ? (($tiktok->price * 0.80 - $lp - $ship) / $lp) : 0,
                 'tiktok_req_view' => $tiktok && $tiktok->views > 0 && $tiktok->shopify_tiktokl30 ? (($inv / 90) * 30) / (($tiktok->shopify_tiktokl30 / $tiktok->views)) : 0,
                 'tiktok_cvr' => $tiktok ? $this->calculateCVR($tiktok->shopify_tiktokl30 ?? 0, $tiktok->views ?? 0) : null,
                 'tiktok_buyer_link' => isset($tiktokListingData[$sku]) ? ($tiktokListingData[$sku]->value['buyer_link'] ?? null) : null,
@@ -677,9 +745,113 @@ class PricingMasterViewsController extends Controller
                 'aliexpress_roi' => $aliexpress && $lp > 0 && ($aliexpress->price ?? 0) > 0 ? (($aliexpress->price * 0.89 - $lp - $ship) / $lp) : 0,
                 'aliexpress_buyer_link' => isset($aliexpressListingData[$sku]) ? ($aliexpressListingData[$sku]->value['buyer_link'] ?? null) : null,
                 'aliexpress_seller_link' => isset($aliexpressListingData[$sku]) ? ($aliexpressListingData[$sku]->value['seller_link'] ?? null) : null,
+
+                // Mercari With Out Ship
+
+                'mercariwoship_price' => isset($mercariWoShipSheet[$sku]) ? ($mercariWoShipSheet[$sku]->price ?? 0) : 0,
+                'mercariwoship_l30' => isset($mercariWoShipSheet[$sku]) ? ($mercariWoShipSheet[$sku]->l30 ?? 0) : 0,
+                'mercariwoship_l60' => isset($mercariWoShipSheet[$sku]) ? ($mercariWoShipSheet[$sku]->l60 ?? 0) : 0,
+                'mercariwoship_pft' => isset($mercariWoShipSheet[$sku]) && ($mercariWoShipSheet[$sku]->price ?? 0) > 0 ? ((($mercariWoShipSheet[$sku]->price * 0.80) - $lp - $ship) / $mercariWoShipSheet[$sku]->price) : 0,
+                'mercariwoship_roi' => isset($mercariWoShipSheet[$sku]) && $lp > 0 && ($mercariWoShipSheet[$sku]->price ?? 0) > 0 ? ((($mercariWoShipSheet[$sku]->price * 0.80) - $lp - $ship) / $lp) : 0,
+                'mercariwoship_views' => isset($mercariWoShipSheet[$sku]) ? ($mercariWoShipSheet[$sku]->views ?? 0) : 0,
+                'mercariwoship_buyer_link' => isset($mercariWoShipSheet[$sku]) && ($mercariWoShipSheet[$sku]->buyer_link ?? null)
+                    ? $mercariWoShipSheet[$sku]->buyer_link
+                    : (isset($mercariWoShipStatuses[$sku]) ? $this->getListingStatusLink($mercariWoShipStatuses[$sku], 'buyer_link') : null),
+                'mercariwoship_seller_link' => isset($mercariWoShipSheet[$sku]) && ($mercariWoShipSheet[$sku]->seller_link ?? null)
+                    ? $mercariWoShipSheet[$sku]->seller_link
+                    : (isset($mercariWoShipStatuses[$sku]) ? $this->getListingStatusLink($mercariWoShipStatuses[$sku], 'seller_link') : null),
+
+
+                // Mercari With Ship
+
+                'mercariwship_price' => isset($mercariWShipSheet[$sku]) ? ($mercariWShipSheet[$sku]->price ?? 0) : 0,
+                'mercariwship_l30' => isset($mercariWShipSheet[$sku]) ? ($mercariWShipSheet[$sku]->l30 ?? 0) : 0,
+                'mercariwship_l60' => isset($mercariWShipSheet[$sku]) ? ($mercariWShipSheet[$sku]->l60 ?? 0) : 0,
+                'mercariwship_pft' => isset($mercariWShipSheet[$sku]) && ($mercariWShipSheet[$sku]->price ?? 0) > 0 ? ((($mercariWShipSheet[$sku]->price * 0.80) - $lp - $ship) / $mercariWShipSheet[$sku]->price) : 0,
+                'mercariwship_roi' => isset($mercariWShipSheet[$sku]) && $lp > 0 && ($mercariWShipSheet[$sku]->price ?? 0) > 0 ? ((($mercariWShipSheet[$sku]->price * 0.80) - $lp - $ship) / $lp) : 0,
+                'mercariwship_views' => isset($mercariWShipSheet[$sku]) ? ($mercariWShipSheet[$sku]->views ?? 0) : 0,
+                'mercariwship_buyer_link' => isset($mercariWShipSheet[$sku]) && ($mercariWShipSheet[$sku]->buyer_link ?? null)
+                    ? $mercariWShipSheet[$sku]->buyer_link
+                    : (isset($mercariWShipStatuses[$sku]) ? $this->getListingStatusLink($mercariWShipStatuses[$sku], 'buyer_link') : null),
+                'mercariwship_seller_link' => isset($mercariWShipSheet[$sku]) && ($mercariWShipSheet[$sku]->seller_link ?? null)
+                    ? $mercariWShipSheet[$sku]->seller_link
+                    : (isset($mercariWShipStatuses[$sku]) ? $this->getListingStatusLink($mercariWShipStatuses[$sku], 'seller_link') : null),
+
+
+
+                // FB Marketplace
+                'fbmarketplace_price' => isset($fbMarketplaceSheet[$sku]) ? ($fbMarketplaceSheet[$sku]->price ?? 0) : 0,
+                'fbmarketplace_l30' => isset($fbMarketplaceSheet[$sku]) ? ($fbMarketplaceSheet[$sku]->l30 ?? 0) : 0,
+                'fbmarketplace_l60' => isset($fbMarketplaceSheet[$sku]) ? ($fbMarketplaceSheet[$sku]->l60 ?? 0) : 0,
+                'fbmarketplace_pft' => isset($fbMarketplaceSheet[$sku]) && ($fbMarketplaceSheet[$sku]->price ?? 0) > 0 ? ((($fbMarketplaceSheet[$sku]->price * 0.80) - $lp - $ship) / $fbMarketplaceSheet[$sku]->price) : 0,
+                'fbmarketplace_roi' => isset($fbMarketplaceSheet[$sku]) && $lp > 0 && ($fbMarketplaceSheet[$sku]->price ?? 0) > 0 ? ((($fbMarketplaceSheet[$sku]->price * 0.80) - $lp - $ship) / $lp) : 0,
+                'fbmarketplace_views' => isset($fbMarketplaceSheet[$sku]) ? ($fbMarketplaceSheet[$sku]->views ?? 0) : 0,
+                'fbmarketplace_buyer_link' => isset($fbMarketplaceSheet[$sku]) && ($fbMarketplaceSheet[$sku]->buyer_link ?? null)
+                    ? $fbMarketplaceSheet[$sku]->buyer_link
+                    : (isset($fbMarketplaceStatuses[$sku]) ? $this->getListingStatusLink($fbMarketplaceStatuses[$sku], 'buyer_link') : null),
+                'fbmarketplace_seller_link' => isset($fbMarketplaceSheet[$sku]) && ($fbMarketplaceSheet[$sku]->seller_link ?? null)
+                    ? $fbMarketplaceSheet[$sku]->seller_link
+                    : (isset($fbMarketplaceStatuses[$sku]) ? $this->getListingStatusLink($fbMarketplaceStatuses[$sku], 'seller_link') : null),
+
+
+
+                // Business Five Core
+                'business5core_price' => isset($businessFiveCoreSheet[$sku]) ? ($businessFiveCoreSheet[$sku]->price ?? 0) : 0,
+                'business5core_l30' => isset($businessFiveCoreSheet[$sku]) ? ($businessFiveCoreSheet[$sku]->l30 ?? 0) : 0,
+                'business5core_l60' => isset($businessFiveCoreSheet[$sku]) ? ($businessFiveCoreSheet[$sku]->l60 ?? 0) : 0,
+                'business5core_pft' => isset($businessFiveCoreSheet[$sku]) && ($businessFiveCoreSheet[$sku]->price ?? 0) > 0 ? ((($businessFiveCoreSheet[$sku]->price * 0.80) - $lp - $ship) / $businessFiveCoreSheet[$sku]->price) : 0,
+                'business5core_roi' => isset($businessFiveCoreSheet[$sku]) && $lp > 0 && ($businessFiveCoreSheet[$sku]->price ?? 0) > 0 ? ((($businessFiveCoreSheet[$sku]->price * 0.80) - $lp - $ship) / $lp) : 0,
+                'business5core_views' => isset($businessFiveCoreSheet[$sku]) ? ($businessFiveCoreSheet[$sku]->views ?? 0) : 0,
+                'business5core_buyer_link' => isset($businessFiveCoreSheet[$sku]) && ($businessFiveCoreSheet[$sku]->buyer_link ?? null)
+                    ? $businessFiveCoreSheet[$sku]->buyer_link
+                    : (isset($businessFiveCoreStatuses[$sku]) ? $this->getListingStatusLink($businessFiveCoreStatuses[$sku], 'buyer_link') : null),
+                'business5core_seller_link' => isset($businessFiveCoreSheet[$sku]) && ($businessFiveCoreSheet[$sku]->seller_link ?? null)
+                    ? $businessFiveCoreSheet[$sku]->seller_link
+                    : (isset($businessFiveCoreStatuses[$sku]) ? $this->getListingStatusLink($businessFiveCoreStatuses[$sku], 'seller_link') : null),
+             
+             
+
+
+                // PLS
+                'pls_price' => isset($plsProducts[$sku]) ? ($plsProducts[$sku]->price ?? 0) : 0,
+                'pls_l30' => isset($plsProducts[$sku]) ? ($plsProducts[$sku]->p_l30 ?? 0) : 0,
+                'pls_l60' => isset($plsProducts[$sku]) ? ($plsProducts[$sku]->p_l60 ?? 0) : 0,
+                'pls_pft' => isset($plsProducts[$sku]) && ($plsProducts[$sku]->price ?? 0) > 0 ? ((($plsProducts[$sku]->price * 0.80) - $lp - $ship) / $plsProducts[$sku]->price) : 0,
+                'pls_roi' => isset($plsProducts[$sku]) && $lp > 0 && ($plsProducts[$sku]->price ?? 0) > 0 ? ((($plsProducts[$sku]->price * 0.80) - $lp - $ship) / $lp) : 0,
+                'pls_buyer_link' => isset($plsProducts[$sku]) && ($plsProducts[$sku]->buyer_link ?? null)
+                    ? $plsProducts[$sku]->buyer_link
+                    : (isset($plsStatuses[$sku]) ? $this->getListingStatusLink($plsStatuses[$sku], 'buyer_link') : null),
+                'pls_seller_link' => isset($plsProducts[$sku]) && ($plsProducts[$sku]->seller_link ?? null)
+                    ? $plsProducts[$sku]->seller_link
+                    : (isset($plsStatuses[$sku]) ? $this->getListingStatusLink($plsStatuses[$sku], 'seller_link') : null),
+               
+               
+                // Wayfair (from sheet)
+                'wayfair_price' => isset($wayfairSheetLookup[$sku]) ? ($wayfairSheetLookup[$sku]->price ?? 0) : 0,
+                'wayfair_l30' => isset($wayfairSheetLookup[$sku]) ? ($wayfairSheetLookup[$sku]->l30 ?? 0) : 0,
+                'wayfair_l60' => isset($wayfairSheetLookup[$sku]) ? ($wayfairSheetLookup[$sku]->l60 ?? 0) : 0,
+                'wayfair_views' => isset($wayfairSheetLookup[$sku]) ? ($wayfairSheetLookup[$sku]->views ?? 0) : 0,
+                'wayfair_pft' => isset($wayfairSheetLookup[$sku]) && ($wayfairSheetLookup[$sku]->price ?? 0) > 0 ? ((($wayfairSheetLookup[$sku]->price * 0.80) - $lp - $ship) / $wayfairSheetLookup[$sku]->price) : 0,
+                'wayfair_roi' => isset($wayfairSheetLookup[$sku]) && $lp > 0 && ($wayfairSheetLookup[$sku]->price ?? 0) > 0 ? ((($wayfairSheetLookup[$sku]->price * 0.80) - $lp - $ship) / $lp) : 0,
+                'wayfair_buyer_link' => isset($wayfairListingData[$sku]) ? $this->getListingStatusLink($wayfairListingData[$sku], 'buyer_link') : null,
+                'wayfair_seller_link' => isset($wayfairListingData[$sku]) ? $this->getListingStatusLink($wayfairListingData[$sku], 'seller_link') : null,
+
+                // Mercari WO Ship
+             
+            
+                // Mercari W Ship
+               
+             
+            
                 // Direct assignments
                 'views_clicks' => $shein ? ($shein->views_clicks ?? 0) : 0,
                 'lmp' => $shein ? ($shein->lmp ?? 0) : 0,
+                'link' => $lmp ? ($lmp->link ?? null) : null,
+                'link_amz' => $lmpa ? ($lmpa->link ?? null) : null,
+                'link_ebay' => $lmp ? ($lmp->link ?? null) : null,
+                'link_shein' => $shein ? ($shein->link1 ?? null) : null,
+                'link_tiktok' => $tiktok ? ($tiktok->link ?? null) : null,
+                'link_aliexpress' => $aliexpress ? ($aliexpress->link ?? null) : null,
                 'shopify_sheinl30' => $shein ? ($shein->shopify_sheinl30 ?? 0) : 0,
                 'total_req_view' => (
                     ($ebay && $ebay->views && $ebay->ebay_l30 ? ($inv * 20) : 0) +
@@ -688,7 +860,9 @@ class PricingMasterViewsController extends Controller
                     ($amazon && $amazon->sessions_l30 && $amazon->units_ordered_l30 ? ($inv * 20) : 0) +
                     ($shein && $shein->views_clicks && $shein->shopify_sheinl30 ? ($inv * 20) : 0) +
                     ($reverb && $reverb->views && $reverb->r_l30 ? ($inv * 20) : 0) +
-                    ($temuMetric && ($temuMetric->product_clicks_l30 ?? 0) && ($temuMetric->quantity_purchased_l30 ?? 0) ? ($inv * 20) : 0)
+                    ($temuMetric && ($temuMetric->product_clicks_l30 ?? 0) && ($temuMetric->quantity_purchased_l30 ?? 0) ? ($inv * 20) : 0) +
+                    ($walmartSheet && ($walmart->l30 ?? 0) > 0 && ($walmartSheet->views ?? 0) > 0 ? ($walmartSheet->views ?? 0) : 0) +
+                    ($dobaSheet && ($doba->l30 ?? 0) > 0 && ($dobaSheet->views ?? 0) > 0 ? ($dobaSheet->views ?? 0) : 0)
                 ),
                 // DataView values
                 'amz_sprice' => isset($amazonDataView[$sku]) ? (is_array($amazonDataView[$sku]->value) ? ($amazonDataView[$sku]->value['SPRICE'] ?? null) : (json_decode($amazonDataView[$sku]->value, true)['SPRICE'] ?? null)) : null,
@@ -734,6 +908,9 @@ class PricingMasterViewsController extends Controller
                 'aliexpress_sprice' => isset($aliexpressDataView[$sku]) ? (is_array($aliexpressDataView[$sku]->value) ? ($aliexpressDataView[$sku]->value['SPRICE'] ?? null) : (json_decode($aliexpressDataView[$sku]->value, true)['SPRICE'] ?? null)) : null,
                 'aliexpress_spft' => isset($aliexpressDataView[$sku]) ? (is_array($aliexpressDataView[$sku]->value) ? ($aliexpressDataView[$sku]->value['SPFT'] ?? null) : (json_decode($aliexpressDataView[$sku]->value, true)['SPFT'] ?? null)) : null,
                 'aliexpress_sroi' => isset($aliexpressDataView[$sku]) ? (is_array($aliexpressDataView[$sku]->value) ? ($aliexpressDataView[$sku]->value['SROI'] ?? null) : (json_decode($aliexpressDataView[$sku]->value, true)['SROI'] ?? null)) : null,
+                // L90 Sales and Views from ProductMaster
+                'sales' => is_string($product->sales) ? json_decode($product->sales, true) : ($product->sales ?? []),
+                'views' => is_string($product->views) ? json_decode($product->views, true) : ($product->views ?? []),
             ];
 
             // Set inventory calculations
@@ -748,12 +925,14 @@ class PricingMasterViewsController extends Controller
             $item->shopifyb2c_l30 = $shopify ? $shopify->quantity : 0;
             $item->shopifyb2c_l30_data = $shopify ? $shopify->shopify_l30 : 0;
             $item->shopifyb2c_image = $shopify ? $shopify->image_src : null;
+            $item->image_url = $product->image_url;
             $item->shopifyb2c_pft = $item->shopifyb2c_price > 0 ? (($item->shopifyb2c_price * 0.75 - $lp - $ship) / $item->shopifyb2c_price) : 0;
             $item->shopifyb2c_roi = ($lp > 0 && $item->shopifyb2c_price > 0) ? (($item->shopifyb2c_price * 0.75 - $lp - $ship) / $lp) : 0;
 
             // Add inv_value and COGS calculations
             $item->inv_value = $inv * $item->shopifyb2c_price;
             $item->COGS = $lp * $inv;
+            $item->lp_value = $lp * $inv;
 
             // Add analysis action buttons
             $item->l30_analysis = '<button class="btn btn-sm btn-info" onclick="showL30Modal(this)" data-sku="' . $item->SKU . '">L30</button>';
@@ -867,8 +1046,24 @@ class PricingMasterViewsController extends Controller
 
     protected function calculateCVR($l30, $views)
     {
-        if (!$views) return null;
-        $cvr = ($l30 / $views) * 100;
+        // Normalize inputs to numeric values safely
+        $l30Num = is_numeric($l30) ? (float) $l30 : 0.0;
+
+        // If $views is an array/object or not numeric, try to coerce scalar values, otherwise treat as zero
+        if (is_array($views) || is_object($views)) {
+            $viewsNum = 0.0;
+        } else {
+            // Cast strings like "0.0" correctly to float; floatval on non-numeric returns 0.0
+            $viewsNum = is_numeric($views) ? (float) $views : floatval($views);
+        }
+
+        // Guard: avoid division when denominator is zero
+        if ($viewsNum == 0.0) {
+            return null;
+        }
+
+        $cvr = ($l30Num / $viewsNum) * 100;
+
         return [
             'value' => number_format($cvr, 2),
             'color' => $cvr <= 7 ? 'blue' : ($cvr <= 13 ? 'green' : 'red')
@@ -1160,7 +1355,7 @@ class PricingMasterViewsController extends Controller
                     'reverb' => 0.84,
                     'macy' => 0.76,
                     'walmart' => 0.80,
-                    'tiktok' => 0.64,
+                    'tiktok' => 0.80,
                     'aliexpress' => 0.89
                 ];
 
@@ -1614,5 +1809,464 @@ class PricingMasterViewsController extends Controller
     {
 
         return view('pricing-master.pricing_master_copy', []);
+    }
+
+    public function saveImageUrl(Request $request)
+    {
+        $data = $request->validate([
+            'sku' => 'required|string',
+            'image_url' => 'required|url',
+        ]);
+
+        $product = ProductMaster::where('sku', $data['sku'])->first();
+
+        if (!$product) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Product not found',
+            ], 404);
+        }
+
+        $product->image_url = $data['image_url'];
+        $product->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Image URL saved successfully',
+            'data' => [
+                'sku' => $product->sku,
+                'image_url' => $product->image_url,
+            ]
+        ]);
+    }
+
+
+
+    public function exportPricingMaster(Request $request)
+    {
+        try {
+            // Get all pricing data
+            $processedData = $this->processPricingData();
+
+            // Create spreadsheet
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+            $sheet->setTitle('Pricing Master Data');
+
+            // Define headers
+            $headers = [
+                'A1' => 'Parent',
+                'B1' => 'SKU',
+                'C1' => 'INV',
+                'D1' => 'OVL30',
+                'E1' => 'Amazon L90 Sales',
+                'F1' => 'Amazon L90 Views',
+                'G1' => 'eBay L90 Sales',
+                'H1' => 'eBay L90 Views',
+                'I1' => 'eBay2 L90 Sales',
+                'J1' => 'eBay2 L90 Views',
+                'K1' => 'eBay3 L90 Sales',
+                'L1' => 'eBay3 L90 Views',
+                'M1' => 'Temu L90 Sales',
+                'N1' => 'Temu L90 Views',
+                'O1' => 'Shopify L90 Sales',
+                'P1' => 'Shopify L90 Views',
+                'Q1' => 'Macy L90 Sales',
+                'R1' => 'Macy L90 Views',
+                'S1' => 'Reverb L90 Sales',
+                'T1' => 'Reverb L90 Views',
+                'U1' => 'Doba L90 Sales',
+                'V1' => 'Doba L90 Views',
+                'W1' => 'Walmart L90 Sales',
+                'X1' => 'Walmart L90 Views',
+                'Y1' => 'Shein L90 Sales',
+                'Z1' => 'Shein L90 Views',
+                'AA1' => 'BestBuy L90 Sales',
+                'AB1' => 'BestBuy L90 Views',
+                'AC1' => 'Tiendamia L90 Sales',
+                'AD1' => 'Tiendamia L90 Views',
+                'AE1' => 'TikTok L90 Sales',
+                'AF1' => 'TikTok L90 Views',
+                'AG1' => 'AliExpress L90 Sales',
+                'AH1' => 'AliExpress L90 Views',
+            ];
+
+            // Set headers
+            foreach ($headers as $cell => $value) {
+                $sheet->setCellValue($cell, $value);
+            }
+
+            // Style headers
+            $sheet->getStyle('A1:AH1')->getFont()->setBold(true);
+            $sheet->getStyle('A1:AH1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
+            $sheet->getStyle('A1:AH1')->getFill()->getStartColor()->setARGB('4472C4');
+            $sheet->getStyle('A1:AH1')->getFont()->getColor()->setARGB('FFFFFF');
+
+            // Fill data
+            $row = 2;
+            foreach ($processedData as $item) {
+                // Get sales and views data from ProductMaster
+                $productMaster = ProductMaster::where('sku', $item->SKU)->first();
+                $sales = $productMaster->sales ?? [];
+                $views = $productMaster->views ?? [];
+
+                $sheet->setCellValue('A' . $row, $item->Parent ?? '');
+                $sheet->setCellValue('B' . $row, $item->SKU ?? '');
+                $sheet->setCellValue('C' . $row, $item->INV ?? 0);
+                $sheet->setCellValue('D' . $row, $item->ovl30 ?? $item->shopifyb2c_l30 ?? 0);
+                $sheet->setCellValue('E' . $row, $sales['amazon'] ?? 0);
+                $sheet->setCellValue('F' . $row, $views['amazon'] ?? 0);
+                $sheet->setCellValue('G' . $row, $sales['ebay'] ?? 0);
+                $sheet->setCellValue('H' . $row, $views['ebay'] ?? 0);
+                $sheet->setCellValue('I' . $row, $sales['ebay2'] ?? 0);
+                $sheet->setCellValue('J' . $row, $views['ebay2'] ?? 0);
+                $sheet->setCellValue('K' . $row, $sales['ebay3'] ?? 0);
+                $sheet->setCellValue('L' . $row, $views['ebay3'] ?? 0);
+                $sheet->setCellValue('M' . $row, $sales['temu'] ?? 0);
+                $sheet->setCellValue('N' . $row, $views['temu'] ?? 0);
+                $sheet->setCellValue('O' . $row, $sales['shopify'] ?? 0);
+                $sheet->setCellValue('P' . $row, $views['shopify'] ?? 0);
+                $sheet->setCellValue('Q' . $row, $sales['macy'] ?? 0);
+                $sheet->setCellValue('R' . $row, $views['macy'] ?? 0);
+                $sheet->setCellValue('S' . $row, $sales['reverb'] ?? 0);
+                $sheet->setCellValue('T' . $row, $views['reverb'] ?? 0);
+                $sheet->setCellValue('U' . $row, $sales['doba'] ?? 0);
+                $sheet->setCellValue('V' . $row, $views['doba'] ?? 0);
+                $sheet->setCellValue('W' . $row, $sales['walmart'] ?? 0);
+                $sheet->setCellValue('X' . $row, $views['walmart'] ?? 0);
+                $sheet->setCellValue('Y' . $row, $sales['shein'] ?? 0);
+                $sheet->setCellValue('Z' . $row, $views['shein'] ?? 0);
+                $sheet->setCellValue('AA' . $row, $sales['bestbuy'] ?? 0);
+                $sheet->setCellValue('AB' . $row, $views['bestbuy'] ?? 0);
+                $sheet->setCellValue('AC' . $row, $sales['tiendamia'] ?? 0);
+                $sheet->setCellValue('AD' . $row, $views['tiendamia'] ?? 0);
+                $sheet->setCellValue('AE' . $row, $sales['tiktok'] ?? 0);
+                $sheet->setCellValue('AF' . $row, $views['tiktok'] ?? 0);
+                $sheet->setCellValue('AG' . $row, $sales['aliexpress'] ?? 0);
+                $sheet->setCellValue('AH' . $row, $views['aliexpress'] ?? 0);
+                $row++;
+            }
+
+            // Auto-size columns
+            $columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'AA', 'AB', 'AC', 'AD', 'AE', 'AF', 'AG', 'AH'];
+            foreach ($columns as $column) {
+                $sheet->getColumnDimension($column)->setAutoSize(true);
+            }
+
+            // Generate filename
+            $filename = 'pricing_master_' . date('Y-m-d_H-i-s') . '.xlsx';
+
+            // Save and download
+            $writer = new Xlsx($spreadsheet);
+            $tempFile = tempnam(sys_get_temp_dir(), 'pricing_master');
+            $writer->save($tempFile);
+
+            return response()->download($tempFile, $filename)->deleteFileAfterSend(true);
+        } catch (\Exception $e) {
+            Log::error('Pricing Master Export error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Export failed: ' . $e->getMessage());
+        }
+    }
+
+    public function downloadSiteL90Sample()
+    {
+        try {
+            // Create spreadsheet
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+            $sheet->setTitle('Site L90 Sample');
+
+            // Headers
+            $headers = [
+                'A1' => 'SKU',
+                'B1' => 'amazon_l90_sales',
+                'C1' => 'amazon_l90_views',
+                'D1' => 'ebay_l90_sales',
+                'E1' => 'ebay_l90_views',
+                'F1' => 'ebay2_l90_sales',
+                'G1' => 'ebay2_l90_views',
+                'H1' => 'ebay3_l90_sales',
+                'I1' => 'ebay3_l90_views',
+                'J1' => 'temu_l90_sales',
+                'K1' => 'temu_l90_views',
+                'L1' => 'shopify_l90_sales',
+                'M1' => 'shopify_l90_views',
+                'N1' => 'macy_l90_sales',
+                'O1' => 'macy_l90_views',
+                'P1' => 'reverb_l90_sales',
+                'Q1' => 'reverb_l90_views',
+                'R1' => 'doba_l90_sales',
+                'S1' => 'doba_l90_views',
+                'T1' => 'walmart_l90_sales',
+                'U1' => 'walmart_l90_views',
+                'V1' => 'shein_l90_sales',
+                'W1' => 'shein_l90_views',
+                'X1' => 'bestbuy_l90_sales',
+                'Y1' => 'bestbuy_l90_views',
+                'Z1' => 'tiendamia_l90_sales',
+                'AA1' => 'tiendamia_l90_views',
+                'AB1' => 'tiktok_l90_sales',
+                'AC1' => 'tiktok_l90_views',
+                'AD1' => 'aliexpress_l90_sales',
+                'AE1' => 'aliexpress_l90_views',
+            ];
+
+            foreach ($headers as $cell => $value) {
+                $sheet->setCellValue($cell, $value);
+            }
+
+            // Style headers
+            $sheet->getStyle('A1:AE1')->getFont()->setBold(true);
+            $sheet->getStyle('A1:AE1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
+            $sheet->getStyle('A1:AE1')->getFill()->getStartColor()->setARGB('4472C4');
+            $sheet->getStyle('A1:AE1')->getFont()->getColor()->setARGB('FFFFFF');
+
+            // Get actual SKUs from ProductMaster
+            $skus = ProductMaster::select('sku')
+                ->whereNotNull('sku')
+                ->where('sku', '!=', '')
+                ->orderBy('sku')
+                ->limit(1000)
+                ->pluck('sku');
+
+            // Populate SKU column with real SKUs
+            $row = 2;
+            foreach ($skus as $sku) {
+                $sheet->setCellValue('A' . $row, $sku);
+                $row++;
+            }
+
+            // Auto-size columns
+            foreach (range('A', 'Z') as $column) {
+                $sheet->getColumnDimension($column)->setAutoSize(true);
+            }
+            $sheet->getColumnDimension('AA')->setAutoSize(true);
+            $sheet->getColumnDimension('AB')->setAutoSize(true);
+            $sheet->getColumnDimension('AC')->setAutoSize(true);
+            $sheet->getColumnDimension('AD')->setAutoSize(true);
+            $sheet->getColumnDimension('AE')->setAutoSize(true);
+
+            // Generate filename
+            $filename = 'site_l90_import_sample_' . date('Y-m-d') . '.xlsx';
+
+            // Save and download
+            $writer = new Xlsx($spreadsheet);
+            $tempFile = tempnam(sys_get_temp_dir(), 'site_l90_sample');
+            $writer->save($tempFile);
+
+            return response()->download($tempFile, $filename)->deleteFileAfterSend(true);
+        } catch (\Exception $e) {
+            Log::error('Site L90 Sample download error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Sample download failed: ' . $e->getMessage());
+        }
+    }
+
+    public function importSiteL90Data(Request $request)
+    {
+        try {
+            $request->validate([
+                'file' => 'required|file|mimes:xlsx,xls'
+            ]);
+
+            $file = $request->file('file');
+
+            // Load spreadsheet
+            $spreadsheet = IOFactory::load($file->getPathname());
+            $sheet = $spreadsheet->getActiveSheet();
+            $rows = $sheet->toArray();
+
+            if (count($rows) < 2) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'File is empty or has no data rows'
+                ], 400);
+            }
+
+            // Get headers
+            $headers = array_map('strtolower', array_map('trim', $rows[0]));
+            $skuIndex = array_search('sku', $headers);
+
+            if ($skuIndex === false) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'SKU column is required in the Excel file'
+                ], 400);
+            }
+
+            // Map column indices for sales and views fields
+            $salesColumns = [
+                'amazon' => array_search('amazon_l90_sales', $headers),
+                'ebay' => array_search('ebay_l90_sales', $headers),
+                'ebay2' => array_search('ebay2_l90_sales', $headers),
+                'ebay3' => array_search('ebay3_l90_sales', $headers),
+                'temu' => array_search('temu_l90_sales', $headers),
+                'shopify' => array_search('shopify_l90_sales', $headers),
+                'macy' => array_search('macy_l90_sales', $headers),
+                'reverb' => array_search('reverb_l90_sales', $headers),
+                'doba' => array_search('doba_l90_sales', $headers),
+                'walmart' => array_search('walmart_l90_sales', $headers),
+                'shein' => array_search('shein_l90_sales', $headers),
+                'bestbuy' => array_search('bestbuy_l90_sales', $headers),
+                'tiendamia' => array_search('tiendamia_l90_sales', $headers),
+                'tiktok' => array_search('tiktok_l90_sales', $headers),
+                'aliexpress' => array_search('aliexpress_l90_sales', $headers),
+            ];
+
+            $viewsColumns = [
+                'amazon' => array_search('amazon_l90_views', $headers),
+                'ebay' => array_search('ebay_l90_views', $headers),
+                'ebay2' => array_search('ebay2_l90_views', $headers),
+                'ebay3' => array_search('ebay3_l90_views', $headers),
+                'temu' => array_search('temu_l90_views', $headers),
+                'shopify' => array_search('shopify_l90_views', $headers),
+                'macy' => array_search('macy_l90_views', $headers),
+                'reverb' => array_search('reverb_l90_views', $headers),
+                'doba' => array_search('doba_l90_views', $headers),
+                'walmart' => array_search('walmart_l90_views', $headers),
+                'shein' => array_search('shein_l90_views', $headers),
+                'bestbuy' => array_search('bestbuy_l90_views', $headers),
+                'tiendamia' => array_search('tiendamia_l90_views', $headers),
+                'tiktok' => array_search('tiktok_l90_views', $headers),
+                'aliexpress' => array_search('aliexpress_l90_views', $headers),
+            ];
+
+            $imported = 0;
+            $errors = 0;
+            $total = count($rows) - 1;
+
+            DB::beginTransaction();
+
+            try {
+                // Process each row
+                for ($i = 1; $i < count($rows); $i++) {
+                    $row = $rows[$i];
+                    $sku = isset($row[$skuIndex]) ? trim((string)$row[$skuIndex]) : '';
+
+                    if (empty($sku)) {
+                        continue;
+                    }
+
+                    // Log the SKU being processed for debugging
+                    Log::info('Processing SKU: ' . $sku);
+
+                    // Find product master record - try exact match first, then case-insensitive
+                    $productMaster = ProductMaster::where('sku', $sku)->first();
+                    
+                    if (!$productMaster) {
+                        // Try case-insensitive match
+                        $productMaster = ProductMaster::whereRaw('LOWER(sku) = ?', [strtolower($sku)])->first();
+                    }
+                    
+                    if (!$productMaster) {
+                        Log::warning('SKU not found in database: ' . $sku);
+                        $errors++;
+                        continue;
+                    }
+
+                    // Get existing sales and views arrays
+                    $sales = $productMaster->sales ?? [];
+                    $views = $productMaster->views ?? [];
+
+                    $hasData = false;
+
+                    // Update sales data
+                    foreach ($salesColumns as $marketplace => $index) {
+                        if ($index !== false && isset($row[$index]) && $row[$index] !== null && $row[$index] !== '') {
+                            $value = is_numeric($row[$index]) ? floatval($row[$index]) : 0;
+                            if ($value > 0) {
+                                $sales[$marketplace] = $value;
+                                $hasData = true;
+                            }
+                        }
+                    }
+
+                    // Update views data
+                    foreach ($viewsColumns as $marketplace => $index) {
+                        if ($index !== false && isset($row[$index]) && $row[$index] !== null && $row[$index] !== '') {
+                            $value = is_numeric($row[$index]) ? floatval($row[$index]) : 0;
+                            if ($value > 0) {
+                                $views[$marketplace] = $value;
+                                $hasData = true;
+                            }
+                        }
+                    }
+
+                    // Only save if we have data to update
+                    if ($hasData) {
+                        // Save updated sales and views
+                        $productMaster->sales = $sales;
+                        $productMaster->views = $views;
+                        $productMaster->save();
+                        
+                        Log::info('Successfully imported data for SKU: ' . $sku);
+                        $imported++;
+                    } else {
+                        Log::info('No data to import for SKU: ' . $sku);
+                    }
+                }
+
+                DB::commit();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Site-wise L90 data imported successfully',
+                    'total' => $total,
+                    'imported' => $imported,
+                    'errors' => $errors
+                ]);
+
+            } catch (\Exception $e) {
+                DB::rollBack();
+                throw $e;
+            }
+
+        } catch (\Exception $e) {
+            Log::error('Site L90 Import error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Import failed: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getLmpHistory(Request $request)
+    {
+        $request->validate([
+            'sku' => 'required|string',
+            'channel' => 'nullable|string',
+        ]);
+
+        $sku = $request->input('sku');
+        $channel = strtolower($request->input('channel', ''));
+
+        // Decide table based on channel
+        $table = $channel === 'amz' ? 'lmpa_data' : 'lmp_data';
+
+        try {
+            $rows = DB::connection('repricer')
+                ->table($table)
+                ->select('price', 'link', DB::raw('NULL as created_at'))
+                ->where('sku', $sku)
+                ->where('price', '>', 0)
+                ->orderBy('price', 'asc')
+                ->limit(200)
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $rows,
+            ]);
+        } catch (Exception $e) {
+            Log::error('Failed to load LMP history', [
+                'sku' => $sku,
+                'channel' => $channel,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Unable to fetch LMP history',
+            ], 500);
+        }
     }
 }

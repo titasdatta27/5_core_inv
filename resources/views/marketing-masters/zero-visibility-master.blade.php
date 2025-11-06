@@ -583,7 +583,6 @@
                         <th>SL</th>
                         <th>Channel</th>
                         <th>R&A</th>
-                        <th>Live Pending</th>
                         <th>Zero Visibility SKU Count</th>
                     </tr>
                 </thead>
@@ -755,296 +754,6 @@
 
         }
 
-        // Initialize DataTable
-        // function initializeDataTable() {
-        //     // console.log('Initializing DataTable...');
-        //     return jq('#channelTable').DataTable({
-        //         processing: true,
-        //         serverSide: false,
-        //         ordering: true,
-        //         searching: true,
-        //         pageLength: 25,
-        //         order: [[1, 'asc']],
-        //         ajax: {
-        //             url: '/show-zero-visibility-data',
-        //             type: "GET",
-        //             data: function(d) {
-        //                 d.channel = jq('#channelSearchInput').val()?.toLowerCase()?.trim();
-        //                 // d.exec = jq('#execSearchInput').val();
-        //                 d.search = jq('#searchInput').val();
-        //                 d.sort_by = jq('#sort_by').val();
-        //                 d.sort_order = jq('#sort_order').val();
-        //                 d.sort_by = currentSortColumn;
-        //                 d.sort_order = currentSortOrder;
-        //             },
-        //             dataSrc: function(json) {
-        //                  originalChannelData = json.data || [];
-
-        //                 allChannelData = json.data;
-        //                 if (!originalChannelData.length) {
-        //                     originalChannelData = json.data;
-        //                 }
-
-        //                return json.data;
-        //             },
-        //             error: function(xhr, error, thrown) {
-        //                 console.log("AJAX error:", error, thrown);
-        //             }
-        //         },
-        //         columns: [{
-        //                 data: null,
-        //                 title: 'SL',
-        //                 render: function(data, type, row, meta) {
-        //                     return meta.row + 1;
-        //                 }
-        //             },
-        //             {
-        //                 data: 'Channel ',
-        //                 render: function(data, type, row) {
-        //                     if (!data) return '';
-
-        //                     const channelName = data.trim().toLowerCase();
-        //                     // console.log(channelName, 'channels');
-
-        //                     return `<div class="d-flex align-items-center channel-name"><span>${data}</span></div>`;
-        //                     // const routeMap = {
-        //                     //     'amazon': '/overall-amazon',
-        //                     //     'amazon fba': '/overall-amazon-fba',
-        //                     //     'ebay': '/ebay',
-        //                     //     'temu': '/temu',
-        //                     //     'macys': '/macys',
-        //                     //     'wayfair': '/Wayfair',
-        //                     //     'reverb': '/reverb',
-        //                     //     'shopify b2c': '/shopifyB2C',
-        //                     //     'doba ': '#',
-        //                     //     // add more routes if needed
-        //                     // };
-
-        //                     // const routeUrl = routeMap[channelName];
-
-        //                     // if (routeUrl) {
-        //                     //     return `<a href="${routeUrl}" target="_blank" style="color: #007bff; text-decoration: underline;">${data}</a>`;
-        //                     // } else {
-        //                     //     return `<div class="d-flex align-items-center"><span>${data}</span></div>`;
-        //                     // }
-        //                 }
-        //             },
-
-        //             {
-        //                 data: 'R&A',
-        //                 visible: false,
-        //                 render: function(data, type, row) {
-        //                     const isChecked = data ? 'checked' : '';
-        //                     return `<div class="ra-edit-container d-flex align-items-center">
-    //                             <input type="checkbox" class="ra-checkbox" ${isChecked}>
-    //                         </div>`;
-        //                 }
-        //             },
-
-        //             {
-        //                 data: 'URL LINK',
-        //                 render: function(data, type, row) {
-        //                    const safeUrl = data ?? '';
-        //                     if (!data) return '';
-        //                     return `
-    //                         <a href="${data}" target="_blank">
-    //                             <i class="bi bi-box-arrow-up-right link-icon"></i>
-    //                         </a>
-    //                         <span class="hidden-url d-none">${data}</span>
-    //                     `;
-
-        //                 }
-        //             },
-        //             {
-        //                 data: 'Total SKU',
-        //                 title: 'Total SKU',
-        //                 render: function(data, type, row, meta) {
-        //                     if (type === 'sort' || type === 'type') return data;
-        //                     return `<input type="number" class="form-control form-control-sm total-sku" value="${data ?? ''}" />`;
-        //                 }
-        //             },
-        //             {
-        //                 data: 'NR',
-        //                 title: 'NR',
-        //                 render: function(data, type, row, meta) {
-        //                     if (type === 'sort' || type === 'type') return data;
-        //                     return `<input type="number" class="form-control form-control-sm nr" value="${data ?? ''}" />`;
-        //                 }
-        //             },
-        //             {
-        //                 data: 'Listed Req',
-        //                 title: 'Listed Req',
-        //                 render: function(data, type, row, meta) {
-        //                     if (type === 'sort' || type === 'type') return data;
-        //                     const totalSku = parseFloat(row['Total SKU']) || 0;
-        //                     const nr = parseFloat(row['NR']) || 0;
-        //                     const listedReq = totalSku - nr;
-
-        //                     // return `<span class="listed-req">${totalSku - nr}</span>`;
-        //                     return `<input type="number" class="form-control form-control-sm listed-req" value="${listedReq}" readonly />`;
-        //                 },
-
-        //             },
-        //             {
-        //                 data: 'Listed',
-        //                 title: 'Listed',
-        //                 render: function(data, type, row, meta) {
-        //                     if (type === 'sort' || type === 'type') return data;
-        //                     return `<input type="number" class="form-control form-control-sm listed" value="${data ?? ''}" data-row="${meta.row}" />`;
-        //                 }
-        //             },
-        //             {
-        //                 data: 'Listing Pending',
-        //                 title: 'Listing Pending',
-        //                 render: function(data, type, row, meta) {
-        //                     if (type === 'sort' || type === 'type') return data;
-        //                     return `<span class="badge badge-danger listing-pending" data-row="${meta.row}">${data ?? 0}</span>`;
-        //                     // return `<input type="number" class="form-control form-control-sm listing-pending" value="${data ?? ''}" data-row="${meta.row}" readonly />`;
-        //                 }
-        //             },
-        //             {
-        //                 data: 'Zero Inv',
-        //                 title: 'Zero Inv',
-        //                 render: function(data, type, row, meta) {
-        //                     if (type === 'sort' || type === 'type') return data;
-        //                     return `<input type="number" class="form-control form-control-sm zero-inv" value="${data ?? ''}" />`;
-        //                 }
-        //             },
-        //             {
-        //                 data: 'Live Req',
-        //                 title: 'Live Req',
-        //                 render: function(data, type, row, meta) {
-        //                     if (type === 'sort' || type === 'type') return data;
-        //                     return `<input type="number" class="form-control form-control-sm live-req" value="${data ?? ''}" readonly />`;
-        //                 }
-        //             },
-        //             {
-        //                 data: 'Active & Live',
-        //                 title: 'Active & Live',
-        //                 render: function(data, type, row, meta) {
-        //                     if (type === 'sort' || type === 'type') return data;
-        //                     return `<input type="number" class="form-control form-control-sm active-live" value="${data ?? ''}" />`;
-        //                 }
-        //             },
-        //             {
-        //                 data: 'Live Pending',
-        //                 title: 'Live Pending',
-        //                 render: function(data, type, row, meta) {
-        //                     if (type === 'sort' || type === 'type') return data;
-        //                     return `<span class="badge badge-danger live-pending" data-row="${meta.row}">${data ?? 0}</span>`;
-        //                     // return `<input type="number" class="form-control form-control-sm live-pending" value="${data ?? ''}" readonly  />`;
-        //                 }
-        //             },
-        //             {
-        //                 data: 'Zero Visibility SKU Count',
-        //                 title: 'Zero Visibility SKU Count',
-        //                 render: function(data, type, row, meta) {
-        //                     if (type === 'sort' || type === 'type') return data;
-        //                     return `<span class="badge badge-danger zero-visibility-sku-count">${data ?? 0}</span>`;
-        //                     // return `<input type="number" class="form-control form-control-sm zero-visibility-sku-count" value="${data ?? ''}" />`;
-        //                 }
-        //             },
-        //             {
-        //                 data: 'Reason',
-        //                 title: 'Reason',
-        //                 render: function(data) {
-        //                     return `<input type="text" class="form-control form-control-sm reason" value="${data ?? ''}" />`;
-        //                 }
-        //             },
-        //             {
-        //                 data: 'Step Taken',
-        //                 title: 'Step Taken',
-        //                 render: function(data) {
-        //                     return `<input type="text" class="form-control form-control-sm step-taken" value="${data ?? ''}" />`;
-        //                 }
-        //             }
-        //         ],
-        //         drawCallback: function(settings) {
-        //             let api = this.api();
-        //             api.column(0, { page: 'current' }).nodes().each(function(cell, i) {
-        //                 cell.innerHTML = i + 1;
-        //             });
-
-        //             // TOTAL SKU & NR → LISTED REQ and LISTING PENDING
-        //             jq('#channelTable tbody').off('input.totalNR').on('input.totalNR', '.total-sku, .nr', function () {
-        //                 const $row = jq(this).closest('tr');
-        //                 const total = parseFloat($row.find('.total-sku').val()) || 0;
-        //                 const nr = parseFloat($row.find('.nr').val()) || 0;
-        //                 const listedReq = total - nr;
-        //                 $row.find('.listed-req').val(listedReq);
-
-        //                 const listed = parseFloat($row.find('.listed').val()) || 0;
-        //                 $row.find('.listing-pending').text(listedReq - listed);
-
-        //                 const zeroInv = parseFloat($row.find('.zero-inv').val()) || 0;
-        //                 const liveReq = listed - zeroInv;
-        //                 $row.find('.live-req').val(liveReq);
-
-        //                 const activeLive = parseFloat($row.find('.active-live').val()) || 0;
-        //                 $row.find('.live-pending').text(liveReq - activeLive);
-
-        //                 saveRow($row);
-        //             });
-
-        //             // LISTED → LISTING PENDING, LIVE REQ, LIVE PENDING
-        //             jq('#channelTable tbody').off('input.listed').on('input.listed', '.listed', function () {
-        //                 const $row = jq(this).closest('tr');
-        //                 const listed = parseFloat($row.find('.listed').val()) || 0;
-        //                 const listedReq = parseFloat($row.find('.listed-req').val()) || 0;
-        //                 $row.find('.listing-pending').text(listedReq - listed);
-
-        //                 const zeroInv = parseFloat($row.find('.zero-inv').val()) || 0;
-        //                 const liveReq = listed - zeroInv;
-        //                 $row.find('.live-req').val(liveReq);
-
-        //                 const activeLive = parseFloat($row.find('.active-live').val()) || 0;
-        //                 $row.find('.live-pending').text(liveReq - activeLive);
-
-        //                 saveRow($row);
-        //             });
-
-        //             // ZERO INV → LIVE REQ, LIVE PENDING
-        //             jq('#channelTable tbody').off('input.zeroinv').on('input.zeroinv', '.zero-inv', function () {
-        //                 const $row = jq(this).closest('tr');
-        //                 const listed = parseFloat($row.find('.listed').val()) || 0;
-        //                 const zeroInv = parseFloat($row.find('.zero-inv').val()) || 0;
-        //                 const liveReq = listed - zeroInv;
-        //                 $row.find('.live-req').val(liveReq);
-
-        //                 const activeLive = parseFloat($row.find('.active-live').val()) || 0;
-        //                 $row.find('.live-pending').text(liveReq - activeLive);
-
-        //                 saveRow($row);
-        //             });
-
-        //             // ACTIVE & LIVE → LIVE PENDING
-        //             jq('#channelTable tbody').off('input.activeLive').on('input.activeLive', '.active-live', function () {
-        //                 const $row = jq(this).closest('tr');
-        //                 const liveReq = parseFloat($row.find('.live-req').val()) || 0;
-        //                 const activeLive = parseFloat($row.find('.active-live').val()) || 0;
-        //                 $row.find('.live-pending').text(liveReq - activeLive);
-
-        //                 saveRow($row);
-        //             });
-
-        //             jq('#channelTable tbody').on('input', '.reason, .step-taken, .zero-visibility-sku-count', function () {
-        //                 const $row = jq(this).closest('tr');
-        //                 saveRow($row);
-        //             });
-        //         },
-        //         responsive: true,
-        //         initComplete: function() {
-        //             // console.log('DataTable initialized successfully');
-        //             // Add buttons to DOM
-        //             var buttons = new jq.fn.dataTable.Buttons(table, {
-        //                 buttons: ['excel', 'print']
-        //             }).container().appendTo(jq('#channelTable_wrapper .col-md-6:eq(0)'));
-        //         }
-        //     });
-
-        // }
-
-
         function initializeDataTable() {
             return jq('#channelTable').DataTable({
                 processing: true,
@@ -1053,7 +762,7 @@
                 searching: true,
                 pageLength: 50,
                 order: [
-                    [1, 'asc']
+                    [3, 'desc']
                 ],
                 ajax: {
                     url: '/show-zero-visibility-data',
@@ -1072,6 +781,10 @@
                         if (!originalChannelData.length) {
                             originalChannelData = json.data;
                         }
+                        setTimeout(() => {
+                            const table = jq('#channelTable').DataTable();
+                            table.order([3, 'desc']).draw(false);
+                        }, 300);
                         return json.data;
                     },
                     error: function(xhr, error, thrown) {
@@ -1098,7 +811,7 @@
                                 'ebaythree': '/zero-ebay3',
                                 'ebayvariation': '/zero-ebayvariation',
                                 'temu': '/temu-zero-view',
-                                'macy': '/macys-zero-view',
+                                'macys': '/macys-zero-view',
                                 'wayfair': '/Wayfair-zero-view',
                                 'reverb': '/reverb/zero/view',
                                 'shopifyb2c': '/shopifyB2C-zero-view',
@@ -1123,6 +836,7 @@
                                 'bestbuyusa': '/zero-bestbuyusa',
                                 'swgearexchange': '/zero-swgearexchange',
                                 'shopifywholesale/ds': '/zero-shopifywholesale',
+                                'amazonfba': '/fba-view-page',
                             };
 
                             const routeUrl = routeMap[channelName];
@@ -1144,32 +858,7 @@
                             </div>`;
                         }
                     },
-                    // {
-                    //     data: 'URL LINK',
-                    //     render: function(data) {
-                    //         if (!data) return '';
-                    //         return `
-                    //             <a href="${data}" target="_blank">
-                    //                 <i class="bi bi-box-arrow-up-right link-icon"></i>
-                    //             </a>
-                    //             <span class="hidden-url d-none">${data}</span>
-                    //         `;
-                    //     }
-                    // },
                     
-                    {
-                        data: 'Live Pending',
-                        title: 'Live Pending',
-                        render: function(data, type, row, meta) {
-                            if (type === 'sort' || type === 'type') return data;
-                            return `<span class="live-pending" data-row="${meta.row}">${data ?? 0}</span>`;
-                            // const value = parseInt(data) || 0;
-                            // const badge = value !== 0 ?
-                            //     `<span class="badge badge-danger">${value}</span>` :
-                            //     `${value}`;
-                            // return `<span class="live-pending" data-row="${meta.row}">${badge}</span>`;
-                        }
-                    },
                     {
                         data: 'Zero Visibility SKU Count',
                         title: 'Zero Visibility SKU Count',
@@ -1180,43 +869,25 @@
                             // return `<input type="number" class="form-control form-control-sm zero-visibility-sku-count" value="${data ?? 0}" readonly disabled />`;
                         }
                     },
-                    // {
-                    //     data: 'Reason',
-                    //     title: 'Reason',
-                    //     render: function(data) {
-                    //         return `<input type="text" class="form-control form-control-sm reason" value="${data ?? ''}" />`;
-                    //     }
-                    // },
-                    // {
-                    //     data: 'Step Taken',
-                    //     title: 'Step Taken',
-                    //     render: function(data) {
-                    //         return `<input type="text" class="form-control form-control-sm step-taken" value="${data ?? ''}" />`;
-                    //     }
-                    // }
+                   
                 ],
                 drawCallback: function(settings) {
                     let api = this.api();
-                    api.column(0, {
-                        page: 'current'
-                    }).nodes().each(function(cell, i) {
+                    api.column(0, { page: 'current' }).nodes().each(function(cell, i) {
                         cell.innerHTML = i + 1;
                     });
 
-                     // Calculate totals for Live Pending & Zero Visibility SKU Count
-                    let livePendingTotal = api.column(3, { search: 'applied' }).data()
+                    // ✅ Only calculate zero-visibility total now
+                    let zeroVisibilityTotal = api.column(3, { search: 'applied' }).data()
                         .reduce((a, b) => (parseInt(a) || 0) + (parseInt(b) || 0), 0);
 
-                    let zeroVisibilityTotal = api.column(4, { search: 'applied' }).data()
-                        .reduce((a, b) => (parseInt(a) || 0) + (parseInt(b) || 0), 0);
-
-                    // Insert totals into header cells (the blank red boxes)
-                    let livePendingHeader = api.column(3).header();
-                    let zeroVisibilityHeader = api.column(4).header();
-
-                    jq(livePendingHeader).html('Live Pending<br><span style="color:white; font-weight:bold; font-size:1rem;">' + livePendingTotal + '</span>');
-                    jq(zeroVisibilityHeader).html('Zero Visibility SKU Count<br><span style="color:white; font-weight:bold; font-size:1rem;">' + zeroVisibilityTotal + '</span>');
-                },
+                    let zeroVisibilityHeader = api.column(3).header();
+                    
+                    jq(zeroVisibilityHeader).html(
+                        'Zero Visibility SKU Count<br><span style="color:white; font-weight:bold; font-size:1rem;">' +
+                        zeroVisibilityTotal + '</span>'
+                    );
+                },                
                 responsive: true,
                 language: {
                     processing: "Loading data, please wait...",
@@ -1433,8 +1104,8 @@
             });
 
             // Initial sort
-            jq('#sortMetric').val('4'); // Default to L-60 Sales (column index 4)
-            table.order([4, sortDirection]).draw();
+            jq('#sortMetric').val('3'); // Default to L-60 Sales (column index 3)
+            table.order([3, sortDirection]).draw();
         }
 
         // Dropdown functionality

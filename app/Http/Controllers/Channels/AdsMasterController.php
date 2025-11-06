@@ -38,6 +38,18 @@ use App\Models\TiktokSheet;
 use App\Models\TopDawgSheetdata;
 use App\Models\WaifairProductSheet;
 use App\Models\WalmartMetrics;
+use App\Models\EbayDataView;
+use App\Models\JungleScoutProductData;
+use App\Models\EbayGeneralReport;
+use App\Models\EbayPriorityReport;
+use App\Models\WalmartProductSheet;
+use App\Models\WalmartDataView;
+use App\Models\EbayThreeDataView;
+use App\Models\Ebay3PriorityReport;
+use App\Models\Ebay3GeneralReport;
+use App\Models\WalmartCampaignReport;
+use App\Models\EbayTwoDataView;
+use App\Models\Ebay2GeneralReport;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -46,6 +58,9 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Spatie\FlareClient\Api;
+
+  
+            
 
 class AdsMasterController extends Controller
 {
@@ -211,9 +226,30 @@ class AdsMasterController extends Controller
             })
             ->get();
 
-        // Calculate total ad metrics
+        // Calculate total ad metrics for each campaign type
         $totalSpendL30 = 0;
         $totalClicksL30 = 0;
+        $totalImpressionsL30 = 0;
+        $totalSoldL30 = 0;
+
+        // Campaign type specific totals
+        $kwSpendL30 = 0;
+        $kwClicksL30 = 0;
+        $kwImpressionsL30 = 0;
+        $kwSoldL30 = 0;
+        $kwSalesL30 = 0;
+
+        $ptSpendL30 = 0;
+        $ptClicksL30 = 0;
+        $ptImpressionsL30 = 0;
+        $ptSoldL30 = 0;
+        $ptSalesL30 = 0;
+
+        $hlSpendL30 = 0;
+        $hlClicksL30 = 0;
+        $hlImpressionsL30 = 0;
+        $hlSoldL30 = 0;
+        $hlSalesL30 = 0;
 
         foreach ($productMasters as $pm) {
             $sku = strtoupper($pm->sku);
@@ -239,6 +275,27 @@ class AdsMasterController extends Controller
                     && strtoupper($item->campaignStatus) === 'ENABLED';
             });
 
+            // KW Campaign metrics
+            $kwSpendL30 += $matchedCampaignKwL30->spend ?? 0;
+            $kwClicksL30 += $matchedCampaignKwL30->clicks ?? 0;
+            $kwImpressionsL30 += $matchedCampaignKwL30->impressions ?? 0;
+            $kwSoldL30 += $matchedCampaignKwL30->unitsSoldClicks30d ?? 0;
+            $kwSalesL30 += $matchedCampaignKwL30->sales30d ?? 0;
+
+            // PT Campaign metrics
+            $ptSpendL30 += $matchedCampaignPtL30->spend ?? 0;
+            $ptClicksL30 += $matchedCampaignPtL30->clicks ?? 0;
+            $ptImpressionsL30 += $matchedCampaignPtL30->impressions ?? 0;
+            $ptSoldL30 += $matchedCampaignPtL30->unitsSoldClicks30d ?? 0;
+            $ptSalesL30 += $matchedCampaignPtL30->sales30d ?? 0;
+
+            // HL Campaign metrics
+            $hlSpendL30 += $matchedCampaignHlL30->cost ?? 0;
+            $hlClicksL30 += $matchedCampaignHlL30->clicks ?? 0;
+            $hlImpressionsL30 += $matchedCampaignHlL30->impressions ?? 0;
+            $hlSoldL30 += $matchedCampaignHlL30->unitsSold ?? 0;
+            $hlSalesL30 += $matchedCampaignHlL30->sales ?? 0;
+
             // Add to totals
             $totalSpendL30 += ($matchedCampaignKwL30->spend ?? 0) +
                 ($matchedCampaignPtL30->spend ?? 0) +
@@ -247,6 +304,14 @@ class AdsMasterController extends Controller
             $totalClicksL30 += ($matchedCampaignKwL30->clicks ?? 0) +
                 ($matchedCampaignPtL30->clicks ?? 0) +
                 ($matchedCampaignHlL30->clicks ?? 0);
+
+            $totalImpressionsL30 += ($matchedCampaignKwL30->impressions ?? 0) +
+                ($matchedCampaignPtL30->impressions ?? 0) +
+                ($matchedCampaignHlL30->impressions ?? 0);
+
+            $totalSoldL30 += ($matchedCampaignKwL30->unitsSoldClicks30d ?? 0) +
+                ($matchedCampaignPtL30->unitsSoldClicks30d ?? 0) +
+                ($matchedCampaignHlL30->unitsSold ?? 0);
         }
 
         // Get Amazon marketing percentage
@@ -263,6 +328,12 @@ class AdsMasterController extends Controller
         // Calculate ROI
         $gRoi = $totalSpendL30 > 0 ? ($totalProfit / $totalSpendL30) * 100 : 0;
         $gRoiL60 = $totalSpendL30 > 0 ? ($totalProfitL60 / $totalSpendL30) * 100 : 0;
+
+        // Calculate ACOS for each campaign type
+        $kwAcos = $kwSalesL30 > 0 ? ($kwSpendL30 / $kwSalesL30) * 100 : 0;
+        $ptAcos = $ptSalesL30 > 0 ? ($ptSpendL30 / $ptSalesL30) * 100 : 0;
+        $hlAcos = $hlSalesL30 > 0 ? ($hlSpendL30 / $hlSalesL30) * 100 : 0;
+        $totalAcos = $l30SalesAmount > 0 ? ($totalSpendL30 / $l30SalesAmount) * 100 : 0;
 
         // Channel data
         $channelData = ChannelMaster::where('channel', 'Amazon')->first();
@@ -288,15 +359,43 @@ class AdsMasterController extends Controller
             'channel_percentage' => $channelData->channel_percentage ?? '',
             'Update'     => $channelData->update ?? 0,
             'Account health' => null,
-            // Ad metrics that match your screenshot
-            'SPEND_L30'  => round($totalSpendL30, 2),  // This is "Spent"
-            'CLICKS_L30' => $totalClicksL30,           // This is "Clicks"
-            // Add other ad metrics if available
-            'Ad Sales'   => intval($l30SalesAmount),   // Sales from ads
-            'Ad Sold'    => $l30Sales,                 // Units sold from ads
-            'ACOS'       => $totalSpendL30 > 0 ? round(($totalSpendL30 / $l30SalesAmount) * 100, 2) . '%' : '0%',
-            'Tacos'      => 'N/A', // Add if you have this data
-            'Pft'        => round($totalProfit, 2),    // Profit
+
+            // Total Ad metrics
+            'SPEND_L30'  => round($totalSpendL30, 2),
+            'CLICKS_L30' => $totalClicksL30,
+            'IMPRESSIONS_L30' => $totalImpressionsL30,
+            'SOLD_L30'   => $totalSoldL30,
+
+            // KW Campaign metrics
+            'KW_SPEND_L30' => round($kwSpendL30, 2),
+            'KW_CLICKS_L30' => $kwClicksL30,
+            'KW_IMPRESSIONS_L30' => $kwImpressionsL30,
+            'KW_SOLD_L30' => $kwSoldL30,
+            'KW_SALES_L30' => round($kwSalesL30, 2),
+            'KW_ACOS' => round($kwAcos, 2) . '%',
+
+            // PT Campaign metrics
+            'PT_SPEND_L30' => round($ptSpendL30, 2),
+            'PT_CLICKS_L30' => $ptClicksL30,
+            'PT_IMPRESSIONS_L30' => $ptImpressionsL30,
+            'PT_SOLD_L30' => $ptSoldL30,
+            'PT_SALES_L30' => round($ptSalesL30, 2),
+            'PT_ACOS' => round($ptAcos, 2) . '%',
+
+            // HL Campaign metrics
+            'HL_SPEND_L30' => round($hlSpendL30, 2),
+            'HL_CLICKS_L30' => $hlClicksL30,
+            'HL_IMPRESSIONS_L30' => $hlImpressionsL30,
+            'HL_SOLD_L30' => $hlSoldL30,
+            'HL_SALES_L30' => round($hlSalesL30, 2),
+            'HL_ACOS' => round($hlAcos, 2) . '%',
+
+            // Combined metrics
+            'Ad Sales'   => intval($l30SalesAmount),
+            'Ad Sold'    => $l30Sales,
+            'ACOS'       => round($totalAcos, 2) . '%',
+            'Tacos'      => 'N/A',
+            'Pft'        => round($totalProfit, 2),
         ];
 
         return response()->json([
@@ -3339,4 +3438,1700 @@ class AdsMasterController extends Controller
             'demo' => $demo,
         ]);
     }
+
+    public function channelAdvMaster(Request $request)
+    {
+        $productMasters = ProductMaster::orderBy('parent', 'asc')
+            ->orderByRaw("CASE WHEN sku LIKE 'PARENT %' THEN 1 ELSE 0 END")
+            ->orderBy('sku', 'asc')
+            ->get();
+        $skus = $productMasters->pluck('sku')->filter()->unique()->values()->all();
+
+        $amazonKwL30 = AmazonSpCampaignReport::where('ad_type', 'SPONSORED_PRODUCTS')
+            ->where('report_date_range', 'L30')
+            ->where(function ($q) use ($skus) {
+                foreach ($skus as $sku) $q->orWhere('campaignName', 'LIKE', '%' . $sku . '%');
+            })
+            ->where('campaignName', 'NOT LIKE', '%PT')
+            ->where('campaignName', 'NOT LIKE', '%PT.')
+            ->get();
+
+        $amazonPtL30 = AmazonSpCampaignReport::where('ad_type', 'SPONSORED_PRODUCTS')
+            ->where('report_date_range', 'L30')
+            ->where(function ($q) use ($skus) {
+                foreach ($skus as $sku) $q->orWhere('campaignName', 'LIKE', '%' . strtoupper($sku) . '%');
+            })
+            ->get();
+
+        $amazonHlL30 = AmazonSbCampaignReport::where('ad_type', 'SPONSORED_BRANDS')
+            ->where('report_date_range', 'L30')
+            ->where(function ($q) use ($skus) {
+                foreach ($skus as $sku) $q->orWhere('campaignName', 'LIKE', '%' . strtoupper($sku) . '%');
+            })
+            ->get();
+
+        $amazonHlL7 = AmazonSbCampaignReport::where('ad_type', 'SPONSORED_BRANDS')
+            ->where('report_date_range', 'L7')
+            ->where(function ($q) use ($skus) {
+                foreach ($skus as $sku) $q->orWhere('campaignName', 'LIKE', '%' . strtoupper($sku) . '%');
+            })
+            ->get();
+
+        $parentSkuCounts = $productMasters
+            ->filter(fn($pm) => $pm->parent && !str_starts_with(strtoupper($pm->sku), 'PARENT'))
+            ->groupBy('parent')
+            ->map->count();
+
+
+        $result = [];
+        $parentHlSpendData = [];
+        
+        foreach ($productMasters as $pm) {
+            $sku = strtoupper($pm->sku);
+            $parent = trim($pm->parent);
+
+            $matchedCampaignHlL30 = $amazonHlL30->first(function ($item) use ($sku) {
+                $cleanName = strtoupper(trim($item->campaignName));
+                return in_array($cleanName, [$sku, $sku . ' HEAD']) && strtoupper($item->campaignStatus) === 'ENABLED';
+            });
+            $matchedCampaignHlL7 = $amazonHlL7->first(function ($item) use ($sku) {
+                $cleanName = strtoupper(trim($item->campaignName));
+                return in_array($cleanName, [$sku, $sku . ' HEAD']) && strtoupper($item->campaignStatus) === 'ENABLED';
+            });
+
+            if (str_starts_with($sku, 'PARENT')) {
+                $childCount = $parentSkuCounts[$parent] ?? 0;
+                $parentHlSpendData[$parent] = [
+                    'total_L30' => $matchedCampaignHlL30->cost ?? 0,
+                    'total_L7'  => $matchedCampaignHlL7->cost ?? 0,
+                    'total_L30_sales' => $matchedCampaignHlL30->sales ?? 0,
+                    'total_L7_sales'  => $matchedCampaignHlL7->sales ?? 0,
+                    'total_L30_sold'  => $matchedCampaignHlL30->unitsSold ?? 0,
+                    'total_L7_sold'   => $matchedCampaignHlL7->unitsSold ?? 0,
+                    'total_L30_impr'  => $matchedCampaignHlL30->impressions ?? 0,
+                    'total_L7_impr'   => $matchedCampaignHlL7->impressions ?? 0,
+                    'total_L30_clicks'=> $matchedCampaignHlL30->clicks ?? 0,
+                    'total_L7_clicks' => $matchedCampaignHlL7->clicks ?? 0,
+                    'childCount'=> $childCount,
+                ];
+            }
+        }
+
+        foreach ($productMasters as $pm) {
+            $sku = strtoupper($pm->sku);
+            $parent = trim($pm->parent);
+
+            $matchedCampaignKwL30 = $amazonKwL30->first(function ($item) use ($sku) {
+                $campaignName = strtoupper(trim(rtrim($item->campaignName, '.')));
+                $cleanSku = strtoupper(trim(rtrim($sku, '.')));
+                return $campaignName === $cleanSku;
+            });
+
+            $matchedCampaignPtL30 = $amazonPtL30->first(function ($item) use ($sku) {
+                $cleanName = strtoupper(trim($item->campaignName));
+                return (str_ends_with($cleanName, $sku . ' PT') || str_ends_with($cleanName, $sku . ' PT.'))
+                    && strtoupper($item->campaignStatus) === 'ENABLED';
+            });
+
+            $row = [];
+            $row['parent'] = $parent;
+            $row['sku'] = $pm->sku;
+
+            $row['kw_clicks_L30'] = $matchedCampaignKwL30->clicks ?? 0;
+            $row['kw_spend_L30']  = $matchedCampaignKwL30->spend ?? 0;
+            $row['kw_sales_L30']  = $matchedCampaignKwL30->sales30d ?? 0;
+            $row['kw_sold_L30']  = $matchedCampaignKwL30->unitsSoldSameSku30d ?? 0;
+            
+            $row['pt_clicks_L30'] = $matchedCampaignPtL30->clicks ?? 0;
+            $row['pt_spend_L30']  = $matchedCampaignPtL30->spend ?? 0;
+            $row['pt_sales_L30']  = $matchedCampaignPtL30->sales30d ?? 0;
+            $row['pt_sold_L30']  = $matchedCampaignPtL30->unitsSoldSameSku30d ?? 0;
+            $row['hl_clicks_L30'] = $matchedCampaignHlL30->clicks ?? 0;
+            $row['hl_sales_L30']  = 0;
+            $row['hl_sold_L30']  = 0;
+
+            if (str_starts_with($sku, 'PARENT')) {
+                $row['hl_spend_L30'] = $matchedCampaignHlL30->cost ?? 0;
+                $row['hl_sales_L30']  = $matchedCampaignHlL30->sales ?? 0;
+                $row['hl_sold_L30']  = $matchedCampaignHlL30->unitsSold ?? 0;
+                $row['hl_clicks_L30'] = $matchedCampaignHlL30->clicks ?? 0;
+            } 
+            elseif (isset($parentHlSpendData[$parent]) && $parentHlSpendData[$parent]['childCount'] > 0) {
+                $row['hl_spend_L30'] = $parentHlSpendData[$parent]['total_L30'] / $parentHlSpendData[$parent]['childCount'];
+                $row['hl_sales_L30']  = $parentHlSpendData[$parent]['total_L30_sales'] / $parentHlSpendData[$parent]['childCount'];
+                $row['hl_sold_L30']  = $parentHlSpendData[$parent]['total_L30_sold'] / $parentHlSpendData[$parent]['childCount'];
+                $row['hl_clicks_L30'] = $parentHlSpendData[$parent]['total_L30_clicks'] / $parentHlSpendData[$parent]['childCount'];
+            } else {
+                $row['hl_spend_L30'] = 0;
+                $row['hl_sales_L30'] = 0;
+                $row['hl_sold_L30']  = 0;
+                $row['hl_clicks_L30'] = 0;
+            }
+            
+            $childCount = $parentSkuCounts[$parent] ?? 0;
+            $childCount = max($childCount, 1);
+            $hl_share_clicks_L30 = ($matchedCampaignHlL30->impressions ?? 0) / $childCount;
+            $row['CLICKS_L30'] = ($row['pt_clicks_L30'] + $row['kw_clicks_L30'] + $hl_share_clicks_L30);
+            $row['SPEND_L30'] = $row['pt_spend_L30'] + $row['kw_spend_L30'] + $row['hl_spend_L30'];
+            $row['SALES_L30'] = $row['pt_sales_L30'] + $row['kw_sales_L30'] + $row['hl_sales_L30'];
+            $row['SOLD_L30'] = $row['pt_sold_L30'] + $row['kw_sold_L30'] + $row['hl_sold_L30'];
+            $result[] = $row;
+        }
+
+        $metrics = [
+            'SPEND_L30', 'kw_spend_L30', 'pt_spend_L30', 'hl_spend_L30',
+            'CLICKS_L30', 'kw_clicks_L30', 'pt_clicks_L30', 'hl_clicks_L30',
+            'SOLD_L30', 'kw_sold_L30', 'pt_sold_L30', 'hl_sold_L30',
+            'SALES_L30', 'kw_sales_L30', 'pt_sales_L30', 'hl_sales_L30',
+        ];
+
+        $totals = array_fill_keys($metrics, 0.0);
+        foreach ($result as $row) {
+            $sku = strtolower(trim($row['sku'] ?? ''));
+            if (strpos($sku, 'parent ') !== false) continue;
+
+            foreach ($metrics as $key) {
+                $val = $row[$key] ?? 0;
+                $totals[$key] += is_numeric($val) ? $val + 0.0 : 0.0;
+            }
+        }
+        $SPEND_L30_total = $totals['SPEND_L30'];
+        $kw_spend_L30_total = $totals['kw_spend_L30'];
+        $pt_spend_L30_total = $totals['pt_spend_L30'];
+        $hl_spend_L30_total = $totals['hl_spend_L30'];
+        $CLICKS_L30_total = $totals['CLICKS_L30'];
+        $kw_clicks_L30_total = $totals['kw_clicks_L30'];
+        $pt_clicks_L30_total = $totals['pt_clicks_L30'];
+        $hl_clicks_L30_total = $totals['hl_clicks_L30'];
+        $SOLD_L30_Total = $totals['SOLD_L30'];
+        $kw_sold_L30_Total = $totals['kw_sold_L30'];
+        $pt_sold_L30_Total = $totals['pt_sold_L30'];
+        $hl_sold_L30_Total = $totals['hl_sold_L30'];
+        $SALES_L30_Total = $totals['SALES_L30'];
+        $kw_sales_L30_Total = $totals['kw_sales_L30'];
+        $pt_sales_L30_Total = $totals['pt_sales_L30'];
+        $hl_sales_L30_Total = $totals['hl_sales_L30'];
+
+        /** Start Ebay Code **/
+
+        $normalizeSku = fn($sku) => strtoupper(trim($sku));
+        $productMasters = ProductMaster::orderBy('parent', 'asc')
+            ->orderByRaw("CASE WHEN sku LIKE 'PARENT %' THEN 1 ELSE 0 END")
+            ->orderBy('sku', 'asc')
+            ->get();
+
+        $skus = $productMasters->pluck('sku')->filter()->map($normalizeSku)->unique()->values()->all();
+
+        $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy(fn($item) => $normalizeSku($item->sku));
+
+        $ebayMetricData = DB::connection('apicentral')->table('ebay_one_metrics')
+            ->select('sku', 'ebay_price', 'item_id')
+            ->whereIn('sku', $skus)
+            ->get()
+            ->keyBy(fn($item) => $normalizeSku($item->sku));
+
+        $nrValues = EbayDataView::whereIn('sku', $skus)->pluck('value', 'sku');
+
+        $ebayCampaignReportsL30 = EbayPriorityReport::where('report_range', 'L30')
+            ->where(function ($q) use ($skus) {
+                foreach ($skus as $sku) {
+                    $q->orWhere('campaign_name', 'LIKE', '%' . $sku . '%');
+                }
+            })
+            ->get();
+
+        $ebayCampaignReportsL7 = EbayPriorityReport::where('report_range', 'L7')
+            ->where(function ($q) use ($skus) {
+                foreach ($skus as $sku) {
+                    $q->orWhere('campaign_name', 'LIKE', '%' . $sku . '%');
+                }
+            })
+            ->get();
+
+        $itemIds = $ebayMetricData->pluck('item_id')->toArray();
+        $ebayGeneralReportsL30 = EbayGeneralReport::where('report_range', 'L30')
+            ->whereIn('listing_id', $itemIds)
+            ->get();
+
+        $result = [];
+        foreach ($productMasters as $pm) {
+            $sku = strtoupper($pm->sku);
+            $parent = $pm->parent;
+
+            $shopify = $shopifyData[$sku] ?? null;
+            $ebay = $ebayMetricData[$sku] ?? null;
+
+            $matchedCampaignL30 = $ebayCampaignReportsL30->first(function ($item) use ($sku) {
+                return strtoupper(trim($item->campaign_name)) === strtoupper(trim($sku));
+            });
+
+            $matchedCampaignL7 = $ebayCampaignReportsL7->first(function ($item) use ($sku) {
+                return strtoupper(trim($item->campaign_name)) === strtoupper(trim($sku));
+            });
+            
+            $matchedGeneralL30 = $ebayGeneralReportsL30->first(function ($item) use ($ebay) {
+                if (!$ebay || empty($ebay->item_id)) return false;
+                return trim((string)$item->listing_id) == trim((string)$ebay->item_id);
+            });
+            $row = [];
+
+            $row['parent'] = $parent;
+            $row['sku'] = $pm->sku;
+            $row['campaignName'] = $matchedCampaignL7->campaign_name ?? ($matchedCampaignL30->campaign_name ?? '');
+            $row['kw_spend_L30'] = (float) str_replace('USD ', '', $matchedCampaignL30->cpc_ad_fees_payout_currency ?? 0);
+            $row['kw_sales_L30'] = (float) str_replace('USD ', '', $matchedCampaignL30->cpc_sale_amount_payout_currency ?? 0);
+            $row['kw_sold_L30'] = (int) ($matchedCampaignL30->cpc_attributed_sales ?? 0);
+            $row['kw_clicks_L30'] = (int) ($matchedCampaignL30?->cpc_clicks ?? 0);
+            $row['pmt_spend_L30'] = (float) str_replace('USD ', '', $matchedGeneralL30->ad_fees ?? 0);
+            $row['pmt_sales_L30'] = (float) str_replace('USD ', '', $matchedGeneralL30->sale_amount ?? 0);
+            $row['pmt_sold_L30'] = (int) ($matchedGeneralL30->sales ?? 0);
+            $row['pmt_clicks_L30'] = (int) ($matchedGeneralL30->clicks ?? 0);
+            $row['SPEND_L30'] = $row['kw_spend_L30'] + $row['pmt_spend_L30'];
+            $row['SALES_L30'] = $row['kw_sales_L30'] + $row['pmt_sales_L30'];
+            $row['SOLD_L30'] = $row['kw_sold_L30'] + $row['pmt_sold_L30'];
+            $row['CLICKS_L30'] = $row['kw_clicks_L30'] + $row['pmt_clicks_L30'];
+    
+            if($row['campaignName'] !== ''){
+                $result[] = $row;
+            }
+        }
+
+        $totals = [
+            'ebay_SALES_L30_total' => 0,
+            'ebay_kw_sales_L30_total' => 0,
+            'ebay_pmt_sales_L30_total' => 0,
+            'ebay_SPEND_L30_total' => 0,
+            'ebay_kw_spend_L30_total' => 0,
+            'ebay_pmt_spend_L30_total' => 0,
+            'ebay_CLICKS_L30_total' => 0,
+            'ebay_kw_clicks_L30_total' => 0,
+            'ebay_pmt_clicks_L30_total' => 0,
+            'ebay_SOLD_L30_total' => 0,
+            'ebay_kw_sold_L30_total' => 0,
+            'ebay_pmt_sold_L30_total' => 0,
+        ];
+
+        $map = [
+            'SALES_L30' => 'ebay_SALES_L30_total',
+            'kw_sales_L30' => 'ebay_kw_sales_L30_total',
+            'pmt_sales_L30' => 'ebay_pmt_sales_L30_total',
+            'SPEND_L30' => 'ebay_SPEND_L30_total',
+            'kw_spend_L30' => 'ebay_kw_spend_L30_total',
+            'pmt_spend_L30' => 'ebay_pmt_spend_L30_total',
+            'CLICKS_L30' => 'ebay_CLICKS_L30_total',
+            'kw_clicks_L30' => 'ebay_kw_clicks_L30_total',
+            'pmt_clicks_L30' => 'ebay_pmt_clicks_L30_total',
+            'SOLD_L30' => 'ebay_SOLD_L30_total',
+            'kw_sold_L30' => 'ebay_kw_sold_L30_total',
+            'pmt_sold_L30' => 'ebay_pmt_sold_L30_total',
+        ];
+
+        foreach ($result as $row) {
+            $sku = strtolower(trim($row['sku'] ?? ''));
+            if (strpos($sku, 'parent ') !== false) continue;
+
+            foreach ($map as $key => $totalKey) {
+                $totals[$totalKey] += (float)($row[$key] ?? 0);
+            }
+        }
+        extract($totals);
+       
+
+        /** End Ebay Code  */
+
+
+        /** Start Amazon Missing data **/
+
+        $productMasters = ProductMaster::orderBy('parent', 'asc')
+            ->orderByRaw("CASE WHEN sku LIKE 'PARENT %' THEN 1 ELSE 0 END")
+            ->orderBy('sku', 'asc')
+            ->get();
+
+        $skus = $productMasters->pluck('sku')->filter()->unique()->values()->all();
+
+        $amazonDatasheetsBySku = AmazonDatasheet::whereIn('sku', $skus)->get()->keyBy(function ($item) {
+            return strtoupper($item->sku);
+        });
+
+        $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy('sku');
+
+        $nrValues = AmazonDataView::whereIn('sku', $skus)->pluck('value', 'sku');
+
+        $amazonKwCampaigns = AmazonSpCampaignReport::where('ad_type', 'SPONSORED_PRODUCTS')
+            ->where(function ($q) use ($skus) {
+                foreach ($skus as $sku) $q->orWhere('campaignName', 'LIKE', '%' . $sku . '%');
+            })
+            ->where('campaignName', 'NOT LIKE', '%PT')
+            ->where('campaignName', 'NOT LIKE', '%PT.')
+            ->where('campaignStatus', '!=', 'ARCHIVED')
+            ->get();
+
+        $amazonPtCampaigns = AmazonSpCampaignReport::where('ad_type', 'SPONSORED_PRODUCTS')
+            ->where(function ($q) use ($skus) {
+                foreach ($skus as $sku) {
+                    $q->orWhere('campaignName', 'LIKE', '%' . strtoupper($sku) . '%');
+                }
+            })
+            ->where('campaignStatus', '!=', 'ARCHIVED')
+            ->get();
+
+        $result = [];
+
+        foreach ($productMasters as $pm) {
+            $sku = strtoupper($pm->sku);
+            $parent = $pm->parent;
+
+            $amazonSheet = $amazonDatasheetsBySku[$sku] ?? null;
+            $shopify = $shopifyData[$pm->sku] ?? null;
+
+            $matchedKwCampaign = $amazonKwCampaigns->first(function ($item) use ($sku) {
+                $campaignName = strtoupper(trim(rtrim($item->campaignName, '.')));
+                $cleanSku = strtoupper(trim(rtrim($sku, '.')));
+                return $campaignName === $cleanSku;
+            });
+
+            $matchedPtCampaign = $amazonPtCampaigns->first(function ($item) use ($sku) {
+                $cleanName = strtoupper(trim($item->campaignName));
+
+                return (
+                    (str_ends_with($cleanName, $sku . ' PT') || str_ends_with($cleanName, $sku . ' PT.'))
+                );
+            });
+
+            $row = [
+                'parent' => $parent,
+                'sku' => $pm->sku,
+                'INV' => $shopify->inv ?? 0,
+                'L30' => $shopify->quantity ?? 0,
+                'A_L30' => $amazonSheet->units_ordered_l30 ?? 0,
+                'kw_campaign_name' => $matchedKwCampaign->campaignName ?? '',
+                'pt_campaign_name' => $matchedPtCampaign->campaignName ?? '',
+                'campaignStatus' => $matchedKwCampaign->campaignStatus ?? '',
+                'NRL' => '',
+                'NRA' => '',
+                'FBA' => '',
+            ];
+
+            if (isset($nrValues[$pm->sku])) {
+                $raw = $nrValues[$pm->sku];
+                if (!is_array($raw)) {
+                    $raw = json_decode($raw, true);
+                }
+                if (is_array($raw)) {
+                    $row['NRL']  = $raw['NRL'] ?? null;
+                    $row['NRA'] = $raw['NRA'] ?? null;
+                    $row['FBA'] = $raw['FBA'] ?? null;
+                    $row['TPFT'] = $raw['TPFT'] ?? null;
+                }
+            }
+            
+            $result[] = $row;
+        }
+
+        $filters = [
+            'global_search' => 'shoes',
+            'status' => 'Active',
+            'inv' => 'INV_0',
+            'nra' => 'RA',
+            'missingAds' => 'KW Missing'
+        ];
+
+        $visibleData = $this->combinedFilter($result, $filters);
+
+        $bothRunning = 0;
+        $ptMissing = 0;
+        $kwMissing = 0;
+        $bothMissing = 0;
+        $totalMissingAds = 0;
+
+        foreach ($visibleData as $row) {
+            $kw = isset($row['kw_campaign_name']) ? $row['kw_campaign_name'] : '';
+            $pt = isset($row['pt_campaign_name']) ? $row['pt_campaign_name'] : '';
+            $nra = isset($row['NRA']) ? trim($row['NRA']) : '';
+
+            if ($nra !== 'NRA') {
+                if (!empty($kw) && !empty($pt)) {
+                    $bothRunning++;
+                } elseif (!empty($kw) && empty($pt)) {
+                    $ptMissing++;
+                } elseif (empty($kw) && !empty($pt)) {
+                    $kwMissing++;
+                } else {
+                    $bothMissing++;
+                }
+            }
+
+            if ($nra !== 'NRA') {
+                $totalMissingAds = $ptMissing + $kwMissing + $bothMissing;
+            }
+        }
+        $ptMissing = $ptMissing + $bothMissing;
+        $kwMissing = $kwMissing + $bothMissing;
+
+        /** End Amazon Missing Data **/
+
+        /** Start ebay Missing data **/
+        $normalizeSku = fn($sku) => strtoupper(trim($sku));
+        $productMasters = ProductMaster::orderBy('parent', 'asc')
+            ->orderByRaw("CASE WHEN sku LIKE 'PARENT %' THEN 1 ELSE 0 END")
+            ->orderBy('sku', 'asc')
+            ->get();
+
+        if ($productMasters->isEmpty()) {
+            return response()->json([
+                'message' => 'No product masters found',
+                'data'    => [],
+                'status'  => 200,
+            ]);
+        }
+
+        $skus = $productMasters->pluck('sku')->filter()->map($normalizeSku)->unique()->values()->all();
+
+        // Fetch all required data
+        $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy(fn($item) => $normalizeSku($item->sku));
+        $nrValues = EbayDataView::whereIn('sku', $skus)->pluck('value', 'sku');
+        $ebayMetricData = DB::connection('apicentral')->table('ebay_one_metrics')
+            ->select('sku', 'ebay_price', 'item_id')
+            ->whereIn('sku', $skus)
+            ->get()
+            ->keyBy(fn($item) => $normalizeSku($item->sku));
+
+        // Fetch campaign reports and create efficient lookup
+        $ebayCampaignReports = EbayPriorityReport::where(function ($q) use ($skus) {
+            foreach ($skus as $sku) {
+                $q->orWhere('campaign_name', 'LIKE', '%' . $sku . '%');
+            }
+        })->get();
+
+        $campaignLookup = [];
+        foreach ($ebayCampaignReports as $campaign) {
+            foreach ($skus as $sku) {
+                if (strpos($campaign->campaign_name, $sku) !== false) {
+                    if (!isset($campaignLookup[$sku])) {
+                        $campaignLookup[$sku] = $campaign;
+                    }
+                }
+            }
+        }
+
+        $campaignListings = DB::connection('apicentral')
+            ->table('ebay_campaign_ads_listings')
+            ->select('listing_id', 'bid_percentage')
+            ->get()
+            ->keyBy('listing_id')
+            ->toArray();
+
+        $result = [];
+
+        foreach ($productMasters as $pm) {
+            $sku = strtoupper($pm->sku);
+            $shopify = $shopifyData->get($sku);
+            $ebayMetric = $ebayMetricData->get($sku);
+            $campaignReport = $campaignLookup[$sku] ?? null;
+                
+            $nrValue = $nrValues->get($sku);
+            $nrActual = is_array($nrValue) ? ($nrValue['NR'] ?? null) : null;
+
+            $result[] = [
+                'sku' => $sku,
+                'parent' => $pm->parent,
+                'INV' => $shopify->inv ?? 0,
+                'L30' => $shopify->quantity ?? 0,
+                'NRA' => $nrActual,
+                'kw_campaign_name' => $campaignReport->campaign_name ?? null,
+                'pmt_bid_percentage' => ($ebayMetric && isset($ebayMetric->item_id) && isset($campaignListings[$ebayMetric->item_id])) ? $campaignListings[$ebayMetric->item_id]->bid_percentage : null,
+                'campaignStatus' => $campaignReport->campaignStatus ?? null,
+            ];
+        }
+
+        $visibleData = $this->combinedFilter($result, $filters);
+
+        $ebaybothRunning = $ebayptMissing = $ebaykwMissing = $ebaybothMissing = 0;
+        foreach ($visibleData as $row) {
+            $nra = trim($row['NRA'] ?? '');
+            if ($nra === 'NRA') continue; // ✅ skip early
+
+            $kw = $row['kw_campaign_name'] ?? '';
+            $pt = $row['pmt_bid_percentage'] ?? '';
+
+            if ($kw && $pt) {
+                $ebaybothRunning++;
+            } elseif ($kw && !$pt) {
+                $ebayptMissing++;
+            } elseif (!$kw && $pt) {
+                $ebaykwMissing++;
+            } else {
+                $ebaybothMissing++;
+            }
+        }
+        $ebaytotalMissingAds = $ebayptMissing + $ebaykwMissing + $ebaybothMissing;
+        $ebaykwMissing += $ebaybothMissing;
+        $ebayptMissing += $ebaybothMissing;
+        
+        /** End ebay Missing Data **/
+
+        /** Start Total Sales Data */
+
+        $productMasters = ProductMaster::orderBy('parent', 'asc')
+            ->orderByRaw("CASE WHEN sku LIKE 'PARENT %' THEN 1 ELSE 0 END")
+            ->orderBy('sku', 'asc')
+            ->get();
+
+        $skus = $productMasters->pluck('sku')->filter()->unique()->values()->all();
+        $amazonDatasheetsBySku = AmazonDatasheet::whereIn('sku', $skus)->get()->keyBy(function ($item) {
+            return strtoupper($item->sku);
+        });
+
+        $result = [];
+        $totalSales = 0;
+        foreach ($productMasters as $pm) {
+            $sku = strtoupper($pm->sku);
+            if (str_starts_with($sku, 'PARENT ')) {
+                continue;
+            }
+            $amazonSheet = $amazonDatasheetsBySku[$sku] ?? null;
+            $row = [];
+            if ($amazonSheet) {
+                $row['A_L30'] = $amazonSheet->units_ordered_l30;
+                $row['price'] = $amazonSheet->price;
+            }
+
+            $price = isset($row['price']) ? floatval($row['price']) : 0;
+            $units_ordered_l30 = isset($row['A_L30']) ? floatval($row['A_L30']) : 0;
+
+            $row['T_Sale_l30'] = round($price * $units_ordered_l30, 2);
+            $T_Sale_l30 = round($price * $units_ordered_l30, 2);
+            $totalSales = $totalSales + $T_Sale_l30; 
+        }
+        
+        /** End Total Sales Data ***/
+            $productMasters = ProductMaster::orderBy("parent", "asc")
+                ->orderByRaw("CASE WHEN sku LIKE 'PARENT %' THEN 1 ELSE 0 END")
+                ->orderBy("sku", "asc")
+                ->get();
+            $skus = $productMasters->pluck("sku")
+                ->filter()
+                ->unique()
+                ->values()
+                ->all();
+            $ebayMetrics = DB::connection('apicentral')->table('ebay_one_metrics')->whereIn('sku', $skus)->get()->keyBy('sku');
+            // 6. Build Result
+            $result = [];
+            $totalEbaySales = 0;
+            foreach ($productMasters as $pm) {
+                $sku = strtoupper($pm->sku);
+                $ebayMetric = $ebayMetrics[$pm->sku] ?? null;
+                $row = [];
+
+                $row["eBay L30"] = $ebayMetric->ebay_l30 ?? 0;
+                $row["eBay Price"] = $ebayMetric->ebay_price ?? 0;
+
+                $ebaySales = $row["eBay L30"] * $row["eBay Price"];
+                $totalEbaySales = $totalEbaySales + $ebaySales;
+            }
+        /** End Total Sales for Ebay **/
+
+        /** Start Walmart Data */    
+        $normalizeSku = fn($sku) => strtoupper(trim($sku));
+        $productMasters = ProductMaster::orderBy('parent', 'asc')
+            ->orderByRaw("CASE WHEN sku LIKE 'PARENT %' THEN 1 ELSE 0 END")
+            ->orderBy('sku', 'asc')
+            ->get();
+        $skus = $productMasters->pluck('sku')->filter()->map($normalizeSku)->unique()->values()->all();
+        $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy(fn($item) => $normalizeSku($item->sku));
+        $walmartProductSheet = WalmartProductSheet::whereIn('sku', $skus)->get()->keyBy(fn($item) => $normalizeSku($item->sku));
+        $nrValues = WalmartDataView::whereIn('sku', $skus)->pluck('value', 'sku');
+        $walmartCampaignReportsAll = WalmartCampaignReport::whereIn('campaignName', $skus)->get()->keyBy(fn($item) => $normalizeSku($item->campaignName));
+        $walmartCampaignReportsL30 = WalmartCampaignReport::where('report_range', 'L30')->whereIn('campaignName', $skus)->get();
+        $walmartCampaignReportsL7  = WalmartCampaignReport::where('report_range', 'L7')->whereIn('campaignName', $skus)->get();
+        $result = [];
+        foreach ($productMasters as $pm) {
+            $sku = $normalizeSku($pm->sku);
+            $parent = $pm->parent;
+            $amazonSheet = $walmartProductSheet[$sku] ?? null;
+            $shopify = $shopifyData[$sku] ?? null;
+            // Campaign name & budget without report_range
+            $matchedCampaign = $walmartCampaignReportsAll[$sku] ?? null;
+            if (!$matchedCampaign) {
+                continue;
+            }
+            // Metrics by report_range
+            $matchedCampaignL30 = $walmartCampaignReportsL30->first(fn($item) => $normalizeSku($item->campaignName) === $sku);
+            $matchedCampaignL7  = $walmartCampaignReportsL7->first(fn($item) => $normalizeSku($item->campaignName) === $sku);
+            $row = [];
+            $row['parent'] = $parent;
+            $row['sku']    = $pm->sku;
+            $row['INV']    = $shopify->inv ?? 0;
+            $row['L30']    = $shopify->quantity ?? 0;
+            $row['WA_L30'] = $amazonSheet->l30 ?? 0;
+
+            $row['campaignName'] = $matchedCampaign->campaignName ?? '';
+            $row['campaignBudgetAmount'] = $matchedCampaign->budget ?? '';
+            $row['campaignStatus'] = $matchedCampaign->status ?? '';
+
+            //kw
+            $row['kw_spend_L30'] = $matchedCampaignL30->spend ?? 0;
+            $row['kw_spend_L7'] = $matchedCampaignL7->spend ?? 0;
+            $row['kw_sales_L30'] = $matchedCampaignL30->sales ?? 0;
+            $row['kw_sales_L7'] = $matchedCampaignL7->sales ?? 0;
+            $row['kw_sold_L30'] = (int) ($matchedCampaignL30->sold ?? 0);
+            $row['kw_sold_L7'] = (int) ($matchedCampaignL7->sold ?? 0);
+            $row['kw_clicks_L30'] = (int) ($matchedCampaignL30?->clicks ?? 0);
+            $row['kw_clicks_L7'] = (int) ($matchedCampaignL7?->clicks ?? 0);
+            $row['kw_impr_L30'] = (int) ($matchedCampaignL30?->impression ?? 0);
+            $row['kw_impr_L7'] = (int) ($matchedCampaignL7?->impression ?? 0);
+
+            $row['SPEND_L30'] = $row['kw_spend_L30'];
+            $row['SPEND_L7'] = $row['kw_spend_L7'];
+            $row['SALES_L30'] = $row['kw_sales_L30'];
+            $row['SALES_L7'] = $row['kw_sales_L7'];
+            $row['SOLD_L30'] = $row['kw_sold_L30'];
+            $row['SOLD_L7'] = $row['kw_sold_L7'];
+            $row['CLICKS_L30'] = $row['kw_clicks_L30'];
+            $row['CLICKS_L7'] = $row['kw_clicks_L7'];
+            $row['IMP_L30'] = $row['kw_impr_L30'];
+            $row['IMP_L7'] = $row['kw_impr_L7'];
+
+            $row['NRA'] = '';
+            if (isset($nrValues[$pm->sku])) {
+                $raw = $nrValues[$pm->sku];
+                if (!is_array($raw)) {
+                    $raw = json_decode($raw, true);
+                }
+                if (is_array($raw)) {
+                    $row['NRA'] = $raw['NRA'] ?? '';
+                }
+            }
+            if($row['campaignName'] !== ''){
+                $result[] = $row;
+            }
+        }
+
+        $walmart_SALES_L30_Total = 0;
+        $walmart_SPEND_L30_Total = 0;
+        $walmart_CLICKS_L30_Total = 0;
+        $walmart_SOLD_L30_Total = 0;
+        foreach ($result as $row) 
+        {
+            //$sku = strtolower(trim($row['sku'] ?? ''));
+            $walmart_SALES_L30_value = $row['SALES_L30'] ?? 0;
+            $walmart_SALES_L30_Total += (float)$walmart_SALES_L30_value;
+
+            $walmart_SPEND_L30_value = $row['SPEND_L30'] ?? 0;
+            $walmart_SPEND_L30_Total += (float)$walmart_SPEND_L30_value;
+
+            $walmart_CLICKS_L30_Value =  $row['CLICKS_L30'] ?? 0;
+            $walmart_CLICKS_L30_Total += (float)$walmart_CLICKS_L30_Value;
+
+            $walmart_SOLD_L30_value = $row['SOLD_L30'] ?? 0;
+            $walmart_SOLD_L30_Total += (float)$walmart_SOLD_L30_value;
+        }
+
+        /** End Walmart data **/
+
+        /** Start Code for Ebay-3 Add Running List */
+
+        $normalizeSku = fn($sku) => strtoupper(trim($sku));
+
+        $productMasters = ProductMaster::orderBy('parent', 'asc')
+            ->orderByRaw("CASE WHEN sku LIKE 'PARENT %' THEN 1 ELSE 0 END")
+            ->orderBy('sku', 'asc')
+            ->get();
+
+        $skus = $productMasters->pluck('sku')->filter()->map($normalizeSku)->unique()->values()->all();
+
+        $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy(fn($item) => $normalizeSku($item->sku));
+
+        $ebayMetricData = DB::table('ebay_3_metrics')
+            ->select('sku', 'ebay_price', 'item_id')
+            ->whereIn('sku', $skus)
+            ->get()
+            ->keyBy(fn($item) => $normalizeSku($item->sku));
+
+        $nrValues = EbayThreeDataView::whereIn('sku', $skus)->pluck('value', 'sku');
+
+        $ebayCampaignReportsL30 = Ebay3PriorityReport::where('report_range', 'L30')
+            ->where(function ($q) use ($skus) {
+                foreach ($skus as $sku) {
+                    $q->orWhere('campaign_name', 'LIKE', '%' . $sku . '%');
+                }
+            })
+            ->get();
+
+        $ebayCampaignReportsL7 = Ebay3PriorityReport::where('report_range', 'L7')
+            ->where(function ($q) use ($skus) {
+                foreach ($skus as $sku) {
+                    $q->orWhere('campaign_name', 'LIKE', '%' . $sku . '%');
+                }
+            })
+            ->get();
+           
+
+        $itemIds = $ebayMetricData->pluck('item_id')->toArray();
+        
+        $ebayGeneralReportsL30 = Ebay3GeneralReport::where('report_range', 'L30')
+            ->whereIn('listing_id', $itemIds)
+            ->get();
+
+        $ebayGeneralReportsL7 = Ebay3GeneralReport::where('report_range', 'L7')
+            ->whereIn('listing_id', $itemIds)
+            ->get();
+
+        $result = [];
+
+        foreach ($productMasters as $pm) {
+            $sku = strtoupper($pm->sku);
+            $parent = $pm->parent;
+
+            $shopify = $shopifyData[$sku] ?? null;
+            $ebay = $ebayMetricData[$sku] ?? null;
+
+            $matchedCampaignL30 = $ebayCampaignReportsL30->first(function ($item) use ($sku) {
+                return strtoupper(trim($item->campaign_name)) === strtoupper(trim($sku));
+            });
+
+            $matchedCampaignL7 = $ebayCampaignReportsL7->first(function ($item) use ($sku) {
+                return strtoupper(trim($item->campaign_name)) === strtoupper(trim($sku));
+            });
+            
+            $matchedGeneralL30 = $ebayGeneralReportsL30->first(function ($item) use ($ebay) {
+                if (!$ebay || empty($ebay->item_id)) return false;
+                return trim((string)$item->listing_id) == trim((string)$ebay->item_id);
+            });
+
+            $matchedGeneralL7 = $ebayGeneralReportsL7->first(function ($item) use ($ebay) {
+                if (!$ebay || empty($ebay->item_id)) return false;
+                return trim((string)$item->listing_id) == trim((string)$ebay->item_id);
+            });
+
+            $row = [];
+
+            $row['parent'] = $parent;
+            $row['sku'] = $pm->sku;
+            $row['INV'] = $shopify->inv ?? 0;
+            $row['L30'] = $shopify->quantity ?? 0;
+            $row['e_l30'] = $ebay->ebay_l30 ?? 0;
+            $row['campaignName'] = $matchedCampaignL7->campaign_name ?? ($matchedCampaignL30->campaign_name ?? '');
+
+            //kw
+            $row['kw_spend_L30'] = (float) str_replace('USD ', '', $matchedCampaignL30->cpc_ad_fees_payout_currency ?? 0);
+            $row['kw_spend_L7'] = (float) str_replace('USD ', '', $matchedCampaignL7->cpc_ad_fees_payout_currency ?? 0);
+            $row['kw_sales_L30'] = (float) str_replace('USD ', '', $matchedCampaignL30->cpc_sale_amount_payout_currency ?? 0);
+            $row['kw_sales_L7'] = (float) str_replace('USD ', '', $matchedCampaignL7->cpc_sale_amount_payout_currency ?? 0);
+            $row['kw_sold_L30'] = (int) ($matchedCampaignL30->cpc_attributed_sales ?? 0);
+            $row['kw_sold_L7'] = (int) ($matchedCampaignL7->cpc_attributed_sales ?? 0);
+            $row['kw_clicks_L30'] = (int) ($matchedCampaignL30?->cpc_clicks ?? 0);
+            $row['kw_clicks_L7'] = (int) ($matchedCampaignL7?->cpc_clicks ?? 0);
+            $row['kw_impr_L30'] = (int) ($matchedCampaignL30?->cpc_impressions ?? 0);
+            $row['kw_impr_L7'] = (int) ($matchedCampaignL7?->cpc_impressions ?? 0);
+
+            //pmt
+            $row['pmt_spend_L30'] = (float) str_replace('USD ', '', $matchedGeneralL30->ad_fees ?? 0);
+            $row['pmt_sales_L30'] = (float) str_replace('USD ', '', $matchedGeneralL30->sale_amount ?? 0);
+            $row['pmt_spend_L7'] = (float) str_replace('USD ', '', $matchedGeneralL7->ad_fees ?? 0);
+            $row['pmt_sales_L7'] = (float) str_replace('USD ', '', $matchedGeneralL7->sale_amount ?? 0);
+
+            $row['pmt_sold_L30'] = (int) ($matchedGeneralL30->sales ?? 0);
+            $row['pmt_sold_L7'] = (int) ($matchedGeneralL7->sales ?? 0);
+            $row['pmt_clicks_L30'] = (int) ($matchedGeneralL30->clicks ?? 0);
+            $row['pmt_clicks_L7'] = (int) ($matchedGeneralL7->clicks ?? 0);
+            $row['pmt_impr_L30'] = (int) ($matchedGeneralL30->impressions ?? 0);
+            $row['pmt_impr_L7'] = (int) ($matchedGeneralL7->impressions ?? 0);
+
+            $row['SPEND_L30'] = $row['kw_spend_L30'] + $row['pmt_spend_L30'];
+            $row['SPEND_L7'] = $row['kw_spend_L7'] + $row['pmt_spend_L7'];
+            $row['SALES_L30'] = $row['kw_sales_L30'] + $row['pmt_sales_L30'];
+            $row['SALES_L7'] = $row['kw_sales_L7'] + $row['pmt_sales_L7'];
+            $row['SOLD_L30'] = $row['kw_sold_L30'] + $row['pmt_sold_L30'];
+            $row['SOLD_L7'] = $row['kw_sold_L7'] + $row['pmt_sold_L7'];
+            $row['CLICKS_L30'] = $row['kw_clicks_L30'] + $row['pmt_clicks_L30'];
+            $row['CLICKS_L7'] = $row['kw_clicks_L7'] + $row['pmt_clicks_L7'];
+            $row['IMP_L30'] = $row['kw_impr_L30'] + $row['pmt_impr_L30'];
+            $row['IMP_L7'] = $row['kw_impr_L7'] + $row['pmt_impr_L7'];
+
+            $row['NR'] = '';
+            if (isset($nrValues[$pm->sku])) {
+                $raw = $nrValues[$pm->sku];
+                if (!is_array($raw)) {
+                    $raw = json_decode($raw, true);
+                }
+                if (is_array($raw)) {
+                    $row['NR'] = $raw['NR'] ?? '';
+                }
+            }
+
+            if($row['campaignName'] !== ''){
+                $result[] = $row;
+            }
+        }
+
+
+        $ebay3_SPEND_L30_Total = 0;  
+        $ebay3_kw_spend_L30_total = 0;
+        $ebay3_pmt_spend_L30_Total = 0;
+        $ebay3_CLICKS_L30_Total = 0; 
+        $ebay3_kw_clicks_L30_Total = 0;
+        $ebay3_pmt_clicks_L30_Total = 0;
+        $ebay3_SALES_L30_Total = 0;
+        $ebay3_kw_sales_L30_Total = 0;
+        $ebay3_pmt_sales_L30_Total = 0;
+        $ebay3_SOLD_L30_Total = 0;
+        $ebay3_kw_sold_L30_Total = 0;
+        $ebay3_pmt_sold_L30_Total = 0;
+
+        foreach ($result as $row) 
+        {
+            $sku = strtolower($row['sku'] ?? '');
+
+            $ebay3_SPEND_L30_Value = $row['SPEND_L30'] ?? 0;
+            if (is_string($ebay3_SPEND_L30_Value)) {
+                $ebay3_SPEND_L30_Value = floatval($ebay3_SPEND_L30_Value);
+            }
+            $ebay3_SPEND_L30_Total += $ebay3_SPEND_L30_Value ?: 0;
+
+
+            $ebay3_kw_spend_L30_value = $row['kw_spend_L30'] ?? 0;
+            if (is_string($ebay3_kw_spend_L30_value)) {
+                $ebay3_kw_spend_L30_value = floatval($ebay3_kw_spend_L30_value);
+            }
+            $ebay3_kw_spend_L30_total += $ebay3_kw_spend_L30_value ?: 0;
+
+
+            $ebay3_pmt_spend_L30_Value = $row['pmt_spend_L30'] ?? 0;
+            if (is_string($ebay3_pmt_spend_L30_Value)) {
+                $ebay3_pmt_spend_L30_Value = floatval($ebay3_pmt_spend_L30_Value);
+            }
+            $ebay3_pmt_spend_L30_Total += $ebay3_pmt_spend_L30_Value ?: 0;
+
+
+            $ebay3_CLICKS_L30_Value = $row['CLICKS_L30'] ?? 0;
+            if (is_string($ebay3_CLICKS_L30_Value)) {
+                $ebay3_CLICKS_L30_Value = floatval($ebay3_CLICKS_L30_Value);
+            }
+            $ebay3_CLICKS_L30_Total += $ebay3_CLICKS_L30_Value ?: 0;
+
+
+            $ebay3_kw_clicks_L30_Value = $row['kw_clicks_L30'] ?? 0;
+            if (is_string($ebay3_kw_clicks_L30_Value)) {
+                $ebay3_kw_clicks_L30_Value = floatval($ebay3_kw_clicks_L30_Value);
+            }
+            $ebay3_kw_clicks_L30_Total += $ebay3_kw_clicks_L30_Value ?: 0;
+
+
+            $ebay3_pmt_clicks_L30_Value = $row['pmt_clicks_L30'] ?? 0;
+            if (is_string($ebay3_pmt_clicks_L30_Value)) {
+                $ebay3_pmt_clicks_L30_Value = floatval($ebay3_pmt_clicks_L30_Value);
+            }
+            $ebay3_pmt_clicks_L30_Total += $ebay3_pmt_clicks_L30_Value ?: 0;
+
+            $ebay3_SALES_L30_Value = $row['SALES_L30'] ?? 0;
+            if (is_string($ebay3_SALES_L30_Value)) {
+                $ebay3_SALES_L30_Value = floatval($ebay3_SALES_L30_Value);
+            }
+            $ebay3_SALES_L30_Total += $ebay3_SALES_L30_Value ?: 0;
+
+            $ebay3_kw_sales_L30_Value = $row['kw_sales_L30'] ?? 0;
+            if (is_string($ebay3_kw_sales_L30_Value)) {
+                $ebay3_kw_sales_L30_Value = floatval($ebay3_kw_sales_L30_Value);
+            }
+            $ebay3_kw_sales_L30_Total += $ebay3_kw_sales_L30_Value ?: 0;
+
+
+            $ebay3_pmt_sales_L30_Value = $row['pmt_sales_L30'] ?? 0;
+            if (is_string($ebay3_pmt_sales_L30_Value)) {
+                $ebay3_pmt_sales_L30_Value = floatval($ebay3_pmt_sales_L30_Value);
+            }
+            $ebay3_pmt_sales_L30_Total += $ebay3_pmt_sales_L30_Value ?: 0;
+
+            $ebay3_SOLD_L30_Value = $row['SOLD_L30'] ?? 0;
+            if (is_string($ebay3_SOLD_L30_Value)) {
+                $ebay3_SOLD_L30_Value = floatval($ebay3_SOLD_L30_Value);
+            }
+            $ebay3_SOLD_L30_Total += $ebay3_SOLD_L30_Value ?: 0;
+
+
+            $ebay3_kw_sold_L30_Value = $row['kw_sold_L30'] ?? 0;
+            if (is_string($ebay3_kw_sold_L30_Value)) {
+                $ebay3_kw_sold_L30_Value = floatval($ebay3_kw_sold_L30_Value);
+            }
+            $ebay3_kw_sold_L30_Total += $ebay3_kw_sold_L30_Value ?: 0;
+            
+            $ebay3_pmt_sold_L30_Value = $row['pmt_sold_L30'] ?? 0;
+            if (is_string($ebay3_pmt_sold_L30_Value)) {
+                $ebay3_pmt_sold_L30_Value = floatval($ebay3_pmt_sold_L30_Value);
+            }
+            $ebay3_pmt_sold_L30_Total += $ebay3_pmt_sold_L30_Value ?: 0;
+
+        }
+
+        /** End Code for Ebay-3 Add Running List **/
+
+        /** Start Code for Ebay-2 Running Ads Data */
+        
+            $normalizeSku = fn($sku) => strtoupper(trim($sku));
+
+            $productMasters = ProductMaster::orderBy('parent', 'asc')
+            ->orderByRaw("CASE WHEN sku LIKE 'PARENT %' THEN 1 ELSE 0 END")
+            ->orderBy('sku', 'asc')
+            ->get();
+
+            $skus = $productMasters->pluck('sku')->filter()->map($normalizeSku)->unique()->values()->all();
+
+            $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy(fn($item) => $normalizeSku($item->sku));
+
+            $ebayMetricData = DB::connection('apicentral')->table('ebay2_metrics')
+                ->select('sku', 'ebay_price', 'item_id')
+                ->whereIn('sku', $skus)
+                ->get()
+                ->keyBy(fn($item) => $normalizeSku($item->sku));
+
+            $nrValues = EbayTwoDataView::whereIn('sku', $skus)->pluck('value', 'sku');
+
+            $itemIds = $ebayMetricData->pluck('item_id')->toArray();
+        
+            $ebayGeneralReportsL30 = Ebay2GeneralReport::where('report_range', 'L30')
+                ->whereIn('listing_id', $itemIds)
+                ->get();
+
+            $ebayGeneralReportsL7 = Ebay2GeneralReport::where('report_range', 'L7')
+                ->whereIn('listing_id', $itemIds)
+                ->get();
+
+            $result = [];
+
+            foreach ($productMasters as $pm) {
+                $sku = strtoupper($pm->sku);
+                $parent = $pm->parent;
+
+                $shopify = $shopifyData[$sku] ?? null;
+                $ebay = $ebayMetricData[$sku] ?? null;
+            
+                $matchedGeneralL30 = $ebayGeneralReportsL30->first(function ($item) use ($ebay) {
+                    if (!$ebay || empty($ebay->item_id)) return false;
+                    return trim((string)$item->listing_id) == trim((string)$ebay->item_id);
+                });
+
+                $matchedGeneralL7 = $ebayGeneralReportsL7->first(function ($item) use ($ebay) {
+                    if (!$ebay || empty($ebay->item_id)) return false;
+                    return trim((string)$item->listing_id) == trim((string)$ebay->item_id);
+                });
+
+                if (!$matchedGeneralL30 && !$matchedGeneralL7) {
+                    continue;
+                }
+
+                $row = [];
+
+                $row['parent'] = $parent;
+                $row['sku'] = $pm->sku;
+                $row['INV'] = $shopify->inv ?? 0;
+                $row['L30'] = $shopify->quantity ?? 0;
+                $row['e_l30'] = $ebay->ebay_l30 ?? 0;
+
+                //pmt
+                $row['pmt_spend_L30'] = (float) str_replace('USD ', '', $matchedGeneralL30->ad_fees ?? 0);
+                $row['pmt_sales_L30'] = (float) str_replace('USD ', '', $matchedGeneralL30->sale_amount ?? 0);
+                $row['pmt_spend_L7'] = (float) str_replace('USD ', '', $matchedGeneralL7->ad_fees ?? 0);
+                $row['pmt_sales_L7'] = (float) str_replace('USD ', '', $matchedGeneralL7->sale_amount ?? 0);
+
+                $row['pmt_sold_L30'] = (int) ($matchedGeneralL30->sales ?? 0);
+                $row['pmt_sold_L7'] = (int) ($matchedGeneralL7->sales ?? 0);
+                $row['pmt_clicks_L30'] = (int) ($matchedGeneralL30->clicks ?? 0);
+                $row['pmt_clicks_L7'] = (int) ($matchedGeneralL7->clicks ?? 0);
+                $row['pmt_impr_L30'] = (int) ($matchedGeneralL30->impressions ?? 0);
+                $row['pmt_impr_L7'] = (int) ($matchedGeneralL7->impressions ?? 0);
+
+                $row['SPEND_L30'] = $row['pmt_spend_L30'];
+                $row['SPEND_L7'] = $row['pmt_spend_L7'];
+                $row['SALES_L30'] = $row['pmt_sales_L30'];
+                $row['SALES_L7'] = $row['pmt_sales_L7'];
+                $row['SOLD_L30'] = $row['pmt_sold_L30'];
+                $row['SOLD_L7'] = $row['pmt_sold_L7'];
+                $row['CLICKS_L30'] = $row['pmt_clicks_L30'];
+                $row['CLICKS_L7'] = $row['pmt_clicks_L7'];
+                $row['IMP_L30'] = $row['pmt_impr_L30'];
+                $row['IMP_L7'] = $row['pmt_impr_L7'];
+
+                $row['NR'] = '';
+                if (isset($nrValues[$pm->sku])) {
+                    $raw = $nrValues[$pm->sku];
+                    if (!is_array($raw)) {
+                        $raw = json_decode($raw, true);
+                    }
+                    if (is_array($raw)) {
+                        $row['NR'] = $raw['NR'] ?? '';
+                    }
+                }
+
+                $result[] = $row;
+            }
+
+            $ebay2_SPEND_L30_Total = 0;
+            $ebay2_pmt_spend_L30_Total = 0;
+            $ebay2_CLICKS_L30_Total = 0;
+            $ebay2_pmt_clicks_L30_Total = 0;
+            $ebay2_SALES_L30_Total = 0;
+            $ebay2_pmt_sales_L30_total = 0;
+            $ebay2_SOLD_L30_Total = 0;
+            $ebay2_pmt_sold_L30_Total = 0;
+
+            foreach ($result as $row) {
+                $sku = strtolower($row['sku'] ?? '');
+
+                // $value = $row[$field] ?? 0;
+                // $total += is_numeric($value) ? (float)$value : 0;
+
+                $ebay2_SPEND_L30_Value = $row['SPEND_L30'] ?? 0;
+                $ebay2_SPEND_L30_Total += is_numeric($ebay2_SPEND_L30_Value) ? (float)$ebay2_SPEND_L30_Value : 0;
+
+
+                $ebay2_pmt_spend_L30_Value = $row['pmt_spend_L30'] ?? 0;
+                $ebay2_pmt_spend_L30_Total += is_numeric($ebay2_pmt_spend_L30_Value) ? (float)$ebay2_pmt_spend_L30_Value : 0;
+
+                $ebay2_CLICKS_L30_Value = $row['CLICKS_L30'] ?? 0;
+                $ebay2_CLICKS_L30_Total += is_numeric($ebay2_CLICKS_L30_Value) ? (float)$ebay2_CLICKS_L30_Value : 0;
+
+                $ebay2_pmt_clicks_L30_Value = $row['pmt_clicks_L30'] ?? 0;
+                $ebay2_pmt_clicks_L30_Total += is_numeric($ebay2_pmt_clicks_L30_Value) ? (float)$ebay2_pmt_clicks_L30_Value : 0;
+
+                $ebay2_SALES_L30_Value = $row['SALES_L30'] ?? 0;
+                $ebay2_SALES_L30_Total += is_numeric($ebay2_SALES_L30_Value) ? (float)$ebay2_SALES_L30_Value : 0;
+
+                $ebay2_pmt_sales_L30_value = $row['pmt_sales_L30'] ?? 0;
+                $ebay2_pmt_sales_L30_total += is_numeric($ebay2_pmt_sales_L30_value) ? (float)$ebay2_pmt_sales_L30_value : 0;
+
+                $ebay2_SOLD_L30_Value = $row['SOLD_L30'] ?? 0;
+                $ebay2_SOLD_L30_Total += is_numeric($ebay2_SOLD_L30_Value) ? (float)$ebay2_SOLD_L30_Value : 0;
+
+                $ebay2_pmt_sold_L30_Value = $row['pmt_sold_L30'] ?? 0;
+                $ebay2_pmt_sold_L30_Total += is_numeric($ebay2_pmt_sold_L30_Value) ? (float)$ebay2_pmt_sold_L30_Value : 0;
+            }
+
+
+        /** End Code for Ebay-2 Running Ads Data **/
+
+        /** Start Ebay-2 Missing Data  */
+            
+            $normalizeSku = fn($sku) => strtoupper(trim($sku));
+
+            $productMasters = ProductMaster::orderBy('parent', 'asc')
+                ->orderByRaw("CASE WHEN sku LIKE 'PARENT %' THEN 1 ELSE 0 END")
+                ->orderBy('sku', 'asc')
+                ->get();
+
+            if ($productMasters->isEmpty()) {
+                return response()->json([
+                    'message' => 'No product masters found',
+                    'data'    => [],
+                    'status'  => 200,
+                ]);
+            }
+
+            $skus = $productMasters->pluck('sku')->filter()->map($normalizeSku)->unique()->values()->all();
+
+            // Fetch all required data
+            $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy(fn($item) => $normalizeSku($item->sku));
+            $nrValues = EbayTwoDataView::whereIn('sku', $skus)->pluck('value', 'sku');
+            $ebayMetricData = DB::connection('apicentral')->table('ebay2_metrics')
+                ->select('sku', 'ebay_price', 'item_id')
+                ->whereIn('sku', $skus)
+                ->get()
+                ->keyBy(fn($item) => $normalizeSku($item->sku));
+
+            $campaignListings = DB::connection('apicentral')
+                ->table('ebay2_campaign_ads_listings')
+                ->select('listing_id', 'bid_percentage')
+                ->get()
+                ->keyBy('listing_id')
+                ->toArray();
+
+            $result = [];
+
+            foreach ($productMasters as $pm) {
+                $sku = strtoupper($pm->sku);
+                $shopify = $shopifyData->get($sku);
+                $ebayMetric = $ebayMetricData->get($sku);
+                
+                $nrActual = null;
+                if (isset($nrValues[$pm->sku])) {
+                    $raw = $nrValues[$pm->sku];
+                    if (!is_array($raw)) {
+                        $raw = json_decode($raw, true);
+                    }
+                    if (is_array($raw)) {
+                        $nrActual = $raw['NRA'] ?? null;
+                    }
+                }
+
+                $result[] = [
+                    'sku' => $sku,
+                    'parent' => $pm->parent,
+                    'INV' => $shopify->inv ?? 0,
+                    'L30' => $shopify->quantity ?? 0,
+                    'NRA' => $nrActual,
+                    'pmt_bid_percentage' => ($ebayMetric && isset($ebayMetric->item_id) && isset($campaignListings[$ebayMetric->item_id])) 
+                        ? $campaignListings[$ebayMetric->item_id]->bid_percentage 
+                        : null,
+                ];
+            }
+
+            $filters = [
+                'global_search' => $_GET['global-search'] ?? '',
+                'status'        => $_GET['status-filter'] ?? '',
+                'inv_filter'    => $_GET['inv-filter'] ?? '',
+                'nra_filter'    => $_GET['nra-filter'] ?? '',
+                'missing_ads'   => $_GET['missingAds-filter'] ?? ''
+            ];
+
+            $filteredRows = array_filter($result, function($row) use ($filters) {
+                return $this->Ebay2combinedFilter($row, $filters);
+            });
+
+            $ebay2_ptMissing = 0;
+            foreach ($filteredRows as $row) {
+                $pt = $row['pmt_bid_percentage'] ?? '';
+                $nra = trim($row['NRA'] ?? '');
+
+                if ($nra !== 'NRA') {
+                    if (empty($pt)) $ebay2_ptMissing++; 
+                }
+            }
+
+        /** End Ebay-2 Missing Data **/
+
+        /** Start Ebay-3 Missing Data **/
+            $normalizeSku = fn($sku) => strtoupper(trim($sku));
+
+            $productMasters = ProductMaster::orderBy('parent', 'asc')
+                ->orderByRaw("CASE WHEN sku LIKE 'PARENT %' THEN 1 ELSE 0 END")
+                ->orderBy('sku', 'asc')
+                ->get();
+
+            if ($productMasters->isEmpty()) {
+                return response()->json([
+                    'message' => 'No product masters found',
+                    'data'    => [],
+                    'status'  => 200,
+                ]);
+            }
+
+            $skus = $productMasters->pluck('sku')->filter()->map($normalizeSku)->unique()->values()->all();
+
+            // Fetch all required data
+            $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy(fn($item) => $normalizeSku($item->sku));
+            $nrValues = EbayThreeDataView::whereIn('sku', $skus)->pluck('value', 'sku');
+            $ebayMetricData = DB::table('ebay_3_metrics')
+                ->select('sku', 'ebay_price', 'item_id')
+                ->whereIn('sku', $skus)
+                ->get()
+                ->keyBy(fn($item) => $normalizeSku($item->sku));
+
+            // Fetch campaign reports and create efficient lookup
+            $ebayCampaignReports = Ebay3PriorityReport::where(function ($q) use ($skus) {
+                foreach ($skus as $sku) {
+                    $q->orWhere('campaign_name', 'LIKE', '%' . $sku . '%');
+                }
+            })->get();
+
+            $campaignLookup = [];
+            foreach ($ebayCampaignReports as $campaign) {
+                foreach ($skus as $sku) {
+                    $normalizedCampaignName = strtoupper(trim($campaign->campaign_name)); 
+                    if (stripos($normalizedCampaignName, $sku) !== false) { 
+                        if (!isset($campaignLookup[$sku])) {
+                            $campaignLookup[$sku] = $campaign;
+                        }
+                    }
+                }
+            }
+
+            $campaignListings = DB::connection('apicentral')
+                ->table('ebay_campaign_ads_listings')
+                ->select('listing_id', 'bid_percentage')
+                ->get()
+                ->keyBy('listing_id')
+                ->toArray();
+
+            $result = [];
+
+            foreach ($productMasters as $pm) {
+                $sku = strtoupper($pm->sku);
+                $shopify = $shopifyData->get($sku);
+                $ebayMetric = $ebayMetricData->get($sku);
+                $campaignReport = $campaignLookup[$sku] ?? null;
+                
+                $nrActual = null;
+                if (isset($nrValues[$pm->sku])) {
+                    $raw = $nrValues[$pm->sku];
+                    if (!is_array($raw)) {
+                        $raw = json_decode($raw, true);
+                    }
+                    if (is_array($raw)) {
+                        $nrActual = $raw['NRA'] ?? null;
+                    }
+                }
+
+                $result[] = [
+                    'sku' => $sku,
+                    'parent' => $pm->parent,
+                    'INV' => $shopify->inv ?? 0,
+                    'L30' => $shopify->quantity ?? 0,
+                    'NRA' => $nrActual,
+                    'kw_campaign_name' => $campaignReport->campaign_name ?? null,
+                    'pmt_bid_percentage' => ($ebayMetric && isset($ebayMetric->item_id) && isset($campaignListings[$ebayMetric->item_id])) 
+                        ? $campaignListings[$ebayMetric->item_id]->bid_percentage 
+                        : null,
+                    'campaignStatus' => $campaignReport->campaignStatus ?? null,
+                ];
+            }
+
+            $filters = [
+                'global_search' => $_GET['global-search'] ?? '',
+                'status_filter' => $_GET['status-filter'] ?? '',
+                'inv_filter'    => $_GET['inv-filter'] ?? '',
+                'nra_filter'    => $_GET['nra-filter'] ?? '',
+                'missing_ads'   => $_GET['missingAds-filter'] ?? ''
+            ];
+
+            $filteredRows = array_filter($result, function($row) use ($filters) {
+                return $this->Ebay3combinedFilter($row, $filters);
+            });
+
+            $ebay3bothMissing = 0;
+            $ebay3kwMissing = 0;
+            $ebay3ptMissing = 0;
+            $ebay3bothRunning = 0;
+            $ebay3kwRunning = 0;
+            $ebay3ptRunning = 0;
+            $ebay3totalMissingAds = 0;
+            $ebay3totalNRA = 0;
+            $ebay3totalRA = 0;
+
+            foreach ($filteredRows as $row) {
+                $kw = $row['kw_campaign_name'] ?? '';
+                $pt = $row['pmt_bid_percentage'] ?? '';
+                $nra = trim($row['NRA'] ?? '');
+
+                // ✅ Existing counts
+                if ($nra !== "NRA") {
+                    if ($kw && $pt) $ebay3bothRunning++;
+                    elseif ($kw && !$pt) $ebay3ptMissing++;
+                    elseif (!$kw && $pt) $ebay3kwMissing++;
+                    else $ebay3bothMissing++;
+                }
+
+                // ✅ Running counts
+                if ($nra !== "NRA") {
+                    if ($kw) $ebay3kwRunning++;
+                    if ($pt) $ebay3ptRunning++;
+                }
+
+                // ✅ Total Missing Ads Count
+                if ($nra !== "NRA") {
+                    $ebay3totalMissingAds = $ebay3ptMissing + $ebay3kwMissing + $ebay3bothMissing;
+                }
+
+                // ✅ NRA and RA counts
+                if ($nra === "NRA") $ebay3totalNRA++;
+                else $ebay3totalRA++;
+            }
+            $ebay3kwMissing = $ebay3bothMissing + $ebay3kwMissing; 
+            $ebay3ptMissing = $ebay3bothMissing + $ebay3ptMissing;
+
+        /** End Ebay-3 Missing data ***/
+
+        /** Start Ebay2 Total Sales Data */
+        $productMasters = ProductMaster::orderBy("parent", "asc")
+            ->orderByRaw("CASE WHEN sku LIKE 'PARENT %' THEN 1 ELSE 0 END")
+            ->orderBy("sku", "asc")
+            ->get();
+
+        $skus = $productMasters->pluck("sku")
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+            
+        $ebayMetrics = DB::connection('apicentral')
+            ->table('ebay2_metrics')
+            ->select('sku', 'ebay_price', 'ebay_l30', 'ebay_l60', 'views', 'item_id')
+            ->whereIn('sku', $skus)
+            ->get()
+            ->keyBy('sku');  
+      
+        $totalEbay2Sales = 0;
+        foreach ($productMasters as $pm) {
+            $ebayMetric = $ebayMetrics[$pm->sku] ?? null;
+            $totalEbay2Sales = ($ebayMetric->ebay_l30 ?? 0) * ($ebayMetric->ebay_price ?? 0);
+        }
+        /** End Ebay2 Total Sales Data **/
+
+        /** Start Ebay3 Total Sales Data **/
+        $productMasterRows = ProductMaster::all()->keyBy('sku');
+        $skus = $productMasterRows->pluck('sku')->toArray();
+
+        $ebayMetrics = Ebay3Metric::select('sku', 'ebay_price', 'ebay_l30', 'ebay_l60', 'views', 'item_id')->whereIn('sku', $skus)->get()->keyBy('sku');
+        
+        $totalSalesEbay3 = 0;
+        foreach ($productMasterRows as $productMaster) {
+            $ebayMetric = $ebayMetrics[$productMaster->sku] ?? null;
+            $totalSalesEbay3 = $totalSalesEbay3 + (($ebayMetric->ebay_l30 ?? 0) * ($ebayMetric->ebay_price ?? 0));
+        }
+        /** End Ebay Total Sales Data **/
+
+        /** Start Shopify G-Shopping Data */
+            /*
+            $productMasters = ProductMaster::orderBy('parent', 'asc')
+                ->orderByRaw("CASE WHEN sku LIKE 'PARENT %' THEN 1 ELSE 0 END")
+                ->orderBy('sku', 'asc')
+                ->get();
+
+            $skus = $productMasters->pluck('sku')->filter()->unique()->values()->all();
+
+            $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy('sku');
+
+            $googleCampaigns = DB::connection('apicentral')
+                ->table('google_ads_campaigns')
+                ->select(
+                    'campaign_id',
+                    'campaign_name',
+                    'campaign_status',
+                    'budget_amount_micros',
+                    'range_type',
+                    'metrics_cost_micros',
+                    'metrics_clicks',
+                    'metrics_impressions',
+                    'ga4_sold_units',
+                    'ga4_ad_sales'
+                )
+                ->whereIn('range_type', ['L7', 'L15', 'L30', 'L60'])
+                ->get();
+
+                $ranges = ['L7', 'L15', 'L30', 'L60'];
+
+                $result = [];
+
+            foreach ($productMasters as $pm) {
+                $sku = strtoupper(trim($pm->sku));
+                $parent = $pm->parent;
+
+                $shopify = $shopifyData[$sku] ?? null;
+
+                $matchedCampaign = $googleCampaigns->first(function ($c) use ($sku) {
+                    $campaign = strtoupper(trim($c->campaign_name));
+                    $skuTrimmed = strtoupper(trim($sku));
+                    
+                    $parts = array_map('trim', explode(',', $campaign));
+                    $exactMatch = in_array($skuTrimmed, $parts);
+                    
+                    return $exactMatch;
+                });
+
+                $row = [];
+                $row['parent'] = $parent;
+                $row['sku']    = $pm->sku;
+                $row['INV']    = $shopify->inv ?? 0;
+                $row['L30']    = $shopify->quantity ?? 0;
+                $row['campaign_id'] = $matchedCampaign->campaign_id ?? null;
+                $row['campaignName'] = $matchedCampaign->campaign_name ?? null;
+                $row['campaignBudgetAmount'] = $matchedCampaign->budget_amount_micros ?? null;
+                $row['campaignBudgetAmount'] = $row['campaignBudgetAmount'] ? $row['campaignBudgetAmount'] / 1000000 : null;
+                $row['campaignStatus'] = $matchedCampaign->campaign_status ?? null;
+
+                foreach ($ranges as $range) {
+                    $campaignRange = $googleCampaigns->first(function ($c) use ($sku, $range) {
+                        $campaign = strtoupper(trim($c->campaign_name));
+                        $skuTrimmed = strtoupper(trim($sku));
+                        
+                        $contains = strpos($campaign, $skuTrimmed) !== false;
+                        
+                        $parts = array_map('trim', explode(',', $campaign));
+                        $exactMatch = in_array($skuTrimmed, $parts);
+                        
+                        return ($contains || $exactMatch) && $c->range_type === $range;
+                    });
+
+
+                    $row["spend_$range"] = isset($campaignRange->metrics_cost_micros)
+                        ? $campaignRange->metrics_cost_micros / 1000000
+                        : 0;
+
+                    $row["clicks_$range"] = $campaignRange->metrics_clicks ?? 0;
+                    $row["impressions_$range"] = $campaignRange->metrics_impressions ?? 0;
+                    $row["cpc_$range"] = $row["clicks_$range"] ? $row["spend_$range"] / $row["clicks_$range"] : 0;
+                    $row["ad_sales_$range"] = $campaignRange->ga4_ad_sales ?? 0;
+                    $row["ad_sold_$range"] = $campaignRange->ga4_sold_units ?? 0;
+                }
+
+                if($row['campaignName'] != '') {
+                    $result[] = (object) $row;
+                }
+            }
+        
+            $uniqueResult = collect($result)->unique('sku')->values()->all();
+            $GShopping_spendl30_Total = 0;
+            foreach($uniqueResult as $row)
+            {
+                $GShopping_spendl30_Total = $GShopping_spendl30_Total + $row['spend_L30'];
+
+            }
+            */
+        /** End Shopify G-shopping Data **/
+
+        $roundVars = [
+            'ebay_SALES_L30_total', 'ebay_kw_sales_L30_total', 'ebay_pmt_sales_L30_total',
+            'ebay_SPEND_L30_total', 'ebay_kw_spend_L30_total', 'ebay_pmt_spend_L30_total',
+            'ebay_CLICKS_L30_total', 'ebay_kw_clicks_L30_total', 'ebay_pmt_clicks_L30_total',
+            'ebay_SOLD_L30_total', 'ebay_kw_sold_L30_total', 'ebay_pmt_sold_L30_total',
+            'SPEND_L30_total', 'kw_spend_L30_total', 'pt_spend_L30_total', 'hl_spend_L30_total',
+            'CLICKS_L30_total', 'kw_clicks_L30_total', 'pt_clicks_L30_total', 'hl_clicks_L30_total',
+            'totalSales', 'totalEbaySales','SOLD_L30_Total', 'kw_sold_L30_Total', 'pt_sold_L30_Total', 'hl_sold_L30_Total',
+            'SALES_L30_Total', 'kw_sales_L30_Total', 'pt_sales_L30_Total', 'hl_sales_L30_Total', 'walmart_SALES_L30_Total', 'walmart_SPEND_L30_Total', 'walmart_CLICKS_L30_Total', 'walmart_SOLD_L30_Total', 'ebay3_SPEND_L30_Total', 'ebay3_kw_spend_L30_total', 'ebay3_pmt_spend_L30_Total', 'ebay3_CLICKS_L30_Total', 'ebay3_kw_clicks_L30_Total', 'ebay3_pmt_clicks_L30_Total', 'ebay3_SALES_L30_Total', 'ebay3_kw_sales_L30_Total', 'ebay3_pmt_sales_L30_Total', 'ebay3_SOLD_L30_Total', 'ebay3_kw_sold_L30_Total', 'ebay3_pmt_sold_L30_Total', 'ebay2_SPEND_L30_Total', 'ebay2_pmt_spend_L30_Total', 'ebay2_CLICKS_L30_Total', 'ebay2_pmt_clicks_L30_Total', 'ebay2_SALES_L30_Total', 'ebay2_pmt_sales_L30_total', 'ebay2_SOLD_L30_Total', 'ebay2_pmt_sold_L30_Total', 'ebay2_ptMissing', 'ebay3totalMissingAds', 'ebay3kwMissing', 'ebay3ptMissing', 'totalEbay2Sales', 'totalSalesEbay3'
+        ];
+
+        foreach ($roundVars as $varName) {
+            if (isset($$varName)) {
+                $$varName = round((float) $$varName);
+            }
+        }
+
+        return view('channels.adv-masters', compact('kw_spend_L30_total', 'pt_spend_L30_total', 'hl_spend_L30_total', 'kw_clicks_L30_total', 'pt_clicks_L30_total', 'hl_clicks_L30_total', 'SPEND_L30_total', 'CLICKS_L30_total', 'ebay_SALES_L30_total', 'ebay_kw_sales_L30_total', 'ebay_pmt_sales_L30_total', 'ebay_SPEND_L30_total', 'ebay_kw_spend_L30_total', 'ebay_pmt_spend_L30_total', 'ebay_CLICKS_L30_total', 'ebay_kw_clicks_L30_total', 'ebay_pmt_clicks_L30_total', 'ebay_SOLD_L30_total', 'ebay_kw_sold_L30_total', 'ebay_pmt_sold_L30_total', 'bothMissing', 'totalMissingAds', 'kwMissing', 'ptMissing', 'ebaytotalMissingAds', 'ebaykwMissing', 'ebayptMissing', 'totalSales', 'totalEbaySales', 'SOLD_L30_Total', 'kw_sold_L30_Total', 'pt_sold_L30_Total', 'hl_sold_L30_Total', 'SALES_L30_Total', 'kw_sales_L30_Total', 'pt_sales_L30_Total', 'hl_sales_L30_Total', 'walmart_SALES_L30_Total', 'walmart_SPEND_L30_Total', 'walmart_CLICKS_L30_Total', 'walmart_SOLD_L30_Total', 'ebay3_SPEND_L30_Total', 'ebay3_kw_spend_L30_total', 'ebay3_pmt_spend_L30_Total', 'ebay3_CLICKS_L30_Total', 'ebay3_kw_clicks_L30_Total', 'ebay3_pmt_clicks_L30_Total', 'ebay3_SALES_L30_Total', 'ebay3_kw_sales_L30_Total', 'ebay3_pmt_sales_L30_Total', 'ebay3_SOLD_L30_Total', 'ebay3_kw_sold_L30_Total', 'ebay3_pmt_sold_L30_Total', 'ebay2_SPEND_L30_Total', 'ebay2_pmt_spend_L30_Total', 'ebay2_CLICKS_L30_Total', 'ebay2_pmt_clicks_L30_Total', 'ebay2_SALES_L30_Total', 'ebay2_pmt_sales_L30_total', 'ebay2_SOLD_L30_Total', 'ebay2_pmt_sold_L30_Total', 'ebay2_ptMissing', 'ebay3totalMissingAds', 'ebay3kwMissing', 'ebay3ptMissing', 'totalEbay2Sales', 'totalSalesEbay3'));
+    }
+
+    public function extractNumber($value)
+    {
+        if (is_null($value)) {
+            return null;
+        }
+        // Match only digits
+        preg_match('/\d+/', $value, $matches);
+        return $matches[0] ?? null;
+    }
+
+    public function combinedFilter($data, $filters) 
+    {
+        $filtered = [];
+        foreach ($data as $row) {
+            $sku = strtoupper($row['sku'] ?? '');
+            if (strpos($sku, 'PARENT') !== false) continue; // Exclude parent rows
+
+            $searchVal = null;
+            if ($searchVal) {
+                $fields = [
+                    strtolower($row['sku'] ?? ''),
+                    strtolower($row['parent'] ?? ''),
+                    strtolower($row['kw_campaign_name'] ?? ''),
+                    strtolower($row['pt_campaign_name'] ?? ''),
+                ];
+
+                $matchFound = false;
+                foreach ($fields as $field) {
+                    if (strpos($field, $searchVal) !== false) {
+                        $matchFound = true;
+                        break;
+                    }
+                }
+                if (!$matchFound) continue;
+            }
+
+            $statusVal = null;
+            if ($statusVal && ($row['campaignStatus'] ?? '') !== $statusVal) continue;
+
+            $invFilterVal = null;
+            $inv = floatval($row['INV'] ?? 0);
+            if ($invFilterVal === 'INV_0' && $inv != 0) continue;
+            if ($invFilterVal === 'OTHERS' && $inv == 0) continue;
+
+            $nraFilterVal = null;
+            $nra = trim($row['NRA'] ?? '');
+            if ($nraFilterVal) {
+                if ($nraFilterVal === 'RA' && $nra === 'NRA') continue;
+                elseif ($nraFilterVal !== 'ALL' && $nra !== $nraFilterVal) continue;
+            }
+
+            $missingVal = null;
+            $kw = $row['kw_campaign_name'] ?? '';
+            $pt = $row['pt_campaign_name'] ?? '';
+
+            if ($missingVal === 'Both Running' && !($kw && $pt)) continue;
+            if ($missingVal === 'KW Missing' && !($pt && !$kw)) continue;
+            if ($missingVal === 'PT Missing' && !($kw && !$pt)) continue;
+            if ($missingVal === 'Both Missing' && ($kw || $pt)) continue;
+
+            $filtered[] = $row;
+        }
+        return $filtered;
+    }
+
+    public function combinedFilterebay($data, $filters) 
+    {
+        $filtered = [];
+        foreach ($data as $row) {
+            
+            $sku = strtoupper($row['sku'] ?? '');
+            if (strpos($sku, 'PARENT') !== false) continue;
+
+            $searchVal = null;
+            if ($searchVal) {
+                $fields = [
+                    strtolower($row['sku'] ?? ''),
+                    strtolower($row['parent'] ?? ''),
+                    strtolower($row['kw_campaign_name'] ?? ''),
+                    strtolower($row['pmt_bid_percentage'] ?? ''),
+                ];
+                $found = false;
+                foreach ($fields as $f) {
+                    if (strpos($f, $searchVal) !== false) {
+                        $found = true;
+                        break;
+                    }
+                }
+                if (!$found) continue;
+            }
+
+            $statusVal = null;
+            if ($statusVal && ($row['campaignStatus'] ?? '') !== $statusVal) continue;
+
+            $invFilterVal = null;
+            $inv = floatval($row['INV'] ?? 0);
+            if ($invFilterVal === 'INV_0' && $inv != 0) continue;
+            if ($invFilterVal === 'OTHERS' && $inv == 0) continue;
+
+            $nraFilterVal = null;
+            $nra = trim($row['NRA'] ?? '');
+            if ($nraFilterVal) {
+                if ($nraFilterVal === 'RA' && $nra === 'NRA') continue;
+                elseif ($nraFilterVal !== 'ALL' && $nra !== $nraFilterVal) continue;
+            }
+
+            $missingVal = null;
+            $kw = $row['kw_campaign_name'] ?? '';
+            $pt = $row['pmt_bid_percentage'] ?? '';
+
+            if ($missingVal === 'Both Running' && !($kw && $pt)) continue;
+            if ($missingVal === 'KW Missing' && !($pt && !$kw)) continue;
+            if ($missingVal === 'PMT Missing' && !($kw && !$pt)) continue;
+            if ($missingVal === 'Both Missing' && ($kw || $pt)) continue;
+
+            $filtered[] = $row;
+        }
+        return $filtered;
+    }
+    public function Ebay2combinedFilter($data, $filters) {
+        // 🟢 1. Exclude Parent SKUs
+        $sku = $data['sku'] ?? '';
+        if (stripos($sku, 'PARENT') !== false) {
+            return false;
+        }
+
+        // 🟢 2. Global Search
+        $searchVal = strtolower(trim($filters['global_search'] ?? ''));
+        if ($searchVal) {
+            $fields = [
+                strtolower($data['sku'] ?? ''),
+                strtolower($data['parent'] ?? ''),
+                strtolower($data['pmt_bid_percentage'] ?? '')
+            ];
+            $found = false;
+            foreach ($fields as $field) {
+                if (strpos($field, $searchVal) !== false) {
+                    $found = true;
+                    break;
+                }
+            }
+            if (!$found) return false;
+        }
+
+        // 🟢 3. Status Filter
+        $statusVal = $filters['status'] ?? '';
+        if ($statusVal && ($data['campaignStatus'] ?? '') !== $statusVal) {
+            return false;
+        }
+
+        // 🟢 4. INV Filter
+        $invFilter = $filters['inv_filter'] ?? '';
+        $inv = floatval($data['INV'] ?? 0);
+        if ($invFilter === 'INV_0' && $inv != 0) return false;
+        if ($invFilter === 'OTHERS' && $inv == 0) return false;
+
+        // 🟢 5. NRA Filter
+        $nraFilter = $filters['nra_filter'] ?? '';
+        $nra = trim($data['NRA'] ?? '');
+        if ($nraFilter) {
+            if ($nraFilter === 'RA' && $nra === 'NRA') return false;
+            if ($nraFilter !== 'ALL' && $nra !== $nraFilter) return false;
+        }
+
+        // 🟢 6. Missing Ads Filter
+        $missingVal = $filters['missing_ads'] ?? '';
+        $pt = $data['pmt_bid_percentage'] ?? '';
+        if ($missingVal) {
+            if ($missingVal === 'PMT Running' && empty($pt)) return false;
+            if ($missingVal === 'PMT Missing' && !empty($pt)) return false;
+        }
+
+        return true; // ✅ keep this record
+    }
+
+    public function Ebay3combinedFilter($data, $filters) {
+        // 🟢 1. Exclude parent SKUs
+        $sku = $data['sku'] ?? '';
+        if (stripos($sku, 'PARENT') !== false) {
+            return false;
+        }
+
+        // 🟢 2. Global Search
+        $searchVal = strtolower(trim($filters['global_search'] ?? ''));
+        if ($searchVal) {
+            $fields = [
+                strtolower($data['sku'] ?? ''),
+                strtolower($data['parent'] ?? ''),
+                strtolower($data['kw_campaign_name'] ?? ''),
+                strtolower($data['pmt_bid_percentage'] ?? '')
+            ];
+
+            $found = false;
+            foreach ($fields as $field) {
+                if (strpos($field, $searchVal) !== false) {
+                    $found = true;
+                    break;
+                }
+            }
+            if (!$found) return false;
+        }
+
+        // 🟢 3. Status Filter
+        $statusVal = $filters['status_filter'] ?? '';
+        if ($statusVal && ($data['campaignStatus'] ?? '') !== $statusVal) {
+            return false;
+        }
+
+        // 🟢 4. INV Filter
+        $invFilter = $filters['inv_filter'] ?? '';
+        $inv = floatval($data['INV'] ?? 0);
+        if ($invFilter === 'INV_0' && $inv != 0) return false;
+        if ($invFilter === 'OTHERS' && $inv == 0) return false;
+
+        // 🟢 5. NRA Filter
+        $nraFilter = $filters['nra_filter'] ?? '';
+        $nra = trim($data['NRA'] ?? '');
+        if ($nraFilter) {
+            if ($nraFilter === 'RA' && $nra === 'NRA') return false;
+            elseif ($nraFilter !== 'ALL' && $nra !== $nraFilter) return false;
+        }
+
+        // 🟢 6. Missing Ads Filter
+        $missingVal = $filters['missing_ads'] ?? '';
+        $kw = $data['kw_campaign_name'] ?? '';
+        $pt = $data['pmt_bid_percentage'] ?? '';
+
+        if ($missingVal === 'Both Running' && (!($kw && $pt))) return false;
+        if ($missingVal === 'KW Missing' && !($pt && !$kw)) return false;
+        if ($missingVal === 'PMT Missing' && !($kw && !$pt)) return false;
+        if ($missingVal === 'Both Missing' && ($kw || $pt)) return false;
+
+        // ✅ If all checks pass, include this row
+        return true;
+    }
+
 }

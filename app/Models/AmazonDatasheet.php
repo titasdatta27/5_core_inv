@@ -14,10 +14,14 @@ class AmazonDatasheet extends Model
     protected $fillable = [
         'units_ordered_l30',
         'units_ordered_l60',
+        'units_ordered_l90',
         'sessions_l30',
-        'sessions_l60',        
+        'sessions_l60',
+        'sessions_l90',        
         'asin',
         'sku',
         'price',
+        'organic_views',
+        'sold',
     ];
 }

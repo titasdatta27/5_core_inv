@@ -13,7 +13,6 @@ use App\Models\TemuListingStatus;
 use App\Models\TemuMetric;
 use Illuminate\Support\Facades\Cache;
 
-
 class TemuZeroController extends Controller
 {
     protected $apiController;
@@ -22,7 +21,7 @@ class TemuZeroController extends Controller
     {
         $this->apiController = $apiController;
     }
-    public function temuZeroView(Request $request)
+public function temuZeroView(Request $request)
     {
         $mode = $request->query('mode');
         $demo = $request->query('demo');
@@ -39,7 +38,9 @@ class TemuZeroController extends Controller
             'percentage' => $percentage
         ]);
     }
-
+    /**
+     * ✅ Get only SKUs where temu_metric.product_clicks_l30 = 0 and shopify_sku.inv > 0
+     */
     public function getViewTemuZeroData(Request $request)
     {
         // Get percentage from cache or database
@@ -49,93 +50,90 @@ class TemuZeroController extends Controller
         });
         $percentageValue = $percentage / 100;
 
-        // Fetch all product master records
-        $productMasterRows = ProductMaster::all()->keyBy('sku');
+        // Fetch all ProductMaster records
+        $productMasters = ProductMaster::whereNull('deleted_at')->get();
 
-        // Get all unique SKUs from product master
-        $skus = $productMasterRows->pluck('sku')->toArray();
+        // Normalize SKUs
+        $skus = $productMasters->pluck('sku')->map(fn($s) => strtoupper(trim($s)))->unique()->toArray();
 
-        // Fetch shopify data for these SKUs
-        $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy('sku');
+        // Fetch related data
+        $shopifyData = ShopifySku::whereIn('sku', $skus)->get()
+            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
 
-        // Fetch NR values for these SKUs from TemuDataView
-        $temuDataViews = TemuDataView::whereIn('sku', $skus)->get()->keyBy('sku');
-        $extraValues = [];
-        foreach ($temuDataViews as $sku => $dataView) {
-            $value = is_array($dataView->value) ? $dataView->value : (json_decode($dataView->value, true) ?: []);
-            $extraValues[$sku] = [
-                'NR' => $value['NR'] ?? 'REQ',
-                'A_Z_Reason' => $value['A_Z_Reason'] ?? null,
-                'A_Z_ActionRequired' => $value['A_Z_ActionRequired'] ?? null,
-                'A_Z_ActionTaken' => $value['A_Z_ActionTaken'] ?? null,
-            ];
-        }
+        $temuMetrics = TemuMetric::whereIn('sku', $skus)->get()
+            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
 
-        // Process data from product master and shopify tables
+        $temuDataViews = TemuDataView::whereIn('sku', $skus)->get()
+            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
+
         $processedData = [];
         $slNo = 1;
 
-        foreach ($productMasterRows as $productMaster) {
-            $sku = $productMaster->sku;
+        foreach ($productMasters as $productMaster) {
+            $sku = strtoupper(trim($productMaster->sku));
             $isParent = stripos($sku, 'PARENT') !== false;
+            if ($isParent) continue;
 
-            // Initialize the data structure
-            $processedItem = [
-                'SL No.' => $slNo++,
-                'Parent' => $productMaster->parent ?? null,
-                'Sku' => $sku,
-                'R&A' => false, // Default value, can be updated as needed
-                'is_parent' => $isParent,
-                'raw_data' => [
-                    'parent' => $productMaster->parent,
-                    'sku' => $sku,
-                    'Values' => $productMaster->Values
-                ]
-            ];
+            // Get inventory from ShopifySku
+            $inv = $shopifyData[$sku]->inv ?? 0;
+            $quantity = $shopifyData[$sku]->quantity ?? 0;
 
-            // Add values from product_master
-            $values = $productMaster->Values ?: [];
-            $processedItem['LP'] = $values['lp'] ?? 0;
-            $processedItem['Ship'] = $values['ship'] ?? 0;
-            $processedItem['COGS'] = $values['cogs'] ?? 0;
-
-            // Add data from shopify_skus if available
-            if (isset($shopifyData[$sku])) {
-                $shopifyItem = $shopifyData[$sku];
-                $processedItem['INV'] = $shopifyItem->inv ?? 0;
-                $processedItem['L30'] = $shopifyItem->quantity ?? 0;
-            } else {
-                $processedItem['INV'] = 0;
-                $processedItem['L30'] = 0;
+            // Skip items with no inventory
+            if ($inv <= 0) {
+                continue;
             }
 
-            // Fetch NR and A_Z fields if available
-            $processedItem['NR'] = $extraValues[$sku]['NR'] ?? 'REQ';
-            $processedItem['A_Z_Reason'] = $extraValues[$sku]['A_Z_Reason'] ?? null;
-            $processedItem['A_Z_ActionRequired'] = $extraValues[$sku]['A_Z_ActionRequired'] ?? null;
-            $processedItem['A_Z_ActionTaken'] = $extraValues[$sku]['A_Z_ActionTaken'] ?? null;
+            // Get product_clicks_l30 and product_impressions_l30 from TemuMetric
+            $clicks = null;
+            $impressions = null;
+            $metric = $temuMetrics[$sku] ?? null;
+            if ($metric) {
+                $clicks = $metric->product_clicks_l30 ?? null;
+                $impressions = $metric->product_impressions_l30 ?? null;
+                if ($clicks === null && !empty($metric->value)) {
+                    $metricValue = json_decode($metric->value, true);
+                    $clicks = $metricValue['product_clicks_l30'] ?? null;
+                    $impressions = $metricValue['product_impressions_l30'] ?? null;
+                }
+            }
 
-            // Default values for other fields
-            $processedItem['A L30'] = 0;
-            $processedItem['Sess30'] = 0;
-            $processedItem['price'] = 0;
-            $processedItem['TOTAL PFT'] = 0;
-            $processedItem['T Sales L30'] = 0;
-            $processedItem['PFT %'] = 0;
-            $processedItem['Roi'] = 0;
-            $processedItem['percentage'] = $percentageValue;
+            // Skip items with clicks > 0 (only show zero-view items)
+            if (!is_null($clicks) && $clicks > 0) {
+                continue;
+            }
+
+            // Fetch NR and A-Z Reason fields
+            $dataView = $temuDataViews[$sku]->value ?? [];
+            if (is_string($dataView)) {
+                $dataView = json_decode($dataView, true);
+            }
+
+            $values = $productMaster->Values ?? [];
+
+            $processedItem = [
+                'Parent' => $productMaster->parent ?? null,
+                'SL No.' => $slNo++,
+                'Sku' => $sku,
+                'INV' => $inv,
+                'L30' => $quantity, // Use Shopify quantity for L30
+                'product_clicks_l30' => $clicks ?? 0,
+                'product_impressions_l30' => $impressions ?? 0,
+                'LP' => $values['lp'] ?? 0,
+                'Ship' => $values['ship'] ?? 0,
+                'COGS' => $values['cogs'] ?? 0,
+                'NR' => $dataView['NR'] ?? 'REQ',
+                'A_Z_Reason' => $dataView['A_Z_Reason'] ?? null,
+                'A_Z_ActionRequired' => $dataView['A_Z_ActionRequired'] ?? null,
+                'A_Z_ActionTaken' => $dataView['A_Z_ActionTaken'] ?? null,
+                'percentage' => $percentageValue,
+            ];
 
             $processedData[] = $processedItem;
         }
 
-        $processedData = array_filter($processedData, function ($item) {
-            return isset($item['INV']) && $item['INV'] > 0;
-        });
-        $processedData = array_values($processedData); // Re-index array
-
         return response()->json([
             'message' => 'Data fetched successfully',
-            'data' => $processedData,
+            'data' => array_values($processedData),
             'status' => 200
         ]);
     }
@@ -168,56 +166,59 @@ class TemuZeroController extends Controller
         ]);
     }
 
-    public function getZeroViewCount()
-    {
-        // Fetch all ProductMaster records
-        $productMasters = ProductMaster::all();
-        $skus = $productMasters->pluck('sku')->toArray();
-
-        // Fetch ShopifySku records for those SKUs
-        $shopifySkus = ShopifySku::whereIn('sku', $skus)->get()->keyBy('sku');
-
-        // Only count SKUs where INV > 0 (zero view logic can be adjusted as needed)
-        $zeroViewCount = $productMasters->filter(function ($product) use ($shopifySkus) {
-            $sku = $product->sku;
-            $inv = $shopifySkus->has($sku) ? $shopifySkus[$sku]->inv : 0;
-            // If you have a "views" or "Sess30" field, add the check here
-            return $inv > 0;
-        })->count();
-
-        return $zeroViewCount;
-    }
-
-    public function getLivePendingAndZeroViewCounts()
+    /**
+     * Optional: Quick summary counts for dashboard
+     */
+   public function getLivePendingAndZeroViewCounts()
     {
         $productMasters = ProductMaster::whereNull('deleted_at')->get();
-        $skus = $productMasters->pluck('sku')->unique()->toArray();
 
-        $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy('sku');
-        $temuDataViews = TemuListingStatus::whereIn('sku', $skus)->get()->keyBy('sku');
+        // Normalize SKUs (avoid case/space mismatch)
+        $skus = $productMasters->pluck('sku')->map(fn($s) => strtoupper(trim($s)))->unique()->toArray();
 
-        $temuMetrics = TemuMetric::whereIn('sku', $skus)->get()->keyBy('sku');
+        $shopifyData = ShopifySku::whereIn('sku', $skus)->get()
+            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
 
+        $temuListingStatus = TemuListingStatus::whereIn('sku', $skus)->get()
+            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
+
+        $temuDataViews = TemuDataView::whereIn('sku', $skus)->get()
+            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
+
+        $temuMetrics = TemuMetric::whereIn('sku', $skus)->get()
+            ->keyBy(fn($s) => strtoupper(trim($s->sku)));
 
         $listedCount = 0;
         $zeroInvOfListed = 0;
-        $liveCount = 0;
+        $liveCount = 0; 
         $zeroViewCount = 0;
 
         foreach ($productMasters as $item) {
-            $sku = trim($item->sku);
+            $sku = strtoupper(trim($item->sku));
             $inv = $shopifyData[$sku]->inv ?? 0;
-            $isParent = stripos($sku, 'PARENT') !== false;
-            if ($isParent) continue;
 
-            $status = $temuDataViews[$sku]->value ?? null;
+            // Skip parent SKUs
+            if (stripos($sku, 'PARENT') !== false) continue;
+
+            // --- Amazon Listing Status ---
+            $status = $temuListingStatus[$sku]->value ?? null;
             if (is_string($status)) {
                 $status = json_decode($status, true);
             }
-            $listed = $status['listed'] ?? (floatval($inv) > 0 ? 'Pending' : 'Listed');
-            $live = $status['live'] ?? null;
 
-            // Listed count (for live pending)
+            // $listed = $status['listed'] ?? (floatval($inv) > 0 ? 'Pending' : 'Listed');
+            $listed = $status['listed'] ?? null;
+
+            // --- Amazon Live Status ---
+            $dataView = $temuDataViews[$sku]->value ?? null;
+            if (is_string($dataView)) {
+                $dataView = json_decode($dataView, true);
+            }
+            // $live = ($dataView['Live'] ?? false) === true ? 'Live' : null;
+            $live = (!empty($dataView['Live']) && $dataView['Live'] === true) ? 'Live' : null;
+
+
+            // --- Listed count ---
             if ($listed === 'Listed') {
                 $listedCount++;
                 if (floatval($inv) <= 0) {
@@ -225,31 +226,50 @@ class TemuZeroController extends Controller
                 }
             }
 
-            // Live count
+            // --- Live count ---
             if ($live === 'Live') {
                 $liveCount++;
             }
 
-            // Zero view: INV > 0, views == 0 (from ebay_metric table), not parent SKU (NR ignored)
-            $views = $temuMetrics[$sku]->product_impressions_l30 ?? null;
-            // if (floatval($inv) > 0 && $views !== null && intval($views) === 0) {
-            //     $zeroViewCount++;
-            // }
-            if ($inv > 0) {
-                if ($views === null) {
-                    // Do nothing, ignore null
-                } elseif (intval($views) === 0) {
-                    $zeroViewCount++;
+
+            // --- Views / Zero-View logic ---
+            $metricRecord = $temuMetrics[$sku] ?? null;
+            $views = null;
+
+
+            if ($metricRecord) {
+                // Direct field
+                if (!empty($metricRecord->product_clicks_l30) || $metricRecord->product_clicks_l30 === "0" || $metricRecord->product_clicks_l30 === 0) {
+                    $views = (int)$metricRecord->product_clicks_l30;
+                }
+                // Or inside JSON column value
+                elseif (!empty($metricRecord->value)) {
+                    $metricData = json_decode($metricRecord->value, true);
+                    if (isset($metricData['product_clicks_l30'])) {
+                        $views = (int)$metricData['product_clicks_l30'];
+                    }
                 }
             }
+
+            // Normalize $inv to numeric
+            $inv = floatval($inv);
+
+            // Count as zero-view if views are exactly 0 or null (no data) and inv > 0
+            if ($inv > 0 && ($views === 0 || $views === null)) {
+                $zeroViewCount++;
+            }
+
         }
 
-        // live pending = listed - 0-inv of listed - live
-        $livePending = $listedCount - $zeroInvOfListed - $liveCount;
+        $livePending = $listedCount - $liveCount;
 
         return [
             'live_pending' => $livePending,
             'zero_view' => $zeroViewCount,
         ];
     }
+
+
+
+    
 }

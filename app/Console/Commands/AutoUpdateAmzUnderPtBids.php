@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Log;
 class AutoUpdateAmzUnderPtBids extends Command
 {
     protected $signature = 'amazon:auto-update-under-pt-bids';
-    protected $description = 'Automatically update Amazon campaign keyword bids';
+    protected $description = 'Automatically update Amazon campaign pt bids';
 
     protected $profileId;
 
@@ -40,19 +40,8 @@ class AutoUpdateAmzUnderPtBids extends Command
         $campaignIds = collect($campaigns)->pluck('campaign_id')->toArray();
         $newBids = collect($campaigns)->pluck('sbid')->toArray();
 
-        $numbered = [];
-        foreach ($campaigns as $index => $campaign) {
-            $numbered[] = [
-                'no'   => $index + 1,  // numbering start from 1
-                'sku'  => $campaign->sku ?? '', // agar sku chahiye to
-                'data' => $campaign,
-            ];
-        }
-
-        Log::info("Response (with numbering)", $numbered);
-
-        // $result = $updateKwBids->updateAutoCampaignTargetsBid($campaignIds, $newBids);
-        // $this->info("Update Result: " . json_encode($result));
+        $result = $updateKwBids->updateAutoCampaignTargetsBid($campaignIds, $newBids);
+        $this->info("Update Result: " . json_encode($result));
 
     }
 
@@ -66,6 +55,8 @@ class AutoUpdateAmzUnderPtBids extends Command
         $skus = $productMasters->pluck('sku')->filter()->unique()->values()->all();
 
         $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy('sku');
+
+        $nrValues = AmazonDataView::whereIn('sku', $skus)->pluck('value', 'sku');
 
         $amazonSpCampaignReportsL7 = AmazonSpCampaignReport::where('ad_type', 'SPONSORED_PRODUCTS')
             ->where('report_date_range', 'L7')
@@ -124,22 +115,31 @@ class AutoUpdateAmzUnderPtBids extends Command
             $row['l1_spend'] = $matchedCampaignL1->spend ?? 0;
             $row['l1_cpc'] = $matchedCampaignL1->costPerClick ?? 0;
 
+            $row['NRA'] = '';
+            if (isset($nrValues[$pm->sku])) {
+                $raw = $nrValues[$pm->sku];
+                if (!is_array($raw)) {
+                    $raw = json_decode($raw, true);
+                }
+                if (is_array($raw)) {
+                    $row['NRA'] = $raw['NRA'] ?? null;
+                }
+            }
+
             $l1_cpc = floatval($row['l1_cpc']);
             $l7_cpc = floatval($row['l7_cpc']);
             if ($l1_cpc > $l7_cpc) {
-                $row['sbid'] = floor($l1_cpc * 1.05 * 100) / 100;
+                $row['sbid'] = floor($l1_cpc * 1.1 * 100) / 100;
             } else {
-                $row['sbid'] = floor($l7_cpc * 1.05 * 100) / 100;
+                $row['sbid'] = floor($l7_cpc * 1.1 * 100) / 100;
             }
 
             $budget = floatval($row['campaignBudgetAmount']);
             $l7_spend = floatval($row['l7_spend']);
-            $l1_spend = floatval($row['l1_spend']);
 
             $ub7 = $budget > 0 ? ($l7_spend / ($budget * 7)) * 100 : 0;
-            $ub1 = $budget > 0 ? ($l1_spend / $budget) * 100 : 0;
 
-            if ($row['INV'] > 0 && $ub7 < 70) {
+            if ($row['INV'] > 0 && $row['NRA'] !== 'NRA' && $ub7 < 70) {
                 $result[] = (object) $row;
             }
         }

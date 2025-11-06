@@ -147,16 +147,19 @@
             border-radius: 5px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             z-index: 100;
-        },
+        }
+
+        ,
         .clickable-ad-sales {
-        cursor: pointer;
-        text-decoration: underline;
-        color: #007bff !important;
-    }
-    .clickable-ad-sales:hover {
-        color: #0056b3 !important;
-        background-color: #f8f9fa;
-    }
+            cursor: pointer;
+            text-decoration: underline;
+            color: #007bff !important;
+        }
+
+        .clickable-ad-sales:hover {
+            color: #0056b3 !important;
+            background-color: #f8f9fa;
+        }
 
         /* Responsive adjustments for DataTables */
         @media (max-width: 768px) {
@@ -451,10 +454,10 @@
     <div class="container-fluid">
         <!-- Header with Title and Search -->
         <!-- <div class="header d-flex align-items-center">
-                        <div>
-                            <h4><i class="bi bi-bar-chart-line me-2"></i> Channel Master Dashboard</h4>
-                        </div>
-                    </div> -->
+                                    <div>
+                                        <h4><i class="bi bi-bar-chart-line me-2"></i> Channel Master Dashboard</h4>
+                                    </div>
+                                </div> -->
 
         <div class="col-md-12 mt-0 pt-0 mb-1 pb-1">
             <div class="row justify-content-center align-items-center g-3">
@@ -542,41 +545,41 @@
                             <!-- <h6 class="mb-3">Performance Metrics</h6> -->
 
                             <!-- <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label for="l60Sales" class="form-label">L-60 Sales</label>
-                                            <input type="number" class="form-control" id="l60Sales">
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="l30Sales" class="form-label">L30 Sales</label>
-                                            <input type="number" class="form-control" id="l30Sales">
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="growth" class="form-label">Growth</label>
-                                            <input type="number" class="form-control" id="growth" step="0.01">
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="l60Orders" class="form-label">L60 Orders</label>
-                                            <input type="number" class="form-control" id="l60Orders">
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="l30Orders" class="form-label">L30 Orders</label>
-                                            <input type="number" class="form-control" id="l30Orders">
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="gprofit" class="form-label">Gprofit%</label>
-                                            <input type="number" class="form-control" id="gprofit" step="0.01">
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="groi" class="form-label">G Roi%</label>
-                                            <input type="number" class="form-control" id="groi" step="0.01">
-                                        </div>
-                                        <div class="col-md-6 mb-3 d-flex align-items-end">
-                                            <div class="form-check form-switch">
-                                                <input class="form-check-input" type="checkbox" id="updateCheck" checked>
-                                                <label class="form-check-label" for="updateCheck">Update</label>
-                                            </div>
-                                        </div>
-                                    </div> -->
+                                                    <div class="col-md-6 mb-3">
+                                                        <label for="l60Sales" class="form-label">L-60 Sales</label>
+                                                        <input type="number" class="form-control" id="l60Sales">
+                                                    </div>
+                                                    <div class="col-md-6 mb-3">
+                                                        <label for="l30Sales" class="form-label">L30 Sales</label>
+                                                        <input type="number" class="form-control" id="l30Sales">
+                                                    </div>
+                                                    <div class="col-md-6 mb-3">
+                                                        <label for="growth" class="form-label">Growth</label>
+                                                        <input type="number" class="form-control" id="growth" step="0.01">
+                                                    </div>
+                                                    <div class="col-md-6 mb-3">
+                                                        <label for="l60Orders" class="form-label">L60 Orders</label>
+                                                        <input type="number" class="form-control" id="l60Orders">
+                                                    </div>
+                                                    <div class="col-md-6 mb-3">
+                                                        <label for="l30Orders" class="form-label">L30 Orders</label>
+                                                        <input type="number" class="form-control" id="l30Orders">
+                                                    </div>
+                                                    <div class="col-md-6 mb-3">
+                                                        <label for="gprofit" class="form-label">Gprofit%</label>
+                                                        <input type="number" class="form-control" id="gprofit" step="0.01">
+                                                    </div>
+                                                    <div class="col-md-6 mb-3">
+                                                        <label for="groi" class="form-label">G Roi%</label>
+                                                        <input type="number" class="form-control" id="groi" step="0.01">
+                                                    </div>
+                                                    <div class="col-md-6 mb-3 d-flex align-items-end">
+                                                        <div class="form-check form-switch">
+                                                            <input class="form-check-input" type="checkbox" id="updateCheck" checked>
+                                                            <label class="form-check-label" for="updateCheck">Update</label>
+                                                        </div>
+                                                    </div>
+                                                </div> -->
                         </form>
                     </div>
                     <div class="modal-footer">
@@ -790,32 +793,34 @@
         </div>
 
         <!-- OVL30 Modal -->
-<div class="modal fade modal-draggable" id="ovl30Modal" tabindex="-1" aria-labelledby="ovl30ModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header bg-gradient">
-                <h5 class="modal-title d-flex align-items-center text-dark">
-                    <i class="bi bi-bar-chart-line-fill me-2"></i>
-                    OVL30 Analysis
-                    <span id="ovl30SkuLabel" class="badge text-danger ms-2 animate__animated animate__fadeIn fw-bold fs-3"></span>
-                </h5>
-                <div class="modal-actions">
-                    <button class="btn btn-sm btn-light-secondary me-2">
-                        <i class="bi bi-download"></i> Export
-                    </button>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                        aria-label="Close"></button>
-                </div>
-            </div>
-            <div class="modal-body p-0">
-                <div id="ovl30Content" class="p-3" style="color: #000000; width:100%; max-height: 70vh; overflow-y: auto;">
-                    <!-- Marketplace data table will be loaded here -->
+        <div class="modal fade modal-draggable" id="ovl30Modal" tabindex="-1" aria-labelledby="ovl30ModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header bg-gradient">
+                        <h5 class="modal-title d-flex align-items-center text-dark">
+                            <i class="bi bi-bar-chart-line-fill me-2"></i>
+                            OVL30 Analysis
+                            <span id="ovl30SkuLabel"
+                                class="badge text-danger ms-2 animate__animated animate__fadeIn fw-bold fs-3"></span>
+                        </h5>
+                        <div class="modal-actions">
+                            <button class="btn btn-sm btn-light-secondary me-2">
+                                <i class="bi bi-download"></i> Export
+                            </button>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                        </div>
+                    </div>
+                    <div class="modal-body p-0">
+                        <div id="ovl30Content" class="p-3"
+                            style="color: #000000; width:100%; max-height: 70vh; overflow-y: auto;">
+                            <!-- Marketplace data table will be loaded here -->
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
 
     </div>
 @endsection
@@ -1012,6 +1017,7 @@
                             d.search = jq('#searchInput').val();
                             d.sort_by = window.currentSortColumn || null;
                             d.sort_order = window.currentSortOrder || null;
+                            console.log('AJAX request data:', d);
                         },
                         dataSrc: function(json) {
                             if (!json || !json.data) return [];
@@ -1056,8 +1062,7 @@
                                 console.log('COGS:', json.data, cogs);
                                 // Add new fields from row data
                                 return {
-                                    'Channel': pick(item, ['channel', 'Channel', 'Channel '],
-                                        ''), // use per-row channel
+                                    'Channel': pick(item, ['channel', 'Channel', 'Channel '], ''),
                                     'Link': pick(item, ['link', 'url', 'URL LINK', 'url_link'], ''),
                                     'sheet_link': pick(item, ['sheet_link', 'sheet_url', 'sheet'], ''),
                                     'R&A': toNum(pick(item, ['ra', 'R&A', 'R_and_A'], 0), 0),
@@ -1097,15 +1102,50 @@
                                         0),
                                     'cogs': cogs,
 
-                                    // New fields from row data
-                                    'views/clicks': item['CLICKS_L30'] ?? '',
-                                    'Spent': item['SPEND_L30'] ?? '',
-                                    'Ad Sales': item['Ad Sales'] ?? '',
-                                    'Ad Sold': item['Ad Sold'] ?? '',
-                                    'ACOS': item['ACOS'] ?? '',
-                                    'Tacos': item['Tacos'] ?? '',
-                                    'Pft': item['Pft'] ?? '',
-                                    'ROI': item['ROI'] ?? '',
+                                    // Advertising fields - सभी required fields add करें
+                                    'views/clicks': item['CLICKS_L30'] ?? item['clicks_l30'] ?? 0,
+                                    'Spent': item['SPEND_L30'] ?? item['spend_l30'] ?? 0,
+                                    'Ad Sales': item['Ad Sales'] ?? item['ad_sales'] ?? 0,
+                                    'Ad Sold': item['Ad Sold'] ?? item['ad_sold'] ?? 0,
+                                    'ACOS': item['ACOS'] ?? item['acos'] ?? '0%',
+                                    'Tacos': item['Tacos'] ?? item['tacos'] ?? 'N/A',
+                                    'Pft': item['Pft'] ?? item['pft'] ?? 0,
+                                    'ROI': item['ROI'] ?? item['roi'] ?? '0%',
+
+                                    // Modal के लिए additional advertising fields
+                                    'IMPRESSIONS_L30': item['IMPRESSIONS_L30'] ?? item[
+                                        'impressions_l30'] ?? 0,
+                                    'SOLD_L30': item['SOLD_L30'] ?? item['sold_l30'] ?? 0,
+
+                                    // KW Campaign data
+                                    'KW_SPEND_L30': item['KW_SPEND_L30'] ?? item['kw_spend_l30'] ?? 0,
+                                    'KW_CLICKS_L30': item['KW_CLICKS_L30'] ?? item['kw_clicks_l30'] ??
+                                        0,
+                                    'KW_IMPRESSIONS_L30': item['KW_IMPRESSIONS_L30'] ?? item[
+                                        'kw_impressions_l30'] ?? 0,
+                                    'KW_SOLD_L30': item['KW_SOLD_L30'] ?? item['kw_sold_l30'] ?? 0,
+                                    'KW_SALES_L30': item['KW_SALES_L30'] ?? item['kw_sales_l30'] ?? 0,
+                                    'KW_ACOS': item['KW_ACOS'] ?? item['kw_acos'] ?? '0%',
+
+                                    // PT Campaign data  
+                                    'PT_SPEND_L30': item['PT_SPEND_L30'] ?? item['pt_spend_l30'] ?? 0,
+                                    'PT_CLICKS_L30': item['PT_CLICKS_L30'] ?? item['pt_clicks_l30'] ??
+                                        0,
+                                    'PT_IMPRESSIONS_L30': item['PT_IMPRESSIONS_L30'] ?? item[
+                                        'pt_impressions_l30'] ?? 0,
+                                    'PT_SOLD_L30': item['PT_SOLD_L30'] ?? item['pt_sold_l30'] ?? 0,
+                                    'PT_SALES_L30': item['PT_SALES_L30'] ?? item['pt_sales_l30'] ?? 0,
+                                    'PT_ACOS': item['PT_ACOS'] ?? item['pt_acos'] ?? '0%',
+
+                                    // HL Campaign data
+                                    'HL_SPEND_L30': item['HL_SPEND_L30'] ?? item['hl_spend_l30'] ?? 0,
+                                    'HL_CLICKS_L30': item['HL_CLICKS_L30'] ?? item['hl_clicks_l30'] ??
+                                        0,
+                                    'HL_IMPRESSIONS_L30': item['HL_IMPRESSIONS_L30'] ?? item[
+                                        'hl_impressions_l30'] ?? 0,
+                                    'HL_SOLD_L30': item['HL_SOLD_L30'] ?? item['hl_sold_l30'] ?? 0,
+                                    'HL_SALES_L30': item['HL_SALES_L30'] ?? item['hl_sales_l30'] ?? 0,
+                                    'HL_ACOS': item['HL_ACOS'] ?? item['hl_acos'] ?? '0%'
                                 };
 
                             });
@@ -1124,7 +1164,7 @@
 
                                 const channelName = data.trim().toLowerCase();
                                 const routeMap = {
-                                    'amazon': '/overall-amazon',
+                                    'amazon': '/amazon/ad-running/list',
                                     'amazon fba': '/overall-amazon-fba',
                                     'ebay': '/ebay',
                                     'ebay': '/ebay',
@@ -1290,6 +1330,14 @@
                                 const n = parseFloat(String(v).replace(/,/g, '')) || 0;
                                 if (type === 'sort' || type === 'type') return n;
                                 return `<span class="metric-value">$${n.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>`;
+                            },
+                            createdCell: function(td, cellData, rowData, row, col) {
+                                console.log('Created cell for Ad Sales:', td, cellData, rowData, row, col);
+                                // Add click event to the cell
+                                jq(td).off('click').on('click', function(e) {
+                                    e.stopPropagation();
+                                    showAdSalesModal(rowData);
+                                });
                             }
                         },
                         {
@@ -1298,13 +1346,6 @@
                                 const n = parseFloat(String(v).replace(/,/g, '')) || 0;
                                 if (type === 'sort' || type === 'type') return n;
                                 return `<span class="metric-value clickable-ad-sales">$${n.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>`;
-                            },
-                            createdCell: function(td, cellData, rowData, row, col) {
-                                // Add click event to the cell
-                                jq(td).off('click').on('click', function(e) {
-                                    e.stopPropagation();
-                                    showAdSalesModal(rowData);
-                                });
                             }
                         },
                         {
@@ -1425,43 +1466,95 @@
             }
         }
 
-      function buildOVL30Table(data, channelName) {
-    // Map channel names to prefixes
-    const channelMap = {
-        'amazon': { prefix: 'amz', logo: "{{ asset('uploads/amazon.png') }}" },
-        'amazon fba': { prefix: 'amz', logo: "{{ asset('uploads/amazon.png') }}" },
-        'ebay': { prefix: 'ebay', logo: "{{ asset('uploads/1.png') }}" },
-        'ebaytwo': { prefix: 'ebay2', logo: "{{ asset('uploads/2.png') }}" },
-        'ebaythree': { prefix: 'ebay3', logo: "{{ asset('uploads/3.png') }}" },
-        'doba': { prefix: 'doba', logo: "{{ asset('uploads/doba.png') }}" },
-        'macys': { prefix: 'macy', logo: "{{ asset('uploads/macy.png') }}" },
-        'reverb': { prefix: 'reverb', logo: "{{ asset('uploads/reverb.png') }}" },
-        'temu': { prefix: 'temu', logo: "{{ asset('uploads/temu.jpeg') }}" },
-        'walmart': { prefix: 'walmart', logo: "{{ asset('uploads/walmart.png') }}" },
-        'shopify b2c': { prefix: 'shopifyb2c', logo: "{{ asset('uploads/shopify.png') }}" },
-        'shein': { prefix: 'shein', logo: "{{ asset('uploads/Shein.jpg') }}" },
-        'tiktokshop': { prefix: 'tiktok', logo: "{{ asset('uploads/tiktok.png') }}" },
-        'wayfair': { prefix: 'wayfair', logo: "{{ asset('uploads/wayfair.png') }}" },
-        ' usa': { prefix: '', logo: "{{ asset('uploads/.png') }}" }
-    };
+        function buildOVL30Table(data, channelName) {
+            // Map channel names to prefixes
+            console.log('Building OVL30 table for channel:', channelName, data);
+            const channelMap = {
+                'amazon': {
+                    prefix: 'amz',
+                    logo: "{{ asset('uploads/amazon.png') }}"
+                },
+                'amazon fba': {
+                    prefix: 'amz',
+                    logo: "{{ asset('uploads/amazon.png') }}"
+                },
+                'ebay': {
+                    prefix: 'ebay',
+                    logo: "{{ asset('uploads/1.png') }}"
+                },
+                'ebaytwo': {
+                    prefix: 'ebay2',
+                    logo: "{{ asset('uploads/2.png') }}"
+                },
+                'ebaythree': {
+                    prefix: 'ebay3',
+                    logo: "{{ asset('uploads/3.png') }}"
+                },
+                'doba': {
+                    prefix: 'doba',
+                    logo: "{{ asset('uploads/doba.png') }}"
+                },
+                'macys': {
+                    prefix: 'macy',
+                    logo: "{{ asset('uploads/macy.png') }}"
+                },
+                'reverb': {
+                    prefix: 'reverb',
+                    logo: "{{ asset('uploads/reverb.png') }}"
+                },
+                'temu': {
+                    prefix: 'temu',
+                    logo: "{{ asset('uploads/temu.jpeg') }}"
+                },
+                'walmart': {
+                    prefix: 'walmart',
+                    logo: "{{ asset('uploads/walmart.png') }}"
+                },
+                'shopify b2c': {
+                    prefix: 'shopifyb2c',
+                    logo: "{{ asset('uploads/shopify.png') }}"
+                },
+                'shein': {
+                    prefix: 'shein',
+                    logo: "{{ asset('uploads/Shein.jpg') }}"
+                },
+                'tiktokshop': {
+                    prefix: 'tiktok',
+                    logo: "{{ asset('uploads/tiktok.png') }}"
+                },
+                'wayfair': {
+                    prefix: 'wayfair',
+                    logo: "{{ asset('uploads/wayfair.png') }}"
+                },
+                'bestbuy usa': {
+                    prefix: 'bestbuy',
+                    logo: "{{ asset('uploads/bestbuy.png') }}"
+                }
+            };
 
-    const channel = channelMap[channelName.toLowerCase()];
-    if (!channel) {
-        return `<div class="alert alert-warning">No data available for channel: ${channelName}</div>`;
-    }
+            const channel = channelMap[channelName.toLowerCase()];
+            if (!channel) {
+                return `<div class="alert alert-warning">No data available for channel: ${channelName}</div>`;
+            }
 
-    const prefix = channel.prefix;
-    const logo = channel.logo;
-    
-    // Get data for this specific channel
-    const l30 = prefix === 'shopifyb2c' ? data['shopify_l30'] : data[`${prefix}_l30`];
-    
-    // Get KW, HL, PT data - adjust these keys based on your actual data structure
-    const kw = data[`${prefix}_kw`] || data[`${prefix}_keyword`] || '-';
-    const hl = data[`${prefix}_hl`] || data[`${prefix}_headline`] || '-';
-    const pt = data[`${prefix}_pt`] || data[`${prefix}_product_type`] || '-';
+            const prefix = channel.prefix;
+            const logo = channel.logo;
 
-    let html = `
+            // Get data for this specific channel
+            const l30 = prefix === 'shopifyb2c' ? data['shopify_l30'] : data[`${prefix}_l30`];
+
+            console.log(`Data for prefix ${prefix}:`, {
+                kw: data[`${prefix}_kw`],
+                hl: data[`${prefix}_hl`],
+                pt: data[`${prefix}_pt`],
+                l30: l30
+            });
+            // Get KW, HL, PT data - adjust these keys based on your actual data structure
+            const kw = data[`${prefix}_kw`] || data[`${prefix}_keyword`] || '-';
+            const hl = data[`${prefix}_hl`] || data[`${prefix}_headline`] || '-';
+            const pt = data[`${prefix}_pt`] || data[`${prefix}_product_type`] || '-';
+
+            let html = `
     <div class="table-responsive">
     <div class="mb-2 text-muted small">
         <i class="bi bi-info-circle"></i> Showing data for: ${channelName}
@@ -1474,13 +1567,12 @@
             <th>KW</th>
             <th>HL</th>
             <th>PT</th>
-            <th>L30</th>
         </tr>
         </thead>
         <tbody>
     `;
 
-    html += `
+            html += `
         <tr>
             <td>
                 <div class="d-flex flex-column align-items-center text-center">
@@ -1507,130 +1599,318 @@
                     ${pt}
                 </div>
             </td>
+        </tr>
+    `;
+
+            html += "</tbody></table></div></div>";
+            return html;
+        }
+
+        function buildOVL30Table(data, channelName) {
+            console.log('Building OVL30 table for channel:', channelName, data);
+            const channelMap = {
+                'amazon': {
+                    prefix: 'amz',
+                    logo: "{{ asset('uploads/amazon.png') }}"
+                },
+                'amazon fba': {
+                    prefix: 'amz',
+                    logo: "{{ asset('uploads/amazon.png') }}"
+                },
+                'ebay': {
+                    prefix: 'ebay',
+                    logo: "{{ asset('uploads/1.png') }}"
+                },
+                'ebaytwo': {
+                    prefix: 'ebay2',
+                    logo: "{{ asset('uploads/2.png') }}"
+                },
+                'ebaythree': {
+                    prefix: 'ebay3',
+                    logo: "{{ asset('uploads/3.png') }}"
+                },
+                'doba': {
+                    prefix: 'doba',
+                    logo: "{{ asset('uploads/doba.png') }}"
+                },
+                'macys': {
+                    prefix: 'macy',
+                    logo: "{{ asset('uploads/macy.png') }}"
+                },
+                'reverb': {
+                    prefix: 'reverb',
+                    logo: "{{ asset('uploads/reverb.png') }}"
+                },
+                'temu': {
+                    prefix: 'temu',
+                    logo: "{{ asset('uploads/temu.jpeg') }}"
+                },
+                'walmart': {
+                    prefix: 'walmart',
+                    logo: "{{ asset('uploads/walmart.png') }}"
+                },
+                'shopify b2c': {
+                    prefix: 'shopifyb2c',
+                    logo: "{{ asset('uploads/shopify.png') }}"
+                },
+                'shein': {
+                    prefix: 'shein',
+                    logo: "{{ asset('uploads/Shein.jpg') }}"
+                },
+                'tiktokshop': {
+                    prefix: 'tiktok',
+                    logo: "{{ asset('uploads/tiktok.png') }}"
+                },
+                'wayfair': {
+                    prefix: 'wayfair',
+                    logo: "{{ asset('uploads/wayfair.png') }}"
+                },
+                'bestbuy usa': {
+                    prefix: 'bestbuy',
+                    logo: "{{ asset('uploads/bestbuy.png') }}"
+                }
+            };
+
+            const channel = channelMap[channelName.toLowerCase()];
+            if (!channel) {
+                return `<div class="alert alert-warning">No data available for channel: ${channelName}</div>`;
+            }
+
+            const prefix = channel.prefix;
+            const logo = channel.logo;
+
+            let html = `
+    <div class="table-responsive">
+    <div class="mb-2 text-muted small">
+        <i class="bi bi-info-circle"></i> Showing advertising data for: ${channelName}
+    </div>
+    <div class="table-responsive" style="max-height: 600px; overflow-y: auto; position: relative;">
+    <table class="table table-sm table-bordered align-middle sortable-table">
+        <thead class="table-light position-sticky" style="top: 0; z-index: 1000;">
+        <tr>
+            <th>Channel</th>
+            <th>KW </th>
+            <th>HL</th>
+            <th>PT</th>
+        </tr>
+        </thead>
+        <tbody>
+    `;
+
+            html += `
+        <tr>
+            <td>
+                <div class="d-flex flex-column align-items-center text-center">
+                    <div class="position-relative">
+                        <img src="${logo}" alt="${channelName}" 
+                            class="channel-logo mb-1" 
+                            style="width:30px; height:30px; object-fit:contain;">
+                    </div>
+                    <span class="small fw-bold">${channelName}</span>
+                </div>
+            </td>
             <td>
                 <div class="value-indicator">
-                    ${l30 ?? "-"}
+                    ${formatKWData(data)}
+                </div>
+            </td>
+            <td>
+                <div class="value-indicator">
+                    ${formatHLData(data)}
+                </div>
+            </td>
+            <td>
+                <div class="value-indicator">
+                    ${formatPTData(data)}
                 </div>
             </td>
         </tr>
     `;
 
-    html += "</tbody></table></div></div>";
-    return html;
-}
-
-// Updated Modal open function
-function showAdSalesModal(row) {
-    const data = row;
-    const channelName = data.Channel || '';
-    
-    document.getElementById('ovl30SkuLabel').textContent = data.SKU ? `${data.SKU}` : "0";     
-    document.getElementById('ovl30Content').innerHTML = buildOVL30Table(data, channelName);
-
-    const modalEl = document.getElementById('ovl30Modal');
-    const modal = new bootstrap.Modal(modalEl);
-
-    // Make modal draggable
-    const dialogEl = modalEl.querySelector('.modal-dialog');
-    let isDragging = false;
-    let currentX;
-    let currentY;
-    let initialX;
-    let initialY;
-    let xOffset = 0;
-    let yOffset = 0;
-
-    dialogEl.addEventListener('mousedown', dragStart);
-    document.addEventListener('mousemove', drag);
-    document.addEventListener('mouseup', dragEnd);
-
-    function dragStart(e) {
-        if (e.target.closest('.modal-header')) {
-            isDragging = true;
-            initialX = e.clientX - xOffset;
-            initialY = e.clientY - yOffset;
+            html += "</tbody></table></div></div>";
+            return html;
         }
-    }
 
-    function drag(e) {
-        if (isDragging) {
-            e.preventDefault();
-            currentX = e.clientX - initialX;
-            currentY = e.clientY - initialY;
-            xOffset = currentX;
-            yOffset = currentY;
-            dialogEl.style.transform = `translate(${currentX}px, ${currentY}px)`;
+        // Helper functions to format different ad types
+        function formatKWData(rowData) {
+            const spend = rowData['KW_SPEND_L30'] || 0;
+            const clicks = rowData['KW_CLICKS_L30'] || 0;
+            const impressions = rowData['KW_IMPRESSIONS_L30'] || 0;
+            const sold = rowData['KW_SOLD_L30'] || 0;
+            const sales = rowData['KW_SALES_L30'] || 0;
+            const acos = rowData['KW_ACOS'] || 'N/A';
+
+            if (impressions === 0 && clicks === 0 && spend === 0) {
+                return '<div class="text-muted small">No Data</div>';
+            }
+
+            return `
+        <div class="small">
+            <div><strong>Spend:</strong> $${parseFloat(spend).toFixed(2)}</div>
+        </div>
+    `;
         }
-    }
 
-    function dragEnd() {
-        isDragging = false;
-    }
+        function formatHLData(rowData) {
+            const spend = rowData['HL_SPEND_L30'] || 0;
+            const clicks = rowData['HL_CLICKS_L30'] || 0;
+            const impressions = rowData['HL_IMPRESSIONS_L30'] || 0;
+            const sold = rowData['HL_SOLD_L30'] || 0;
+            const sales = rowData['HL_SALES_L30'] || 0;
+            const acos = rowData['HL_ACOS'] || 'N/A';
 
-    // Reset position when modal is hidden
-    modalEl.addEventListener('hidden.bs.modal', function() {
-        dialogEl.style.transform = 'none';
-        xOffset = 0;
-        yOffset = 0;
-    });
+            if (impressions === 0 && clicks === 0 && spend === 0) {
+                return '<div class="text-muted small">No Data</div>';
+            }
 
-    modal.show();
-}
+            return `
+        <div class="small">
+            <div><strong>Spend:</strong> $${parseFloat(spend).toFixed(2)}</div>
+        </div>
+    `;
+        }
 
-// Initialize table sorting function
-function initTableSorting(table) {
-    const headers = table.querySelectorAll('th[data-sort]');
-    
-    headers.forEach(header => {
-        header.style.cursor = 'pointer';
-        
-        header.addEventListener('click', () => {
-            const sortType = header.getAttribute('data-sort');
-            const columnIndex = Array.from(headers).indexOf(header);
-            const isAscending = !header.classList.contains('sort-asc');
-            
-            // Reset all headers
-            headers.forEach(h => {
-                h.classList.remove('sort-asc', 'sort-desc');
+        function formatPTData(rowData) {
+            const spend = rowData['PT_SPEND_L30'] || 0;
+            const clicks = rowData['PT_CLICKS_L30'] || 0;
+            const impressions = rowData['PT_IMPRESSIONS_L30'] || 0;
+            const sold = rowData['PT_SOLD_L30'] || 0;
+            const sales = rowData['PT_SALES_L30'] || 0;
+            const acos = rowData['PT_ACOS'] || 'N/A';
+
+            if (impressions === 0 && clicks === 0 && spend === 0) {
+                return '<div class="text-muted small">No Data</div>';
+            }
+
+            return `
+        <div class="small">
+            <div><strong>Spend:</strong> $${parseFloat(spend).toFixed(2)}</div>
+        </div>
+    `;
+        }
+
+        function formatOverallData(rowData) {
+            const spend = rowData['SPEND_L30'] || 0;
+            const clicks = rowData['CLICKS_L30'] || 0;
+            const impressions = rowData['IMPRESSIONS_L30'] || 0;
+            const sold = rowData['SOLD_L30'] || 0;
+            const adSales = rowData['Ad Sales'] || 0;
+            const acos = rowData['ACOS'] || 'N/A';
+            const pft = rowData['Pft'] || 0;
+
+            if (impressions === 0 && clicks === 0 && spend === 0) {
+                return '<div class="text-muted small">No Data</div>';
+            }
+
+            return `
+        <div class="small">
+            <div><strong>Total Spend:</strong> $${parseFloat(spend).toFixed(2)}</div>
+            <div><strong>Total Clicks:</strong> ${parseInt(clicks).toLocaleString()}</div>
+            <div><strong>Total Impressions:</strong> ${parseInt(impressions).toLocaleString()}</div>
+            <div><strong>Total Sold:</strong> ${parseInt(sold)}</div>
+            <div><strong>Ad Sales:</strong> $${parseFloat(adSales).toFixed(2)}</div>
+            <div><strong>Profit:</strong> $${parseFloat(pft).toFixed(2)}</div>
+            <div><strong>ACOS:</strong> ${acos}</div>
+        </div>
+    `;
+        }
+
+        // Updated Modal open function
+        function showAdSalesModal(row) {
+            console.log('Showing Ad Sales Modal for row:', row);
+            const data = row;
+            const channelName = data.Channel || data['Channel '] || '';
+
+            // Update modal title
+            document.getElementById('ovl30SkuLabel').textContent = `Advertising Data - ${channelName}`;
+
+            // Build and display the table
+            document.getElementById('ovl30Content').innerHTML = buildOVL30Table(data, channelName);
+
+            const modalEl = document.getElementById('ovl30Modal');
+            const modal = new bootstrap.Modal(modalEl);
+
+            // Make modal draggable
+            const dialogEl = modalEl.querySelector('.modal-dialog');
+            let isDragging = false;
+            let currentX;
+            let currentY;
+            let initialX;
+            let initialY;
+            let xOffset = 0;
+            let yOffset = 0;
+
+            function dragStart(e) {
+                if (e.target.closest('.modal-header')) {
+                    isDragging = true;
+                    initialX = e.clientX - xOffset;
+                    initialY = e.clientY - yOffset;
+                }
+            }
+
+            function drag(e) {
+                if (isDragging) {
+                    e.preventDefault();
+                    currentX = e.clientX - initialX;
+                    currentY = e.clientY - initialY;
+                    xOffset = currentX;
+                    yOffset = currentY;
+                    dialogEl.style.transform = `translate(${currentX}px, ${currentY}px)`;
+                }
+            }
+
+            function dragEnd() {
+                isDragging = false;
+            }
+
+            // Add event listeners
+            dialogEl.addEventListener('mousedown', dragStart);
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', dragEnd);
+
+            // Reset position when modal is hidden
+            modalEl.addEventListener('hidden.bs.modal', function() {
+                dialogEl.style.transform = 'none';
+                xOffset = 0;
+                yOffset = 0;
+
+                // Remove event listeners
+                dialogEl.removeEventListener('mousedown', dragStart);
+                document.removeEventListener('mousemove', drag);
+                document.removeEventListener('mouseup', dragEnd);
             });
-            
-            // Set current header
-            header.classList.add(isAscending ? 'sort-asc' : 'sort-desc');
-            
-            // Sort table
-            sortTable(table, columnIndex, sortType, isAscending);
-        });
-    });
-}
 
-// Sort table function
-function sortTable(table, columnIndex, sortType, ascending) {
-    const tbody = table.querySelector('tbody');
-    const rows = Array.from(tbody.querySelectorAll('tr'));
-    
-    rows.sort((a, b) => {
-        const aCell = a.cells[columnIndex];
-        const bCell = b.cells[columnIndex];
-        
-        let aValue = aCell.textContent.trim();
-        let bValue = bCell.textContent.trim();
-        
-        if (sortType === 'number') {
-            aValue = parseFloat(aValue) || 0;
-            bValue = parseFloat(bValue) || 0;
+            modal.show();
         }
-        
-        if (aValue < bValue) return ascending ? -1 : 1;
-        if (aValue > bValue) return ascending ? 1 : -1;
-        return 0;
-    });
-    
-    // Remove existing rows
-    rows.forEach(row => tbody.removeChild(row));
-    
-    // Add sorted rows
-    rows.forEach(row => tbody.appendChild(row));
-}
+
+        // Sort table function
+        function sortTable(table, columnIndex, sortType, ascending) {
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+
+            rows.sort((a, b) => {
+                const aCell = a.cells[columnIndex];
+                const bCell = b.cells[columnIndex];
+
+                let aValue = aCell.textContent.trim();
+                let bValue = bCell.textContent.trim();
+
+                if (sortType === 'number') {
+                    aValue = parseFloat(aValue) || 0;
+                    bValue = parseFloat(bValue) || 0;
+                }
+
+                if (aValue < bValue) return ascending ? -1 : 1;
+                if (aValue > bValue) return ascending ? 1 : -1;
+                return 0;
+            });
+
+            // Remove existing rows
+            rows.forEach(row => tbody.removeChild(row));
+
+            // Add sorted rows
+            rows.forEach(row => tbody.appendChild(row));
+        }
 
 
         function drawSalesTrendChart() {

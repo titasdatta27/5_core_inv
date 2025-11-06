@@ -117,6 +117,13 @@
         .red-bg {
             color: #ff2727 !important;
         }
+
+        .tabulator-col-title {
+            white-space: normal !important;
+            overflow: visible !important;
+            height: auto !important;
+            line-height: 1.2em;
+        }
     </style>
 @endsection
 @section('content')
@@ -400,7 +407,7 @@
                     visible: false
                 },
                 {
-                    title: 'SPEND L30 <span class="text-muted" id="spend-l30-total"></span>',
+                    title: 'SPEND L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="spend-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "SPEND_L30",
                     formatter: function(cell) {
                         let SPEND_L30 = cell.getValue();
@@ -413,22 +420,22 @@
                     }
                 },
                 {
-                    title: 'KW Spend L30 <span class="text-muted" id="kw-spend-l30-total"></span>',
+                    title: 'KW Spend L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="kw-spend-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "kw_spend_L30",
                     visible: false
                 },
                 {
-                    title: 'PT Spend L30 <span class="text-muted" id="pt-spend-l30-total"></span>',
+                    title: 'PT Spend L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="pt-spend-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "pt_spend_L30",
                     visible: false
                 },
                 {
-                    title: 'HL Spend L30 <span class="text-muted" id="hl-spend-l30-total"></span>',
+                    title: 'HL Spend L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="hl-spend-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "hl_spend_L30",
                     visible: false
                 },
                 {
-                    title: 'SPEND L7 <span class="text-muted" id="spend-l7-total"></span>',
+                    title: 'SPEND L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="spend-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "SPEND_L7",
                     formatter: function(cell) {
                         let SPEND_L7 = cell.getValue();
@@ -441,22 +448,154 @@
                     }
                 },
                 {
-                    title: 'KW Spend L7 <span class="text-muted" id="kw-spend-l7-total"></span>',
+                    title: 'KW Spend L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="kw-spend-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "kw_spend_L7",
                     visible: false
                 },
                 {
-                    title: 'PT Spend L7 <span class="text-muted" id="pt-spend-l7-total"></span>',
+                    title: 'PT Spend L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="pt-spend-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "pt_spend_L7",
                     visible: false
                 },
                 {
-                    title: 'HL Spend L7 <span class="text-muted" id="hl-spend-l7-total"></span>',
+                    title: 'HL Spend L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="hl-spend-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "hl_spend_L7",
                     visible: false
                 },
                 {
-                    title: 'CLICKS L30 <span class="text-muted" id="clicks-l30-total"></span>',
+                    title: 'SOLD L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="sold-l30-total" style="display:inline-block; margin-top:2px;"></span>',
+                    field: "SOLD_L30",
+                    formatter: function(cell) {
+                        let SOLD_L30 = cell.getValue();
+                        return `
+                            <span>${SOLD_L30.toFixed(0)}</span>
+                            <i class="fa fa-info-circle text-primary toggle-soldL30-btn" 
+                            data-sold-l30="${SOLD_L30}" 
+                            style="cursor:pointer; margin-left:8px;"></i>
+                        `;
+                    }
+                },
+                {
+                    title: 'KW Sold L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="kw-sold-l30-total" style="display:inline-block; margin-top:2px;"></span>',
+                    field: "kw_sold_L30",
+                    visible: false
+                },
+                {
+                    title: 'PT Sold L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="pt-sold-l30-total" style="display:inline-block; margin-top:2px;"></span>',
+                    field: "pt_sold_L30",
+                    visible: false
+                },
+                {
+                    title: 'HL Sold L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="hl-sold-l30-total" style="display:inline-block; margin-top:2px;"></span>',
+                    field: "hl_sold_L30",
+                    formatter: function(cell) {
+                        let HL_SOLD_L30 = cell.getValue();
+                        return `
+                            <span>${HL_SOLD_L30.toFixed(0)}</span>`;
+                    },
+                    visible: false
+                },
+                {
+                    title: 'SOLD L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="sold-l7-total" style="display:inline-block; margin-top:2px;"></span>',
+                    field: "SOLD_L7",
+                    formatter: function(cell) {
+                        let SOLD_L7 = cell.getValue();
+                        return `
+                            <span>${SOLD_L7.toFixed(0)}</span>
+                            <i class="fa fa-info-circle text-primary toggle-soldL7-btn" 
+                            data-sold-l7="${SOLD_L7}" 
+                            style="cursor:pointer; margin-left:8px;"></i>
+                        `;
+                    }
+                },
+                {
+                    title: 'KW Sold L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="kw-sold-l7-total" style="display:inline-block; margin-top:2px;"></span>',
+                    field: "kw_sold_L7",
+                    visible: false
+                },
+                {
+                    title: 'PT Sold L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="pt-sold-l7-total" style="display:inline-block; margin-top:2px;"></span>',
+                    field: "pt_sold_L7",
+                    visible: false
+                },
+                {
+                    title: 'HL Sold L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="hl-sold-l7-total" style="display:inline-block; margin-top:2px;"></span>',
+                    field: "hl_sold_L7",
+                    formatter: function(cell) {
+                        let HL_SOLD_L7 = cell.getValue();
+                        return `
+                            <span>${HL_SOLD_L7.toFixed(0)}</span>`;
+                    },
+                    visible: false
+                },
+                {
+                    title: 'SALES L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="sales-l30-total" style="display:inline-block; margin-top:2px;"></span>',
+                    field: "SALES_L30",
+                    formatter: function(cell) {
+                        let SALES_L30 = cell.getValue();
+                        return `
+                            <span>${SALES_L30.toFixed(0)}</span>
+                            <i class="fa fa-info-circle text-primary toggle-salesL30-btn" 
+                            data-sales-l30="${SALES_L30}" 
+                            style="cursor:pointer; margin-left:8px;"></i>
+                        `;
+                    }
+                },
+                {
+                    title: 'KW Sales L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="kw-sales-l30-total" style="display:inline-block; margin-top:2px;"></span>',
+                    field: "kw_sales_L30",
+                    visible: false
+                },
+                {
+                    title: 'PT Sales L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="pt-sales-l30-total" style="display:inline-block; margin-top:2px;"></span>',
+                    field: "pt_sales_L30",
+                    visible: false
+                },
+                {
+                    title: 'HL Sales L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="hl-sales-l30-total" style="display:inline-block; margin-top:2px;"></span>',
+                    field: "hl_sales_L30",
+                    formatter: function(cell) {
+                        let HL_SALES_L30 = cell.getValue();
+                        return `
+                            <span>${HL_SALES_L30.toFixed(0)}</span>`;
+                    },
+                    visible: false
+                },
+                {
+                    title: 'SALES L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="sales-l7-total" style="display:inline-block; margin-top:2px;"></span>',
+                    field: "SALES_L7",
+                    formatter: function(cell) {
+                        let SALES_L7 = cell.getValue();
+                        return `
+                            <span>${SALES_L7.toFixed(0)}</span>
+                            <i class="fa fa-info-circle text-primary toggle-salesL7-btn" 
+                            data-sales-l7="${SALES_L7}" 
+                            style="cursor:pointer; margin-left:8px;"></i>
+                        `;
+                    }
+                },
+                {
+                    title: 'KW Sales L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="kw-sales-l7-total" style="display:inline-block; margin-top:2px;"></span>',
+                    field: "kw_sales_L7",
+                    visible: false
+                },
+                {
+                    title: 'PT Sales L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="pt-sales-l7-total" style="display:inline-block; margin-top:2px;"></span>',
+                    field: "pt_sales_L7",
+                    visible: false
+                },
+                {
+                    title: 'HL Sales L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="hl-sales-l7-total" style="display:inline-block; margin-top:2px;"></span>',
+                    field: "hl_sales_L7",
+                    formatter: function(cell) {
+                        let HL_SALES_L7 = cell.getValue();
+                        return `
+                            <span>${HL_SALES_L7.toFixed(0)}</span>`;
+                    },
+                    visible: false
+                },
+                {
+                    title: 'CLICKS L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="clicks-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "CLICKS_L30",
                     formatter: function(cell) {
                         let CLICKS_L30 = cell.getValue();
@@ -469,22 +608,22 @@
                     }
                 },
                 {
-                    title: 'KW Clicks L30 <span class="text-muted" id="kw-clicks-l30-total"></span>',
+                    title: 'KW Clicks L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="kw-clicks-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "kw_clicks_L30",
                     visible: false
                 },
                 {
-                    title: 'PT Clicks L30 <span class="text-muted" id="pt-clicks-l30-total"></span>',
+                    title: 'PT Clicks L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="pt-clicks-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "pt_clicks_L30",
                     visible: false
                 },
                 {
-                    title: 'HL Clicks L30 <span class="text-muted" id="hl-clicks-l30-total"></span>',
+                    title: 'HL Clicks L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="hl-clicks-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "hl_clicks_L30",
                     visible: false
                 },
                 {
-                    title: 'CLICKS L7 <span class="text-muted" id="clicks-l7-total"></span>',
+                    title: 'CLICKS L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="clicks-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "CLICKS_L7",
                     formatter: function(cell) {
                         let CLICKS_L7 = cell.getValue();
@@ -497,22 +636,22 @@
                     }
                 },
                 {
-                    title: 'KW Clicks L7 <span class="text-muted" id="kw-clicks-l7-total"></span>',
+                    title: 'KW Clicks L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="kw-clicks-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "kw_clicks_L7",
                     visible: false
                 },
                 {
-                    title: 'PT Clicks L7 <span class="text-muted" id="pt-clicks-l7-total"></span>',
+                    title: 'PT Clicks L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="pt-clicks-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "pt_clicks_L7",
                     visible: false
                 },
                 {
-                    title: 'HL Clicks L7 <span class="text-muted" id="hl-clicks-l7-total"></span>',
+                    title: 'HL Clicks L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="hl-clicks-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "hl_clicks_L7",
                     visible: false
                 },
                 {
-                    title: 'IMP L30 <span class="text-muted" id="imp-l30-total"></span>',
+                    title: 'IMP L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="imp-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "IMP_L30",
                     formatter: function(cell) {
                         let IMP_L30 = cell.getValue();
@@ -525,22 +664,22 @@
                     }
                 },
                 {
-                    title: 'KW IMP L30 <span class="text-muted" id="kw-imp-l30-total"></span>',
+                    title: 'KW IMP L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="kw-imp-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "kw_impr_L30",
                     visible: false,
                 },
                 {
-                    title: 'PT IMP L30 <span class="text-muted" id="pt-imp-l30-total"></span>',
+                    title: 'PT IMP L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="pt-imp-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "pt_impr_L30",
                     visible: false
                 },
                 {
-                    title: 'HL IMP L30 <span class="text-muted" id="hl-imp-l30-total"></span>',
+                    title: 'HL IMP L30 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="hl-imp-l30-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "hl_impr_L30",
                     visible: false
                 },
                 {
-                    title: 'IMP L7 <span class="text-muted" id="imp-l7-total"></span>',
+                    title: 'IMP L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="imp-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "IMP_L7",
                     formatter: function(cell) {
                         let IMP_L7 = cell.getValue();
@@ -553,17 +692,17 @@
                     }
                 },
                 {
-                    title: 'KW IMP L7 <span class="text-muted" id="kw-imp-l7-total"></span>',
+                    title: 'KW IMP L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="kw-imp-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "kw_impr_L7",
                     visible: false
                 },
                 {
-                    title: 'PT IMP L7 <span class="text-muted" id="pt-imp-l7-total"></span>',
+                    title: 'PT IMP L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="pt-imp-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "pt_impr_L7",
                     visible: false
                 },
                 {
-                    title: 'HL IMP L7 <span class="text-muted" id="hl-imp-l7-total"></span>',
+                    title: 'HL IMP L7 <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div> <span class="text-muted" id="hl-imp-l7-total" style="display:inline-block; margin-top:2px;"></span>',
                     field: "hl_impr_L7",
                     visible: false
                 },
@@ -692,61 +831,69 @@
             }
         });
 
+        let initialSpendL30Data = {};
+
+        table.on("dataLoaded", function(data) {
+            data.forEach(row => {
+            if (row.SPEND_L30 !== undefined) {
+                initialSpendL30Data[row.sku] = row.SPEND_L30;
+
+                fetch('/update-amazon-nr-nrl-fba', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    sku: row.sku,
+                    field: 'Spend_L30', 
+                    value: row.SPEND_L30
+                })
+                })
+                .then(res => res.json())
+                .then(data => {
+                console.log('SPEND_L30 saved for SKU:', row.sku);
+                })
+                .catch(err => {
+                console.error('Error saving SPEND_L30:', err);
+                });
+            }
+            });
+        });
+
         table.on("tableBuilt", function() {
 
             function combinedFilter(data) {
 
-                let searchVal = $("#global-search").val()?.toLowerCase() || "";
-                if (searchVal && !(data.sku?.toLowerCase().includes(searchVal))) {
+                let searchVal = ($("#global-search").val() || "").toLowerCase();
+                if (searchVal && !(data.campaignName || "").toLowerCase().includes(searchVal)) {
                     return false;
                 }
 
+                // ⚙️ Status filter
                 let statusVal = $("#status-filter").val();
                 if (statusVal && data.campaignStatus !== statusVal) {
                     return false;
                 }
 
+                // 📦 INV filter
                 let invFilterVal = $("#inv-filter").val();
-                if (invFilterVal === "ALL") {
-                    if (parseFloat(data.INV) === 0) return false;
-                } else if (invFilterVal === "INV_0") {
-                    if (parseFloat(data.INV) !== 0) return false;
-                } else if (invFilterVal === "OTHERS") {
-                    if (parseFloat(data.INV) === 0) return false;
-                }
+                let inv = parseFloat(data.INV) || 0;
+                if (!invFilterVal && inv === 0) return false;
+                if (invFilterVal === "INV_0" && inv !== 0) return false;
+                if (invFilterVal === "OTHERS" && inv === 0) return false;
 
+                // 🟩 NRL filter
                 let nrlFilterVal = $("#nrl-filter").val();
-                if (nrlFilterVal) {
-                    let rowSelect = document.querySelector(
-                        `select[data-sku="${data.sku}"][data-field="NRL"]`
-                    );
-                    let rowVal = rowSelect ? rowSelect.value : "";
-                    if (!rowVal) rowVal = data.NRL || "";
+                if (nrlFilterVal && (data.NRL || "") !== nrlFilterVal) return false;
 
-                    if (rowVal !== nrlFilterVal) return false;
-                }
-
+                // 🟧 NR filter
                 let nraFilterVal = $("#nra-filter").val();
-                if (nraFilterVal) {
-                    let rowSelect = document.querySelector(
-                        `select[data-sku="${data.sku}"][data-field="NR"]`
-                    );
-                    let rowVal = rowSelect ? rowSelect.value : "";
-                    if (!rowVal) rowVal = data.NR || "";
+                if (nraFilterVal && (data.NR || "") !== nraFilterVal) return false;
 
-                    if (rowVal !== nraFilterVal) return false;
-                }
-
+                // 🟦 FBA filter
                 let fbaFilterVal = $("#fba-filter").val();
-                if (fbaFilterVal) {
-                    let rowSelect = document.querySelector(
-                        `select[data-sku="${data.sku}"][data-field="FBA"]`
-                    );
-                    let rowVal = rowSelect ? rowSelect.value : "";
-                    if (!rowVal) rowVal = data.FBA || "";
-
-                    if (rowVal !== fbaFilterVal) return false;
-                }
+                if (fbaFilterVal && (data.FBA || "") !== fbaFilterVal) return false;
 
                 return true;
             }
@@ -806,14 +953,49 @@
                 let hlImpL30Total = calculateTotal('hl_impr_L30');
                 let hlImpL7Total = calculateTotal('hl_impr_L7');
 
-                // Debug logging
-                console.log("Calculated Totals:", {
-                    spendTotal,
-                    kwSpendL30Total,
-                    spendL7Total,
-                    kwSpendL7Total,
-                    ptSpendL30Total,
-                    ptSpendL7Total
+                let soldL30Total = calculateTotal('SOLD_L30');
+                let soldL7Total = calculateTotal('SOLD_L7');
+                let salesL30Total = calculateTotal('SALES_L30');
+                let salesL7Total = calculateTotal('SALES_L7');
+                let kwSoldL30Total = calculateTotal('kw_sold_L30');
+                let kwSoldL7Total = calculateTotal('kw_sold_L7');
+                let ptSoldL30Total = calculateTotal('pt_sold_L30');
+                let ptSoldL7Total = calculateTotal('pt_sold_L7');
+                let hlSoldL30Total = calculateTotal('hl_sold_L30');
+                let hlSoldL7Total = calculateTotal('hl_sold_L7');
+                let kwSalesL30Total = calculateTotal('kw_sales_L30');
+                let kwSalesL7Total = calculateTotal('kw_sales_L7');
+                let ptSalesL30Total = calculateTotal('pt_sales_L30');
+                let ptSalesL7Total = calculateTotal('pt_sales_L7');
+                let hlSalesL30Total = calculateTotal('hl_sales_L30');
+                let hlSalesL7Total = calculateTotal('hl_sales_L7');
+
+
+                $.ajax({
+                    url: "{{ route('adv-amazon.ad-running.save-data') }}",
+                    method: 'GET',
+                    data: {
+                        spendl30Total: spendTotal,
+                        kwSpendL30Total: kwSpendL30Total,
+                        ptSpendL30Total: ptSpendL30Total,
+                        hlSpendL30Total:hlSpendL30Total,
+                        clicksL30Total: clicksL30Total,
+                        kwClicksL30Total: kwClicksL30Total,
+                        ptClicksL30Total:ptClicksL30Total,
+                        hlClicksL30Total: hlClicksL30Total,
+                        salesL30Total : salesL30Total,
+                        kwSalesL30Total:kwSalesL30Total,
+                        ptSalesL30Total:ptSalesL30Total,
+                        hlSalesL30Total:hlSalesL30Total,
+                        soldL30Total:soldL30Total,
+                        kwSoldL30Total:kwSoldL30Total,
+                        ptSoldL30Total:ptSoldL30Total,
+                        hlSoldL30Total:hlSoldL30Total
+                    },
+                    success: function(response) {
+                    },
+                    error: function(xhr) {
+                    }
                 });
 
                 // Update SPEND totals
@@ -900,6 +1082,56 @@
                 document.getElementById("hl-imp-l7-total").innerText = hlImpL7Total > 0 ? ` (${hlImpL7Total.toFixed(0)})` : "";
                 document.getElementById("hl-imp-l7-total").style.display = hlImpL7Total > 0 ? "inline" : "none";
 
+                // Update SOLD totals
+                document.getElementById("sold-l30-total").innerText = soldL30Total > 0 ? ` (${soldL30Total.toFixed(0)})` : "";
+                document.getElementById("sold-l30-total").style.display = soldL30Total > 0 ? "inline" : "none";
+
+                document.getElementById("sold-l7-total").innerText = soldL7Total > 0 ? ` (${soldL7Total.toFixed(0)})` : "";
+                document.getElementById("sold-l7-total").style.display = soldL7Total > 0 ? "inline" : "none";
+
+                // Update SALES totals
+                document.getElementById("sales-l30-total").innerText = salesL30Total > 0 ? ` (${salesL30Total.toFixed(0)})` : "";
+                document.getElementById("sales-l30-total").style.display = salesL30Total > 0 ? "inline" : "none";
+
+                document.getElementById("sales-l7-total").innerText = salesL7Total > 0 ? ` (${salesL7Total.toFixed(0)})` : "";
+                document.getElementById("sales-l7-total").style.display = salesL7Total > 0 ? "inline" : "none";
+
+                // Update KW SOLD totals
+                document.getElementById("kw-sold-l30-total").innerText = kwSoldL30Total > 0 ? ` (${kwSoldL30Total.toFixed(0)})` : "";
+                document.getElementById("kw-sold-l30-total").style.display = kwSoldL30Total > 0 ? "inline" : "none";
+                document.getElementById("kw-sold-l7-total").innerText = kwSoldL7Total > 0 ? ` (${kwSoldL7Total.toFixed(0)})` : "";
+                document.getElementById("kw-sold-l7-total").style.display = kwSoldL7Total > 0 ? "inline" : "none";
+
+                // Update PT SOLD totals
+                document.getElementById("pt-sold-l30-total").innerText = ptSoldL30Total > 0 ? ` (${ptSoldL30Total.toFixed(0)})  ` : "";
+                document.getElementById("pt-sold-l30-total").style.display = ptSoldL30Total > 0 ? "inline" : "none";
+                document.getElementById("pt-sold-l7-total").innerText = ptSoldL7Total > 0 ? ` (${ptSoldL7Total.toFixed(0)})` : "";
+                document.getElementById("pt-sold-l7-total").style.display = ptSoldL7Total > 0 ? "inline" : "none";
+
+                // Update HL SOLD totals
+                document.getElementById("hl-sold-l30-total").innerText = hlSoldL30Total > 0 ? ` (${hlSoldL30Total.toFixed(0)})` : "";
+                document.getElementById("hl-sold-l30-total").style.display = hlSoldL30Total > 0 ? "inline" : "none";
+                document.getElementById("hl-sold-l7-total").innerText = hlSoldL7Total > 0 ? ` (${hlSoldL7Total.toFixed(0)})` : "";
+                document.getElementById("hl-sold-l7-total").style.display = hlSoldL7Total > 0 ? "inline" : "none";
+
+                // Update KW SALES totals
+                document.getElementById("kw-sales-l30-total").innerText = kwSalesL30Total > 0 ? ` (${kwSalesL30Total.toFixed(0)})` : "";
+                document.getElementById("kw-sales-l30-total").style.display = kwSalesL30Total > 0 ? "inline" : "none";
+                document.getElementById("kw-sales-l7-total").innerText = kwSalesL7Total > 0 ? ` (${kwSalesL7Total.toFixed(0)})` : "";
+                document.getElementById("kw-sales-l7-total").style.display = kwSalesL7Total > 0 ? "inline" : "none";
+
+                // Update PT SALES totals
+                document.getElementById("pt-sales-l30-total").innerText = ptSalesL30Total > 0 ? ` (${ptSalesL30Total.toFixed(0)})` : "";
+                document.getElementById("pt-sales-l30-total").style.display = ptSalesL30Total > 0 ? "inline" : "none";
+                document.getElementById("pt-sales-l7-total").innerText = ptSalesL7Total > 0 ? ` (${ptSalesL7Total.toFixed(0)})` : "";
+                document.getElementById("pt-sales-l7-total").style.display = ptSalesL7Total > 0 ? "inline" : "none";
+
+                // Update HL SALES totals
+                document.getElementById("hl-sales-l30-total").innerText = hlSalesL30Total > 0 ? ` (${hlSalesL30Total.toFixed(0)})` : "";
+                document.getElementById("hl-sales-l30-total").style.display = hlSalesL30Total > 0 ? "inline" : "none";
+                document.getElementById("hl-sales-l7-total").innerText = hlSalesL7Total > 0 ? ` (${hlSalesL7Total.toFixed(0)})` : "";
+                document.getElementById("hl-sales-l7-total").style.display = hlSalesL7Total > 0 ? "inline" : "none";
+
                 // Update campaign count and percentage
                 let percentage = total > 0 ? ((filtered / total) * 100).toFixed(0) : 0;
                 document.getElementById("total-campaigns").innerText = filtered;
@@ -950,6 +1182,46 @@
             }
             if (e.target.classList.contains("toggle-spendL7-btn")) {
                 let colsToToggle = ["kw_spend_L7", "pt_spend_L7", "hl_spend_L7"];
+
+                colsToToggle.forEach(colField => {
+                    let col = table.getColumn(colField);
+                    if (col) {
+                        col.toggle();
+                    }
+                });
+            }
+            if (e.target.classList.contains("toggle-soldL30-btn")) {
+                let colsToToggle = ["kw_sold_L30", "pt_sold_L30", "hl_sold_L30"];
+
+                colsToToggle.forEach(colField => {
+                    let col = table.getColumn(colField);
+                    if (col) {
+                        col.toggle();
+                    }
+                });
+            }
+            if (e.target.classList.contains("toggle-soldL7-btn")) {
+                let colsToToggle = ["kw_sold_L7", "pt_sold_L7", "hl_sold_L7"];
+
+                colsToToggle.forEach(colField => {
+                    let col = table.getColumn(colField);
+                    if (col) {
+                        col.toggle();
+                    }
+                });
+            }
+            if (e.target.classList.contains("toggle-salesL30-btn")) {
+                let colsToToggle = ["kw_sales_L30", "pt_sales_L30", "hl_sales_L30"];
+
+                colsToToggle.forEach(colField => {
+                    let col = table.getColumn(colField);
+                    if (col) {
+                        col.toggle();
+                    }
+                });
+            }
+            if (e.target.classList.contains("toggle-salesL7-btn")) {
+                let colsToToggle = ["kw_sales_L7", "pt_sales_L7", "hl_sales_L7"];
 
                 colsToToggle.forEach(colField => {
                     let col = table.getColumn(colField);

@@ -1587,7 +1587,6 @@
                                     </div>
                                 </th>
 
-
                                 <th data-field="cvr" style="vertical-align: middle; white-space: nowrap;">
                                     <div class="d-flex flex-column align-items-center" style="gap: 4px">
                                         <div class="d-flex align-items-center">
@@ -1616,17 +1615,33 @@
                                 <th data-field="pft" style="vertical-align: middle; white-space: nowrap;">
                                     <div class="d-flex flex-column align-items-center">
                                         <div class="d-flex align-items-center" style="gap: 4px">
-                                            GPRFT <span class="sort-arrow">↓</span>
+                                            GPRFT 
                                         </div>
-                                        <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
-                                        <div class="metric-total" id="pft-total">0%</div>
                                     </div>
                                 </th>
+                                <th data-field="gprft" style="vertical-align: middle; white-space: nowrap;">
+                                    <div class="d-flex flex-column align-items-center">
+                                        <div class="d-flex align-items-center" style="gap: 4px">
+                                            PFT 
+                                        </div>
+                                    </div>
+                                </th>
+
+                                <th data-field="profit" style="vertical-align: middle; white-space: nowrap;">
+                                    <div class="d-flex flex-column align-items-center">
+                                        <div class="d-flex align-items-center" style="gap: 4px">
+                                            TPRFT 
+                                        </div>
+                                    </div>
+                                </th>
+
                                 <th data-field="total_sales" style="vertical-align: middle; white-space: nowrap;">
                                     <div class="d-flex flex-column align-items-center">
                                         <div class="d-flex align-items-center">
                                             Total Sales <span class="sort-arrow">↓</span>
                                         </div>
+                                        <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
+                                        <div class="metric-total" id="total-sales-total"></div>
                                     </div>
                                 </th>
                                 {{-- <th data-field="tpft" style="vertical-align: middle; white-space: nowrap;">
@@ -1646,7 +1661,13 @@
                                     </div>
                                 </th>
 
-
+                                <th data-field="ad cost/ pc" style="vertical-align: middle; white-space: nowrap;">
+                                    <div class="d-flex flex-column align-items-center">
+                                        <div class="d-flex align-items-center">
+                                            CPS<span class="sort-arrow">↓</span>
+                                        </div>
+                                    </div>
+                                </th>
                                 {{-- <th data-field="spend" style="vertical-align: middle; white-space: nowrap;">
                                     <div class="d-flex flex-column align-items-center">
                                         <div class="d-flex align-items-center" style="gap: 4px">
@@ -1667,16 +1688,6 @@
                                         <div class="metric-total" id="Tpft-total">0%</div>
                                     </div>
                                 </th> --}}
-
-                                <th data-field="profit" style="vertical-align: middle; white-space: nowrap;">
-                                    <div class="d-flex flex-column align-items-center">
-                                        <div class="d-flex align-items-center" style="gap: 4px">
-                                            TPRFT <span class="sort-arrow">↓</span>
-                                        </div>
-                                        <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
-                                        <div class="metric-total" id="profit-total">0%</div>
-                                    </div>
-                                </th>
 
                                 {{-- <th data-field="profit" style="vertical-align: middle; white-space: nowrap;">
                                         <div class="d-flex flex-column align-items-center">
@@ -1724,14 +1735,6 @@
                                         </div>
                                         <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
                                         <div class="metric-total" id="tacos-total">0%</div>
-                                    </div>
-                                </th>
-
-                                <th data-field="ad cost/ pc" style="vertical-align: middle; white-space: nowrap;">
-                                    <div class="d-flex flex-column align-items-center">
-                                        <div class="d-flex align-items-center">
-                                            AD COST <br> PER PC<span class="sort-arrow">↓</span>
-                                        </div>
                                     </div>
                                 </th>
 
@@ -3060,16 +3063,7 @@
                             'PFT_percentage']) ?
                         `<span class="dil-percent-value ${getPftColor(item['PFT_percentage'])}">
                             ${Math.round(item['PFT_percentage'])}%
-                        </span>
-                        <span class="tooltip-container" style="margin-left:8px">
-                            <i class="fas fa-tag text-warning price-view-trigger" 
-                                style="transform:translateY(1px)"
-                                data-bs-toggle="tooltip" 
-                                data-bs-placement="top-end" 
-                                title="Pricing view"
-                                data-item='${JSON.stringify(item.raw_data)}'></i>
-                        </span>` :
-                        ''
+                        </span>` : ''
                     ));
 
 
@@ -3093,22 +3087,27 @@
                     const totalProfit = (aL30 * price) * rawPft / 100;
                     
                     let percentage = {{ $amazonPercentage ?? 0 }};
-                    let costPercentage = (percentage + amazonAdUpdates) / 100; 
+                    let costPercentage = (percentage - amazonAdUpdates) / 100; 
                     let netPft = (price * costPercentage) - ship - lp - (spend / aL30);
-                    console.log("SKU ", sku, price, costPercentage, ship, lp, spend);
-                    let tpft = (netPft / price) * 100;
+                    // let tpft = (netPft / price) * 100;
+                    let tpft = rawPft - tacos;
+                    
+                    const totalAmazonPercentage = (percentage - amazonAdUpdates) / 100;
+                    const netGpft = (price * totalAmazonPercentage) - ship - lp;
+                    let gPft = (netGpft / price) * 100;
 
-                    // total sales 
+                    // PFT with color coding
+                    if(isNaN(gPft) || !isFinite(gPft)) {
+                        gPft = 0;
+                    }
+
                     $row.append($('<td>').html(
-                        `$${soldAmount.toFixed(2)}`
+                        `
+                            <span class="dil-percent-value ${getPftColor(gPft)}">
+                                ${gPft.toFixed(0)}%
+                            </span>
+                        ` 
                     ));
-
-
-                    // spend in advertising     
-                    $row.append($('<td>').html(
-                        `$${adSpend.toFixed(2)}`
-                    ));
-
 
                     // var tpft = rawPft + amazonAdUpdates - tacos;
                     if(isNaN(tpft) || !isFinite(tpft)) {
@@ -3138,6 +3137,22 @@
                         ` 
                     ));
 
+                    // total sales 
+                    $row.append($('<td>').html(
+                        `$${soldAmount.toFixed(2)}`
+                    ));
+
+
+                    // spend in advertising     
+                    $row.append($('<td>').html(
+                        `$${adSpend.toFixed(2)}`
+                    ));
+
+                    // CPS with color coding and tooltip
+                    let cps = aL30 > 0 ? (spend / aL30).toFixed(2) : 0;
+                    $row.append($('<td>').text(
+                        `${cps}`
+                    ));
 
                     // ROI with color coding
                     $row.append($('<td>').html(
@@ -3160,14 +3175,6 @@
                                 data-bs-toggle="tooltip" data-bs-placement="bottom" title="Advertisement view"
                                 data-item='${JSON.stringify(item.raw_data)}'></i>`
                     ));
-
-
-                    // CVR with color coding and tooltip
-
-                    $row.append($('<td>').text(
-                        typeof item['ad cost/ pc'] === 'number' ? item['ad cost/ pc'].toFixed(2) : 0
-                    ));
-
 
                     // SPRICE + Edit Button (no decimals)
                     $row.append($('<td>').html(
@@ -5510,7 +5517,8 @@
                         totalSalesL30Sum: 0,
                         totalCogsSum: 0,
                         listedCount: 0,
-                        liveCount: 0
+                        liveCount: 0,
+                        totalSalesTotal : 0,
                     };
 
                     filteredData.forEach(item => {
@@ -5552,6 +5560,8 @@
                         metrics.scvrSum += parseFloat(item.SCVR) || 0;
                         metrics.rowCount++;
 
+
+                        
                         // Only sum for child rows (not parent rows)
                         if (
                             item['(Child) sku'] &&
@@ -5588,6 +5598,22 @@
                     $('#al30-total').text(metrics.el30Total.toLocaleString());
                     $('#lDil-total').text(aDilTotalDisplay);
                     $('#views-total').text(metrics.viewsTotal.toLocaleString());
+                    $('#total-sales-total').text(metrics.totalSalesL30Sum.toLocaleString());
+
+
+
+                    $.ajax({
+                        url: "{{ route('adv-amazon.total-sales.save-data') }}",
+                        method: 'GET',
+                        data: {
+                            totalSales: metrics.totalSalesL30Sum
+                        },
+                        success: function(response) {
+                        },
+                        error: function(xhr) {
+                        }
+                    });
+
 
 
 

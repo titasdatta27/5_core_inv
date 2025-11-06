@@ -1,4 +1,4 @@
-@extends('layouts.vertical', ['title' => 'Pricing Masters Analysis'])
+@extends('layouts.vertical', ['title' => 'CVR Masters Analysis'])
 
 @section('css')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -480,8 +480,8 @@
 
 @section('content')
     @include('layouts.shared.page-title', [
-        'page_title' => 'Pricing Masters Analysis',
-        'sub_title' => 'Pricing Masters Analysis',
+        'page_title' => 'CVR Masters Analysis',
+        'sub_title' => 'CVR Masters Analysis',
     ])
 
     <!-- Image Preview -->
@@ -575,8 +575,18 @@
                     </div>
 
                     <div class="btn-group" id="margin-filter" role="group" aria-label="Margin Filter">
+                        <input type="radio" class="btn-check" name="marginFilter" id="marginFilterAll" value="all">
+                        <label class="btn btn-outline-primary" for="marginFilterAll">All Margin</label>
+                        <input type="radio" class="btn-check" name="marginFilter" id="marginFilterVeryLow" value="verylow">
+                        <label class="btn btn-outline-danger" for="marginFilterVeryLow">Very Low Margin (&lt; 11%)</label>
+                        <input type="radio" class="btn-check" name="marginFilter" id="marginFilterLow" value="low">
+                        <label class="btn btn-outline-warning" for="marginFilterLow">Low Margin (11-15%)</label>
+                        <input type="radio" class="btn-check" name="marginFilter" id="marginFilterMedium" value="medium">
+                        <label class="btn btn-outline-info" for="marginFilterMedium">Medium Margin (15-20%)</label>
                         <input type="radio" class="btn-check" name="marginFilter" id="marginFilterHigh" value="high">
-                        <label class="btn btn-outline-success" for="marginFilterHigh">High Margin (&gt; 20%)</label>
+                        <label class="btn btn-outline-success" for="marginFilterHigh">High Margin (20-50%)</label>
+                        <input type="radio" class="btn-check" name="marginFilter" id="marginFilterVeryHigh" value="veryhigh">
+                        <label class="btn btn-outline-secondary" for="marginFilterVeryHigh">Very High Margin (&gt; 50%)</label>
                         <input type="radio" class="btn-check" name="marginFilter" id="marginFilterClear" value="clear" checked>
                         <label class="btn btn-outline-secondary" for="marginFilterClear">Clear</label>
                     </div>
@@ -947,7 +957,7 @@
             const tiendamiaProfit = data.tiendamia_price ? ((parseFloat(data.tiendamia_price) * 0.83) - LP - SHIP) * (parseFloat(data
                 .tiendamia_l30) || 0) : 0;
 
-            const tiktokProfit = data.tiktok_price ? ((parseFloat(data.tiktok_price) * 0.64) - LP - SHIP) * (parseFloat(data
+            const tiktokProfit = data.tiktok_price ? ((parseFloat(data.tiktok_price) * 0.80) - LP - SHIP) * (parseFloat(data
                 .tiktok_l30) || 0) : 0;
 
             const aliexpressProfit = data.aliexpress_price ? ((parseFloat(data.aliexpress_price) * 0.89) - LP - SHIP) * (parseFloat(data
@@ -980,7 +990,7 @@
                 { name: "shein", price: data.shein_price, l30: data.shein_l30, percent: 0.89 },
                 { name: "tiendamia", price: data.tiendamia_price, l30: data.tiendamia_l30, percent: 0.83 },
                 { name: "bestbuy", price: data.bestbuy_price, l30: data.bestbuy_l30, percent: 0.80 },
-                { name: "tiktok", price: data.tiktok_price, l30: data.tiktok_l30, percent: 0.64 },
+                { name: "tiktok", price: data.tiktok_price, l30: data.tiktok_l30, percent: 0.80 },
                 { name: "aliexpress", price: data.aliexpress_price, l30: data.aliexpress_l30, percent: 0.89 }
             ];
 
@@ -1041,17 +1051,18 @@
 
 
         //global variables for play btn
+        let currentInvFilter = null;
+        let currentCvrFilter = null;
+        let currentViewFilter = null;
+        let currentDilFilter = null;
+        let currentMarginFilter = null;
+
         function renderGroup(parentKey) {
         if (!groupedSkuData[parentKey]) return;
 
             // Update current filter
         currentParentFilter = parentKey;
         setCombinedFilters();
-
-            // Apply Tabulator filter for the selected group
-        table.setFilter(function(data) {
-            return data.Parent === parentKey;
-        });
         }
 
         // Filter by Inventory radio buttons
@@ -1061,11 +1072,14 @@
                 let value = this.value;
 
                 if (value === "all") {
-                    table.clearFilter();
+                    currentInvFilter = null;
+                    setCombinedFilters();
                 } else if (value === "zero") {
-                    table.setFilter("inv", "=", 0);
+                    currentInvFilter = "zero";
+                    setCombinedFilters();
                 } else if (value === "other") {
-                    table.setFilter("inv", ">", 0);
+                    currentInvFilter = "other";
+                    setCombinedFilters();
                 }
             });
         });
@@ -1078,19 +1092,18 @@
             input.addEventListener("change", function() {
                 let value = this.value;
 
-                if (value === "clear") {
-                    table.clearFilter("avgCvr");
-                } else if (value === "all") {
-                    table.clearFilter("avgCvr");
+                if (value === "clear" || value === "all") {
+                    currentCvrFilter = null;
+                    setCombinedFilters();
                 } else if (value === "high") {
-                    table.setFilter("avgCvr", ">", 5);
+                    currentCvrFilter = "high";
+                    setCombinedFilters();
                 } else if (value === "medium") {
-                    table.setFilter(function(data) {
-                        const cvr = parseFloat(data.avgCvr) || 0;
-                        return cvr >= 3 && cvr <= 5;
-                    });
+                    currentCvrFilter = "medium";
+                    setCombinedFilters();
                 } else if (value === "low") {
-                    table.setFilter("avgCvr", "<", 3);
+                    currentCvrFilter = "low";
+                    setCombinedFilters();
                 }
             });
         });
@@ -1101,75 +1114,97 @@
                 let value = this.value;
 
                 if (value === "parent") {
-                    table.setFilter(function(data) {
-                        const sku = (data.SKU || "").toUpperCase();
-                        return sku.includes("PARENT");
-                    });
+                    currentViewFilter = "parent";
+                    setCombinedFilters();
                 } else if (value === "sku") {
-                    table.setFilter(function(data) {
-                        const sku = (data.SKU || "").toUpperCase();
-                        return !sku.includes("PARENT");
-                    });
+                    currentViewFilter = "sku";
+                    setCombinedFilters();
                 } else if (value === "both") {
-                    table.clearFilter();
+                    currentViewFilter = null;
+                    setCombinedFilters();
                 }
             });
         });
+        
+        
+        // Set default view filter to "parent" on page load
+        currentViewFilter = "parent";
 
         // Filter by Dilution radio buttons for dil
         document.querySelectorAll("input[name='dilFilter']").forEach(input => {
             input.addEventListener("change", function() {
                 let value = this.value;
 
-                if (value === "clear") {
-                    table.clearFilter("Dil%");
-                } else if (value === "all") {
-                    table.clearFilter("Dil%");
+                if (value === "clear" || value === "all") {
+                    currentDilFilter = null;
+                    setCombinedFilters();
                 } else if (value === "verylow") {
-                    table.setFilter("Dil%", "<=", 10);
+                    currentDilFilter = "verylow";
+                    setCombinedFilters();
                 } else if (value === "low") {
-                    table.setFilter(function(data) {
-                        const dil = parseFloat(data["Dil%"]) || 0;
-                        return dil >= 11 && dil <= 15;
-                    });
+                    currentDilFilter = "low";
+                    setCombinedFilters();
                 } else if (value === "medium") {
-                    table.setFilter(function(data) {
-                        const dil = parseFloat(data["Dil%"]) || 0;
-                        return dil >= 16 && dil <= 20;
-                    });
+                    currentDilFilter = "medium";
+                    setCombinedFilters();
                 } else if (value === "high") {
-                    table.setFilter(function(data) {
-                        const dil = parseFloat(data["Dil%"]) || 0;
-                        return dil >= 21 && dil <= 40;
-                    });
+                    currentDilFilter = "high";
+                    setCombinedFilters();
                 } else if (value === "veryhigh") {
-                    table.setFilter("Dil%", ">", 40);
+                    currentDilFilter = "veryhigh";
+                    setCombinedFilters();
                 }
             });
         });
         
+        // Filter by Margin radio buttons for margin
+        document.querySelectorAll("input[name='marginFilter']").forEach(input => {
+            input.addEventListener("change", function() {
+                let value = this.value;
+
+                if (value === "clear" || value === "all") {
+                    currentMarginFilter = null;
+                    setCombinedFilters();
+                } else if (value === "verylow") {
+                    currentMarginFilter = "verylow";
+                    setCombinedFilters();
+                } else if (value === "low") {
+                    currentMarginFilter = "low";
+                    setCombinedFilters();
+                } else if (value === "medium") {
+                    currentMarginFilter = "medium";
+                    setCombinedFilters();
+                } else if (value === "high") {
+                    currentMarginFilter = "high";
+                    setCombinedFilters();
+                } else if (value === "veryhigh") {
+                    currentMarginFilter = "veryhigh";
+                    setCombinedFilters();
+                }
+            });
+        });
         
 
 
-
-       const table = new Tabulator("#forecast-table", {
+        const table = new Tabulator("#forecast-table", {
+            
             ajaxURL: "/pricing-master-data-views",
             fixedHeader: true,
-         
             width: "100%",
             height: "700px",
-          
-            pagination: true, 
+            pagination: true,
             paginationSize: 50,
-        
-             rowFormatter: function(row) {
+
+            rowFormatter: function(row) {
                 const data = row.getData();
                 const sku = data["SKU"] || '';
 
+                // Add class to parent rows
                 if (sku.toUpperCase().includes("PARENT")) {
                     row.getElement().classList.add("parent-row");
                 }
             },
+
             columns: [{
                     title: "Image",
                     field: "shopifyb2c_image",
@@ -1293,6 +1328,7 @@
                             data.dilPercentage = rounded;
                            
                             return element;
+                            
                         },
                     }
 
@@ -1517,7 +1553,7 @@
                         const sheinProfit = ((sheinPrice * 0.89) - LP - SHIP) ;
                         const bestbuyProfit = ((bestbuyPrice * 0.80) - LP - SHIP) ;
                         const tiendamiaProfit = ((tiendamiaPrice * 0.83) - LP - SHIP) ;
-                        const tiktokProfit = ((tiktokPrice * 0.64) - LP - SHIP) ;
+                        const tiktokProfit = ((tiktokPrice * 0.80) - LP - SHIP) ;
                         const aliexpressProfit = ((aliexpressPrice * 0.89) - LP - SHIP) ;
 
  
@@ -1677,7 +1713,7 @@
                             const sheinProfit   = data.shein_price      ? ((parseFloat(data.shein_price) * 0.89) - LP - SHIP) * sheinL30 : 0;
                             const bestbuyProfit  = data.bestbuy_price    ? ((parseFloat(data.bestbuy_price) * 0.80) - LP - SHIP) * bestbuyL30 : 0;
                             const tiendamiaProfit = data.tiendamia_price ? ((parseFloat(data.tiendamia_price) * 0.83) - LP - SHIP) * tiendamiaL30 : 0;
-                            const tiktokProfit    = data.tiktok_price    ? ((parseFloat(data.tiktok_price) * 0.64) - LP - SHIP) * tiktokL30 : 0;
+                            const tiktokProfit    = data.tiktok_price    ? ((parseFloat(data.tiktok_price) * 0.80) - LP - SHIP) * tiktokL30 : 0;
                             const aliexpressProfit = data.aliexpress_price ? ((parseFloat(data.aliexpress_price) * 0.89) - LP - SHIP) * aliexpressL30 : 0;
                             // Total profit
                             const totalProfit = amzProfit + ebayProfit + shopifyProfit + macyProfit +
@@ -1884,8 +1920,80 @@
                         const sku = item.SKU || "";
                         const isParent = item.is_parent || sku.toUpperCase().includes("PARENT");
 
+                        // Calculate avgPftPercent
+                        const LP = parseFloat(item.LP) || 0;
+                        const SHIP = parseFloat(item.SHIP) || 0;
+                        const temuship = parseFloat(item.temu_ship) || 0;
+
+                        const amzPrice = parseFloat(item.amz_price) || 0;
+                        const ebayPrice = parseFloat(item.ebay_price) || 0;
+                        const shopifyPrice = parseFloat(item.shopifyb2c_price) || 0;
+                        const macyPrice = parseFloat(item.macy_price) || 0;
+                        const reverbPrice = parseFloat(item.reverb_price) || 0;
+                        const dobaPrice = parseFloat(item.doba_price) || 0;
+                        const temuPrice = parseFloat(item.temu_price) || 0;
+                        const ebay3Price = parseFloat(item.ebay3_price) || 0;
+                        const ebay2Price = parseFloat(item.ebay2_price) || 0;
+                        const walmartPrice = parseFloat(item.walmart_price) || 0;
+                        const sheinPrice = parseFloat(item.shein_price) || 0;
+                        const bestbuyPrice = parseFloat(item.bestbuy_price) || 0;
+                        const tiendamiaPrice = parseFloat(item.tiendamia_price) || 0;
+                        const tiktokPrice = parseFloat(item.tiktok_price) || 0;
+                        const aliexpressPrice = parseFloat(item.aliexpress_price) || 0;
+
+                        const amzL30 = parseFloat(item.amz_l30) || 0;
+                        const ebayL30 = parseFloat(item.ebay_l30) || 0;
+                        const shopifyL30 = parseFloat(item.shopifyb2c_l30_data) || 0;
+                        const macyL30 = parseFloat(item.macy_l30) || 0;
+                        const reverbL30 = parseFloat(item.reverb_l30) || 0;
+                        const dobaL30 = parseFloat(item.doba_l30) || 0;
+                        const temuL30 = parseFloat(item.temu_l30) || 0;
+                        const ebay3L30 = parseFloat(item.ebay3_l30) || 0;
+                        const ebay2L30 = parseFloat(item.ebay2_l30) || 0;
+                        const walmartL30 = parseFloat(item.walmart_l30) || 0;
+                        const sheinL30 = parseFloat(item.shein_l30) || 0;
+                        const bestbuyL30 = parseFloat(item.bestbuy_l30) || 0;
+                        const tiendamiaL30 = parseFloat(item.tiendamia_l30) || 0;
+                        const tiktokL30 = parseFloat(item.tiktok_l30) || 0;
+                        const aliexpressL30 = parseFloat(item.aliexpress_l30) || 0;
+
+                        const amzProfit = ((amzPrice * 0.70) - LP - SHIP);
+                        const ebayProfit = ((ebayPrice * 0.72) - LP - SHIP);
+                        const shopifyProfit = ((shopifyPrice * 0.75) - LP - SHIP);
+                        const macyProfit = ((macyPrice * 0.76) - LP - SHIP);
+                        const reverbProfit = ((reverbPrice * 0.84) - LP - SHIP);
+                        const dobaProfit = ((dobaPrice * 0.95) - LP - SHIP);
+                        const temuProfit = ((temuPrice * 0.87) - LP - temuship);
+                        const ebay3Profit = ((ebay3Price * 0.71) - LP - SHIP);
+                        const ebay2Profit = ((ebay2Price * 0.80) - LP - SHIP);
+                        const walmartProfit = ((walmartPrice * 0.80) - LP - SHIP);
+                        const sheinProfit = ((sheinPrice * 0.89) - LP - SHIP);
+                        const bestbuyProfit = ((bestbuyPrice * 0.80) - LP - SHIP);
+                        const tiendamiaProfit = ((tiendamiaPrice * 0.83) - LP - SHIP);
+                        const tiktokProfit = ((tiktokPrice * 0.80) - LP - SHIP);
+                        const aliexpressProfit = ((aliexpressPrice * 0.89) - LP - SHIP);
+
+                        const totalProfit = amzProfit * amzL30 + ebayProfit * ebayL30 + shopifyProfit * shopifyL30 + macyProfit * macyL30 +
+                            reverbProfit * reverbL30 + dobaProfit * dobaL30 + temuProfit * temuL30 +
+                            ebay3Profit * ebay3L30 + ebay2Profit * ebay2L30 + walmartProfit * walmartL30 +
+                            sheinProfit * sheinL30 + bestbuyProfit * bestbuyL30 + tiendamiaProfit * tiendamiaL30 +
+                            tiktokProfit * tiktokL30 + aliexpressProfit * aliexpressL30;
+
+                        const totalRevenue = (amzPrice * amzL30) + (ebayPrice * ebayL30) + (shopifyPrice * shopifyL30) + (macyPrice * macyL30) +
+                            (reverbPrice * reverbL30) + (dobaPrice * dobaL30) + (temuPrice * temuL30) +
+                            (ebay3Price * ebay3L30) + (ebay2Price * ebay2L30) + (walmartPrice * walmartL30) +
+                            (sheinPrice * sheinL30) + (bestbuyPrice * bestbuyL30) + (tiendamiaPrice * tiendamiaL30) +
+                            (tiktokPrice * tiktokL30) + (aliexpressPrice * aliexpressL30);
+
+                        let avgPftPercent = totalRevenue > 0 ? (totalProfit / totalRevenue) * 100 : 0;
+                        if (!isFinite(avgPftPercent) || isNaN(avgPftPercent)) {
+                            avgPftPercent = 0;
+                        }
+                        avgPftPercent = Math.round(avgPftPercent);
+
                         return {
                             ...item,
+                            avgPftPercent: avgPftPercent,
                             calculatedRoi: calculateROI(item),
                             calculatedProfit: calculateAvgProfit(item),
                             sl_no: index + 1,
@@ -1896,118 +2004,115 @@
                         };
                     });
 
-                    // Group by Parent
+                   
                     let grouped = {};
                     response.data.forEach(item => {
                         const parentKey = item.Parent || "";
                         if (!grouped[parentKey]) grouped[parentKey] = [];
                         grouped[parentKey].push(item);
-
-                        // Group for play button use
                         if (!groupedSkuData[parentKey]) {
                             groupedSkuData[parentKey] = [];
                         }
                         groupedSkuData[parentKey].push(item);
                     });
 
-
                          // Aggregate for parent rows
-        Object.keys(grouped).forEach(parentKey => {
-            const rows = grouped[parentKey];
-            const children = rows.filter(item => !item.is_parent);
-            const parent = rows.find(item => item.is_parent);
+                    Object.keys(grouped).forEach(parentKey => {
+                        const rows = grouped[parentKey];
+                        const children = rows.filter(item => !item.is_parent);
+                        const parent = rows.find(item => item.is_parent);
 
-            if (!parent || children.length === 0) return;
+                        if (!parent || children.length === 0) return;
 
-            // Additive fields to sum
-            const additiveFields = ['INV', 'total_views', 'total_req_view', 'inv_value', 'COGS'];
-            additiveFields.forEach(field => {
-                parent[field] = children.reduce((sum, c) => sum + (parseFloat(c[field]) || 0), 0).toFixed(2);
-            });
+                        // Additive fields to sum
+                        const additiveFields = ['INV', 'total_views', 'total_req_view', 'inv_value', 'COGS'];
+                        additiveFields.forEach(field => {
+                            parent[field] = children.reduce((sum, c) => sum + (parseFloat(c[field]) || 0), 0).toFixed(2);
+                        });
 
-            // Rate fields to average
-            const rateFields = ['Dil%', 'avgCvr', 'MSRP', 'MAP', 'LP', 'SHIP', 'temu_ship', 'avgPftPercent'];
-            rateFields.forEach(field => {
-                const values = children.map(c => parseFloat(c[field]) || 0);
-                const valid = values.filter(v => !isNaN(v) && v !== 0); // Exclude 0 to avoid skew
-                parent[field] = valid.length > 0 ? (valid.reduce((sum, v) => sum + v, 0) / valid.length).toFixed(2) :
-                    (values.length > 0 ? (values.reduce((sum, v) => sum + v, 0) / values.length).toFixed(2) : 0);
-            });
+                        // Rate fields to average
+                        const rateFields = ['Dil%', 'avgCvr', 'MSRP', 'MAP', 'LP', 'SHIP', 'temu_ship', 'avgPftPercent'];
+                        rateFields.forEach(field => {
+                            const values = children.map(c => parseFloat(c[field]) || 0);
+                            const valid = values.filter(v => !isNaN(v) && v !== 0); // Exclude 0 to avoid skew
+                            parent[field] = valid.length > 0 ? (valid.reduce((sum, v) => sum + v, 0) / valid.length).toFixed(2) :
+                                (values.length > 0 ? (values.reduce((sum, v) => sum + v, 0) / values.length).toFixed(2) : 0);
+                        });
 
-            // Marketplaces for l30 sum and price weighted average
-            const mps = ['amz', 'ebay', 'macy', 'reverb', 'doba', 'temu', 'ebay3', 'ebay2', 'walmart', 'shein', 'shopifyb2c', 'aliexpress', 'tiktok', 'bestbuy' ,'tiendamia'];
-            mps.forEach(mp => {
-                const l30Field = (mp === 'shopifyb2c' ? 'shopifyb2c_l30' : `${mp}_l30`);
-                const priceField = (mp === 'shopifyb2c' ? 'shopifyb2c_price' : `${mp}_price`);
+                        // Marketplaces for l30 sum and price weighted average
+                        const mps = ['amz', 'ebay', 'macy', 'reverb', 'doba', 'temu', 'ebay3', 'ebay2', 'walmart', 'shein', 'shopifyb2c', 'aliexpress', 'tiktok', 'bestbuy' ,'tiendamia'];
+                        mps.forEach(mp => {
+                            const l30Field = (mp === 'shopifyb2c' ? 'shopifyb2c_l30' : `${mp}_l30`);
+                            const priceField = (mp === 'shopifyb2c' ? 'shopifyb2c_price' : `${mp}_price`);
 
-                // Sum l30
-                parent[l30Field] = children.reduce((sum, c) => sum + (parseFloat(c[l30Field]) || 0), 0);
+                            // Sum l30
+                            parent[l30Field] = children.reduce((sum, c) => sum + (parseFloat(c[l30Field]) || 0), 0);
 
-                // Weighted average price by l30
-                let totalWeighted = 0;
-                let totalWeight = 0;
-                children.forEach(c => {
-                    const price = parseFloat(c[priceField]) || 0;
-                    const weight = parseFloat(c[l30Field]) || 0;
-                    totalWeighted += price * weight;
-                    totalWeight += weight;
-                });
+                            // Weighted average price by l30
+                            let totalWeighted = 0;
+                            let totalWeight = 0;
+                            children.forEach(c => {
+                                const price = parseFloat(c[priceField]) || 0;
+                                const weight = parseFloat(c[l30Field]) || 0;
+                                totalWeighted += price * weight;
+                                totalWeight += weight;
+                            });
 
-                parent[priceField] = totalWeight > 0 ? (totalWeighted / totalWeight).toFixed(2) :
-                    (children.reduce((sum, c) => sum + (parseFloat(c[priceField]) || 0), 0) / children.length).toFixed(2);
-            });
+                            parent[priceField] = totalWeight > 0 ? (totalWeighted / totalWeight).toFixed(2) :
+                                (children.reduce((sum, c) => sum + (parseFloat(c[priceField]) || 0), 0) / children.length).toFixed(2);
+                        });
 
-            // Recalculate inv_value for parent
-            const inv = parseFloat(parent.INV) || 0;
-            const shopifyPrice = parseFloat(parent.shopifyb2c_price) || 0;
-            parent.inv_value = (inv * shopifyPrice).toFixed(2);
+                        // Recalculate inv_value for parent
+                        const inv = parseFloat(parent.INV) || 0;
+                        const shopifyPrice = parseFloat(parent.shopifyb2c_price) || 0;
+                        parent.inv_value = (inv * shopifyPrice).toFixed(2);
 
-            // Recalculate COGS for parent
-            const lp = parseFloat(parent.LP) || 0;
-            parent.COGS = (lp * inv).toFixed(2);
+                        // Recalculate COGS for parent
+                        const lp = parseFloat(parent.LP) || 0;
+                        parent.COGS = (lp * inv).toFixed(2);
 
-            // Recalculate avgPftPercent for parent
-            const marketplaces = [
-                { price: parent.amz_price, l30: parent.amz_l30, factor: 0.70 },
-                { price: parent.ebay_price, l30: parent.ebay_l30, factor: 0.72 },
-                { price: parent.shopifyb2c_price, l30: parent.shopifyb2c_l30, factor: 0.75 },
-                { price: parent.macy_price, l30: parent.macy_l30, factor: 0.76 },
-                { price: parent.reverb_price, l30: parent.reverb_l30, factor: 0.84 },
-                { price: parent.doba_price, l30: parent.doba_l30, factor: 0.95 },
-                { price: parent.temu_price, l30: parent.temu_l30, factor: 0.87, ship: parent.temu_ship },
-                { price: parent.ebay3_price, l30: parent.ebay3_l30, factor: 0.71 },
-                { price: parent.ebay2_price, l30: parent.ebay2_l30, factor: 0.80 },
-                { price: parent.walmart_price, l30: parent.walmart_l30, factor: 0.80 },
-                { price: parent.shein_price, l30: parent.shein_l30, factor: 0.89 },
-                { price: parent.aliexpress_price, l30: parent.aliexpress_l30, factor: 0.89 },
-                { price: parent.tiktok_price, l30: parent.tiktok_price, factor: 0.64 },
-                { price: parent.bestbuy_price, l30: parent.bestbuy_price, factor: 0.80 },
-                { price: parent.tiendamia_price, l30: parent.tiendamia_price, factor: 0.83 },
-                { price: parent.aliexpress_price, l30: parent.aliexpress_price, factor: 0.89 }
+                        // Recalculate avgPftPercent for parent
+                        const marketplaces = [
+                            { price: parent.amz_price, l30: parent.amz_l30, factor: 0.70 },
+                            { price: parent.ebay_price, l30: parent.ebay_l30, factor: 0.72 },
+                            { price: parent.shopifyb2c_price, l30: parent.shopifyb2c_l30, factor: 0.75 },
+                            { price: parent.macy_price, l30: parent.macy_l30, factor: 0.76 },
+                            { price: parent.reverb_price, l30: parent.reverb_l30, factor: 0.84 },
+                            { price: parent.doba_price, l30: parent.doba_l30, factor: 0.95 },
+                            { price: parent.temu_price, l30: parent.temu_l30, factor: 0.87, ship: parent.temu_ship },
+                            { price: parent.ebay3_price, l30: parent.ebay3_l30, factor: 0.71 },
+                            { price: parent.ebay2_price, l30: parent.ebay2_l30, factor: 0.80 },
+                            { price: parent.walmart_price, l30: parent.walmart_l30, factor: 0.80 },
+                            { price: parent.shein_price, l30: parent.shein_l30, factor: 0.89 },
+                            { price: parent.aliexpress_price, l30: parent.aliexpress_l30, factor: 0.89 },
+                            { price: parent.tiktok_price, l30: parent.tiktok_price, factor: 0.80 },
+                            { price: parent.bestbuy_price, l30: parent.bestbuy_price, factor: 0.80 },
+                            { price: parent.tiendamia_price, l30: parent.tiendamia_price, factor: 0.83 },
+                            { price: parent.aliexpress_price, l30: parent.aliexpress_price, factor: 0.89 }
 
-            ];
+                        ];
 
-            let totalProfit = 0;
-            let totalRevenue = 0;
-            marketplaces.forEach(mp => {
-                const price = parseFloat(mp.price) || 0;
-                const l30 = parseFloat(mp.l30) || 0;
-                const ship = parseFloat(mp.ship || parent.SHIP) || 0;
-                const profit = ((price * mp.factor) - lp - ship) * l30;
-                totalProfit += profit;
-                totalRevenue += price * l30;
-            });
+                        let totalProfit = 0;
+                        let totalRevenue = 0;
+                        marketplaces.forEach(mp => {
+                            const price = parseFloat(mp.price) || 0;
+                            const l30 = parseFloat(mp.l30) || 0;
+                            const ship = parseFloat(mp.ship || parent.SHIP) || 0;
+                            const profit = ((price * mp.factor) - lp - ship) * l30;
+                            totalProfit += profit;
+                            totalRevenue += price * l30;
+                        });
 
-            parent.avgPftPercent = totalRevenue > 0 ? ((totalProfit / totalRevenue) * 100).toFixed(2) : 0;
+                        parent.avgPftPercent = totalRevenue > 0 ? ((totalProfit / totalRevenue) * 100).toFixed(2) : 0;
 
-            // Set image from first child if missing
-            if (!parent.shopifyb2c_image && children[0]) {
-                parent.shopifyb2c_image = children[0].shopifyb2c_image;
-            }
+                        // Set image from first child if missing
+                        if (!parent.shopifyb2c_image && children[0]) {
+                            parent.shopifyb2c_image = children[0].shopifyb2c_image;
+                        }
 
-            // Set ovl30 if needed
-            parent.ovl30 = parent.shopifyb2c_l30;
-        });
+                        // Set ovl30 if needed
+                        parent.ovl30 = parent.shopifyb2c_l30;
+                    });
 
 
                     // Sort inside each group: child rows first, parent bottom
@@ -2032,6 +2137,44 @@
 
         });
 
+
+
+        table.on("dataLoaded", function() {
+    table.getRows().forEach(r => {
+        const data = r.getData();
+        const rowEl = r.getElement();
+        // Show PARENT rows by default
+        if (!data["SKU"].toUpperCase().includes("PARENT")) {
+            rowEl.style.display = "none";
+        }
+    });
+    
+    // Make sure "Parent" view filter is checked by default
+    document.getElementById('parentFilter').checked = true;
+});
+
+// Expand/Collapse parent on click
+document.addEventListener("click", function(e) {
+    const parentRow = e.target.closest(".tabulator-row.parent-row");
+    if (parentRow) {
+        const table = Tabulator.findTable("#forecast-table")[0];
+        const row = table.getRowFromElement(parentRow);
+        const parentData = row.getData();
+        const parentName = parentData["Parent"];
+        const icon = parentRow.querySelector(".toggle-icon");
+
+        const isExpanded = parentRow.classList.toggle("expanded");
+        icon.textContent = isExpanded ? "➖" : "➕";
+
+        table.getRows().forEach(r => {
+            const data = r.getData();
+            const rowEl = r.getElement();
+            if (data["Parent"] === parentName && !data["SKU"].toUpperCase().includes("PARENT")) {
+                rowEl.style.display = isExpanded ? "table-row" : "none";
+            }
+        });
+    }
+});
 
 
 
@@ -2115,8 +2258,41 @@
         let currentParentFilter = null;
 
         function setCombinedFilters() {
-            table.setFilter(function(row) {
-                return true; // Show all rows by default
+            table.setFilter(function(data) {
+                // Parent filter
+                if (currentParentFilter && data.Parent !== currentParentFilter) return false;
+
+                // Inv filter
+                if (currentInvFilter === "zero" && data.inv != 0) return false;
+                if (currentInvFilter === "other" && data.inv == 0) return false;
+
+                // CVR filter
+                const cvr = parseFloat(data.avgCvr) || 0;
+                if (currentCvrFilter === "high" && !(cvr > 5)) return false;
+                if (currentCvrFilter === "medium" && !(cvr >= 3 && cvr <= 5)) return false;
+                if (currentCvrFilter === "low" && !(cvr < 3)) return false;
+
+                // View filter
+                if (currentViewFilter === "parent" && !data.is_parent) return false;
+                if (currentViewFilter === "sku" && data.is_parent) return false;
+
+                // Dil filter
+                const dil = parseFloat(data["Dil%"]) || 0;
+                if (currentDilFilter === "verylow" && !(dil <= 10)) return false;
+                if (currentDilFilter === "low" && !(dil >= 11 && dil <= 15)) return false;
+                if (currentDilFilter === "medium" && !(dil >= 16 && dil <= 20)) return false;
+                if (currentDilFilter === "high" && !(dil >= 21 && dil <= 40)) return false;
+                if (currentDilFilter === "veryhigh" && !(dil > 40)) return false;
+
+                // Margin filter
+                const margin = parseFloat(data.avgPftPercent) || 0;
+                if (currentMarginFilter === "verylow" && !(margin < 11)) return false;
+                if (currentMarginFilter === "low" && !(margin >= 11 && margin <= 15)) return false;
+                if (currentMarginFilter === "medium" && !(margin >= 15 && margin <= 20)) return false;
+                if (currentMarginFilter === "high" && !(margin >= 20 && margin <= 50)) return false;
+                if (currentMarginFilter === "veryhigh" && !(margin > 50)) return false;
+
+                return true;
             });
         }
 
@@ -2365,6 +2541,8 @@
                                 : r.prefix === 'temu' ? (data.temu_views ?? "-")
                                 : r.prefix === 'tiktok' ? (data.tiktok_views ?? "-")
                                 : r.prefix === 'aliexpress' ? (data.aliexpress_views ?? "-")
+                                : r.prefix === 'walmart' ? (data.walmart_views ?? "-")
+                                : r.prefix === 'doba' ? (data.doba_views ?? "-")
                                 : "-" }
                         </div>
                     </td>
@@ -2391,6 +2569,12 @@
                                 else if (r.prefix === 'aliexpress' && cvr) {
                                     return `<span style="color: ${cvr.color}">${Math.round(cvr.value)}%</span>`;
                                 }
+                                else if (r.prefix === 'walmart' && cvr) {
+                                    return `<span style="color: ${cvr.color}">${Math.round(cvr.value)}%</span>`;
+                                }
+                                else if (r.prefix === 'doba' && cvr) {
+                                    return `<span style="color: ${cvr.color}">${Math.round(cvr.value)}%</span>`;
+                                }
 
                                 return "N/A";
                             })()} 
@@ -2408,7 +2592,9 @@
                             r.prefix === 'bestbuy' ? Math.round(data.bestbuy_req_view) ?? "-" :
                             r.prefix === 'tiendamia' ? Math.round(data.tiendamia_req_view) ?? "-" :
                             r.prefix === 'tiktok' ? Math.round(data.tiktok_req_view) ?? "-" :
-                            r.prefix === 'aliexpress' ? Math.round(data.aliexpress_req_view) ?? "-" : "-"}
+                            r.prefix === 'aliexpress' ? Math.round(data.aliexpress_req_view) ?? "-" :
+                            r.prefix === 'walmart' ? Math.round(data.walmart_req_view) ?? "-" :
+                            r.prefix === 'doba' ? Math.round(data.doba_req_view) ?? "-" : "-"}
                         </div>
                     </td>
 

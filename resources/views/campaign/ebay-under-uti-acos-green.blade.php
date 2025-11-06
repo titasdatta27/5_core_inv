@@ -247,7 +247,7 @@
 
             var table = new Tabulator("#budget-under-table", {
                 index: "Sku",
-                ajaxURL: "/ebay3",
+                ajaxURL: "/ebay-uti-acos/data",
                 layout: "fitData",
                 movableColumns: true,
                 resizableColumns: true,
@@ -550,12 +550,20 @@
 
                     // Inventory filter
                     let invFilterVal = $("#inv-filter").val();
-                    if (!invFilterVal) {
-                        if (parseFloat(data.INV) === 0) return false;
-                    } else if (invFilterVal === "INV_0") {
-                        if (parseFloat(data.INV) !== 0) return false;
-                    } else if (invFilterVal === "OTHERS") {
-                        if (parseFloat(data.INV) === 0) return false;
+                    if (invFilterVal) {
+                        const inv = parseFloat(data.INV || 0);
+
+                        if (invFilterVal === "INV_0" && inv !== 0) {
+                            // Show only rows where inventory = 0
+                            return false;
+                        } 
+                        else if (invFilterVal === "OTHERS" && inv === 0) {
+                            // Show only rows where inventory > 0
+                            return false;
+                        } 
+                        else if (invFilterVal === "ALL") {
+                            // Show all — no filter
+                        }
                     }
 
                     // NR filter (use only data object)

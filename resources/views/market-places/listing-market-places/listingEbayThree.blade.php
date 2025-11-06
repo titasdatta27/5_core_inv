@@ -1149,7 +1149,8 @@
 
                                 <a href="{{ asset('sample_excel/sample_listing_file.csv') }}" download class="btn btn-outline-secondary mb-3">📄 Download Sample File</a>
 
-                                <input type="file" id="importFile" name="file" accept=".xlsx,.xls,.csv" class="form-control" />
+                                <input type="file" id="importFile" name="file" accept=".csv,.txt" class="form-control" />
+                                <small class="text-muted">Only CSV or TXT files are supported</small>
                             </div>
 
                             <div class="modal-footer">
@@ -1601,21 +1602,36 @@
 
                 // Listed/Pending dropdown only for non-parent rows
                 if (!item.sku.includes('PARENT')) {
-                    const $listedDropdown = $('<select>')
-                        .addClass('listed-dropdown form-control form-control-sm')
-                        .append('<option value="Listed" class="listed-option">Listed</option>')
-                        .append('<option value="Pending" class="pending-option">Pending</option>');
+                    // Check if nr_req is 'NR', then show 'NRL' button instead of dropdown
+                    if (item.nr_req === 'NR') {
+                        const $badge = $('<button>').text('NRL').css({
+                            'color': 'white',
+                            'background-color': '#dc3545',
+                            'padding': '6px 8px',
+                            'border': 'none',
+                            'cursor': 'default',
+                            'font-size': '14px',
+                            'width': '100%',
+                            'text-align': 'center'
+                        });
+                        $row.append($('<td>').append($badge));
+                    } else {
+                        const $listedDropdown = $('<select>')
+                            .addClass('listed-dropdown form-control form-control-sm')
+                            .append('<option value="Listed" class="listed-option">Listed</option>')
+                            .append('<option value="Pending" class="pending-option">Pending</option>');
 
-                    const listedValue = item.listed || 'Pending';
-                    $listedDropdown.val(listedValue);
+                        const listedValue = item.listed || 'Pending';
+                        $listedDropdown.val(listedValue);
 
-                    if (listedValue === 'Listed') {
-                        $listedDropdown.css('background-color', '#28a745').css('color', 'white');
-                    } else if (listedValue === 'Pending') {
-                        $listedDropdown.css('background-color', '#dc3545').css('color', 'white');
+                        if (listedValue === 'Listed') {
+                            $listedDropdown.css('background-color', '#28a745').css('color', 'white');
+                        } else if (listedValue === 'Pending') {
+                            $listedDropdown.css('background-color', '#dc3545').css('color', 'white');
+                        }
+
+                        $row.append($('<td>').append($listedDropdown));
                     }
-
-                    $row.append($('<td>').append($listedDropdown));
                 } else {
                     $row.append($('<td>').text('')); // Empty cell for parent rows
                 }
@@ -2241,6 +2257,37 @@
                 const $row = $(this).closest('tr');
                 const sku = $row.find('td').eq(2).text().trim();
                 const nr_req = $(this).val();
+
+                // Get the Listed/Pending cell (assuming it's the 6th column, index 5)
+                const $listedCell = $row.find('td').eq(6);
+
+                // If NR is selected, replace dropdown with 'NRL' button
+                if (nr_req === 'NR') {
+                    const $badge = $('<button>').text('NRL').css({
+                        'color': 'white',
+                        'background-color': '#dc3545',
+                        'padding': '6px 8px',
+                        'border': 'none',
+                        'cursor': 'default',
+                        'font-size': '14px',
+                        'width': '100%',
+                        'text-align': 'center'
+                    });
+                    $listedCell.empty().append($badge);
+                } else {
+                    // If REQ is selected, restore the dropdown if it doesn't exist
+                    if (!$listedCell.find('select').length) {
+                        const $listedDropdown = $('<select>')
+                            .addClass('listed-dropdown form-control form-control-sm')
+                            .append('<option value="Listed" class="listed-option">Listed</option>')
+                            .append('<option value="Pending" class="pending-option">Pending</option>');
+                        
+                        $listedDropdown.val('Pending');
+                        $listedDropdown.css('background-color', '#dc3545').css('color', 'white');
+                        
+                        $listedCell.empty().append($listedDropdown);
+                    }
+                }
 
                 saveStatusToDB(sku, {
                     nr_req

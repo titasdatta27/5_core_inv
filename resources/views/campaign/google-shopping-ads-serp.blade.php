@@ -152,7 +152,7 @@
                                     <select id="inv-filter" class="form-select form-select-md">
                                         <option value="ALL">ALL</option>
                                         <option value="INV_0">0 INV</option>
-                                        <option value="OTHERS">OTHERS</option>
+                                        <option value="OTHERS">INV > 0</option>
                                     </select>
 
                                     <select id="nrl-filter" class="form-select form-select-md">
@@ -245,7 +245,7 @@
 
             var table = new Tabulator("#budget-under-table", {
                 index: "Sku",
-                ajaxURL: "/google/shopping/data",
+                ajaxURL: "/google/search/data",
                 layout: "fitData",
                 movableColumns: true,
                 resizableColumns: true,
@@ -316,6 +316,10 @@
                         field: "campaignName"
                     },
                     {
+                        title: "STATUS",
+                        field: "status"
+                    },
+                    {
                         title: "BGT",
                         field: "campaignBudgetAmount",
                         hozAlign: "right",
@@ -323,13 +327,13 @@
                     },
                     {
                         title: "7 UB%",
-                        field: "l7_spend",
+                        field: "spend_L7",
                         hozAlign: "right",
                         formatter: function(cell) {
                             var row = cell.getRow().getData();
-                            var l7_spend = parseFloat(row.l7_spend) || 0;
+                            var spend_L7 = parseFloat(row.spend_L7) || 0;
                             var budget = parseFloat(row.campaignBudgetAmount) || 0;
-                            var ub7 = budget > 0 ? (l7_spend / (budget * 7)) * 100 : 0;
+                            var ub7 = budget > 0 ? (spend_L7 / (budget * 7)) * 100 : 0;
 
                             var td = cell.getElement();
                             td.classList.remove('green-bg', 'pink-bg', 'red-bg');
@@ -346,13 +350,13 @@
                     },
                     {
                         title: "1 UB%",
-                        field: "l1_spend",
+                        field: "spend_L1",
                         hozAlign: "right",
                         formatter: function(cell) {
                             var row = cell.getRow().getData();
-                            var l1_spend = parseFloat(row.l1_spend) || 0;
+                            var spend_L1 = parseFloat(row.spend_L1) || 0;
                             var budget = parseFloat(row.campaignBudgetAmount) || 0;
-                            var ub1 = budget > 0 ? (l1_spend / budget) * 100 : 0;
+                            var ub1 = budget > 0 ? (spend_L1 / budget) * 100 : 0;
 
                             var td = cell.getElement();
                             td.classList.remove('green-bg', 'pink-bg', 'red-bg');
@@ -369,22 +373,22 @@
                     },
                     {
                         title: "L7 CPC",
-                        field: "l7_cpc",
+                        field: "cpc_L7",
                         hozAlign: "center",
                         formatter: function(cell) {
                             var row = cell.getRow().getData();
-                            var l7_cpc = parseFloat(row.l7_cpc) || 0;
-                            return l7_cpc.toFixed(2);
+                            var cpc_L7 = parseFloat(row.cpc_L7) || 0;
+                            return cpc_L7.toFixed(2);
                         }
                     },
                     {
                         title: "L1 CPC",
-                        field: "l1_cpc",
+                        field: "cpc_L1",
                         hozAlign: "center",
                         formatter: function(cell) {
                             var row = cell.getRow().getData();
-                            var l1_cpc = parseFloat(row.l1_cpc) || 0;
-                            return l1_cpc.toFixed(2);
+                            var cpc_L1 = parseFloat(row.cpc_L1) || 0;
+                            return cpc_L1.toFixed(2);
                         }
                     },
                     {
@@ -393,13 +397,13 @@
                         hozAlign: "center",
                         formatter: function(cell) {
                             var row = cell.getRow().getData();
-                            var l1_cpc = parseFloat(row.l1_cpc) || 0;
-                            var l7_cpc = parseFloat(row.l7_cpc) || 0;
+                            var cpc_L1 = parseFloat(row.cpc_L1) || 0;
+                            var cpc_L7 = parseFloat(row.cpc_L7) || 0;
                             var sbid;
-                            if(l1_cpc > l7_cpc) {
-                                sbid = (l1_cpc * 0.9).toFixed(2);
+                            if(cpc_L1 > cpc_L7) {
+                                sbid = Math.floor(cpc_L1 * 0.90 * 100) / 100;
                             }else{
-                                sbid = (l7_cpc * 0.9).toFixed(2);
+                                sbid = Math.floor(cpc_L7 * 0.90 * 100) / 100;
                             }
                             return sbid;
                         },
@@ -419,15 +423,15 @@
                         cellClick: function(e, cell) {
                             if (e.target.classList.contains("update-row-btn")) {
                                 var row = cell.getRow().getData();
-                                var l1_cpc = parseFloat(row.l1_cpc) || 0;
-                                var l7_cpc = parseFloat(row.l7_cpc) || 0;
+                                var cpc_L1 = parseFloat(row.cpc_L1) || 0;
+                                var cpc_L7 = parseFloat(row.cpc_L7) || 0;
                                 var sbid;
-                                if(l1_cpc > l7_cpc) {
-                                    sbid = (l1_cpc * 0.9).toFixed(2);
+                                if(cpc_L1 > cpc_L7) {
+                                    sbid = Math.floor(cpc_L1 * 0.90 * 100) / 100;
                                 }else{
-                                    sbid = (l7_cpc * 0.9).toFixed(2);
+                                    sbid = Math.floor(cpc_L7 * 0.90 * 100) / 100;
                                 }
-                                updateBid(sbid, rowData.campaign_id);
+                                updateBid(sbid, row.campaign_id);
                             }
                         }
                     },
@@ -445,61 +449,6 @@
                 }
             });
 
-            table.on("cellEdited", function(cell){
-                if(cell.getField() === "crnt_bid"){
-                    var row = cell.getRow();
-                    var rowData = row.getData();
-                    var newCrntBid = parseFloat(rowData.crnt_bid) || 0;
-
-                    row.update({
-                        sbid: (newCrntBid * 0.9).toFixed(2)
-                    });
-
-                    $.ajax({
-                        url: '/update-amazon-sp-bid-price', 
-                        method: 'POST',
-                        data: {
-                            id: rowData.campaign_id,
-                            crnt_bid: newCrntBid,
-                            _token: '{{ csrf_token() }}'
-                        },
-                        success: function(response){
-                            console.log(response);
-                        },
-                        error: function(xhr){
-                            alert('Error updating CRNT BID');
-                        }
-                    });
-                }
-            });
-
-            // document.addEventListener("change", function(e){
-            //     if(e.target.classList.contains("editable-select")){
-            //         let sku   = e.target.getAttribute("data-sku");
-            //         let field = e.target.getAttribute("data-field");
-            //         let value = e.target.value;
-
-            //         fetch('/update-amazon-nr-nrl-fba', {
-            //             method: 'POST',
-            //             headers: {
-            //                 'Content-Type': 'application/json',
-            //                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            //             },
-            //             body: JSON.stringify({
-            //                 sku: sku,
-            //                 field: field,
-            //                 value: value
-            //             })
-            //         })
-            //         .then(res => res.json())
-            //         .then(data => {
-            //             console.log(data);
-            //         })
-            //         .catch(err => console.error(err));
-            //     }
-            // });
-
-
             table.on("tableBuilt", function () {
 
                 function combinedFilter(data) {
@@ -514,13 +463,12 @@
                     }
 
                     let statusVal = $("#status-filter").val();
-                    if (statusVal && data.campaignStatus !== statusVal) {
+                    if (statusVal && data.status !== statusVal) {
                         return false;
                     }
 
                     let invFilterVal = $("#inv-filter").val();
                     if (invFilterVal === "ALL") {
-                        if (parseFloat(data.INV) === 0) return false;
                     } else if (invFilterVal === "INV_0") {
                         if (parseFloat(data.INV) !== 0) return false;
                     } else if (invFilterVal === "OTHERS") {
@@ -569,7 +517,7 @@
                 if (e.target.classList.contains("toggle-cols-btn")) {
                     let btn = e.target;
 
-                    let colsToToggle = ["INV", "L30", "DIL %", "WA_L30", "NRL"];
+                    let colsToToggle = ["INV", "L30", "DIL %"];
 
                     colsToToggle.forEach(colName => {
                         let col = table.getColumn(colName);
@@ -580,90 +528,38 @@
                 }
             });
 
-            // document.getElementById("apr-all-sbid-btn").addEventListener("click", function(){
-            //     const overlay = document.getElementById("progress-overlay");
-            //     overlay.style.display = "flex";
+            function updateBid(aprBid, campaignId) {
+                const overlay = document.getElementById("progress-overlay");
+                overlay.style.display = "flex";
 
-            //     var filteredData = table.getSelectedRows();
-                
-            //     var campaignIds = [];
-            //     var bids = [];
+                console.log("Updating bid for Campaign ID:", campaignId, "New Bid:", aprBid);
 
-            //     filteredData.forEach(function(row){
-            //         var rowEl = row.getElement();
-            //         if(rowEl && rowEl.offsetParent !== null){
-            //             var rowData = row.getData();
-            //             var l1_cpc = parseFloat(rowData.l1_cpc) || 0;
-            //             var l7_cpc = parseFloat(rowData.l7_cpc) || 0;
-            //             var sbid;
-            //             if(l1_cpc > l7_cpc) {
-            //                 sbid = (l1_cpc * 0.9).toFixed(2);
-            //             }else{
-            //                 sbid = (l7_cpc * 0.9).toFixed(2);
-            //             }
-
-            //             campaignIds.push(rowData.campaign_id);
-            //             bids.push(sbid);
-            //         }
-            //     });
-            //     console.log("Campaign IDs:", campaignIds);
-            //     console.log("Bids:", bids);
-            //     fetch('/update-keywords-bid-price', {
-            //         method: 'PUT',
-            //         headers: {
-            //             'Content-Type': 'application/json',
-            //             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            //         },
-            //         body: JSON.stringify({
-            //             campaign_ids: campaignIds,
-            //             bids: bids
-            //         })
-            //     })
-            //     .then(res => res.json())
-            //     .then(data => {
-            //         console.log("Backend response:", data);
-            //         if(data.status === 200){
-            //             alert("Keywords updated successfully!");
-            //         } else {
-            //             alert("Something went wrong: " + data.message);
-            //         }
-            //     })
-            //     .catch(err => console.error(err))
-            //     .finally(() => {
-            //         overlay.style.display = "none";
-            //     });
-            // });
-
-            // function updateBid(aprBid, campaignId) {
-            //     const overlay = document.getElementById("progress-overlay");
-            //     overlay.style.display = "flex";
-
-            //     console.log("Updating bid for Campaign ID:", campaignId, "New Bid:", aprBid);
-            //     fetch('/update-keywords-bid-price', {
-            //         method: 'PUT',
-            //         headers: {
-            //             'Content-Type': 'application/json',
-            //             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            //         },
-            //         body: JSON.stringify({
-            //             campaign_ids: [campaignId],
-            //             bids: [aprBid]
-            //         })
-            //     })
-            //     .then(res => res.json())
-            //     .then(data => {
-            //         console.log("Backend response:", data);
-            //         if(data.status === 200){
-            //             alert("Keywords updated successfully!");
-            //         } else {
-            //             alert("Something went wrong: " + data.message);
-            //         }
-            //     })
-            //     .catch(err => console.error(err))
-            //     .finally(() => {
-            //         overlay.style.display = "none";
-            //     });
-            // }
+                fetch('/update-google-ads-bid-price', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                            'content')
+                    },
+                    body: JSON.stringify({
+                        campaign_ids: [campaignId],
+                        bids: [aprBid]
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    console.log("Backend response:", data);
+                    // if (data.status === 200) {
+                    //     alert("Keywords updated successfully!");
+                    // } else {
+                    //     alert("Something went wrong: " + data.message);
+                    // }
+                })
+                .catch(err => console.error(err))
+                .finally(() => {
+                    overlay.style.display = "none";
+                });
+            }
 
             // Safe selector function
             function getRowSelectBySkuAndField(sku, field) {

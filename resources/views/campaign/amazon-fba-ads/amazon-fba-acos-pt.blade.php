@@ -192,6 +192,9 @@
                                     <button id="apr-all-sbid-btn" class="btn btn-info btn-sm d-none">
                                         APR ALL SBID
                                     </button>
+                                    <a href="javascript:void(0)" id="export-btn" class="btn btn-sm btn-success d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-file-export me-1"></i> Export Excel/CSV
+                                    </a>
                                     <button class="btn btn-success btn-md">
                                         <i class="fa fa-arrow-up me-1"></i>
                                         Need to increase bids: <span id="total-campaigns" class="fw-bold ms-1 fs-4">0</span>
@@ -248,6 +251,8 @@
 @section('script')
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://unpkg.com/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
+    <!-- SheetJS for Excel Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
 
@@ -662,7 +667,7 @@
 
                     let invFilterVal = $("#inv-filter").val();
                     if (!invFilterVal) {
-                        // if (parseFloat(data.INV) === 0) return false;
+                        if (parseFloat(data.INV) === 0) return false;
                     } else if (invFilterVal === "INV_0") {
                         if (parseFloat(data.INV) !== 0) return false;
                     } else if (invFilterVal === "OTHERS") {
@@ -705,8 +710,10 @@
                     return true;
                 }
 
+                // ✅ SET FILTER
                 table.setFilter(combinedFilter);
 
+                // ✅ UPDATE COUNTS
                 function updateCampaignStats() {
                     let allRows = table.getData();
                     let filteredRows = allRows.filter(combinedFilter);
@@ -724,7 +731,8 @@
                 table.on("pageLoaded", updateCampaignStats);
                 table.on("dataProcessed", updateCampaignStats);
 
-                $("#global-search").on("keyup", function() {
+                // ✅ SEARCH + FILTER CHANGE HANDLERS
+                $("#global-search").on("keyup", function () {
                     table.setFilter(combinedFilter);
                 });
 
@@ -869,6 +877,22 @@
                 });
             }
 
+            document.getElementById("export-btn").addEventListener("click", function () {
+                let allData = table.getData("active"); 
+
+                if (allData.length === 0) {
+                    alert("No data available to export!");
+                    return;
+                }
+
+                let exportData = allData.map(row => ({ ...row }));
+
+                let ws = XLSX.utils.json_to_sheet(exportData);
+                let wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Campaigns");
+
+                XLSX.writeFile(wb, "amazon_fba_acos_pt_ads.xlsx");
+            });
 
             document.body.style.zoom = "78%";
         });

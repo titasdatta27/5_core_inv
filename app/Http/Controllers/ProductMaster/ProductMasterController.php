@@ -130,8 +130,20 @@ class ProductMasterController extends Controller
             }
 
             // Add Shopify inv and quantity if available
-            $row['shopify_inv'] = $shopifySkus[$product->sku]->inv ?? null;
-            $row['shopify_quantity'] = $shopifySkus[$product->sku]->quantity ?? null;
+            // $row['shopify_inv'] = $shopifySkus[$product->sku]->inv ?? null;
+            // $row['shopify_quantity'] = $shopifySkus[$product->sku]->quantity ?? null;
+
+            if (isset($shopifySkus[$product->sku])) {
+                $shopifyData = $shopifySkus[$product->sku];
+                $row['shopify_inv'] = $shopifyData->inv !== null ? (float)$shopifyData->inv : 0;
+                $row['shopify_quantity'] = $shopifyData->quantity !== null ? (float)$shopifyData->quantity : 0;
+                $shopifyImage = $shopifyData->image_src ?? null;
+            } else {
+                $row['shopify_inv'] = 0;
+                $row['shopify_quantity'] = 0;
+                $shopifyImage = null;
+            }
+
 
             $shopifyImage = $shopifySkus[$product->sku]->image_src ?? null;
             // image_path is inside $row (from Values JSON)
@@ -287,6 +299,22 @@ class ProductMasterController extends Controller
                     }
                 }
 
+                // Check if changing SKU/parent would create a duplicate
+                if ($validated['sku'] !== $originalSku || $validated['parent'] !== $originalParent) {
+                    $duplicate = ProductMaster::where('sku', $validated['sku'])
+                        ->where('parent', $validated['parent'])
+                        ->where('id', '!=', $product->id)
+                        ->first();
+                    
+                    if ($duplicate) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Another product with this SKU already exists.',
+                            'data' => $duplicate
+                        ], 409); // 409 Conflict status code
+                    }
+                }
+                
                 $product->sku = $validated['sku'];
                 $product->parent = $validated['parent'];
                 $product->Values = $values;
@@ -309,7 +337,14 @@ class ProductMasterController extends Controller
                     ->where('parent', $validated['parent'])
                     ->first();
 
-                if ($existing && $existing->trashed()) {
+                if ($existing && !$existing->trashed()) {
+                    // Product already exists and is not deleted
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'A product with this SKU already exists in the database.',
+                        'data' => $existing
+                    ], 409); // 409 Conflict status code
+                } else if ($existing && $existing->trashed()) {
                     // Restore and update
                     $existing->restore();
                     $existing->Values = $values;
@@ -355,9 +390,25 @@ class ProductMasterController extends Controller
             }
         } catch (\Exception $e) {
             Log::error('Error saving product: ' . $e->getMessage());
+            
+            // Check for duplicate entry error (integrity constraint violation)
+            if (strpos($e->getMessage(), 'Integrity constraint violation') !== false && 
+                strpos($e->getMessage(), 'Duplicate entry') !== false) {
+                
+                // Extract the duplicate SKU from the error message
+                preg_match("/Duplicate entry '(.+)' for/", $e->getMessage(), $matches);
+                $duplicateSku = isset($matches[1]) ? $matches[1] : 'this SKU';
+                
+                return response()->json([
+                    'success' => false,
+                    'message' => "Product with SKU '{$duplicateSku}' already exists in the database.",
+                    'error_type' => 'duplicate_entry'
+                ], 409); // Conflict status code
+            }
+            
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage() // <-- TEMP: show real error
+                'message' => 'Error saving product: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -391,10 +442,15 @@ class ProductMasterController extends Controller
             }
 
             foreach ($products as $product) {
+
                 // Delete image if exists
                 if ($product->image && File::exists(public_path($product->image))) {
                     File::delete(public_path($product->image));
                 }
+                
+                //Log the user who is deleting
+                $product->deleted_by = auth()->id();
+                $product->save();
 
                 // Hard delete the product
                 $product->delete();
@@ -402,7 +458,7 @@ class ProductMasterController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => count($productIds) . ' product(s) deleted successfully.',
+                'message' => count($productIds) . ' product(s) archived successfully.',
             ]);
         } catch (\Exception $e) {
             Log::error('Error deleting product(s): ' . $e->getMessage());
@@ -423,10 +479,12 @@ class ProductMasterController extends Controller
         $keyMap = [
             'LP' => 'lp',
             'CP' => 'cp',
+            'MOQ' => 'moq',
             'FRGHT' => 'frght',
             'SHIP' => 'ship',
             'SHIP FBA' => 'ship_fba',
             'SHIP Temu' => 'ship_temu',
+            'MOQ' => 'moq',
             'SHIP eBay2' => 'ship_ebay2',
             'Label QTY' => 'label_qty',
             'WT ACT' => 'wt_act',
@@ -628,4 +686,62 @@ class ProductMasterController extends Controller
 
         return response()->json($data);
     }
+
+
+    public function getArchived()
+    {
+        try {
+            $archived = ProductMaster::onlyTrashed()
+            ->leftJoin('users', 'product_master.deleted_by', '=', 'users.id') 
+            ->select('product_master.*','users.name as deleted_by_name')
+            ->orderBy('product_master.deleted_at', 'desc')
+            ->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $archived
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error fetching archived products: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch archived products.'
+            ], 500);
+        }
+    }
+
+    public function restore(Request $request)
+    {
+        try {
+            $ids = $request->input('ids');
+
+            if (empty($ids)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No products selected for restoration.'
+                ], 400);
+            }
+
+            if (!is_array($ids)) {
+                $ids = [$ids];
+            }
+
+            ProductMaster::withTrashed()
+            ->whereIn('id', $ids)
+            ->update(['deleted_at' => null]);
+
+            return response()->json([
+                'success' => true,
+                'message' => count($ids) . ' product(s) restored successfully.'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error restoring products: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to restore products.'
+            ], 500);
+        }
+    }
+
+
 }

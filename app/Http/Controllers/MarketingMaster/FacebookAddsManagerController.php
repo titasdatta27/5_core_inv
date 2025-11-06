@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ProductMaster;
 use App\Models\ShopifySku;
 use Illuminate\Http\Request;
+use App\Models\AmazonDataView;
 
 class FacebookAddsManagerController extends Controller
 {
@@ -40,6 +41,8 @@ class FacebookAddsManagerController extends Controller
 
         $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy('sku');
 
+        $nrValues = AmazonDataView::whereIn('sku', $skus)->pluck('value', 'sku');
+
         $result = [];
 
         foreach ($productMasters as $pm) {
@@ -54,6 +57,19 @@ class FacebookAddsManagerController extends Controller
             $row['INV']    = $shopify->inv ?? 0;
             $row['L30']    = $shopify->quantity ?? 0;
             $row['fba']    = $pm->fba ?? null;
+
+            if (isset($nrValues[$pm->sku])) {
+                $raw = $nrValues[$pm->sku];
+                if (!is_array($raw)) {
+                    $raw = json_decode($raw, true);
+                }
+                if (is_array($raw)) {
+                    $row['NRL']  = $raw['NRL'] ?? null;
+                    $row['NRA'] = $raw['NRA'] ?? null;
+                    $row['FBA'] = $raw['FBA'] ?? null;
+                    $row['TPFT'] = $raw['TPFT'] ?? null;
+                }
+            }
 
             $result[] = (object) $row;
         }
@@ -82,6 +98,8 @@ class FacebookAddsManagerController extends Controller
 
         $shopifyData = ShopifySku::whereIn('sku', $skus)->get()->keyBy('sku');
 
+        $nrValues = AmazonDataView::whereIn('sku', $skus)->pluck('value', 'sku');
+
         $result = [];
 
         foreach ($productMasters as $pm) {
@@ -96,6 +114,23 @@ class FacebookAddsManagerController extends Controller
             $row['INV']    = $shopify->inv ?? 0;
             $row['L30']    = $shopify->quantity ?? 0;
             $row['fba']    = $pm->fba ?? null;
+
+            $row['NRL']  = '';
+            $row['NRA'] = '';
+            $row['FBA'] = '';
+
+            if (isset($nrValues[$pm->sku])) {
+                $raw = $nrValues[$pm->sku];
+                if (!is_array($raw)) {
+                    $raw = json_decode($raw, true);
+                }
+                if (is_array($raw)) {
+                    $row['NRL']  = $raw['NRL'] ?? null;
+                    $row['NRA'] = $raw['NRA'] ?? null;
+                    $row['FBA'] = $raw['FBA'] ?? null;
+                    $row['TPFT'] = $raw['TPFT'] ?? null;
+                }
+            }
 
             $result[] = (object) $row;
         }

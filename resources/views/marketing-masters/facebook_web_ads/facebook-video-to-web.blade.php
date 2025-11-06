@@ -191,14 +191,14 @@
                                     <button id="apr-all-sbid-btn" class="btn btn-info btn-sm d-none">
                                         APR ALL SBID
                                     </button>
-                                    <button class="btn btn-success btn-md">
+                                    <!-- <button class="btn btn-success btn-md">
                                         <i class="fa fa-arrow-up me-1"></i>
                                         Need to increase bids: <span id="total-campaigns" class="fw-bold ms-1 fs-4">0</span>
                                     </button>
                                     <button class="btn btn-primary btn-md">
                                         <i class="fa fa-percent me-1"></i>
                                         of Total: <span id="percentage-campaigns" class="fw-bold ms-1 fs-4">0%</span>
-                                    </button>
+                                    </button> -->
                                 </div>
                             </div>
                         </div>
@@ -251,6 +251,12 @@
     <script>
         document.addEventListener("DOMContentLoaded", function() {
 
+            const invFilter  = document.querySelector("#inv-filter");
+            const nrlFilter  = document.querySelector("#nrl-filter");
+            const nraFilter  = document.querySelector("#nra-filter");
+            const fbaFilter  = document.querySelector("#fba-filter");
+
+
             const getDilColor = (value) => {
                 const percent = parseFloat(value) * 100;
                 if (percent < 16.66) return 'red';
@@ -286,28 +292,28 @@
                         title: "Parent",
                         field: "parent"
                     },
-                    //     {
-                    //         title: "SKU",
-                    //         field: "sku",
-                    //         formatter: function(cell) {
-                    //             let sku = cell.getValue();
-                    //             return `
-                //     <span>${sku}</span>
-                //     <i class="fa fa-info-circle text-primary toggle-cols-btn" 
-                //     data-sku="${sku}" 
-                //     style="cursor:pointer; margin-left:8px;"></i>
-                // `;
-                    //         }
-                    //     },
+                    {
+                        title: "SKU",
+                        field: "sku",
+                        formatter: function(cell) {
+                            let sku = cell.getValue();
+                            return `
+                                <span>${sku}</span>
+                                <i class="fa fa-info-circle text-primary toggle-cols-btn" 
+                                    data-sku="${sku}" 
+                                    style="cursor:pointer; margin-left:8px;"></i>
+                                `;
+                        }
+                    },
                     {
                         title: "INV",
                         field: "INV",
-                        visible: true
+                        visible: false
                     },
                     {
-                        title: "L30",
+                        title: "OV L30",
                         field: "L30",
-                        visible: true
+                        visible: false
                     },
                     {
                         title: "DIL %",
@@ -324,30 +330,40 @@
                             }
                             return `<div class="text-center"><span class="dil-percent-value red">0%</span></div>`;
                         },
-                        visible: true
+                        visible: false
                     },
-                    //     {
-                    //         title: "NRA",
-                    //         field: "NR",
-                    //         formatter: function(cell) {
-                    //             const row = cell.getRow();
-                    //             const sku = row.getData().sku;
-                    //             const value = cell.getValue();
-                    //             const bgColor = value === 'NRA' ? 'red-bg' : 'green-bg';
-                    //             return `
-                //     <select class="form-select form-select-sm editable-select" 
-                //             data-sku="${sku}" 
-                //             data-field="NR"
-                //             style="width: 90px;">
-                //         <option value="NRA" ${value === 'NRA' ? 'selected' : ''}>NRA</option>
-                //         <option value="RA" ${value === 'RA' ? 'selected' : ''}>RA</option>
-                //         <option value="LATER" ${value === 'LATER' ? 'selected' : ''}>LATER</option>
-                //     </select>
-                // `;
-                    //         },
-                    //         hozAlign: "center",
-                    //         visible: false
-                    //     }
+                    {
+                        title: "NRA",
+                        field: "NRA",
+                        formatter: function(cell) {
+                            const row = cell.getRow();
+                            const sku = row.getData().sku;
+                            const value = cell.getValue()?.trim();
+
+                            let bgColor = "white";
+                            // if (value === "NRA") {
+                            //     bgColor = "background-color:#dc3545;color:#fff;"; // red
+                            // } else if (value === "RA") {
+                            //     bgColor = "background-color:#28a745;color:#fff;"; // green
+                            // } else if (value === "LATER") {
+                            //     bgColor = "background-color:#ffc107;color:#000;"; // yellow
+                            // }
+
+                            return `
+                                <select class="form-select form-select-sm editable-select" 
+                                        data-sku="${sku}" 
+                                        data-field="NRA"
+                                        style="width: 100px; ${bgColor}">
+                                    <option value="" selected></option>
+                                    <option value="RA">RA</option>
+                                    <option value="NRA">NRA</option>
+                                    <option value="LATER">LATER</option>
+                                </select>
+                            `;
+                        },
+                        hozAlign: "center",
+                        visible: false
+                    },
                     {
                         title: "C NAME",
                         field: "c_name",
@@ -364,28 +380,23 @@
                         visible: true
                     },
                     {
-                        title: "NRA",
-                        field: "nra",
-                        visible: true
-                    },
-                    {
                         title: "STATUS",
                         field: "status",
-                        formatter: function(cell) {
-                            const row = cell.getRow();
-                            const sku = row.getData().Sku;
-                            return `
-                            <select class="form-select form-select-sm editable-select" 
-                                    data-row-id="${sku}" 
-                                    data-type="ad_req"
-                                style="width: 120px;">
-                                <option value="ACTIVE" ${cell.getValue() === 'NR' ? 'selected' : ''}>ACTIVE</option>
-                                <option value="PAUSED" ${cell.getValue() === 'REQ' ? 'selected' : ''}>PAUSED</option>
-                                <option value="ENDED" ${cell.getValue() === 'REQ' ? 'selected' : ''}>ENDED</option>
-                            </select>
-                        `;
+                        // formatter: function(cell) {
+                        //     const row = cell.getRow();
+                        //     const sku = row.getData().Sku;
+                        //     return `
+                        //     <select class="form-select form-select-sm editable-select" 
+                        //             data-row-id="${sku}" 
+                        //             data-type="ad_req"
+                        //         style="width: 120px;">
+                        //         <option value="ACTIVE" ${cell.getValue() === 'NR' ? 'selected' : ''}>ACTIVE</option>
+                        //         <option value="PAUSED" ${cell.getValue() === 'REQ' ? 'selected' : ''}>PAUSED</option>
+                        //         <option value="ENDED" ${cell.getValue() === 'REQ' ? 'selected' : ''}>ENDED</option>
+                        //     </select>
+                        // `;
 
-                        },
+                        // },
                         visible: true
                     },
                     {
@@ -557,18 +568,18 @@
                     table.setFilter(combinedFilter);
                 });
 
-                $("#status-filter,#clicks-filter,#inv-filter, #nrl-filter, #nra-filter, #fba-filter").on(
-                    "change",
-                    function() {
-                        table.setFilter(combinedFilter);
-                    });
+                $("#status-filter, #inv-filter, #nrl-filter, #nra-filter, #fba-filter").on("change", function() {
+                    table.setFilter(combinedFilter);
+                });
 
                 updateCampaignStats();
             });
 
             document.addEventListener("click", function(e) {
                 if (e.target.classList.contains("toggle-cols-btn")) {
-                    let colsToToggle = ["INV", "L30", "DIL %", "A_L30", "A DIL %", "NRL", "NR", "FBA"];
+                    let btn = e.target;
+
+                    let colsToToggle = ["INV", "L30", "DIL %", "A_L30", "A DIL %", "NRL", "NRA", "FBA"];
 
                     colsToToggle.forEach(colName => {
                         let col = table.getColumn(colName);

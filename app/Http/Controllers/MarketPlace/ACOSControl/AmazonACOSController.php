@@ -484,6 +484,7 @@ class AmazonACOSController extends Controller
             })
             ->where('campaignName', 'NOT LIKE', '%PT')
             ->where('campaignName', 'NOT LIKE', '%PT.')
+            ->where('campaignStatus', '!=', 'ARCHIVED')
             ->get();
 
         $amazonSpCampaignReportsL7 = AmazonSpCampaignReport::where('ad_type', 'SPONSORED_PRODUCTS')
@@ -493,6 +494,17 @@ class AmazonACOSController extends Controller
             })
             ->where('campaignName', 'NOT LIKE', '%PT')
             ->where('campaignName', 'NOT LIKE', '%PT.')
+            ->where('campaignStatus', '!=', 'ARCHIVED')
+            ->get();
+
+        $amazonSpCampaignReportsL1 = AmazonSpCampaignReport::where('ad_type', 'SPONSORED_PRODUCTS')
+            ->where('report_date_range', 'L1')
+            ->where(function ($q) use ($skus) {
+                foreach ($skus as $sku) $q->orWhere('campaignName', 'LIKE', '%' . $sku . '%');
+            })
+            ->where('campaignName', 'NOT LIKE', '%PT')
+            ->where('campaignName', 'NOT LIKE', '%PT.')
+            ->where('campaignStatus', '!=', 'ARCHIVED')
             ->get();
 
         $result = [];
@@ -516,6 +528,12 @@ class AmazonACOSController extends Controller
                 return $campaignName === $cleanSku;
             });
 
+            $matchedCampaignL1 = $amazonSpCampaignReportsL1->first(function ($item) use ($sku) {
+                $campaignName = strtoupper(trim(rtrim($item->campaignName, '.')));
+                $cleanSku = strtoupper(trim(rtrim($sku, '.')));
+                return $campaignName === $cleanSku;
+            });
+
             $row = [];
             $row['parent'] = $parent;
             $row['sku']    = $pm->sku;
@@ -523,15 +541,24 @@ class AmazonACOSController extends Controller
             $row['L30']    = $shopify->quantity ?? 0;
             $row['fba']    = $pm->fba ?? null;
             $row['A_L30']  = $amazonSheet->units_ordered_l30 ?? 0;
-            $row['campaign_id'] = $matchedCampaignL30->campaign_id ??  '';
-            $row['campaignName'] = $matchedCampaignL30->campaignName ?? '';
-            $row['campaignStatus'] = $matchedCampaignL30->campaignStatus ?? '';
-            $row['campaignBudgetAmount'] = $matchedCampaignL30->campaignBudgetAmount ?? '';
+            $row['campaign_id'] = $matchedCampaignL7->campaign_id ?? ($matchedCampaignL1->campaign_id ?? '');
+            $row['campaignName'] = $matchedCampaignL7->campaignName ?? ($matchedCampaignL1->campaignName ?? '');
+            $row['campaignStatus'] = $matchedCampaignL7->campaignStatus ?? ($matchedCampaignL1->campaignStatus ?? '');
+            $row['campaignBudgetAmount'] = $matchedCampaignL7->campaignBudgetAmount ?? ($matchedCampaignL1->campaignBudgetAmount ?? '');
             $row['l7_cpc'] = $matchedCampaignL7->costPerClick ?? 0;
-            
-            $row['acos_L30'] = ($matchedCampaignL30 && ($matchedCampaignL30->sales30d ?? 0) > 0)
-                ? round(($matchedCampaignL30->spend / $matchedCampaignL30->sales30d) * 100, 2)
-                : null;
+            $row['spend_l30'] = $matchedCampaignL30->spend ?? 0;
+            $row['ad_sales_l30'] = $matchedCampaignL30->sales30d ?? 0;
+
+            $sales = $matchedCampaignL30->sales30d ?? 0;
+            $spend = $matchedCampaignL30->spend ?? 0;
+
+            if ($sales > 0) {
+                $row['acos_L30'] = round(($spend / $sales) * 100, 2);
+            } elseif ($spend > 0) {
+                $row['acos_L30'] = 100;
+            } else {
+                $row['acos_L30'] = 0;
+            }
 
             $row['clicks_L30'] = $matchedCampaignL30->clicks ?? 0;
 
@@ -551,7 +578,7 @@ class AmazonACOSController extends Controller
                 }
             }
 
-            if ($row['NRA'] !== 'NRA') {
+            if ($row['NRA'] !== 'NRA' && $row['campaignName'] !== '') {
                 $result[] = (object) $row;
             }
 
@@ -592,6 +619,7 @@ class AmazonACOSController extends Controller
                     $q->orWhere('campaignName', 'LIKE', '%' . strtoupper($sku) . '%');
                 }
             })
+            ->where('campaignStatus', '!=', 'ARCHIVED')
             ->get();
 
         $amazonSpCampaignReportsL7 = AmazonSbCampaignReport::where('ad_type', 'SPONSORED_BRANDS')
@@ -601,6 +629,7 @@ class AmazonACOSController extends Controller
                     $q->orWhere('campaignName', 'LIKE', '%' . strtoupper($sku) . '%');
                 }
             })
+            ->where('campaignStatus', '!=', 'ARCHIVED')
             ->get();
 
         $result = [];
@@ -617,8 +646,7 @@ class AmazonACOSController extends Controller
                 $expected1 = $sku;                
                 $expected2 = $sku . ' HEAD';      
 
-                return ($cleanName === $expected1 || $cleanName === $expected2)
-                    && strtoupper($item->campaignStatus) === 'ENABLED';
+                return ($cleanName === $expected1 || $cleanName === $expected2);
             });
 
             $matchedCampaignL7 = $amazonSpCampaignReportsL7->first(function ($item) use ($sku) {
@@ -626,8 +654,7 @@ class AmazonACOSController extends Controller
                 $expected1 = $sku;                
                 $expected2 = $sku . ' HEAD';      
 
-                return ($cleanName === $expected1 || $cleanName === $expected2)
-                    && strtoupper($item->campaignStatus) === 'ENABLED';
+                return ($cleanName === $expected1 || $cleanName === $expected2);
             });
 
 
@@ -642,15 +669,27 @@ class AmazonACOSController extends Controller
             $row['campaignName'] = $matchedCampaignL30->campaignName ?? '';
             $row['campaignStatus'] = $matchedCampaignL30->campaignStatus ?? '';
             $row['campaignBudgetAmount'] = $matchedCampaignL30->campaignBudgetAmount ?? '';
-            $row['l7_cpc'] = $matchedCampaignL7->costPerClick ?? 0;
+
+            $costPerClick7 = ($matchedCampaignL7 && $matchedCampaignL7->clicks > 0)
+                ? ($matchedCampaignL7->cost / $matchedCampaignL7->clicks)
+                : 0;
+                
+            $row['l7_cpc'] = $costPerClick7;
+
+            $sales = $matchedCampaignL30->sales ?? 0;
+            $cost = $matchedCampaignL30->cost ?? 0;
             
-            $row['acos_L30'] = ($matchedCampaignL30 && ($matchedCampaignL30->sales ?? 0) > 0)
-                ? round(($matchedCampaignL30->cost / $matchedCampaignL30->sales) * 100, 2)
-                : null;
+            if ($sales > 0) {
+                $row['acos_L30'] = round(($cost / $sales) * 100, 2);
+            } elseif ($cost > 0) {
+                $row['acos_L30'] = 100;
+            } else {
+                $row['acos_L30'] = 0;
+            }
 
             $row['clicks_L30'] = $matchedCampaignL30->clicks ?? 0;
-            $row['spend_l30']       = $matchedCampaignL30->spend ?? 0;
-            $row['ad_sales_l30']    = $matchedCampaignL30->sales30d ?? 0;
+            $row['spend_l30']       = $matchedCampaignL30->cost ?? 0;
+            $row['ad_sales_l30']    = $matchedCampaignL30->sales ?? 0;
 
             $row['NRL']  = '';
             $row['NRA'] = '';
@@ -668,7 +707,7 @@ class AmazonACOSController extends Controller
                 }
             }
 
-            if ($row['NRA'] !== 'NRA') {
+            if ($row['NRA'] !== 'NRA' && $row['campaignName'] !== '') {
                 $result[] = (object) $row;
             }
         }
@@ -708,6 +747,7 @@ class AmazonACOSController extends Controller
                     $q->orWhere('campaignName', 'LIKE', '%' . $sku . '%');
                 }
             })
+            ->where('campaignStatus', '!=', 'ARCHIVED')
             ->get();
 
         $amazonSpCampaignReportsL7 = AmazonSpCampaignReport::where('ad_type', 'SPONSORED_PRODUCTS')
@@ -717,6 +757,17 @@ class AmazonACOSController extends Controller
                     $q->orWhere('campaignName', 'LIKE', '%' . $sku . '%');
                 }
             })
+            ->where('campaignStatus', '!=', 'ARCHIVED')
+            ->get();
+
+        $amazonSpCampaignReportsL1 = AmazonSpCampaignReport::where('ad_type', 'SPONSORED_PRODUCTS')
+            ->where('report_date_range', 'L1')
+            ->where(function ($q) use ($skus) {
+                foreach ($skus as $sku) {
+                    $q->orWhere('campaignName', 'LIKE', '%' . $sku . '%');
+                }
+            })
+            ->where('campaignStatus', '!=', 'ARCHIVED')
             ->get();
 
         $result = [];
@@ -730,6 +781,7 @@ class AmazonACOSController extends Controller
 
             $matchedCampaignL30 = $this->matchCampaign($sku, $amazonSpCampaignReportsL30);
             $matchedCampaignL7  = $this->matchCampaign($sku, $amazonSpCampaignReportsL7);
+            $matchedCampaignL1  = $this->matchCampaign($sku, $amazonSpCampaignReportsL1);
 
             $row = [];
             $row['parent'] = $parent;
@@ -738,15 +790,24 @@ class AmazonACOSController extends Controller
             $row['L30']    = $shopify->quantity ?? 0;
             $row['fba']    = $pm->fba ?? null;
             $row['A_L30']  = $amazonSheet->units_ordered_l30 ?? 0;
-            $row['campaign_id'] = $matchedCampaignL30->campaign_id ??  '';
-            $row['campaignName'] = $matchedCampaignL30->campaignName ?? '';
-            $row['campaignStatus'] = $matchedCampaignL30->campaignStatus ?? '';
-            $row['campaignBudgetAmount'] = $matchedCampaignL30->campaignBudgetAmount ?? '';
+            $row['campaign_id'] = $matchedCampaignL7->campaign_id ?? ($matchedCampaignL1->campaign_id ?? '');
+            $row['campaignName'] = $matchedCampaignL7->campaignName ?? ($matchedCampaignL1->campaignName ?? '');
+            $row['campaignStatus'] = $matchedCampaignL7->campaignStatus ?? ($matchedCampaignL1->campaignStatus ?? '');
+            $row['campaignBudgetAmount'] = $matchedCampaignL7->campaignBudgetAmount ?? ($matchedCampaignL1->campaignBudgetAmount ?? '');
             $row['l7_cpc'] = $matchedCampaignL7->costPerClick ?? 0;
+            $row['spend_l30'] = $matchedCampaignL30->spend ?? 0;
+            $row['ad_sales_l30'] = $matchedCampaignL30->sales30d ?? 0;
             
-            $row['acos_L30'] = ($matchedCampaignL30 && ($matchedCampaignL30->sales30d ?? 0) > 0)
-                ? round(($matchedCampaignL30->spend / $matchedCampaignL30->sales30d) * 100, 2)
-                : null;
+            $sales = $matchedCampaignL30->sales30d ?? 0;
+            $spend = $matchedCampaignL30->spend ?? 0;
+
+            if ($sales > 0) {
+                $row['acos_L30'] = round(($spend / $sales) * 100, 2);
+            } elseif ($spend > 0) {
+                $row['acos_L30'] = 100;
+            } else {
+                $row['acos_L30'] = 0;
+            }
 
             $row['clicks_L30'] = $matchedCampaignL30->clicks ?? 0;
 
@@ -766,7 +827,7 @@ class AmazonACOSController extends Controller
                 }
             }
 
-            if ($row['NRA'] !== 'NRA') {
+            if ($row['NRA'] !== 'NRA' && $row['campaignName'] !== '') {
                 $result[] = (object) $row;
             }
         }
@@ -787,8 +848,7 @@ class AmazonACOSController extends Controller
         return $campaignReports->first(function ($item) use ($expected1, $expected2) {
             $campaignName = preg_replace('/\s+/', ' ', strtoupper(trim($item->campaignName)));
 
-            return in_array($campaignName, [$expected1, $expected2], true)
-                && strtoupper($item->campaignStatus) === 'ENABLED';
+            return in_array($campaignName, [$expected1, $expected2], true);
         });
     }
 }

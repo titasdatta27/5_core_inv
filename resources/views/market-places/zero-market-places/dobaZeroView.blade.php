@@ -1341,7 +1341,7 @@
                                     <th data-field="al_30" style="vertical-align: middle; white-space: nowrap;">
                                         <div class="d-flex flex-column align-items-center" style="gap: 4px">
                                             <div class="d-flex align-items-center">
-                                                AL 30 <span class="sort-arrow">↓</span>
+                                                Doba L30 <span class="sort-arrow">↓</span>
                                             </div>
                                             <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
                                             <div class="metric-total" id="al30-total">0</div>
@@ -2131,9 +2131,9 @@
                     if (item.is_parent) {
                         $row.addClass('parent-row');
                     }
-                    if (item.NR === 'NR') {
-                        $row.addClass('nr-hide');
-                    }
+                    // if (item.NR === 'NR') {
+                    //     $row.addClass('nr-hide');
+                    // }
                     // Helper functions for color coding
                     const getDilColor = (value) => {
                         const percent = parseFloat(value) * 100;

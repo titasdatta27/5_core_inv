@@ -94,9 +94,17 @@ class AutoUpdateAmazonBgtPt extends Command
             $row = [];
             $row['INV']         = $shopify->inv ?? 0;
             $row['campaign_id'] = $matchedCampaignL30->campaign_id ?? '';
-            $row['acos_L30'] = ($matchedCampaignL30 && ($matchedCampaignL30->sales30d ?? 0) > 0)
-                ? round(($matchedCampaignL30->spend / $matchedCampaignL30->sales30d) * 100, 2)
-                : 0;
+
+            $sales = $matchedCampaignL30->sales30d ?? 0;
+            $spend = $matchedCampaignL30->spend ?? 0;
+
+            if ($sales > 0) {
+                $row['acos_L30'] = round(($spend / $sales) * 100, 2);
+            } elseif ($spend > 0) {
+                $row['acos_L30'] = 100;
+            } else {
+                $row['acos_L30'] = 0;
+            }
 
             $acos = (float) ($row['acos_L30'] ?? 0);
 
@@ -112,12 +120,12 @@ class AutoUpdateAmazonBgtPt extends Command
 
             // Basic SBGT
             if ($acos >= 100) $sbgt = 1;
-            elseif ($acos >= 50) $sbgt = 2;
-            elseif ($acos >= 40) $sbgt = 3;
-            elseif ($acos >= 35) $sbgt = 4;
-            elseif ($acos >= 30) $sbgt = 5;
-            elseif ($acos >= 25) $sbgt = 6;
-            elseif ($acos >= 20) $sbgt = 7;
+            elseif ($acos >= 50) $sbgt = 1;
+            elseif ($acos >= 40) $sbgt = 1;
+            elseif ($acos >= 35) $sbgt = 2;
+            elseif ($acos >= 30) $sbgt = 3;
+            elseif ($acos >= 25) $sbgt = 5;
+            elseif ($acos >= 20) $sbgt = 6;
             elseif ($acos >= 15) $sbgt = 8;
             elseif ($acos >= 10) $sbgt = 9;
             elseif ($acos > 0) $sbgt = 10;
@@ -133,12 +141,12 @@ class AutoUpdateAmazonBgtPt extends Command
             }
 
             // Double SBGT ONLY for exact thresholds
-            if (($dilColor === "red" && $tpft > 18) ||
-                ($dilColor === "yellow" && $tpft > 22) ||
-                ($dilColor === "green" && $tpft > 26) ||
-                ($dilColor === "pink" && $tpft > 30)) {
-                $sbgt = $sbgt * 2;
-            }
+            // if (($dilColor === "red" && $tpft > 18) ||
+            //     ($dilColor === "yellow" && $tpft > 22) ||
+            //     ($dilColor === "green" && $tpft > 26) ||
+            //     ($dilColor === "pink" && $tpft > 30)) {
+            //     $sbgt = $sbgt * 2;
+            // }
 
             $row['sbgt'] = $sbgt;
 
@@ -146,6 +154,21 @@ class AutoUpdateAmazonBgtPt extends Command
         }
 
         return $result;
+    }
+
+    private function getDilColor($value)
+    {
+        $percent = floatval($value) * 100;
+
+        if ($percent < 16.66) {
+            return 'red';
+        } elseif ($percent >= 16.66 && $percent < 25) {
+            return 'yellow';
+        } elseif ($percent >= 25 && $percent < 50) {
+            return 'green';
+        } else {
+            return 'pink';
+        }
     }
 
     function matchCampaign($sku, $campaignReports) {

@@ -1,6 +1,7 @@
 @extends('layouts.vertical', ['title' => 'Channel Master', 'mode' => $mode ?? '', 'demo' => $demo ?? ''])
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
+
 @section('css')
     @vite(['node_modules/admin-resources/rwd-table/rwd-table.min.css'])
     <link href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" rel="stylesheet">
@@ -29,6 +30,15 @@
             background-color: #f5f7fa !important;
             color: var(--dark-color) !important;
         }
+        /* bar chart css */
+        canvas { width: 100% !important; height: 60% !important; }
+         .controls { margin-bottom:12px; display:flex; gap:8px; align-items:center; }
+         .btn {
+           padding:8px 12px; border-radius:6px; border:1px solid #ccc; cursor:pointer; background:#fff;
+         }
+         .btn.off { opacity:0.45; text-decoration:line-through; }
+         .status { margin-top:8px; color:#666; font-size:0.95rem; }
+        /* bar chart css end */
 
         .container {
             max-width: 1200px !important;
@@ -498,6 +508,56 @@
             </div>
         </div>
 
+         <div id="chartWrap">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="controls">
+                         <button id="toggleL30" class="btn" style="background-color: #53afed;">L30</button>
+                         <button id="toggleL60" class="btn" style="background-color: #feac5b;">L60</button>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <input type="date" class="form-control" name="from_date">
+                </div>
+                <div class="col-md-3">
+                    <input type="date" class="form-control" name="to_date">
+                </div>
+                <div class="col-md-2">
+                    <button class="badge bg-primary text-white px-3 py-2" style="font-size: 1rem; border-radius: 8px;">Sales Graph</button>
+                </div>
+            </div>
+            <!-- top chart summary calculation -->
+             <div class="row text-center">
+                            <div class="col">
+                                <p class="text-muted mt-3">Sales</p>
+                                <h3 class=" mb-0">
+                                    <span id="total_sales">0</span>
+                                </h3>
+                            </div>
+                            <div class="col">
+                                <p class="text-muted mt-3">Profit Margin</p>
+                                <h3 class=" mb-0">
+                                    <span id="profit_margin">0% </span>
+                                </h3>
+                            </div>
+                            <div class="col">
+                                <p class="text-muted mt-3">ROI</p>
+                                <h3 class=" mb-0">
+                                    <span id="sales_roi">0%</span>
+                                </h3>
+                            </div>
+                            <!-- <div class="col">
+                                <p class="text-muted mt-3">Customers</p>
+                                <h3 class=" mb-0">
+                                    <span>3k</span>
+                                </h3>
+                            </div> -->
+                        </div>
+                        <br>
+         <canvas id="barChart"></canvas>
+        <div id="status" class="status">Loading data…</div>
+        </div>
+
         <!-- Add Channel Modal (Left to Right Slide-in) -->
         <div class="modal fade right-to-left" id="addChannelModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-side">
@@ -605,7 +665,7 @@
                 </div>
 
                 <div class="mb-3">
-                    <label for="editpercentage" class="form-label">Type</label>
+                    <label for="editpercentage" class="form-label">Channel Percentage</label>
                     <input type="text" class="form-control" id="editpercentage" name="type" required>
                 </div>
 
@@ -880,7 +940,7 @@
             if (l30SalesTotal !== 0) {
                 growthTotal = ((l30SalesTotal - l60SalesTotal) / l60SalesTotal) * 100;
             }
-
+            
             // Update the cards with formatted values
             const l60Badge = document.getElementById('l60SalesCountBadge');
             const l30Badge = document.getElementById('l30SalesCountBadge');
@@ -919,6 +979,7 @@
 
                 totalPft += profitAmount;
                 totalL30Sales += l30Sales;
+                $("#total_sales").html('$'+Number(totalL30Sales).toLocaleString('en-US'));
             });
             let gProfit = totalL30Sales !== 0 ? (totalPft / totalL30Sales)* 100 : null;
             let gRoi = totalCogs !== 0 ? (totalPft / totalCogs)* 100 : null;
@@ -927,75 +988,140 @@
             }
             // if (gprofitBadge) gprofitBadge.textContent = gProfit !== null ? gProfit.toFixed(1) + '%' : 'N/A';
             if (groiBadge) groiBadge.textContent = gRoi !== null ? gRoi.toFixed(1) + '%' : 'N/A';
+
+            $("#profit_margin").html(gProfit.toFixed(1)+'%');
+            $("#sales_roi").html(gRoi.toFixed(1)+'%');
         }
 
         // Initialize DataTable
-        // function initializeDataTable() {
+        // function initializeDataTable() {         //without gprofit sort
         //     try {
         //         if (!jq('#channelTable').length) {
         //             console.error('Table element not found');
         //             return null;
         //         }
 
-        //         return jq('#channelTable').DataTable({
+        //         // If already initialized, destroy cleanly so we can rebuild
+        //         if (jq.fn.DataTable.isDataTable('#channelTable')) {
+        //             jq('#channelTable').DataTable().clear().destroy();
+        //             // Remove previous header thead that DataTables might have created
+        //             jq('#channelTable').empty();
+        //         }
+
+        //         // --- helpers ---
+        //         const toNum = (v, def = 0) => {
+        //             const n = parseFloat(String(v).replace(/,/g, ''));
+        //             return Number.isFinite(n) ? n : def;
+        //         };
+        //         const pick = (obj, keys, def = '') => {
+        //             for (const k of keys) {
+        //                 const v = obj[k];
+        //                 if (v !== undefined && v !== null && v !== '') return v;
+        //             }
+        //             return def;
+        //         };
+        //         const pctFix = (v) => {
+        //             let n = toNum(v, 0);
+        //             // If it's a fraction (<=1), convert to %
+        //             if (Math.abs(n) <= 1) n = n * 100;
+        //             // clamp weird values
+        //             if (!Number.isFinite(n)) n = 0;
+        //             return n;
+        //         };
+
+        //         let table = jq('#channelTable').DataTable({
         //             processing: true,
         //             serverSide: false,
         //             ordering: false,
         //             searching: true,
         //             pageLength: 50,
-        //             order: [[5, 'desc']],
+        //             destroy: true,
         //             ajax: {
         //                 url: '/channels-master-data',
         //                 type: "GET",
-        //                 data: function(d) {
-        //                     $('#customLoader').hide();
-        //                     $('#channelTableWrapper').show();
-        //                     d.channel = jq('#channelSearchInput').val();
-        //                     d.search = jq('#searchInput').val();
-        //                     d.sort_by = jq('#sort_by').val();
-        //                     d.sort_order = jq('#sort_order').val();
-        //                     d.sort_by = currentSortColumn;
-        //                     d.sort_order = currentSortOrder;
+        //                 data: function (d) {
+        //                     jq('#customLoader').hide();
+        //                     jq('#channelTableWrapper').show();
+        //                     d.channel     = jq('#channelSearchInput').val(); // Amazon / eBay / etc.
+        //                     d.search      = jq('#searchInput').val();
+        //                     d.sort_by     = window.currentSortColumn || null;
+        //                     d.sort_order  = window.currentSortOrder || null;
         //                 },
-        //                 dataSrc: function(json) {
-        //                     allChannelData = json.data;
-        //                     if (!originalChannelData.length) {
-        //                         originalChannelData = json.data;
-        //                     }
+        //                dataSrc: function (json) {
+        //                     if (!json || !json.data) return [];
 
-        //                     const selectedChannel = jq('#channelSearchInput').val()?.toLowerCase()?.trim();
-        //                     const search = jq('#searchInput').val()?.toLowerCase()?.trim();
+        //                     // drawChannelChart(json.data);
 
-        //                     let filteredData = json.data;
-
-        //                     if (selectedChannel) {
-        //                         filteredData = filteredData.filter(item =>
-        //                             item['Channel ']?.toLowerCase()?.trim() === selectedChannel
-        //                         );
-        //                     }
-
-        //                     if (search) {
-        //                         filteredData = filteredData.filter(item =>
-        //                             item['Channel ']?.toLowerCase()?.trim() === search
-        //                         );
-        //                     }
-
-        //                     filteredData.sort((a, b) => {
-        //                         const aVal = parseFloat(a['L30 Sales']?.toString().replace(/,/g, '')) || 0;
-        //                         const bVal = parseFloat(b['L30 Sales']?.toString().replace(/,/g, '')) || 0;
-        //                         return bVal - aVal;
+        //                     json.data.sort((a, b) => {
+        //                         const aVal = parseFloat(String(a['L30 Sales'] || a['l30_sales'] || 0).replace(/,/g, '')) || 0;
+        //                         const bVal = parseFloat(String(b['L30 Sales'] || b['l30_sales'] || 0).replace(/,/g, '')) || 0;
+        //                         return bVal - aVal; // high → low
         //                     });
 
-        //                     tableData = filteredData;
+        //                     // Normalize every row to ONE schema so columns line up
+        //                     return json.data.map(item => {
+        //                         // console.log('Raw item:', item);
 
-        //                     return filteredData;
+        //                         // Make sure to include exact keys sent by controller
+        //                         const l60Sales = toNum(pick(item, ['L-60 Sales', 'L60 Sales', 'l60_sales', 'A_L60', 'l60sales'], 0), 0);
+        //                         const l30Sales = toNum(pick(item, ['L30 Sales', 'l30_sales', 'T_Sale_l30', 'l30sales'], 0), 0);
+
+        //                         const l60Orders = toNum(pick(item, ['L60 Orders','l60_orders', 'A_L60_orders', 'l60orders'], 0), 0);
+        //                         const l30Orders = toNum(pick(item, ['L30 Orders','l30_orders', 'A_L30_orders', 'l30orders'], 0), 0);
+
+        //                         let growth = pick(item, ['growth', 'Growth'], null);
+        //                         // if (growth === null || growth === '' || !Number.isFinite(toNum(growth))) {
+        //                         //     growth = l30Orders > 0 ? ((l30Orders - l60Orders) / l30Orders) * 100 : 0;
+        //                         // } else {
+        //                         //     growth = pctFix(growth);
+        //                         // }
+        //                         // if (!Number.isFinite(growth)) growth = 0;
+
+        //                         let gprofit = pctFix(pick(item, ['gprofit_percentage', 'PFT_percentage', 'gprofit', 'Gprofit%'], 0));
+        //                         let groi    = pctFix(pick(item, ['G Roi', 'g_roi_percentage', 'roi'], 0));
+        //                         let gprofitL60  = pctFix(pick(item, ['Gprofitl60'], 0));
+        //                         let cogs = pctFix(pick(item, ['cogs'], 0));
+
+        //                         return {
+        //                             'Channel': pick(item, ['channel', 'Channel', 'Channel '], ''),  // use per-row channel
+        //                             'Link': pick(item, ['link', 'url', 'URL LINK', 'url_link'], ''),
+        //                             'sheet_link': pick(item, ['sheet_link', 'sheet_url', 'sheet'], ''),
+        //                             'R&A': toNum(pick(item, ['ra', 'R&A', 'R_and_A'], 0), 0),
+        //                             'L-60 Sales': l60Sales,
+        //                             'L30 Sales': l30Sales,
+        //                             'Growth': growth,
+        //                             'L60 Orders': l60Orders,
+        //                             'L30 Orders': l30Orders,
+        //                             'Gprofit%': gprofit,
+        //                             'GprofitL30': gprofit,
+        //                             'GprofitL60': gprofitL60,
+        //                             'G ROI%': groi,
+        //                             'Red Margin': toNum(pick(item, ['red_margin', 'Total_pft', 'total_pft'], 0), 0),
+        //                             'NR': toNum(pick(item, ['nr','NR'], 0), 0),
+        //                             'type': pick(item, ['type'], ''),
+        //                             'Listing Counts': toNum(pick(item, ['listing_counts', 'listed_count', 'list_count'], 0), 0),
+        //                             'W/Ads': toNum(pick(item, ['w_ads', 'W/Ads','with_ads', 'ads'], 0), 0),
+        //                             '0 Sold SKU Count': toNum(pick(item, ['zero_sku', 'zero_sku_count', 'zero_sold_sku'], 0), 0),
+        //                             'Sold Sku Count': toNum(pick(item, ['sold_sku', 'sold_sku_count'], 0), 0),
+        //                             'Brand Registry': toNum(pick(item, ['brand_registry', 'brandregistry'], 0), 0),
+        //                             'Update': toNum(pick(item, ['update_flag', 'update','Update'], 0), 0),
+        //                             'Ac Health': pick(item, ['account_health', 'ac_health', 'accounthealth'], ''),
+        //                             'Channel Percentage': pctFix(pick(item, ['channel_percentage'], 0), 0),
+        //                             'cogs': cogs,
+                                    
+        //                         };
+                                
+        //                     });
         //                 },
-        //                 error: function(xhr, error, thrown) {
+
+        //                 error: function (xhr, error, thrown) {
         //                     console.log("AJAX error:", error, thrown);
         //                 }
         //             },
-        //             columns: [{
-        //                     data: 'Channel ',
+        //             columns: [
+        //                 // { data: 'Channel' },
+        //                 {
+        //                     data: 'Channel',
         //                     render: function(data, type, row) {
         //                         if (!data) return '';
 
@@ -1004,12 +1130,20 @@
         //                             'amazon': '/overall-amazon',
         //                             'amazon fba': '/overall-amazon-fba',
         //                             'ebay': '/ebay',
+        //                             'ebay': '/ebay',
+        //                             'ebaytwo': '/ebayTwoAnalysis',
+        //                             'ebaythree': '/ebayThreeAnalysis',
         //                             'temu': '/temu',
         //                             'macys': '/macys',
         //                             'wayfair': '/Wayfair',
         //                             'reverb': '/reverb',
         //                             'shopify b2c': '/shopifyB2C',
-        //                             'doba ': '#',
+        //                             'doba': '/doba',
+        //                             'walmart': '/walmartAnalysis',
+        //                             'bestbuy usa': '/bestbuyusa-analytics',
+        //                             'shein': '/sheinAnalysis',
+        //                             'tiktok shop': '/tiktokAnalysis',
+        //                             'aliexpress': '/aliexpressAnalysis',
         //                         };
 
         //                         const routeUrl = routeMap[channelName];
@@ -1021,312 +1155,184 @@
         //                         }
         //                     }
         //                 },
-        //                 {
-        //                     data: 'R&A',
-        //                     visible: false,
-        //                     render: function(data, type, row) {
-        //                         const isChecked = data ? 'checked' : '';
-        //                         return `<div class="ra-edit-container d-flex align-items-center">
-        //                                 <input type="checkbox" class="ra-checkbox" ${isChecked}>
-        //                             </div>`;
+        //                 { data: 'R&A', render: function (v, t, row) {
+        //                         const checked = toNum(v) === 1 ? 'checked' : '';
+        //                         return `<input type="checkbox" class="ra-checkbox" data-channel="${row['Channel']}" ${checked}>`;
         //                     }
         //                 },
-        //                 {
-        //                     data: 'URL LINK',
-        //                     render: function(data, type, row) {
-        //                         return data ?
-        //                             `<a href="${data}" target="_blank"><i class="bi bi-box-arrow-up-right link-icon"></i></a>` :
-        //                             '';
-        //                     }
-        //                 },
+        //                 // {
+        //                 //     data: 'sheet_link',
+        //                 //     render: function(data, type, row) {
+        //                 //         const sheetLink = data || '';
+        //                 //         const channelName = row['Channel'] || '';
+        //                 //         return `
+        //                 //             <div style="display:flex; align-items:center; gap:6px;">
+        //                 //                 <input type="text"
+        //                 //                     class="form-control form-control-sm sheet-link-input"
+        //                 //                     value="${sheetLink}"
+        //                 //                     data-channel="${channelName}"
+        //                 //                     placeholder="Enter Link"
+        //                 //                     style="min-width: 10px;" />
+        //                 //                 ${sheetLink ? `<a href="${sheetLink}" target="_blank" class="btn btn-sm btn-success">🔗</a>` : ''}
+        //                 //             </div>
+        //                 //         `;
+        //                 //     }
+        //                 // },      
         //                 {
         //                     data: 'sheet_link',
         //                     render: function(data, type, row) {
         //                         const sheetLink = data || '';
-        //                         const channelName = row['Channel '] || '';  // use correct key here
+        //                         const channelName = row['Channel'] || '';
         //                         return `
         //                             <div style="display:flex; align-items:center; gap:6px;">
-        //                                 <input type="text"
-        //                                     class="form-control form-control-sm sheet-link-input"
-        //                                     value="${sheetLink}"
-        //                                     data-channel="${channelName}"
-        //                                     placeholder="Enter Link"
-        //                                     style="min-width: 100px;" />
         //                                 ${sheetLink ? `<a href="${sheetLink}" target="_blank" class="btn btn-sm btn-success">🔗</a>` : ''}
         //                             </div>
         //                         `;
         //                     }
-        //                 },
-        //                 {
-        //                     data: 'L-60 Sales',
-        //                     className: 'metric-cell',
-        //                     render: function(data, type, row) {
-        //                         try {
-        //                             const num = parseFloat(data.toString().replace(/,/g, ''));
-        //                             const roundedNum = Math.round(num);
-        //                             return `<span class="metric-value">${roundedNum.toLocaleString('en-US')}</span>`;
-        //                         } catch (e) {
-        //                             return '<span class="metric-value">N/A</span>';
-        //                         }
-        //                     }
-        //                 },
+        //                 },      
+        //                 // { data: 'L-60 Sales', render: v => `<span class="metric-value">${toNum(v).toLocaleString('en-US')}</span>` },
+        //                 // { data: 'L30 Sales',  render: v => `<span class="metric-value">${toNum(v).toLocaleString('en-US')}</span>` },
         //                 {
         //                     data: 'L30 Sales',
-        //                     className: 'metric-cell',
         //                     render: function(data, type, row) {
-        //                         if (data === undefined || data === null || data === '#DIV/0!') {
-        //                             return '<span class="metric-value"></span>';
-        //                         }
+        //                         const n = parseFloat(String(data).replace(/,/g, '')) || 0;
 
-        //                         const num = parseFloat(data.toString().replace(/,/g, ''));
+        //                         // For sorting: return numeric value (DataTables internal)
+        //                         if (type === 'sort' || type === 'type') return n;
 
-        //                         if (isNaN(num)) {
-        //                             return '<span class="metric-value"></span>';
-        //                         }
-
-        //                         const roundedNum = Math.round(num);
-
-        //                         return `<span class="metric-value">${roundedNum.toLocaleString('en-US', {
-        //                             minimumFractionDigits: 0,
-        //                             maximumFractionDigits: 0
-        //                         })}</span>`;
+        //                         // Display formatted
+        //                         return `<span class="metric-value">${n.toLocaleString('en-US')}</span>`;
+        //                     },
+        //                     // --- NEW: always sort descending before displaying ---
+        //                     createdCell: function(td, cellData, rowData, row, col) {
+        //                         // no action needed here
         //                     }
         //                 },
+
         //                 {
         //                     data: 'Growth',
-        //                     className: 'metric-cell',
-        //                     render: function(data, type, row) {
-        //                         const l30 = parseFloat(row['L30 Sales']);
-        //                         let l60 = parseFloat(row['L-60 Sales']);
-
-        //                         if (isNaN(l60)) l60 = 0;
-
-        //                         if (!l30 || isNaN(l30) || l30 === 0) {
-        //                             return '<span class="growth-value">-</span>';
-        //                         }
-
-        //                         const growth = (l30 - l60) / l30;
-        //                         const percent = (growth * 100).toFixed(0);
-        //                         const value = `${percent}%`;
-
-        //                         let bgColor = '';
-        //                         let textColor = 'black';
-
-        //                         if (growth < 0) {
-        //                             bgColor = '#ff0000';
-        //                             textColor = 'white';
-        //                         } else if (growth >= 0 && growth < 0.10) {
-        //                             bgColor = '#ffff00';
-        //                         } else if (growth >= 0.10 && growth < 0.20) {
-        //                             bgColor = '#00ffff';
-        //                         } else if (growth >= 0.20 && growth < 0.50) {
-        //                             bgColor = '#00ff00';
-        //                         } else if (growth >= 0.50) {
-        //                             bgColor = '#ff00ff';
-        //                             textColor = 'white';
-        //                         }
-
-        //                         return `<span class="growth-value" style="background-color:${bgColor}; color:${textColor}; padding:2px 6px; border-radius:4px;">${value}</span>`;
+        //                     render: function (v) {
+        //                         const n = pctFix(v);
+        //                         if (!Number.isFinite(n)) return '-';
+        //                         let bg = '', color = 'black';
+        //                         if (n < 0)              { bg = '#ff0000'; color = 'white'; }
+        //                         else if (n < 10)        { bg = '#ffff00'; }
+        //                         else if (n < 20)        { bg = '#00ffff'; }
+        //                         else if (n < 50)        { bg = '#00ff00'; }
+        //                         else                    { bg = '#ff00ff'; color = 'white'; }
+        //                         return `<span style="background:${bg};color:${color};padding:2px 6px;border-radius:4px;">${Math.round(n)}%</span>`;
         //                     }
         //                 },
-        //                 {
-        //                     data: 'L60 Orders',
-        //                     className: 'metric-cell',
-        //                     render: function(data, type, row) {
-        //                         if (data === undefined || data === null || data === '#DIV/0!') {
-        //                             return '<span class="metric-value"></span>';
-        //                         }
-        //                         return `<span class="metric-value">${data}</span>`;
-        //                     }
-        //                 },
-        //                 {
-        //                     data: 'L30 Orders',
-        //                     className: 'metric-cell',
-        //                     render: function(data, type, row) {
-        //                         if (data === undefined || data === null || data === '#DIV/0!') {
-        //                             return '<span class="metric-value"></span>';
-        //                         }
-        //                         return `<span class="metric-value">${data}</span>`;
-        //                     }
-        //                 },
+                        
+        //                 // { data: 'L60 Orders', render: v => `<span class="metric-value">${toNum(v).toLocaleString('en-US')}</span>` },
+        //                 { data: 'L30 Orders', render: v => `<span class="metric-value">${toNum(v).toLocaleString('en-US')}</span>` },
+
+        //                 // {
+        //                 //     data: 'Gprofit%',
+        //                 //     render: function (v) {
+        //                 //         const n = pctFix(v);
+        //                 //         let bg = '', color = 'black';
+        //                 //         if (n < 25)            { bg = '#ff0000'; color = 'white'; }
+        //                 //         else if (n < 33)       { bg = '#00ff00'; }
+        //                 //         else                   { bg = '#ff00ff'; color = 'white'; }
+        //                 //         return `<span style="background:${bg};color:${color};padding:2px 6px;border-radius:4px;">${Math.round(n)}%</span>`;
+        //                 //     }
+        //                 // },
         //                 {
         //                     data: 'Gprofit%',
-        //                     className: 'metric-cell',
-        //                     render: function(data, type, row) {
-        //                         if (data === undefined || data === null || data === '#DIV/0!') {
-        //                             return '<span class="metric-value"></span>';
-        //                         }
+        //                     render: function (v) {
+        //                         const n = pctFix(v);
+        //                         let bg = '', color = 'white';
 
-        //                         const num = parseFloat(data);
-
-        //                         if (isNaN(num)) {
-        //                             return '<span class="metric-value"></span>';
-        //                         }
-
-        //                         let percentage = Math.round(num * 100);
-        //                         let bgColor = '';
-        //                         let textColor = 'black';
-
-        //                         if (percentage < 25) {
-        //                             bgColor = '#ff0000';
-        //                             textColor = 'white';
-        //                         } else if (percentage >= 25 && percentage < 33) {
-        //                             bgColor = '#00ff00';
-        //                             textColor = 'black';
+        //                         if (n < 15) {
+        //                             bg = '#ff0000'; // Red
+        //                         } else if (n >= 15 && n < 25) {
+        //                             bg = '#ffff00'; // Yellow
+        //                             color = 'black';
+        //                         } else if (n >= 25 && n < 40) {
+        //                             bg = '#00ff00'; // Green
+        //                             color = 'black';
         //                         } else {
-        //                             bgColor = '#ff00ff';
-        //                             textColor = 'white';
+        //                             bg = '#8000ff'; // Purple
         //                         }
 
-        //                         return `<span class="gprofit-value" style="background-color:${bgColor}; color:${textColor}; padding:2px 6px; border-radius:4px;">${percentage}%</span>`;
+        //                         return `<span style="background:${bg};color:${color};padding:2px 6px;border-radius:4px;">${Math.round(n)}%</span>`;
         //                     }
         //                 },
         //                 {
-        //                     data: 'G Roi%',
-        //                     className: 'metric-cell',
-        //                     render: function(data, type, row) {
-        //                         if (data === undefined || data === null || data === '#DIV/0!') {
-        //                             return '<span class="metric-value"></span>';
-        //                         }
-
-        //                         const num = parseFloat(data);
-
-        //                         if (isNaN(num)) {
-        //                             return '<span class="metric-value"></span>';
-        //                         }
-
-        //                         let percentage = Math.round(num * 100);
-        //                         let bgColor = '';
-        //                         let textColor = 'black';
-
-        //                         if (percentage <= 50) {
-        //                             bgColor = '#ff0000';
-        //                             textColor = 'white';
-        //                         }
-
-        //                         return `<span class="groi-value" style="background-color:${bgColor}; color:${textColor}; padding:2px 6px; border-radius:4px;">${percentage}%</span>`;
+        //                     data: 'G ROI%',
+        //                     render: function (v) {
+        //                         const n = pctFix(v);
+        //                         let bg = '', color = 'black';
+        //                         if (n <= 50) { bg = '#ff0000'; color = 'white'; }
+        //                         return `<span style="background:${bg};color:${color};padding:2px 6px;border-radius:4px;">${Math.round(n)}%</span>`;
         //                     }
         //                 },
-        //                 {
-        //                     data: 'red_margin',
-        //                     className: 'metric-cell',
-        //                     render: function(data, type, row) {
-        //                         if (data === undefined || data === null || data === '#DIV/0!') {
-        //                             return '<span class="metric-value"></span>';
-        //                         }
-        //                         return `<span class="metric-value">${data}</span>`;
-        //                     }
-        //                 },
+        //                 // { data: 'Red Margin', render: v => `<span class="metric-value">${toNum(v).toLocaleString('en-US')}</span>` },
+        //                 { data: 'Channel Percentage', render: v => `<span class="metric-value">${toNum(v).toLocaleString('en-US')}</span>` },
+        //                 // {
+        //                 //     data: 'Channel Percentage',
+        //                 //     render: function (v, t, row) {
+        //                 //         return `<input type="integer" class="form-control form-control-sm channel-percentage-input"
+        //                 //                     value="${v || ''}" data-channel="${row['Channel']}"  style="min-width: 100px;" placeholder="Enter Percentage">`;
+        //                 //     }
+        //                 // },
         //                 {
         //                     data: 'NR',
-        //                     render: function(data, type, row) {
-        //                         // var isChecked = data ? 'checked' : '';
-        //                         const isChecked = parseInt(row.nr) === 1 ? 'checked' : '';
-        //                         // var dateDisplay = data ? new Date(data).toLocaleDateString() : '';
-
-        //                         return `<input type="checkbox" class="checkbox-nr" data-channel="${row['Channel ']}" ${isChecked}>`;
+        //                     render: function (v, t, row) {
+        //                         const checked = toNum(v) === 1 ? 'checked' : '';
+        //                         return `<input type="checkbox" class="checkbox-nr" data-channel="${row['Channel']}" ${checked}>`;
         //                     }
         //                 },
         //                 {
         //                     data: 'type',
-        //                     render: function(data, type, row) {
-        //                         const current = data || row.type || '';
-        //                         const channel = row['Channel ']?.trim();
-
-        //                         return `
-        //                             <input 
-        //                                 type="text" 
-        //                                 class="form-control form-control-sm type-input"
-        //                                 value="${current}" 
-        //                                 data-channel="${channel}" 
-        //                                 style="min-width: 100px;" 
-        //                                 placeholder="Enter Type" />
-        //                         `;
+        //                     render: function (v, t, row) {
+        //                         return `<span style="display:inline-block; min-width:100px;">${v ? v : '-'}</span>`;
         //                     }
         //                 },
-        //                 {
-        //                     data: 'listed_count',
-        //                     title: 'Listed Count',
-        //                     render: function (data, type, row) {
-                                
-        //                         return `<span class="metric-value">${data ?? 0}</span>`;
 
-        //                     }
-        //                 },
+        //                 // {
+        //                 //     data: 'type',
+        //                 //     render: function (v, t, row) {
+        //                 //         return `<input type="text" class="form-control form-control-sm type-input"
+        //                 //                     value="${v || ''}" data-channel="${row['Channel']}"  style="min-width: 100px;" placeholder="Enter Type">`;
+        //                 //     }
+        //                 // },
+        //                 { data: 'Listing Counts', render: v => `<span class="metric-value">${toNum(v).toLocaleString('en-US')}</span>` },
         //                 {
         //                     data: 'W/Ads',
-        //                     render: function(data, type, row) {
-        //                         const isChecked = parseInt(row.w_ads) === 1 ? 'checked' : '';
-        //                         // var isChecked = data ? 'checked' : '';
-        //                         // var dateDisplay = data ? new Date(data).toLocaleDateString() : '';
-
-        //                         return `<input type="checkbox" class="checkbox-wads" data-channel="${row['Channel ']}" ${isChecked}>`;
+        //                     render: function (v, t, row) {
+        //                         const checked = toNum(v) === 1 ? 'checked' : '';
+        //                         return `<input type="checkbox" class="checkbox-wads" data-channel="${row['Channel']}" ${checked}>`;
         //                     }
         //                 },
-        //                 {
-        //                     data: '0 Sold SKU Count',
-        //                     className: 'metric-cell',
-        //                     render: function(data, type, row) {
-        //                         if (data === undefined || data === null || data === '#DIV/0!') {
-        //                             return '<span class="metric-value"></span>';
-        //                         }
-        //                         return `<span class="metric-value">${data}</span>`;
-        //                     }
-        //                 },
-        //                 {
-        //                     data: 'Sold SKU Count',
-        //                     className: 'metric-cell',
-        //                     render: function(data, type, row) {
-        //                         if (data === undefined || data === null || data === '#DIV/0!') {
-        //                             return '<span class="metric-value"></span>';
-        //                         }
-        //                         return `<span class="metric-value">${data}</span>`;
-        //                     }
-        //                 },
-        //                 {
-        //                     data: 'Brand Registry',
-        //                     className: 'metric-cell',
-        //                     render: function(data, type, row) {
-        //                         if (data === undefined || data === null || data === '#DIV/0!') {
-        //                             return '<span class="metric-value"></span>';
-        //                         }
-        //                         return `<span class="metric-value">${data}</span>`;
-        //                     }
-        //                 },
+        //                 // { data: '0 Sold SKU Count', render: v => `<span class="metric-value">${toNum(v).toLocaleString('en-US')}</span>` },
+        //                 // { data: 'Sold Sku Count',   render: v => `<span class="metric-value">${toNum(v).toLocaleString('en-US')}</span>` },
+        //                 // { data: 'Brand Registry',   render: v => `<span class="metric-value">${toNum(v).toLocaleString('en-US')}</span>` },
         //                 {
         //                     data: 'Update',
-        //                     render: function(data, type, row) { 
-        //                         const isChecked = parseInt(row.update) === 1 ? 'checked' : '';
-        //                         // var isChecked = data ? 'checked' : '';
-        //                         // var dateDisplay = data ? new Date(data).toLocaleDateString() : '';
-
-        //                         return `<input type="checkbox" class="checkbox-update" data-channel="${row['Channel ']}" ${isChecked}>`;
+        //                     render: function (v, t, row) {
+        //                         const checked = toNum(v) === 1 ? 'checked' : '';
+        //                         return `<input type="checkbox" class="checkbox-update" data-channel="${row['Channel']}" ${checked}>`;
         //                     }
         //                 },
         //                 {
-        //                     data: 'Account health',
-        //                     render: function(data, type, row) {
-        //                         return data ?
-        //                             `<a href="${data}" target="_blank"><i class="bi bi-box-arrow-up-right link-icon"></i></a>` :
-        //                             '';
+        //                     data: 'Ac Health',
+        //                     render: function (data) {
+        //                         return data ? `<a href="${data}" target="_blank"><i class="bi bi-box-arrow-up-right"></i></a>` : '';
         //                     }
         //                 },
         //                 {
         //                     data: null,
-        //                     orderable: true,
-        //                     searchable: false,
-        //                     render: function(data, type, row, meta) {
-        //                         const index = meta.row;
-                                
+        //                     render: function (_d, _t, row, meta) {
         //                         return `
         //                         <div class="d-flex justify-content-center">
-        //                             <button class="btn btn-sm btn-outline-primary edit-btn me-1" title="Edit" data-index="${index}"
-        //                                     data-channel="${row.channel || ''}"
-        //                                     data-url="${row.sheet_url || ''}">
-        //                                 <i class="fas fa-edit"></i>
+        //                             <button class="btn btn-sm btn-outline-primary edit-btn me-1"
+        //                                     title="Edit" data-index="${meta.row}" data-channel="${row['Channel'] || ''}">
+        //                             <i class="fas fa-edit"></i>
         //                             </button>
         //                             <button class="btn btn-sm btn-outline-danger delete-btn" title="Archive">
-        //                                 <i class="fa fa-archive"></i>
+        //                             <i class="fa fa-archive"></i>
         //                             </button>
         //                         </div>`;
         //                     }
@@ -1337,175 +1343,6 @@
         //                 processing: "Loading data, please wait...",
         //                 emptyTable: "",
         //                 zeroRecords: "",
-        //             },
-        //             initComplete: function() {
-        //                 var buttons = new jq.fn.dataTable.Buttons(table, {
-        //                     buttons: ['excel', 'print']
-        //                 }).container().appendTo(jq('#channelTable_wrapper .col-md-6:eq(0)'));
-        //             }
-        //         });
-        //     } catch (e) {
-        //         console.error('Error initializing DataTable:', e);
-        //         return null;
-        //     }
-        // }
-
-        // function initializeDataTable() {
-        //     try {
-        //         if (!jq('#channelTable').length) {
-        //             console.error('Table element not found');
-        //             return null;
-        //         }
-
-        //         let table = jq('#channelTable').DataTable({
-        //             processing: true,
-        //             serverSide: false,
-        //             ordering: false,
-        //             searching: true,
-        //             pageLength: 50,
-        //             order: [[5, 'desc']],
-        //             ajax: {
-        //                 url: '/channels-master-data',
-        //                 type: "GET",
-        //                 data: function (d) {
-        //                     $('#customLoader').hide();
-        //                     $('#channelTableWrapper').show();
-        //                     d.channel = jq('#channelSearchInput').val(); // Amazon / eBay / etc.
-        //                     d.search = jq('#searchInput').val();
-        //                     d.sort_by = currentSortColumn;
-        //                     d.sort_order = currentSortOrder;
-        //                 },
-        //                 dataSrc: function (json) {
-        //                     if (!json.data) return [];
-
-        //                     // 🔹 Detect selected channel
-        //                     const channel = jq('#channelSearchInput').val().toLowerCase();
-
-        //                     return json.data.map(item => {
-        //                         let mapped = {};
-
-        //                         if (channel === 'amazon') {
-        //                             // Mapping for AmazonController::getAmazonChannelData
-        //                             mapped = {
-        //                                 'Channel ': 'Amazon',
-        //                                 'R&A': item.ra || false,
-        //                                 'Link': item.link || '',
-        //                                 'Sheet Link': item.sheet_link || '',
-        //                                 'L-60 Sales': item.A_L60 || 0,
-        //                                 'L30 Sales': item.T_Sale_l30 || 0,
-        //                                 'Growth': item.PFT_percentage || 0,
-        //                                 'L60 Orders': item.A_L60_orders || 0,
-        //                                 'L30 Orders': item.A_L30_orders || 0,
-        //                                 'Gprofit%': item.PFT_percentage || 0,
-        //                                 'G ROI%': item.roi_percentage || 0,
-        //                                 'Red Margin': item.Total_pft || 0,
-        //                                 'NR': item.nr || 0,
-        //                                 'type': item.type || '',
-        //                                 'Listing Counts': item.listing_counts || 0,
-        //                                 'W/Ads': item.w_ads || 0,
-        //                                 '0 Sold SKU Count': item.zero_sku || 0,
-        //                                 'Sold Sku Count': item.sold_sku || 0,
-        //                                 'Brand Registry': item.brand_registry || 0,
-        //                                 'Update': item.update_flag || 0,
-        //                                 'Ac Health': item.account_health || '',
-        //                             };
-        //                         } else {
-        //                             // Default mapping for other channels (ChannelMaster data)
-        //                             mapped = {
-        //                                 'Channel ': item.channel || '',
-        //                                 'R&A': item.ra || false,
-        //                                 'Link': item.link || '',
-        //                                 'Sheet Link': item.sheet_link || '',
-        //                                 'L-60 Sales': item.l60_sales || 0,
-        //                                 'L30 Sales': item.l30_sales || 0,
-        //                                 'Growth': item.growth || 0,
-        //                                 'L60 Orders': item.l60_orders || 0,
-        //                                 'L30 Orders': item.l30_orders || 0,
-        //                                 'Gprofit%': item.gprofit_percentage || 0,
-        //                                 'G ROI%': item.roi_percentage || 0,
-        //                                 'Red Margin': item.red_margin || 0,
-        //                                 'NR': item.nr || 0,
-        //                                 'type': item.type || '',
-        //                                 'Listing Counts': item.listing_counts || 0,
-        //                                 'W/Ads': item.w_ads || 0,
-        //                                 '0 Sold SKU Count': item.zero_sku || 0,
-        //                                 'Sold Sku Count': item.sold_sku || 0,
-        //                                 'Brand Registry': item.brand_registry || 0,
-        //                                 'Update': item.update_flag || 0,
-        //                                 'Ac Health': item.account_health || '',
-        //                             };
-        //                         }
-
-        //                         return mapped;
-        //                     });
-        //                 },
-        //                 error: function (xhr, error, thrown) {
-        //                     console.log("AJAX error:", error, thrown);
-        //                 }
-        //             },
-        //             columns: [
-        //                 { data: 'Channel ' },
-        //                 {
-        //                     data: 'R&A',
-        //                     render: function (data) {
-        //                         const isChecked = data ? 'checked' : '';
-        //                         return `<div class="ra-edit-container d-flex align-items-center">
-        //                                     <input type="checkbox" class="ra-checkbox" ${isChecked}>
-        //                                 </div>`;
-        //                     }
-        //                 },
-        //                 { data: 'Link' },
-        //                 { data: 'Sheet Link' },
-        //                 { data: 'L-60 Sales' },
-        //                 { data: 'L30 Sales' },
-        //                 { data: 'Growth' },
-        //                 { data: 'L60 Orders' },
-        //                 { data: 'L30 Orders' },
-        //                 { data: 'Gprofit%' },
-        //                 { data: 'G ROI%' },
-        //                 { data: 'Red Margin' },
-        //                 { data: 'NR' },
-        //                 {
-        //                     data: 'type',
-        //                     render: function (data) {
-        //                         return `<input type="text" class="form-control type-input" value="${data || ''}">`;
-        //                     }
-        //                 },
-        //                 { data: 'Listing Counts' },
-        //                 {
-        //                     data: 'W/Ads',
-        //                     render: function (data) {
-        //                         const isChecked = data ? 'checked' : '';
-        //                         return `<div class="wa-edit-container d-flex align-items-center">
-        //                                     <input type="checkbox" class="wa-checkbox" ${isChecked}>
-        //                                 </div>`;
-        //                     }
-        //                 },
-        //                 { data: '0 Sold SKU Count' },
-        //                 { data: 'Sold Sku Count' },
-        //                 { data: 'Brand Registry' },
-        //                 {
-        //                     data: 'Update',
-        //                     render: function (data) {
-        //                         const isChecked = data ? 'checked' : '';
-        //                         return `<div class="update-edit-container d-flex align-items-center">
-        //                                     <input type="checkbox" class="update-checkbox" ${isChecked}>
-        //                                 </div>`;
-        //                     }
-        //                 },
-        //                 { data: 'Ac Health' },
-        //                 {
-        //                     data: null,
-        //                     render: function () {
-        //                         return `<button class="btn btn-sm btn-primary">Edit</button>`;
-        //                     }
-        //                 }
-        //             ],
-        //             responsive: true,
-        //             language: {
-        //                 processing: "Loading data, please wait...",
-        //                 emptyTable: "",
-        //                 zeroRecords: "",
         //             }
         //         });
 
@@ -1516,132 +1353,7 @@
         //     }
         // }
 
-        // function initializeDataTable() {
-        //     try {
-        //         if (!jq('#channelTable').length) {
-        //             console.error('Table element not found');
-        //             return null;
-        //         }
-
-        //         let table = jq('#channelTable').DataTable({
-        //             processing: true,
-        //             serverSide: false,
-        //             ordering: false,
-        //             searching: true,
-        //             pageLength: 50,
-        //             destroy: true, // ✅ Prevent "Cannot reinitialise DataTable"
-        //             ajax: {
-        //                 url: '/channels-master-data',
-        //                 type: "GET",
-        //                 data: function (d) {
-        //                     $('#customLoader').hide();
-        //                     $('#channelTableWrapper').show();
-        //                     d.channel = jq('#channelSearchInput').val(); 
-        //                     d.search = jq('#searchInput').val();
-        //                     d.sort_by = window.currentSortColumn || null;
-        //                     d.sort_order = window.currentSortOrder || null;
-        //                 },
-        //                 dataSrc: function (json) {
-        //                     if (!json.data || !json.data.length) return [];
-
-        //                     //Normalize data: ensure every row has same keys
-        //                     return json.data.map(item => {
-        //                         return {
-        //                             'Channel': item.channel || 'Amazon', // fallback
-        //                             'R&A': item.ra || 0,
-        //                             'Link': item.link || '',
-        //                             'Sheet Link': item.sheet_link || '',
-        //                             'L-60 Sales': item.l60_sales || item.A_L60 || 0,
-        //                             'L30 Sales': item.l30_sales || item.T_Sale_l30 || 0,
-        //                             'Growth': item.growth || item.PFT_percentage || 0,
-        //                             'L60 Orders': item.l60_orders || item.A_L60_orders || 0,
-        //                             'L30 Orders': item.l30_orders || item.A_L30_orders || 0,
-        //                             'Gprofit%': item.gprofit_percentage || item.PFT_percentage || 0,
-        //                             'G ROI%': item.roi_percentage || 0,
-        //                             'Red Margin': item.red_margin || item.Total_pft || 0,
-        //                             'NR': item.nr || 0,
-        //                             'type': item.type || '',
-        //                             'Listing Counts': item.listing_counts || 0,
-        //                             'W/Ads': item.w_ads || 0,
-        //                             '0 Sold SKU Count': item.zero_sku || 0,
-        //                             'Sold Sku Count': item.sold_sku || 0,
-        //                             'Brand Registry': item.brand_registry || 0,
-        //                             'Update': item.update_flag || 0,
-        //                             'Ac Health': item.account_health || '',
-        //                         };
-        //                     });
-        //                 },
-        //                 error: function (xhr, error, thrown) {
-        //                     console.log("AJAX error:", error, thrown);
-        //                 }
-        //             },
-        //             columns: [
-        //                 { data: 'Channel' },
-        //                 {
-        //                     data: 'R&A',
-        //                     render: function (data) {
-        //                         const isChecked = data ? 'checked' : '';
-        //                         return `<input type="checkbox" class="ra-checkbox" ${isChecked}>`;
-        //                     }
-        //                 },
-        //                 { data: 'Link' },
-        //                 { data: 'Sheet Link' },
-        //                 { data: 'L-60 Sales' },
-        //                 { data: 'L30 Sales' },
-        //                 { data: 'Growth' },
-        //                 { data: 'L60 Orders' },
-        //                 { data: 'L30 Orders' },
-        //                 { data: 'Gprofit%' },
-        //                 { data: 'G ROI%' },
-        //                 { data: 'Red Margin' },
-        //                 { data: 'NR' },
-        //                 {
-        //                     data: 'type',
-        //                     render: function (data) {
-        //                         return `<input type="text" class="form-control type-input" value="${data || ''}">`;
-        //                     }
-        //                 },
-        //                 { data: 'Listing Counts' },
-        //                 {
-        //                     data: 'W/Ads',
-        //                     render: function (data) {
-        //                         const isChecked = data ? 'checked' : '';
-        //                         return `<input type="checkbox" class="wa-checkbox" ${isChecked}>`;
-        //                     }
-        //                 },
-        //                 { data: '0 Sold SKU Count' },
-        //                 { data: 'Sold Sku Count' },
-        //                 { data: 'Brand Registry' },
-        //                 {
-        //                     data: 'Update',
-        //                     render: function (data) {
-        //                         const isChecked = data ? 'checked' : '';
-        //                         return `<input type="checkbox" class="update-checkbox" ${isChecked}>`;
-        //                     }
-        //                 },
-        //                 { data: 'Ac Health' },
-        //                 {
-        //                     data: null,
-        //                     render: function () {
-        //                         return `<button class="btn btn-sm btn-primary">Edit</button>`;
-        //                     }
-        //                 }
-        //             ],
-        //             responsive: true,
-        //             language: {
-        //                 processing: "Loading data, please wait...",
-        //                 emptyTable: "No data available",
-        //                 zeroRecords: "No matching records found",
-        //             }
-        //         });
-
-        //         return table;
-        //     } catch (e) {
-        //         console.error('Error initializing DataTable:', e);
-        //         return null;
-        //     }
-        // }
-
+        
         function initializeDataTable() {
             try {
                 if (!jq('#channelTable').length) {
@@ -1652,7 +1364,6 @@
                 // If already initialized, destroy cleanly so we can rebuild
                 if (jq.fn.DataTable.isDataTable('#channelTable')) {
                     jq('#channelTable').DataTable().clear().destroy();
-                    // Remove previous header thead that DataTables might have created
                     jq('#channelTable').empty();
                 }
 
@@ -1670,17 +1381,163 @@
                 };
                 const pctFix = (v) => {
                     let n = toNum(v, 0);
-                    // If it's a fraction (<=1), convert to %
                     if (Math.abs(n) <= 1) n = n * 100;
-                    // clamp weird values
                     if (!Number.isFinite(n)) n = 0;
                     return n;
                 };
 
-                let table = jq('#channelTable').DataTable({
+                // --- define columns (same order as you're using) ---
+                const columns = [
+                    {
+                        data: 'Channel',
+                        render: function(data, type, row) {
+                            if (!data) return '';
+                            const channelName = data.trim().toLowerCase();
+                            const routeMap = {
+                                'amazon': '/overall-amazon',
+                                'amazon fba': '/overall-amazon-fba',
+                                'ebay': '/ebay',
+                                'ebaytwo': '/ebayTwoAnalysis',
+                                'ebaythree': '/ebayThreeAnalysis',
+                                'temu': '/temu',
+                                'macys': '/macys',
+                                'wayfair': '/Wayfair',
+                                'reverb': '/reverb',
+                                'shopify b2c': '/shopifyB2C',
+                                'doba': '/doba',
+                                'walmart': '/walmartAnalysis',
+                                'bestbuy usa': '/bestbuyusa-analytics',
+                                'shein': '/sheinAnalysis',
+                                'tiktok shop': '/tiktokAnalysis',
+                                'aliexpress': '/aliexpressAnalysis',
+                            };
+                            const routeUrl = routeMap[channelName];
+                            return routeUrl
+                                ? `<a href="${routeUrl}" target="_blank" style="color: #007bff; text-decoration: underline;">${data}</a>`
+                                : `<div class="d-flex align-items-center"><span>${data}</span></div>`;
+                        }
+                    },
+                    {
+                        data: 'R&A',
+                        render: function (v, t, row) {
+                            const checked = toNum(v) === 1 ? 'checked' : '';
+                            return `<input type="checkbox" class="ra-checkbox" data-channel="${row['Channel']}" ${checked}>`;
+                        }
+                    },
+                    {
+                        data: 'sheet_link',
+                        render: function(data, type, row) {
+                            const sheetLink = data || '';
+                            return `<div style="display:flex; align-items:center; gap:6px;">${sheetLink ? `<a href="${sheetLink}" target="_blank" class="btn btn-sm btn-success">🔗</a>` : ''}</div>`;
+                        }
+                    },
+                    // L30 Sales column (IMPORTANT: this returns numeric when type === 'sort' so ordering works)
+                    {
+                        data: 'L30 Sales',
+                        render: function (data, type) {
+                            const n = toNum(data);
+                            if (type === 'sort' || type === 'type') return n; // numeric for sorting
+                            return `<span class="metric-value">${n.toLocaleString('en-US')}</span>`;
+                        }
+                    },
+                    {
+                        data: 'Growth',
+                        render: function (v) {
+                            const n = pctFix(v);
+                            if (!Number.isFinite(n)) return '-';
+                            let bg = '', color = 'black';
+                            if (n < 0)              { bg = '#ff0000'; color = 'white'; }
+                            else if (n < 10)        { bg = '#ffff00'; }
+                            else if (n < 20)        { bg = '#00ffff'; }
+                            else if (n < 50)        { bg = '#00ff00'; }
+                            else                    { bg = '#ff00ff'; color = 'white'; }
+                            return `<span style="background:${bg};color:${color};padding:2px 6px;border-radius:4px;">${Math.round(n)}%</span>`;
+                        }
+                    },
+                    { data: 'L30 Orders', render: v => `<span class="metric-value">${toNum(v).toLocaleString('en-US')}</span>` },
+
+                    // Gprofit% column: numeric sort enabled
+                    {
+                        data: 'Gprofit%',
+                        render: function (v, type) {
+                            const n = pctFix(v);
+                            if (type === 'sort' || type === 'type') return n; // numeric for sorting
+                            let bg = '', color = 'white';
+                            if (n < 15) { bg = '#ff0000'; }
+                            else if (n >= 15 && n < 25) { bg = '#ffff00'; color = 'black'; }
+                            else if (n >= 25 && n < 40) { bg = '#00ff00'; color = 'black'; }
+                            else { bg = '#8000ff'; }
+                            return `<span style="background:${bg};color:${color};padding:2px 6px;border-radius:4px;">${Math.round(n)}%</span>`;
+                        }
+                    },
+
+                    {
+                        data: 'G ROI%',
+                        render: function (v) {
+                            const n = pctFix(v);
+                            let bg = '', color = 'black';
+                            if (n <= 50) { bg = '#ff0000'; color = 'white'; }
+                            return `<span style="background:${bg};color:${color};padding:2px 6px;border-radius:4px;">${Math.round(n)}%</span>`;
+                        }
+                    },
+                    { data: 'Channel Percentage', render: v => `<span class="metric-value">${toNum(v).toLocaleString('en-US')}</span>` },
+                    {
+                        data: 'NR',
+                        render: function (v, t, row) {
+                            const checked = toNum(v) === 1 ? 'checked' : '';
+                            return `<input type="checkbox" class="checkbox-nr" data-channel="${row['Channel']}" ${checked}>`;
+                        }
+                    },
+                    {
+                        data: 'type',
+                        render: function (v) {
+                            return `<span style="display:inline-block; min-width:100px;">${v ? v : '-'}</span>`;
+                        }
+                    },
+                    { data: 'Listing Counts', render: v => `<span class="metric-value">${toNum(v).toLocaleString('en-US')}</span>` },
+                    {
+                        data: 'W/Ads',
+                        render: function (v, t, row) {
+                            const checked = toNum(v) === 1 ? 'checked' : '';
+                            return `<input type="checkbox" class="checkbox-wads" data-channel="${row['Channel']}" ${checked}>`;
+                        }
+                    },
+                    {
+                        data: 'Update',
+                        render: function (v, t, row) {
+                            const checked = toNum(v) === 1 ? 'checked' : '';
+                            return `<input type="checkbox" class="checkbox-update" data-channel="${row['Channel']}" ${checked}>`;
+                        }
+                    },
+                    {
+                        data: 'Ac Health',
+                        render: function (data) {
+                            return data ? `<a href="${data}" target="_blank"><i class="bi bi-box-arrow-up-right"></i></a>` : '';
+                        }
+                    },
+                    {
+                        data: null,
+                        render: function (_d, _t, row, meta) {
+                            return `
+                                <div class="d-flex justify-content-center">
+                                    <button class="btn btn-sm btn-outline-primary edit-btn me-1" title="Edit" data-index="${meta.row}" data-channel="${row['Channel'] || ''}"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-outline-danger delete-btn" title="Archive"><i class="fa fa-archive"></i></button>
+                                </div>`;
+                        }
+                    }
+                ];
+
+                // Find indexes dynamically so you don't have to guess numbers
+                const l30Index = columns.findIndex(c => c.data === 'L30 Sales');
+                const gprofitIndex = columns.findIndex(c => c.data === 'Gprofit%');
+
+                // initialize DataTable with ordering enabled
+                const table = jq('#channelTable').DataTable({
                     processing: true,
                     serverSide: false,
-                    ordering: false,
+                    ordering: true,
+                    // don't rely solely on this index number in config; we'll enforce order on initComplete too
+                    order: (l30Index >= 0) ? [[l30Index, 'desc']] : [], 
                     searching: true,
                     pageLength: 50,
                     destroy: true,
@@ -1690,27 +1547,15 @@
                         data: function (d) {
                             jq('#customLoader').hide();
                             jq('#channelTableWrapper').show();
-                            d.channel     = jq('#channelSearchInput').val(); // Amazon / eBay / etc.
+                            d.channel     = jq('#channelSearchInput').val();
                             d.search      = jq('#searchInput').val();
                             d.sort_by     = window.currentSortColumn || null;
                             d.sort_order  = window.currentSortOrder || null;
                         },
-                       dataSrc: function (json) {
+                        dataSrc: function (json) {
                             if (!json || !json.data) return [];
 
-                            // drawChannelChart(json.data);
-
-                            json.data.sort((a, b) => {
-                                const aVal = parseFloat(String(a['L30 Sales'] || a['l30_sales'] || 0).replace(/,/g, '')) || 0;
-                                const bVal = parseFloat(String(b['L30 Sales'] || b['l30_sales'] || 0).replace(/,/g, '')) || 0;
-                                return bVal - aVal; // high → low
-                            });
-
-                            // Normalize every row to ONE schema so columns line up
                             return json.data.map(item => {
-                                // console.log('Raw item:', item);
-
-                                // Make sure to include exact keys sent by controller
                                 const l60Sales = toNum(pick(item, ['L-60 Sales', 'L60 Sales', 'l60_sales', 'A_L60', 'l60sales'], 0), 0);
                                 const l30Sales = toNum(pick(item, ['L30 Sales', 'l30_sales', 'T_Sale_l30', 'l30sales'], 0), 0);
 
@@ -1718,20 +1563,13 @@
                                 const l30Orders = toNum(pick(item, ['L30 Orders','l30_orders', 'A_L30_orders', 'l30orders'], 0), 0);
 
                                 let growth = pick(item, ['growth', 'Growth'], null);
-                                // if (growth === null || growth === '' || !Number.isFinite(toNum(growth))) {
-                                //     growth = l30Orders > 0 ? ((l30Orders - l60Orders) / l30Orders) * 100 : 0;
-                                // } else {
-                                //     growth = pctFix(growth);
-                                // }
-                                // if (!Number.isFinite(growth)) growth = 0;
-
                                 let gprofit = pctFix(pick(item, ['gprofit_percentage', 'PFT_percentage', 'gprofit', 'Gprofit%'], 0));
                                 let groi    = pctFix(pick(item, ['G Roi', 'g_roi_percentage', 'roi'], 0));
                                 let gprofitL60  = pctFix(pick(item, ['Gprofitl60'], 0));
                                 let cogs = pctFix(pick(item, ['cogs'], 0));
 
                                 return {
-                                    'Channel': pick(item, ['channel', 'Channel', 'Channel '], ''),  // use per-row channel
+                                    'Channel': pick(item, ['channel', 'Channel', 'Channel '], ''),
                                     'Link': pick(item, ['link', 'url', 'URL LINK', 'url_link'], ''),
                                     'sheet_link': pick(item, ['sheet_link', 'sheet_url', 'sheet'], ''),
                                     'R&A': toNum(pick(item, ['ra', 'R&A', 'R_and_A'], 0), 0),
@@ -1756,230 +1594,28 @@
                                     'Ac Health': pick(item, ['account_health', 'ac_health', 'accounthealth'], ''),
                                     'Channel Percentage': pctFix(pick(item, ['channel_percentage'], 0), 0),
                                     'cogs': cogs,
-                                    
                                 };
-                                
                             });
                         },
-
                         error: function (xhr, error, thrown) {
                             console.log("AJAX error:", error, thrown);
                         }
                     },
-                    columns: [
-                        // { data: 'Channel' },
-                        {
-                            data: 'Channel',
-                            render: function(data, type, row) {
-                                if (!data) return '';
-
-                                const channelName = data.trim().toLowerCase();
-                                const routeMap = {
-                                    'amazon': '/overall-amazon',
-                                    'amazon fba': '/overall-amazon-fba',
-                                    'ebay': '/ebay',
-                                    'ebay': '/ebay',
-                                    'ebaytwo': '/ebayTwoAnalysis',
-                                    'ebaythree': '/ebayThreeAnalysis',
-                                    'temu': '/temu',
-                                    'macys': '/macys',
-                                    'wayfair': '/Wayfair',
-                                    'reverb': '/reverb',
-                                    'shopify b2c': '/shopifyB2C',
-                                    'doba': '/doba',
-                                    'walmart': '/walmartAnalysis',
-                                    'bestbuy usa': '/bestbuyusa-analytics',
-                                    'shein': '/sheinAnalysis',
-                                    'tiktok shop': '/tiktokAnalysis',
-                                    'aliexpress': '/aliexpressAnalysis',
-                                };
-
-                                const routeUrl = routeMap[channelName];
-
-                                if (routeUrl) {
-                                    return `<a href="${routeUrl}" target="_blank" style="color: #007bff; text-decoration: underline;">${data}</a>`;
-                                } else {
-                                    return `<div class="d-flex align-items-center"><span>${data}</span></div>`;
-                                }
-                            }
-                        },
-                        { data: 'R&A', render: function (v, t, row) {
-                                const checked = toNum(v) === 1 ? 'checked' : '';
-                                return `<input type="checkbox" class="ra-checkbox" data-channel="${row['Channel']}" ${checked}>`;
-                            }
-                        },
-                        // {
-                        //     data: 'sheet_link',
-                        //     render: function(data, type, row) {
-                        //         const sheetLink = data || '';
-                        //         const channelName = row['Channel'] || '';
-                        //         return `
-                        //             <div style="display:flex; align-items:center; gap:6px;">
-                        //                 <input type="text"
-                        //                     class="form-control form-control-sm sheet-link-input"
-                        //                     value="${sheetLink}"
-                        //                     data-channel="${channelName}"
-                        //                     placeholder="Enter Link"
-                        //                     style="min-width: 10px;" />
-                        //                 ${sheetLink ? `<a href="${sheetLink}" target="_blank" class="btn btn-sm btn-success">🔗</a>` : ''}
-                        //             </div>
-                        //         `;
-                        //     }
-                        // },      
-                        {
-                            data: 'sheet_link',
-                            render: function(data, type, row) {
-                                const sheetLink = data || '';
-                                const channelName = row['Channel'] || '';
-                                return `
-                                    <div style="display:flex; align-items:center; gap:6px;">
-                                        ${sheetLink ? `<a href="${sheetLink}" target="_blank" class="btn btn-sm btn-success">🔗</a>` : ''}
-                                    </div>
-                                `;
-                            }
-                        },      
-                        // { data: 'L-60 Sales', render: v => `<span class="metric-value">${toNum(v).toLocaleString('en-US')}</span>` },
-                        // { data: 'L30 Sales',  render: v => `<span class="metric-value">${toNum(v).toLocaleString('en-US')}</span>` },
-                        {
-                            data: 'L30 Sales',
-                            render: function(data, type, row) {
-                                const n = parseFloat(String(data).replace(/,/g, '')) || 0;
-
-                                // For sorting: return numeric value (DataTables internal)
-                                if (type === 'sort' || type === 'type') return n;
-
-                                // Display formatted
-                                return `<span class="metric-value">${n.toLocaleString('en-US')}</span>`;
-                            },
-                            // --- NEW: always sort descending before displaying ---
-                            createdCell: function(td, cellData, rowData, row, col) {
-                                // no action needed here
-                            }
-                        },
-
-                        {
-                            data: 'Growth',
-                            render: function (v) {
-                                const n = pctFix(v);
-                                if (!Number.isFinite(n)) return '-';
-                                let bg = '', color = 'black';
-                                if (n < 0)              { bg = '#ff0000'; color = 'white'; }
-                                else if (n < 10)        { bg = '#ffff00'; }
-                                else if (n < 20)        { bg = '#00ffff'; }
-                                else if (n < 50)        { bg = '#00ff00'; }
-                                else                    { bg = '#ff00ff'; color = 'white'; }
-                                return `<span style="background:${bg};color:${color};padding:2px 6px;border-radius:4px;">${Math.round(n)}%</span>`;
-                            }
-                        },
-                        
-                        // { data: 'L60 Orders', render: v => `<span class="metric-value">${toNum(v).toLocaleString('en-US')}</span>` },
-                        { data: 'L30 Orders', render: v => `<span class="metric-value">${toNum(v).toLocaleString('en-US')}</span>` },
-
-                        // {
-                        //     data: 'Gprofit%',
-                        //     render: function (v) {
-                        //         const n = pctFix(v);
-                        //         let bg = '', color = 'black';
-                        //         if (n < 25)            { bg = '#ff0000'; color = 'white'; }
-                        //         else if (n < 33)       { bg = '#00ff00'; }
-                        //         else                   { bg = '#ff00ff'; color = 'white'; }
-                        //         return `<span style="background:${bg};color:${color};padding:2px 6px;border-radius:4px;">${Math.round(n)}%</span>`;
-                        //     }
-                        // },
-                        {
-                            data: 'Gprofit%',
-                            render: function (v) {
-                                const n = pctFix(v);
-                                let bg = '', color = 'white';
-
-                                if (n < 15) {
-                                    bg = '#ff0000'; // Red
-                                } else if (n >= 15 && n < 25) {
-                                    bg = '#ffff00'; // Yellow
-                                    color = 'black';
-                                } else if (n >= 25 && n < 40) {
-                                    bg = '#00ff00'; // Green
-                                    color = 'black';
-                                } else {
-                                    bg = '#8000ff'; // Purple
-                                }
-
-                                return `<span style="background:${bg};color:${color};padding:2px 6px;border-radius:4px;">${Math.round(n)}%</span>`;
-                            }
-                        },
-                        {
-                            data: 'G ROI%',
-                            render: function (v) {
-                                const n = pctFix(v);
-                                let bg = '', color = 'black';
-                                if (n <= 50) { bg = '#ff0000'; color = 'white'; }
-                                return `<span style="background:${bg};color:${color};padding:2px 6px;border-radius:4px;">${Math.round(n)}%</span>`;
-                            }
-                        },
-                        // { data: 'Red Margin', render: v => `<span class="metric-value">${toNum(v).toLocaleString('en-US')}</span>` },
-                        { data: 'Channel Percentage', render: v => `<span class="metric-value">${toNum(v).toLocaleString('en-US')}</span>` },
-                        // {
-                        //     data: 'Channel Percentage',
-                        //     render: function (v, t, row) {
-                        //         return `<input type="integer" class="form-control form-control-sm channel-percentage-input"
-                        //                     value="${v || ''}" data-channel="${row['Channel']}"  style="min-width: 100px;" placeholder="Enter Percentage">`;
-                        //     }
-                        // },
-                        {
-                            data: 'NR',
-                            render: function (v, t, row) {
-                                const checked = toNum(v) === 1 ? 'checked' : '';
-                                return `<input type="checkbox" class="checkbox-nr" data-channel="${row['Channel']}" ${checked}>`;
-                            }
-                        },
-                        {
-                            data: 'type',
-                            render: function (v, t, row) {
-                                return `<input type="text" class="form-control form-control-sm type-input"
-                                            value="${v || ''}" data-channel="${row['Channel']}"  style="min-width: 100px;" placeholder="Enter Type">`;
-                            }
-                        },
-                        { data: 'Listing Counts', render: v => `<span class="metric-value">${toNum(v).toLocaleString('en-US')}</span>` },
-                        {
-                            data: 'W/Ads',
-                            render: function (v, t, row) {
-                                const checked = toNum(v) === 1 ? 'checked' : '';
-                                return `<input type="checkbox" class="checkbox-wads" data-channel="${row['Channel']}" ${checked}>`;
-                            }
-                        },
-                        // { data: '0 Sold SKU Count', render: v => `<span class="metric-value">${toNum(v).toLocaleString('en-US')}</span>` },
-                        // { data: 'Sold Sku Count',   render: v => `<span class="metric-value">${toNum(v).toLocaleString('en-US')}</span>` },
-                        // { data: 'Brand Registry',   render: v => `<span class="metric-value">${toNum(v).toLocaleString('en-US')}</span>` },
-                        {
-                            data: 'Update',
-                            render: function (v, t, row) {
-                                const checked = toNum(v) === 1 ? 'checked' : '';
-                                return `<input type="checkbox" class="checkbox-update" data-channel="${row['Channel']}" ${checked}>`;
-                            }
-                        },
-                        {
-                            data: 'Ac Health',
-                            render: function (data) {
-                                return data ? `<a href="${data}" target="_blank"><i class="bi bi-box-arrow-up-right"></i></a>` : '';
-                            }
-                        },
-                        {
-                            data: null,
-                            render: function (_d, _t, row, meta) {
-                                return `
-                                <div class="d-flex justify-content-center">
-                                    <button class="btn btn-sm btn-outline-primary edit-btn me-1"
-                                            title="Edit" data-index="${meta.row}" data-channel="${row['Channel'] || ''}">
-                                    <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-danger delete-btn" title="Archive">
-                                    <i class="fa fa-archive"></i>
-                                    </button>
-                                </div>`;
-                            }
-                        }
-                    ],
+                    columns: columns,
                     responsive: true,
+
+                    // ensure default sort is applied after table init (fixes timing/responsive issues)
+                    initComplete: function () {
+                        try {
+                            if (l30Index >= 0) {
+                                // set primary default order to L30 Sales descending
+                                this.api().order([[l30Index, 'desc']]).draw(false);
+                            }
+                        } catch (err) {
+                            console.warn('Could not set default order:', err);
+                        }
+                    },
+
                     language: {
                         processing: "Loading data, please wait...",
                         emptyTable: "",
@@ -1995,6 +1631,7 @@
         }
 
 
+
         function drawSalesTrendChart() {
             fetch('/sales-trend-data')
                 .then(response => response.json())
@@ -2007,24 +1644,24 @@
                         [
                             'Date', 
                             'L30 Sales', { role: 'tooltip', p: { html: true } },
-                            'L60 Sales', { role: 'tooltip', p: { html: true } },
+                            // 'L60 Sales', { role: 'tooltip', p: { html: true } },
                             'GProfit (%)', { role: 'tooltip', p: { html: true } }
                         ]
                     ];
 
                     chartDataFromAPI.forEach(row => {
                         const l30 = Math.round(row.l30_sales);
-                        const l60 = Math.round(row.l60_sales);
+                        // const l60 = Math.round(row.l60_sales);
                         const gprofit = Math.round(row.gprofit);
 
                         const tooltipL30 = `<div style="padding:5px"><strong>${row.date}</strong><br/>L30 Sales: ${l30}</div>`;
-                        const tooltipL60 = `<div style="padding:5px"><strong>${row.date}</strong><br/>L60 Sales: ${l60}</div>`;
+                        // const tooltipL60 = `<div style="padding:5px"><strong>${row.date}</strong><br/>L60 Sales: ${l60}</div>`;
                         const tooltipGProfit = `<div style="padding:5px"><strong>${row.date}</strong><br/>GProfit: ${gprofit}%</div>`;
 
                         chartArray.push([
                             row.date,
                             l30, tooltipL30,
-                            l60, tooltipL60,
+                            // l60, tooltipL60,
                             gprofit, tooltipGProfit
                         ]);
                     });
@@ -2034,7 +1671,7 @@
                         const data = google.visualization.arrayToDataTable(chartArray);
 
                         const options = {
-                            title: '📈 Daily Sales Trend (L30 vs L60 vs GProfit %)',
+                            title: '📈 Daily Sales Trend (L30 vs GProfit %)',
                             legend: { position: 'bottom', textStyle: { fontSize: 12 } },
                             focusTarget: 'datum',
                             tooltip: { isHtml: true },
@@ -2050,7 +1687,7 @@
                             },
                             series: {
                                 0: { targetAxisIndex: 0, color: '#1E88E5', lineWidth: 3, pointSize: 5, pointShape: 'circle' },
-                                1: { targetAxisIndex: 0, color: '#FF7043', lineWidth: 3, pointSize: 5, pointShape: 'circle', lineDashStyle: [4, 4] },
+                                // 1: { targetAxisIndex: 0, color: '#FF7043', lineWidth: 3, pointSize: 5, pointShape: 'circle', lineDashStyle: [4, 4] },
                                 2: { targetAxisIndex: 1, color: '#43A047', lineWidth: 3, pointSize: 5, pointShape: 'circle' }
                             },
                             chartArea: { left: 70, top: 50, width: '85%', height: '65%' },
@@ -2707,5 +2344,169 @@
             }
         });
     </script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+(async function(){
+  const fetchUrl = '/sales-trend-data';
+  const statusEl = document.getElementById('status');
+  const ctx = document.getElementById('barChart').getContext('2d');
+  const btnL30 = document.getElementById('toggleL30');
+  const btnL60 = document.getElementById('toggleL60');
+
+  let enabled = { l30: true, l60: false };
+  let rawChartData = [];
+  let chart = null;
+
+  function setStatus(msg, isError = false) {
+    statusEl.textContent = msg;
+    statusEl.style.color = isError ? '#b00020' : '#666';
+  }
+
+  function updateButtons() {
+    btnL30.classList.toggle('off', !enabled.l30);
+    btnL60.classList.toggle('off', !enabled.l60);
+  }
+
+  function renderChart() {
+    // Filter to show only rows where at least one enabled series has data
+    const filtered = rawChartData.filter(row => {
+      const hasL30 = enabled.l30 && Number(row.l30_sales) > 0;
+      const hasL60 = enabled.l60 && Number(row.l60_sales) > 0;
+      return hasL30 || hasL60;
+    });
+
+    if (filtered.length === 0) {
+      if (chart) chart.destroy();
+      setStatus('No data to display with current filters.');
+      return;
+    }
+
+    const labels = filtered.map(r => r.date);
+    const l30Data = filtered.map(r => Number(r.l30_sales ?? 0));
+    const l60Data = filtered.map(r => Number(r.l60_sales ?? 0));
+
+    const datasets = [];
+    
+    if (enabled.l30) {
+      datasets.push({
+        label: 'L30',
+        data: l30Data,
+        backgroundColor: 'rgba(54, 162, 235, 0.85)',
+        borderColor: 'rgba(54, 162, 235, 1)',
+        borderWidth: 1,
+        borderRadius: 4
+      });
+    }
+    
+    if (enabled.l60) {
+      datasets.push({
+        label: 'L60',
+        data: l60Data,
+        backgroundColor: 'rgba(255, 159, 64, 0.85)',
+        borderColor: 'rgba(255, 159, 64, 1)',
+        borderWidth: 1,
+        borderRadius: 4
+      });
+    }
+
+    if (chart) chart.destroy();
+
+    chart = new Chart(ctx, {
+      type: 'bar',
+      data: { labels, datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { 
+          mode: 'index', 
+          intersect: false 
+        },
+        plugins: {
+          legend: { 
+            position: 'top',
+            labels: {
+              padding: 15,
+              font: { size: 12 }
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: (context) => {
+                const value = context.parsed.y ?? context.parsed;
+                return context.dataset.label + ': $' + Number(value).toLocaleString('en-US', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2
+                });
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            title: { 
+              display: true, 
+              text: 'Date',
+              font: { size: 12, weight: 'bold' }
+            },
+            grid: { display: false },
+            ticks: { 
+              maxRotation: 45,
+              minRotation: 45,
+              autoSkip: true, 
+              maxTicksLimit: 30,
+              font: { size: 10 }
+            }
+          },
+          y: {
+            title: { 
+              display: true, 
+              text: 'Sales ($)',
+              font: { size: 12, weight: 'bold' }
+            },
+            beginAtZero: true,
+            grid: { color: 'rgba(0, 0, 0, 0.05)' },
+            ticks: { 
+              callback: (value) => '$' + Number(value).toLocaleString()
+            }
+          }
+        }
+      }
+    });
+
+    setStatus(`Showing ${filtered.length} dates — L30: ${enabled.l30 ? 'ON' : 'OFF'}, L60: ${enabled.l60 ? 'ON' : 'OFF'}`);
+  }
+
+  try {
+    const res = await fetch(fetchUrl, { credentials: 'same-origin' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const payload = await res.json();
+    rawChartData = Array.isArray(payload.chartData) ? payload.chartData : [];
+
+    if (rawChartData.length === 0) {
+      setStatus('No data available for the selected period.');
+      return;
+    }
+
+    updateButtons();
+    renderChart();
+  } catch (err) {
+    console.error(err);
+    setStatus('Failed to load chart data — check console and API route.', true);
+    return;
+  }
+
+  btnL30.addEventListener('click', () => {
+    enabled.l30 = !enabled.l30;
+    updateButtons();
+    renderChart();
+  });
+
+  btnL60.addEventListener('click', () => {
+    enabled.l60 = !enabled.l60;
+    updateButtons();
+    renderChart();
+  });
+})();
+</script>
 
 @endsection

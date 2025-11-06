@@ -14,6 +14,7 @@ class WalmartCampaignReport extends Model
     public $timestamps = true; 
 
     protected $fillable = [
+        'campaign_id',
         'report_range',
         'campaign_id',
         'campaignName',
@@ -22,6 +23,7 @@ class WalmartCampaignReport extends Model
         'cpc',
         'impression',
         'clicks',
+        'sold',
         'status',
         'created_at',
         'updated_at',

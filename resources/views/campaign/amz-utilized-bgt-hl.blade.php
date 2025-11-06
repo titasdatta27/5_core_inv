@@ -444,6 +444,37 @@
                         formatter: (cell) => parseFloat(cell.getValue() || 0)
                     },
                     {
+                        title: "ACOS L30",
+                        field: "acos_L30",
+                        hozAlign: "right",
+                        formatter: function(cell) {
+                            return `
+                                <span>${cell.getValue().toFixed(0) + "%"}</span>
+                                <i class="fa fa-info-circle text-primary toggle-acos-cols-btn"
+                                style="cursor:pointer; margin-left:8px;"></i>
+                            `;
+                            
+                        }
+                    },
+                    {
+                        title: "ACOS L15",
+                        field: "acos_L15",
+                        hozAlign: "right",
+                        visible: false,
+                        formatter: function(cell) {
+                            return parseFloat(cell.getValue() || 0).toFixed(0) + "%";
+                        }
+                    },
+                    {
+                        title: "ACOS L7",
+                        field: "acos_L7",
+                        hozAlign: "right",
+                        visible: false,
+                        formatter: function(cell) {
+                            return parseFloat(cell.getValue() || 0).toFixed(0) + "%";
+                        }
+                    },
+                    {
                         title: "7 UB%",
                         field: "l7_spend",
                         hozAlign: "right",
@@ -520,7 +551,7 @@
                             var l7_cpc = parseFloat(row.l7_cpc) || 0;
                             var sbid;
 
-                            sbid = Math.floor(l1_cpc * 0.20 * 100) / 100;
+                            sbid = Math.floor(l1_cpc * 0.90 * 100) / 100;
                             return sbid;
                         },
                     },
@@ -543,7 +574,7 @@
                                 var l7_cpc = parseFloat(rowData.l7_cpc) || 0;
                                 var sbid;
                                     
-                                sbid = Math.floor(l1_cpc * 0.20 * 100) / 100;
+                                sbid = Math.floor(l1_cpc * 0.90 * 100) / 100;
                                 updateBid(sbid, rowData.campaign_id);
                             }
                         }
@@ -656,24 +687,26 @@
 
                     if (!(ub7 > 90)) return false;
 
+                    // ✅ SEARCH FILTER
                     let searchVal = $("#global-search").val()?.toLowerCase() || "";
                     if (searchVal && !(data.campaignName?.toLowerCase().includes(searchVal))) {
                         return false;
                     }
 
+                    // ✅ STATUS FILTER
                     let statusVal = $("#status-filter").val();
                     if (statusVal && data.campaignStatus !== statusVal) {
                         return false;
                     }
 
                     let invFilterVal = $("#inv-filter").val();
+                    let inv = parseFloat(data.INV || 0);
 
+                    // ALL → no restriction
                     if (invFilterVal === "INV_0") {
-                        if (parseFloat(data.INV) !== 0) return false;
+                        if (inv !== 0) return false;
                     } else if (invFilterVal === "OTHERS") {
-                        if (parseFloat(data.INV) === 0) return false;
-                    } else if (invFilterVal === "ALL" || invFilterVal === "") {
-                        // show all rows → do nothing
+                        if (inv === 0) return false;
                     }
 
                     let nrlFilterVal = $("#nrl-filter").val();
@@ -712,16 +745,20 @@
                     return true;
                 }
 
+                // ✅ SET FILTER
                 table.setFilter(combinedFilter);
 
+                // ✅ UPDATE COUNTS
                 function updateCampaignStats() {
-                    let total = table.getDataCount();
-                    let filtered = table.getDataCount("active");
-                    let currentPage = table.getRows("active").length;
+                    let allRows = table.getData();
+                    let filteredRows = allRows.filter(combinedFilter);
+
+                    let total = allRows.length;
+                    let filtered = filteredRows.length;
 
                     let percentage = total > 0 ? ((filtered / total) * 100).toFixed(0) : 0;
 
-                    document.getElementById("total-campaigns").innerText = currentPage;
+                    document.getElementById("total-campaigns").innerText = filtered; 
                     document.getElementById("percentage-campaigns").innerText = percentage + "%";
                 }
 
@@ -729,14 +766,17 @@
                 table.on("pageLoaded", updateCampaignStats);
                 table.on("dataProcessed", updateCampaignStats);
 
-                $("#global-search").on("keyup", function() {
+                // ✅ SEARCH + FILTER CHANGE HANDLERS
+                $("#global-search").on("keyup", function () {
                     table.setFilter(combinedFilter);
                 });
 
-                $("#status-filter, #inv-filter, #nrl-filter, #nra-filter, #fba-filter").on("change", function() {
-                    table.setFilter(combinedFilter);
-                });
+                $("#status-filter, #inv-filter, #nrl-filter, #nra-filter, #fba-filter")
+                    .on("change", function () {
+                        table.setFilter(combinedFilter);
+                    });
 
+                // ✅ INITIAL UPDATE
                 updateCampaignStats();
             });
 
@@ -748,6 +788,19 @@
 
                     colsToToggle.forEach(colName => {
                         let col = table.getColumn(colName);
+                        if (col) {
+                            col.toggle();
+                        }
+                    });
+                }
+            });
+
+            document.addEventListener("click", function(e) {
+                if (e.target.classList.contains("toggle-acos-cols-btn")) {
+                    let colsToToggle = ["acos_L15", "acos_L7"]; 
+
+                    colsToToggle.forEach(colField => {
+                        let col = table.getColumn(colField);
                         if (col) {
                             col.toggle();
                         }
@@ -773,7 +826,7 @@
                         var l7_cpc = parseFloat(rowData.l7_cpc) || 0;
                         var sbid;
                         
-                        sbid = Math.floor(l1_cpc * 0.20 * 100) / 100;
+                        sbid = Math.floor(l1_cpc * 0.90 * 100) / 100;
 
                         campaignIds.push(rowData.campaign_id);
                         bids.push(sbid);

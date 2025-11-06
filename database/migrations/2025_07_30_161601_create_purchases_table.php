@@ -18,6 +18,8 @@ return new class extends Migration
             $table->integer('supplier_id')->nullable();
             $table->integer('warehouse_id')->nullable();
             $table->json('items')->nullable();
+            $table->string('deleted_by')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

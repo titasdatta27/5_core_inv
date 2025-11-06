@@ -26,3 +26,4 @@
 .DS_Store
 Thumbs.db
 vendor/symfony/polyfill-php83/Php83.php
+.htaccess

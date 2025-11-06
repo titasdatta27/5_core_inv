@@ -398,6 +398,7 @@ class ToOrderAnalysisController extends Controller
                 $record->qty = $request->order_qty;
                 $record->supplier = $request->supplier;
                 $record->adv_date = $request->adv_date;
+                $record->ready_to_ship = 'No';
                 $record->save();
             } else {
                 // Create new record
@@ -407,6 +408,7 @@ class ToOrderAnalysisController extends Controller
                     'qty' => $request->order_qty,
                     'supplier' => $request->supplier,
                     'adv_date' => $request->adv_date,
+                    'ready_to_ship' => 'No',
                 ]);
             }
 
@@ -440,14 +442,33 @@ class ToOrderAnalysisController extends Controller
 
     public function deleteToOrderAnalysis(Request $request)
     {
-        $ids = $request->input('ids', []);
-        if(!empty($ids)){
-            ToOrderAnalysis::whereIn('id', $ids)->delete();
-            return response()->json(['success' => true]);
-        }
-        return response()->json(['success' => false], 400);
-    }
-    
+        try {
+            $ids = $request->input('ids', []);
 
+            if (!empty($ids)) {
+                $user = auth()->check() ? auth()->user()->name : 'System';
+
+                ToOrderAnalysis::whereIn('id', $ids)->update([
+                    'auth_user' => $user,
+                    'deleted_at' => now(),
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Records soft-deleted successfully by ' . $user,
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'No IDs provided',
+            ], 400);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error deleting records: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
 
 }

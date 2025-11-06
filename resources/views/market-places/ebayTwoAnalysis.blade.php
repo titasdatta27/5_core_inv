@@ -1640,6 +1640,8 @@
                                             <div class="d-flex align-items-center">
                                                 PRICE <span class="sort-arrow">↓</span>
                                             </div>
+                                            <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
+                                            <div class="metric-total" id="price-total">0</div>
                                         </div>
                                     </th>
                                     <th data-field="sprice"
@@ -1712,6 +1714,15 @@
                                             </div>
                                             <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
                                             <div class="metric-total" id="pft-total">0%</div>
+                                        </div>
+                                    </th>
+                                    <th data-field="sales-total" style="vertical-align: middle; white-space: nowrap;">
+                                        <div class="d-flex flex-column align-items-center" style="gap: 4px">
+                                            <div class="d-flex align-items-center">
+                                                Total Sales <span class="sort-arrow">↓</span>
+                                            </div>
+                                            <div style="width: 100%; height: 5px; background-color: #9ec7f4;"></div>
+                                            <div class="metric-total" id="total-sales">0</div>
                                         </div>
                                     </th>
                                 </tr>
@@ -2916,7 +2927,9 @@
                         ''
                     ));
 
-
+                    $row.append($('<td>').html(
+                        parseFloat(item['eBay Price']) * parseFloat(item['eBay L30'])
+                    ));
 
                     $tbody.append($row);
                 });
@@ -4868,7 +4881,9 @@
                         scvrSum: 0,
                         rowCount: 0,
                         listedCount: 0,
-                        liveCount: 0
+                        liveCount: 0,
+                        priceTotal: 0,
+                        totalSales: 0,
                     };
 
                     filteredData.forEach(item => {
@@ -4917,6 +4932,8 @@
                             (Number(item['eBay L30']) / Number(item['PmtClkL30'])) :
                             0;
                         metrics.rowCount++;
+                        metrics.priceTotal += parseFloat(item['eBay Price']) || 0;
+                        metrics.totalSales = (parseFloat(item['eBay Price']) || 0) * (parseFloat(item['eBay L30']) || 0);
                     });
 
                     // Calculate percentages
@@ -4935,6 +4952,25 @@
                     $('#views-total').text(metrics.viewsTotal.toLocaleString());
                     $('#listed-total').text(metrics.listedCount.toLocaleString());
                     $('#live-total').text(metrics.liveCount.toLocaleString());
+                    $('#price-total').text(metrics.priceTotal.toLocaleString());
+                    $('#total-sales').text(metrics.totalSales.toLocaleString());
+
+
+                    $.ajax({
+                        url: "{{ route('adv-ebay2.total-sale.save-data') }}",
+                        method: 'GET',
+                        data: {
+                            totalSales: metrics.totalSales,                
+                        },
+                        success: function(response) {
+                        },
+                        error: function(xhr) {
+                        }
+                    });
+
+
+
+
 
                     // Calculate and display averages
                     let pftTotal = 0;

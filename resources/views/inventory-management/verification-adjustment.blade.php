@@ -2061,7 +2061,7 @@
                                     IMAGE_URL: item.IMAGE_URL || '',
                                     Parent: item.Parent || item.parent || item.parent_asin || item.Parent_ASIN || '(No Parent)',
                                     // SKU: item['SKU'] || '', // Normalize SKU field
-                                    SKU: item.sku || '', // Normalize SKU field
+                                    SKU: (item.sku || item.SKU || '').toString().trim(), // Normalize SKU field (support both keys)
                                     TITLE: item['TITLE'] || '', // Title field from the sheet
 
                                     INV: INV, // Inventory
@@ -2082,9 +2082,9 @@
                                     LAST_APPROVED_AT: formatApprovedAt(item.APPROVED_AT),
 
                                     is_parent: (() => {
-                                        const sku = (item.SKU || '').toUpperCase();
-                                        const parent = (item.Parent || '').toUpperCase();
-                                        return sku.startsWith('PARENT') || sku === parent;
+                                        const skuVal = (item.sku || item.SKU || '').toString().trim().toUpperCase();
+                                        const parentVal = (item.Parent || item.parent || item.parent_asin || item.Parent_ASIN || '').toString().trim().toUpperCase();
+                                        return skuVal.startsWith('PARENT') || (skuVal !== '' && skuVal === parentVal);
                                     })(),
 
                                     raw_data: item || {} // Full original row, in case needed later
@@ -2108,352 +2108,7 @@
                 });
             }
 
-            // function loadData() {
-            //     showLoader();
 
-            //         // Fetch first dataset (sheet + Shopify data)
-            //         const sheetAjax = $.ajax({
-            //             url: '/verification-adjustment-data-view',
-            //             type: 'GET',
-            //             dataType: 'json'
-            //         });
-
-            //         // Fetch second dataset (inventory DB)
-            //         const inventoryAjax = $.ajax({
-            //             url: '/get-verified-stock',
-            //             type: 'GET',
-            //             dataType: 'json'
-            //         });
-
-            //         //  When both done, merge data and render
-            //         return $.when(sheetAjax, inventoryAjax).done(function(sheetRes, inventoryRes) {
-            //             const sheetDataRaw = sheetRes[0].data || [];
-            //             const inventoryDataRaw = inventoryRes[0].data || [];
-
-            //             // Create a map for quick SKU lookup from inventory DB
-            //             const inventoryMap = {};
-            //             inventoryDataRaw.forEach(item => {
-            //                 if (item.sku) {
-            //                     inventoryMap[item.sku.toUpperCase().trim()] = item;
-            //                 }
-            //             });
-
-            //             // Map over sheet data and merge fields from inventory data if SKU matches
-            //             tableData = sheetDataRaw.map((item, index) => {
-            //                 const sku = (item.SKU || '').toUpperCase().trim();
-            //                 const invItem = inventoryMap[sku] || {};
-
-            //                 // Parse inventory and L30 values as floats (like your original)
-            //                 const INV = parseFloat(item.INV) || 0;
-            //                 const L30 = parseFloat(item.L30) || 0;
-            //                 let DIL = 0;
-            //                 if (INV !== 0) DIL = (L30 / INV).toFixed(2);
-            //                 // if (INV !== 0) DIL = `${((L30 / INV) * 100).toFixed(0)}%`;
-            //                 function formatOhioTime(approvedAtStr) {
-            //                     if (!approvedAtStr) return '';
-
-            //                     const [datePart, timePart] = approvedAtStr.split(' ');
-            //                     if (!datePart || !timePart) return approvedAtStr;
-
-            //                     const [year, month, day] = datePart.split('-');
-            //                     const [hour, minute] = timePart.split(':');
-
-            //                     // Convert hour to 12-hour format with AM/PM
-            //                     let h = parseInt(hour);
-            //                     const ampm = h >= 12 ? 'PM' : 'AM';
-            //                     h = h % 12 || 12; // Convert 0 or 12 to 12
-
-            //                     const formattedDate = `${day} ${getMonthName(month)} ${year}`;
-            //                     const formattedTime = `${h.toString().padStart(2, '0')}:${minute} ${ampm}`;
-
-            //                     return `${formattedDate}, ${formattedTime}`;
-            //                 }
-
-            //                 function getMonthName(monthNumStr) {
-            //                     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", 
-            //                                     "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-            //                     const index = parseInt(monthNumStr, 10) - 1;
-            //                     return months[index] || '';
-            //                 }
-
-            //                 // Compose merged row object
-            //                 return {
-            //                     sl_no: index + 1,
-            //                     Parent: item.Parent || item.parent || item.parent_asin || item.Parent_ASIN || '(No Parent)',
-            //                     SKU: item.SKU || '',
-            //                     'R&A': invItem['R&A'] !== undefined ? invItem['R&A'] : (item['R&A'] !== undefined ? item['R&A'] : ''),
-            //                     TITLE: item.TITLE || '',
-
-            //                     INV: INV,
-            //                     L30: L30,
-            //                     DIL: DIL,
-            //                     ON_HAND:  isNaN(item.ON_HAND) ? 0 : parseFloat(item.ON_HAND),
-            //                     COMMITTED: isNaN(item.COMMITTED) ? 0 : parseFloat(item.COMMITTED),
-            //                     AVAILABLE_TO_SELL: isNaN(item.AVAILABLE_TO_SELL) ? 0 : parseFloat(item.AVAILABLE_TO_SELL),
-
-            //                     // Here merge: if invItem has verified_stock, reason, etc. use that, else fall back to original item
-            //                     VERIFIED_STOCK: invItem.verified_stock !== undefined ? invItem.verified_stock : (item.verified_stock || ''),
-            //                     TO_ADJUST: invItem.to_adjust !== undefined ? invItem.to_adjust : (item.to_adjust || ''),
-            //                     REASON: invItem.reason !== undefined ? invItem.reason : (item.reason || ''),
-            //                     APPROVED: invItem.is_approved !== undefined ? invItem.is_approved : (item.APPROVED === true),
-            //                     APPROVED_BY: invItem.approved_by !== undefined ? invItem.approved_by : (item.approved_by || ''),
-            //                     // APPROVED_BY_IH: invItem.approved_by_ih !== undefined ? !!invItem.approved_by_ih : false,
-            //                     LOSS_GAIN: item.LOSS_GAIN !== undefined ? Math.trunc(item.LOSS_GAIN) : null,
-            //                     APPROVED_AT: invItem.approved_at ? formatOhioTime(invItem.approved_at) : '',
-
-            //                     raw_data: item
-            //                 };
-            //             });
-
-            //             // Optional: filter if needed (your original filteredData logic)
-            //             filteredData = tableData.filter(row => row.ON_HAND !== "N/A");
-
-            //             renderTable(filteredData);
-            //             hideLoader();
-            //         }).fail(function(xhr, status, error) {
-            //             console.error('Error loading combined data:', error);
-            //             showNotification('danger', 'Failed to load data from both sources.');
-            //             hideLoader();
-            //         });
-            // }
-
-
-            // Render table with current data - without parent total row
-            // function renderTable() {
-            //     const $tbody = $('#ebay-table tbody');
-            //     $tbody.empty(); 
-
-            //     if (isLoading) {
-            //         $tbody.append('<tr><td colspan="15" class="text-center">Loading data...</td></tr>');
-            //         return;
-            //     }
-
-            //     if (filteredData.length === 0) {
-            //         $tbody.append('<tr><td colspan="15" class="text-center">No matching records found</td></tr>');
-            //         return;
-            //     }
-
-            //     filteredData.forEach((item, rowIndex) => {
-            //         const $row = $('<tr>');
-
-            //         if (item.SKU && item.SKU.toUpperCase().startsWith('PARENT')) {
-            //             $row.css({
-            //                 backgroundColor: 'rgba(13, 110, 253, 0.2)',
-            //                 fontWeight: '500'
-            //             });
-            //         }
-
-            //         if (item.is_parent) {
-            //             $row.addClass('parent-row');
-            //         }
-
-            //         // Helper functions for color coding
-            //         const getDilColor = (value) => {
-            //             const percent = parseFloat(value) * 100;
-            //             if (percent < 16.66) return 'red';
-            //             if (percent >= 16.66 && percent < 25) return 'yellow';
-            //             if (percent >= 25 && percent < 50) return 'green';
-            //             return 'pink'; // 50 and above
-            //         };
-
-            //         $row.append($('<td>').text(item.sl_no));
-            //         $row.append($('<td>').text(item.Parent));
-
-            //         // SKU with hover content for links
-            //         const $skuCell = $('<td>').addClass('skuColumn').css('position', 'static');
-            //         const sku = item.SKU || '';
-
-            //         if (item.is_parent) {
-            //             $skuCell.html(`<strong>${sku}</strong><input type="hidden" class="sku-hidden" value="${sku}" />`);
-            //         } else {
-            //             const buyerLink = item.raw_data['B Link'] || '';
-            //             const sellerLink = item.raw_data['AMZ LINK SL'] || '';
-
-            //             if (buyerLink || sellerLink) {
-            //                 $skuCell.html(`
-            //                     <div class="sku-tooltip-container">
-            //                         <span class="sku-text">${sku}</span>
-            //                         <div class="sku-tooltip">
-            //                             ${buyerLink ? `<div class="sku-link"><a href="${buyerLink}" target="_blank" rel="noopener noreferrer">Buyer link</a></div>` : ''}
-            //                             ${sellerLink ? `<div class="sku-link"><a href="${sellerLink}" target="_blank" rel="noopener noreferrer">Seller link</a></div>` : ''}
-            //                         </div>
-            //                     </div>
-            //                     <input type="hidden" class="sku-hidden" value="${sku}" />
-            //                 `);
-            //             } else {
-            //                 $skuCell.html(`${sku}<input type="hidden" class="sku-hidden" value="${sku}" />`);
-            //             }
-            //         }
-            //         $row.append($skuCell); 
-
-            //          // Only create the checkbox cell if navigation is active
-            //         if (isNavigationActive) {
-            //             const $raCell = $('<td>').addClass('ra-cell');
-
-            //             if (item.hasOwnProperty('R&A')) {
-            //                 const $container = $('<div>').addClass(
-            //                     'ra-edit-container d-flex align-items-center');
-
-            //                 const isChecked = item['R&A'] === true || item['R&A'] === '1' || item['R&A'] === 1;
-
-            //                 // Checkbox with proper boolean value
-            //                 const $checkbox = $('<input>', {
-            //                     type: 'checkbox',
-            //                     checked: isChecked,
-            //                     class: 'ra-checkbox',
-            //                     'data-sku': item['SKU'],
-            //                     disabled: isChecked 
-            //                 }).data('original-value', item['R&A'])
-            //                 .data('sku', item.SKU); // Store original value
-
-            //                 // Edit/Save icon
-            //                 const $editIcon = $('<i>').addClass('fas fa-pen edit-icon ml-2 text-primary')
-            //                     .css('cursor', 'pointer')
-            //                     .attr('title', 'Edit R&A');
-
-            //                 $container.append($checkbox, $editIcon);
-            //                 $raCell.append($container);
-            //             } else {
-            //                 $raCell.html('&nbsp;');
-            //             }
-
-            //             $row.append($raCell);
-            //         }
-
-            //         $row.append($('<td>').text(item.AVAILABLE_TO_SELL));
-            //         $row.append($('<td>').text(item.L30));   
-            //         // $row.append($('<td>').text(item.DIL));
-            //         // const dilValue = parseFloat(item.DIL) || 0;
-            //         // const dilPercent = dilValue === 0 ? '-' : `${Math.round(dilValue * 100)}%`;
-            //         // const dilClass = getDilColor(dilValue); 
-
-            //         // $row.append(
-            //         //     $('<td>').html(`<span class="dil-percent-value ${dilClass}">${dilPercent}%</span>`)
-            //         // );
-            //         const dilValue = parseFloat(item.DIL) || 0;
-
-            //         let dilContent;
-            //         if (dilValue <= 0) {
-            //             dilContent = `<span>-</span>`; // No color class, no percent symbol
-            //         } else {
-            //             const dilPercent = Math.round(dilValue * 100);
-            //             const dilClass = getDilColor(dilValue);
-            //             dilContent = `<span class="dil-percent-value ${dilClass}">${dilPercent}%</span>`;
-            //         }
-
-            //         $row.append(
-            //             $('<td>').html(dilContent)
-            //         );
-            //         $row.append($('<td>').text(item.AVAILABLE_TO_SELL));
-
-            //         // $row.append($('<td>').addClass('on-hand').text(item.ON_HAND));
-            //         $row.append($('<td>').text(item.COMMITTED));
-            //         // $row.append($('<td>').text(item.AVAILABLE_TO_SELL));
-            //         $row.append($('<td>').addClass('on-hand').text(item.ON_HAND));
-
-
-            //         // const isApproved = item.APPROVED ? 'disabled' : ''; 
-
-            //         $row.append($('<td>').html(`
-            //             <input type="number" class="form-control verified-stock-input" 
-            //                 data-sku="${item.SKU}" data-index="${rowIndex}" value="${item.VERIFIED_STOCK ?? ''}" />
-            //         `));
-
-            //         const toAdjust = item.VERIFIED_STOCK !== '' ? parseInt(item.VERIFIED_STOCK) - parseInt(item.ON_HAND || 0) : '';
-            //         item.TO_ADJUST = toAdjust;
-            //         $row.append($('<td>').addClass('to-adjust').text(toAdjust));
-
-            //         $row.append($('<td>').html(`
-            //             <select class="form-control reason-select" data-sku="${item.SKU}" data-index="${rowIndex}">
-            //                 <option value="">Select</option>
-            //                 <option value="Count" ${item.REASON === 'Count' ? 'selected' : ''}>Count</option>
-            //                 <option value="Received" ${item.REASON === 'Received' ? 'selected' : ''}>Received</option>
-            //                 <option value="Return Restock" ${item.REASON === 'Return Restock' ? 'selected' : ''}>Return Restock</option>
-            //                 <option value="Damaged" ${item.REASON === 'Damaged' ? 'selected' : ''}>Damaged</option>
-            //                 <option value="Theft or Loss" ${item.REASON === 'Theft or Loss' ? 'selected' : ''}>Theft or Loss</option>
-            //                 <option value="Promotion" ${item.REASON === 'Promotion' ? 'selected' : ''}>Promotion</option>
-            //                 <option value="Suspense" ${item.REASON === 'Suspense' ? 'selected' : ''}>Suspense</option>
-            //                 <option value="Unknown" ${item.REASON === 'Unknown' ? 'selected' : ''}>Unknown</option>
-            //             </select>
-            //         `));
-
-            //         $row.append($('<td>').html(`
-            //             <div class="d-flex flex-column align-items-center">
-            //                 <input type="checkbox" class="form-check-input approve-checkbox" 
-            //                     data-index="${rowIndex}" ${item.APPROVED ? 'checked' : ''}/>
-            //                 <small class="approved-by text-success">${item.APPROVED_BY || ''}</small>
-                            
-            //             </div>
-            //         `));
-
-            //         const $historyIcon = $(`
-            //             <td class="text-center">
-            //                 <i class="fas fa-external-link-alt text-primary view-history-icon" 
-            //                 data-sku="${item.SKU}" 
-            //                 title="View History" 
-            //                 style="cursor: pointer;"></i>
-            //             </td>
-            //         `);
-
-            //         $row.append($historyIcon); 
-
-            //         // $row.append($('<td>').html(`
-            //         //     <div class="d-flex flex-column align-items-center">
-            //         //         <input type="checkbox" class="form-check-input ih-approve-checkbox" 
-            //         //             data-index="${rowIndex}" ${item.APPROVED_BY_IH  ? 'checked' : ''}/>
-                            
-            //         //     </div>
-            //         // `));
-
-            //         $row.append($('<td>').addClass('adjusted-qty').text(toAdjust));
-
-            //         // const lossGain = item.LOSS_GAIN !== undefined && item.LOSS_GAIN !== null ? item.LOSS_GAIN.toFixed(2) : '-';
-            //         // $row.append($('<td>').addClass('loss-gain').text(lossGain ? Math.trunc(item.LOSS_GAIN) : '0'));
-            //         const lossGain = item.LOSS_GAIN;
-            //         $row.append(
-            //             $('<td>').addClass('loss-gain').text(lossGain === '' ? '' : Math.trunc(lossGain))
-            //         );
-
-
-            //         // $row.append($('<td>').addClass('approved-at').text(item.APPROVED_AT || '-'));
-            //         let approvedAtHTML = '-';
-                    
-            //         // if (item.APPROVED_AT && item.APPROVED_AT.includes(',')) {
-            //         //     const [datePart, timePart] = item.APPROVED_AT.split(', ');
-            //         //     approvedAtHTML = `${datePart}<br><small>${timePart}</small>`;
-            //         // }
-            //         if (item.APPROVED_AT && item.APPROVED_AT.includes(', ')) {
-            //             const [datePart, timePart] = item.APPROVED_AT.split(', ');
-            //             approvedAtHTML = `<div style="line-height:1.3">${datePart}<br><small>${timePart}</small></div>`;
-            //         }
-            //         $row.append($('<td>').addClass('approved-at').html(approvedAtHTML));
-
-            //         $tbody.append($row);
-            //     });
-
-            //     let totalLossGain = filteredData.reduce((sum, item) => {
-            //         const value = parseFloat(item.LOSS_GAIN);
-            //         return !isNaN(value) ? sum + value : sum;
-            //     }, 0);
-
-            //     const badge = $('#lossGainTotalText');
-            //     badge
-            //     // .removeClass('bg-success bg-danger')
-            //     // .addClass(totalLossGain >= 0 ? 'bg-success' : 'bg-danger')
-            //     // .addClass('bg-primary')
-            //     .text(`$ ${Math.trunc(totalLossGain)}`);
-
-            //     $('#lossGainTotalText').text(`$ ${Math.trunc(totalLossGain)}`);
-
-                
-
-            //     updatePaginationInfo();
-            //     $('#visible-rows').text(`Showing all ${filteredData.length} rows`);
-            //     // Initialize tooltips
-            //     initTooltips();
-            // }
-
- 
             function renderTable() {
                 const $tbody = $('#ebay-table tbody');
                 $tbody.empty();
@@ -2464,20 +2119,35 @@
                 }
 
                 // const visibleRows = filteredData.filter(item => !item.IS_HIDE);
-                filteredData = filteredData.filter(item => item && item.IS_HIDE !== 1);
+                // filteredData = filteredData.filter(item => item && item.IS_HIDE !== 1);
+                const visibleRows = filteredData.filter(item => item && item.IS_HIDE !== 1);
+
 
                 if (filteredData.length === 0) {
                     $tbody.append('<tr><td colspan="15" class="text-center">No matching records found</td></tr>');
                     return;
                 }
 
-                // NEW: Group children rows by parent and calculate totals
+                // Group rows by Parent so that child SKUs render first and parent row is appended last
                 const parentTotalsMap = {};
-                filteredData.forEach(item => {
-                    const parentName = item.Parent;
-                    const isParentRow = item.SKU && item.SKU.toUpperCase().startsWith('PARENT');
+                const groups = {}; // parentName -> { children: [], parentRow: null }
+                const parentOrder = [];
 
-                    if (!isParentRow) {
+                filteredData.forEach(item => {
+                    const parentName = item.Parent || '(No Parent)';
+                    const isParentRow = !!item.is_parent || (item.SKU && String(item.SKU).toUpperCase().startsWith('PARENT'));
+
+                    if (!groups[parentName]) {
+                        groups[parentName] = { children: [], parentRow: null };
+                        parentOrder.push(parentName);
+                    }
+
+                    if (isParentRow) {
+                        groups[parentName].parentRow = item;
+                    } else {
+                        groups[parentName].children.push(item);
+
+                        // accumulate totals from children for parent totals
                         if (!parentTotalsMap[parentName]) {
                             parentTotalsMap[parentName] = {
                                 INV: 0,
@@ -2498,10 +2168,21 @@
                     }
                 });
 
-                filteredData.forEach((item, rowIndex) => {
+                // Build ordered array: for each parent, push children then parentRow (if exists)
+                const orderedRows = [];
+                parentOrder.forEach(parentName => {
+                    const grp = groups[parentName];
+                    if (!grp) return;
+                    // push children in their original order
+                    grp.children.forEach(ch => orderedRows.push(ch));
+                    if (grp.parentRow) orderedRows.push(grp.parentRow);
+                });
+
+                // Now render rows from orderedRows
+                orderedRows.forEach((item, rowIndex) => {
                     const $row = $('<tr>');
 
-                    const isParentRow = item.SKU && item.SKU.toUpperCase().startsWith('PARENT');
+                    const isParentRow = !!item.is_parent || (item.SKU && String(item.SKU).toUpperCase().startsWith('PARENT'));
                     if (isParentRow) {
                         $row.css({
                             // backgroundColor: 'rgba(13, 110, 253, 0.2)',
@@ -2630,6 +2311,8 @@
                             <option value="Promotion" ${item.REASON === 'Promotion' ? 'selected' : ''}>Promotion</option>
                             <option value="Suspense" ${item.REASON === 'Suspense' ? 'selected' : ''}>Suspense</option>
                             <option value="Unknown" ${item.REASON === 'Unknown' ? 'selected' : ''}>Unknown</option>
+                            <option value="Adjustment" ${item.REASON === 'Adjustment' ? 'selected' : ''}>Adjustment</option>
+                            <option value="Combo" ${item.REASON === 'Combo' ? 'selected' : ''}>Combo</option>
                         </select>
                     `));
 
@@ -4037,13 +3720,17 @@
             // Initialize search functionality
             function initSearch() {
                 $('#search-input').on('keyup', function() {
-                    const searchTerm = $(this).val().toLowerCase();
+                    // const searchTerm = $(this).val().toLowerCase();
+                    const rawSearch = $(this).val();
+                    const searchTerm = rawSearch.replace(/\s+/g, '').toLowerCase();
 
                     if (searchTerm) {
                         filteredData = tableData.filter(item => {
                             return Object.values(item).some(val => {
                                 if (typeof val === 'boolean' || val === null) return false;
-                                return val.toString().toLowerCase().includes(searchTerm);
+                                // return val.toString().toLowerCase().includes(searchTerm);
+                                const normalizedVal = val.toString().replace(/\s+/g, '').toLowerCase();
+                                return normalizedVal.includes(searchTerm);
                             });
                         });
                     } else {
@@ -4141,32 +3828,34 @@
 
             // Apply column filters
             function applyColumnFilters() {
-                // Reset filteredData to all data first
-                filteredData = [...tableData];
+                console.log('Applying column filters...');
+                filteredData = [...tableData]; // start fresh
 
-                // Apply row type filter first
+                // Apply Data Type filter
                 const rowTypeFilter = $('#row-data-type').val();
                 if (rowTypeFilter === 'parent') {
-                    filteredData = filteredData.filter(item => item.is_parent);
+                    filteredData = filteredData.filter(item => item.is_parent === true);
                 } else if (rowTypeFilter === 'sku') {
-                    filteredData = filteredData.filter(item => !item.is_parent);
+                    filteredData = filteredData.filter(item => item.is_parent === false);
                 }
 
-                // Then apply other filters as before
-                Object.entries(state.filters).forEach(([column, filterValue]) => {
-                    if (filterValue === 'all') return;
+                // Apply any other active filters if you have them
+                if (state.filters && Object.keys(state.filters).length > 0) {
+                    Object.entries(state.filters).forEach(([column, filterValue]) => {
+                        if (filterValue === 'all') return;
 
-                    filteredData = filteredData.filter(item => {
-                        if (column === 'entryType') {
-                            if (filterValue === 'parent') return item.is_parent;
-                            if (filterValue === 'child') return !item.is_parent;
-                            return true;
-                        }
+                        filteredData = filteredData.filter(item => {
+                            if (column === 'entryType') {
+                                if (filterValue === 'parent') return item.is_parent === true;
+                                if (filterValue === 'child') return item.is_parent === false;
+                                return true;
+                            }
 
-                        const color = getColorForColumn(column, item);
-                        return color === filterValue;
+                            const color = getColorForColumn(column, item);
+                            return color === filterValue;
+                        });
                     });
-                });
+                }
 
                 currentPage = 1;
                 renderTable();
@@ -4262,6 +3951,8 @@
                     };
 
                     filteredData.forEach(item => {
+                        const sku = String(item.SKU || '').trim().toUpperCase();
+                        if (sku.startsWith('PARENT ')) return;
 
                         metrics.invTotal += parseFloat(item.INV) || 0;
                         metrics.ovL30Total += parseFloat(item.L30) || 0;
@@ -4357,12 +4048,23 @@
                     // Get unique values for the field
                     const uniqueValues = [...new Set(tableData.map(item => String(item[field] || '')))];
 
+                    const normalizedSearch = searchTerm.replace(/\s+/g, '').toLowerCase();
+
                     // Filter based on search term if provided
-                    const filteredValues = searchTerm.length >= minSearchLength ?
-                        uniqueValues.filter(value =>
-                            value.toLowerCase().includes(searchTerm.toLowerCase())
-                        ) :
-                        uniqueValues;
+                    // const filteredValues = searchTerm.length >= minSearchLength ?
+                    //     uniqueValues.filter(value =>
+                    //         // value.toLowerCase().includes(searchTerm.toLowerCase())
+                    //         const normalizedValue = value.replace(/\s+/g, '').toLowerCase();
+                    //         return normalizedValue.includes(normalizedSearch);
+                    //     ) :
+                    //     uniqueValues;
+                    const filteredValues =
+                        searchTerm.length >= minSearchLength
+                            ? uniqueValues.filter(value => {
+                                const normalizedValue = value.replace(/\s+/g, '').toLowerCase();
+                                return normalizedValue.includes(normalizedSearch);
+                            })
+                            : uniqueValues;
 
                     if (filteredValues.length) {
                         filteredValues.sort().forEach(value => {
@@ -4384,9 +4086,16 @@
                     if (value === '') {
                         filteredData = [...tableData];
                     } else {
-                        filteredData = tableData.filter(item =>
-                            String(item[column] || '').toLowerCase() === value.toLowerCase()
-                        );
+                        const normalizedValue = value.replace(/\s+/g, '').toLowerCase();
+                        filteredData = tableData.filter(item => {
+                            const itemValue = String(item[column] || '').replace(/\s+/g, '').toLowerCase();
+                            return itemValue.includes(normalizedValue);
+                        });
+                        // filteredData = tableData.filter(item =>
+                        // const itemValue = String(item[column] || '').replace(/\s+/g, '').toLowerCase();
+                        // return itemValue.includes(normalizedValue);
+                        //     // String(item[column] || '').toLowerCase() === value.toLowerCase()
+                        // );
                     }
 
                     currentPage = 1;
@@ -4468,7 +4177,11 @@
                     });
                 }
 
-                $('#row-data-type').on('change', function() {
+                // $('#row-data-type').on('change', function() {
+                //     const filterType = $(this).val();
+                //     applyRowTypeFilter(filterType);
+                // });
+                $(document).on('change', '#row-data-type', function () {
                     const filterType = $(this).val();
                     applyRowTypeFilter(filterType);
                 });
@@ -4604,7 +4317,6 @@
                     filteredData = filteredData.filter(item => !item.is_parent);
                 }
                 // else 'all' - no filtering needed
-
                 // Reset to first page and render
                 currentPage = 1;
                 renderTable();

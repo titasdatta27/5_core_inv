@@ -192,6 +192,9 @@
                                     <button id="apr-all-sbid-btn" class="btn btn-info btn-sm d-none">
                                         APR ALL SBID
                                     </button>
+                                    <a href="javascript:void(0)" id="export-btn" class="btn btn-sm btn-success d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-file-export me-1"></i> Export Excel/CSV
+                                    </a>
                                     <button class="btn btn-success btn-md">
                                         <i class="fa fa-arrow-up me-1"></i>
                                         Need to increase bids: <span id="total-campaigns" class="fw-bold ms-1 fs-4">0</span>
@@ -248,6 +251,8 @@
 @section('script')
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://unpkg.com/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
+    <!-- SheetJS for Excel Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
 
@@ -461,6 +466,26 @@
                         }
                     },
                     {
+                        title: "SPEND L30",
+                        field: "spend_l30",
+                        hozAlign: "right",
+                        formatter: function(cell) {
+                            return `
+                                <span>${parseFloat(cell.getValue() || 0).toFixed(0)}</span>
+                            `;
+                        }
+                    },
+                    {
+                        title: "SALES L30",
+                        field: "ad_sales_l30",
+                        hozAlign: "right",
+                        formatter: function(cell) {
+                            return `
+                                <span>${parseFloat(cell.getValue() || 0).toFixed(0)}</span>
+                            `;
+                        }
+                    },
+                    {
                         title: "Clicks L30",
                         field: "clicks_L30",
                         hozAlign: "right",
@@ -490,43 +515,49 @@
                             var tpftInt = Math.floor(tpft);
                             var sbgt;
                             
-                            if(acos >= 100){
-                                sbgt = 1;
-                            }else if(acos >= 50 && acos <= 100){
-                                sbgt = 2;
-                            }else if(acos >= 40 && acos <= 50){
-                                sbgt = 3;
-                            }else if(acos >= 35 && acos <= 40){
-                                sbgt = 4;
-                            }else if(acos >= 30 && acos <= 35){
-                                sbgt = 5;
-                            }else if(acos >= 25 && acos <= 30){
-                                sbgt = 6;
-                            }else if(acos >= 20 && acos <= 25){
-                                sbgt = 7;
-                            }else if(acos >= 15 && acos <= 20){
-                                sbgt = 8;
-                            }else if(acos >= 10 && acos <= 15){
-                                sbgt = 9;
-                            }else if(acos < 10 && acos > 0){
-                                sbgt = 10;
+                            const clicks = parseFloat(row.clicks_L30) || 0;
+
+                            if(clicks > 25){
+                                if(acos >= 100){
+                                    sbgt = 1;
+                                }else if(acos >= 50 && acos <= 100){
+                                    sbgt = 1;
+                                }else if(acos >= 40 && acos <= 50){
+                                    sbgt = 1;
+                                }else if(acos >= 35 && acos <= 40){
+                                    sbgt = 2;
+                                }else if(acos >= 30 && acos <= 35){
+                                    sbgt = 3;
+                                }else if(acos >= 25 && acos <= 30){
+                                    sbgt = 5;
+                                }else if(acos >= 20 && acos <= 25){
+                                    sbgt = 6;
+                                }else if(acos >= 15 && acos <= 20){
+                                    sbgt = 8;
+                                }else if(acos >= 10 && acos <= 15){
+                                    sbgt = 9;
+                                }else if(acos < 10 && acos > 0){
+                                    sbgt = 10;
+                                }else{
+                                    sbgt = 3;
+                                }
+
+                                const l30 = parseFloat(row.L30);
+                                const inv = parseFloat(row.INV);
+                                let dilColor = "";
+                                if (!isNaN(l30) && !isNaN(inv) && inv !== 0) {
+                                    const dilDecimal = l30 / inv;
+                                    dilColor = getDilColor(dilDecimal);
+                                }
+
+                                // if ((dilColor === "red" && tpftInt > 10) ||
+                                //     (dilColor === "yellow" && tpftInt > 22) ||
+                                //     (dilColor === "green" && tpftInt > 26) ||
+                                //     (dilColor === "pink" && tpftInt > 30)) {
+                                //     sbgt = sbgt * 2;
+                                // }
                             }else{
-                                sbgt = 3;
-                            }
-
-                            const l30 = parseFloat(row.L30);
-                            const inv = parseFloat(row.INV);
-                            let dilColor = "";
-                            if (!isNaN(l30) && !isNaN(inv) && inv !== 0) {
-                                const dilDecimal = l30 / inv;
-                                dilColor = getDilColor(dilDecimal);
-                            }
-
-                            if ((dilColor === "red" && tpftInt > 10) ||
-                                (dilColor === "yellow" && tpftInt > 22) ||
-                                (dilColor === "green" && tpftInt > 26) ||
-                                (dilColor === "pink" && tpftInt > 30)) {
-                                sbgt = sbgt * 2;
+                                sbgt = 5;
                             }
 
                             return `
@@ -661,12 +692,19 @@
                     }
 
                     let invFilterVal = $("#inv-filter").val();
+                    let inv = parseFloat(data.INV);
+
                     if (!invFilterVal) {
-                        if (parseFloat(data.INV) === 0) return false;
-                    } else if (invFilterVal === "INV_0") {
-                        if (parseFloat(data.INV) !== 0) return false;
-                    } else if (invFilterVal === "OTHERS") {
-                        if (parseFloat(data.INV) === 0) return false;
+                        // Default → show only > 0
+                        if (inv <= 0) return false;
+                    } 
+                    else if (invFilterVal === "INV_0") {
+                        // Only 0
+                        if (inv !== 0) return false;
+                    } 
+                    else if (invFilterVal === "OTHERS") {
+                        // Show only > 0
+                        if (inv <= 0) return false;
                     }
 
                     let nrlFilterVal = $("#nrl-filter").val();
@@ -869,6 +907,22 @@
                 });
             }
 
+            document.getElementById("export-btn").addEventListener("click", function () {
+                let allData = table.getData("active"); 
+
+                if (allData.length === 0) {
+                    alert("No data available to export!");
+                    return;
+                }
+
+                let exportData = allData.map(row => ({ ...row }));
+
+                let ws = XLSX.utils.json_to_sheet(exportData);
+                let wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Campaigns");
+
+                XLSX.writeFile(wb, "amazon_acos_pt_ads.xlsx");
+            });
 
             document.body.style.zoom = "78%";
         });
