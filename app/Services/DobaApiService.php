@@ -554,6 +554,7 @@ class DobaApiService
             //     ['sku' => $sku],
             //     ['inventory_doba'=>$quantity,]
             // );
+            
             ProductStockMapping::where('sku', $sku)->update(['inventory_doba' => (int) $quantity]);
         }
         return $allStock;

@@ -324,6 +324,7 @@ public function getInventory1()
             //     ['sku' => $skuId],
             //     ['inventory_temu' => $qty]
             // );     
+            
             ProductStockMapping::where('sku', $sku)->update(['inventory_temu' => (int) $qty]);    
         }
 
