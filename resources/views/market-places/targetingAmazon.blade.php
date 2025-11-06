@@ -632,14 +632,6 @@
                             `;
                         }
                     },
-                    {
-                        title: "Clicks",
-                        field: "clicks",
-                    },
-                    {
-                        title: "Orders",
-                        field: "orders",
-                    },
                     // {
                     //     title: "Price",
                     //     field: "price"
