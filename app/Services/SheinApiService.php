@@ -107,8 +107,8 @@ $spuNames = array_filter($spuNames); // remove nulls if any
         // );
         ProductStockMapping::where('sku', $sku)->update(['inventory_shein' => (int) $quantity]);
     }
-    // dd($result);
-    Log::info('Total Shein inventory items collected: ' . count($result));
+    
+        Log::info('Total Shein inventory items collected: ' . count($result));
     return $result;
         // return $spuNames;
     }

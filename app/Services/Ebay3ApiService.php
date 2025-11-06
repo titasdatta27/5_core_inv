@@ -100,7 +100,7 @@ class Ebay3ApiService
         }
         return $listingData;
         
-         \Log::info('Total Ebay3 inventory items collected: ' . count($listingData));
+            \Log::info('Total Ebay3 inventory items collected: ' . count($listingData));
         $itemIdToSku = [];       
     }
 

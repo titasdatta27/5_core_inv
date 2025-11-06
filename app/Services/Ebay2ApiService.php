@@ -84,10 +84,10 @@ class Ebay2ApiService
     }
     public function getEbayInventory(){
         $token = $this->generateEbayToken();
-         if (!$token) {
-            Log::error('Failed to generate token.');
-            return;
-        }
+            if (!$token) {
+                Log::error('Failed to generate token.');
+                return;
+            }
         $listingData = $this->fetchAndParseReport('LMS_ACTIVE_INVENTORY_REPORT', null, $token);
         foreach ($listingData as $sku => $data) {
         $sku = $data['sku'] ?? null;

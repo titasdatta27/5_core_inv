@@ -184,8 +184,8 @@ class AmazonSpApiService
         }
 
         // Step 3: Download and parse the data
-        $csv = file_get_contents($url);
-          $csv = strtoupper($compression) === 'GZIP' ? gzdecode($csv) : $csv;
+            $csv = file_get_contents($url);
+            $csv = strtoupper($compression) === 'GZIP' ? gzdecode($csv) : $csv;
         if (!$csv) {
             Log::error('Failed to decode report content.');
             return;

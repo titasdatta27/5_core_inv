@@ -316,9 +316,7 @@ public function getInventory1()
         }
 
         // Stop if this is the last page (fewer items than page size)
-        if (count($items) < $pageSize) {
-            break;
-        }
+        if (count($items) < $pageSize) {break;}
 
         $pageNumber++;
 

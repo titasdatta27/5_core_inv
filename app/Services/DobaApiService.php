@@ -548,7 +548,7 @@ class DobaApiService
             $page++;
         } while (count($data) === 100);
         foreach ($allStock as $sku => $data) {
-              $sku = $data['sku'] ?? null;
+                $sku = $data['sku'] ?? null;
                 $quantity = $data['quantity'];
             // ProductStockMapping::updateOrCreate(
             //     ['sku' => $sku],

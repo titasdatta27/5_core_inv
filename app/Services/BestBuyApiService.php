@@ -61,7 +61,7 @@ class BestBuyApiService
              $page++;
         } while ($pageToken);
         foreach ($allProducts as $sku => $data) {
-      $sku = $data['sku'] ?? null;
+        $sku = $data['sku'] ?? null;
         $quantity =$data['quantity'];
         
             // ProductStockMapping::updateOrCreate(

@@ -1332,7 +1332,7 @@
                                                 <div class="d-flex align-items-center">
                                                     BestBuyUSA <span class="sort-arrow">↓</span>
                                                 </div>                                            
-                                                <a href="{{ route('listing.bestbuyusa') }}" target="_blank"><span class="text-danger text-center mx-auto d-block" id="hbestbuynl"></span></a>
+                                                <a href="{{ route('listing.bestbuyusa') }}" target="_blank"><span class="text-danger text-center mx-auto d-block" id="hBestbuynl"></span></a>
                                             </div>
                                         </th>
 
@@ -1341,7 +1341,7 @@
                                                 <div class="d-flex align-items-center">
                                                     Tiendamia <span class="sort-arrow">↓</span>
                                                 </div>                                            
-                                                <a href="{{ route('listing.tiendamia') }}" target="_blank"><span class="text-danger text-center mx-auto d-block" id="htiendamianl"></span></a>
+                                                <a href="{{ route('listing.tiendamia') }}" target="_blank"><span class="text-danger text-center mx-auto d-block" id="hTiendamianl"></span></a>
                                             </div>
                                         </th>
                                     </tr>
@@ -2485,7 +2485,9 @@ function handleRefetchForChannel(e) {
     })
     .done(response => {
         console.log('✅ Refetch successful:', response);
-        location.reload();
+        setInterval(() => {
+            location.reload();            
+        }, 2000);
     })
     .fail((jqXHR, textStatus, errorThrown) => {
         console.error(`❌ Refetch failed: ${textStatus}`, errorThrown);

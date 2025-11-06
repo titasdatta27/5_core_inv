@@ -20,6 +20,8 @@ class ShopifyApiService
 
     public function getInventory()
     {
+
+        
         $inventoryData = [];
         $parentVariants = [];
         $pageInfo = null;
@@ -27,12 +29,12 @@ class ShopifyApiService
         $pageCount = 0;
         $totalProducts = 0;
         $totalVariants = 0;
- $validSkus = ProductMaster::selectRaw('DISTINCT TRIM(sku) as sku')
+ $validSkus = ProductMaster::query()
+    ->selectRaw('DISTINCT TRIM(sku) as sku')
     ->whereNotNull('sku')
-    ->where(function($query) {
-        $query->whereRaw('LOWER(sku) NOT LIKE ?', ['%parent%']);
-    })
+    ->whereNull('deleted_at')
     ->whereRaw("TRIM(sku) != ''")
+    ->whereRaw("LOWER(sku) NOT LIKE '%parent%'")
     ->orderBy('sku')
     ->pluck('sku')
     ->map(fn($sku) => trim($sku))
@@ -40,9 +42,7 @@ class ShopifyApiService
     ->unique()
     ->values()
     ->toArray();
-
-        // dd($validSkus);
-
+   $validSkuLookup = array_flip($validSkus);
         while ($hasMore) {
             $pageCount++;
             $queryParams = [
@@ -121,36 +121,6 @@ class ShopifyApiService
             }
         }
 
-        // ✅ Update all SKUs in DB, but only for SKUs present in ProductMaster (exclude parent SKUs)
-        // Fetch an array of SKUs from ProductMaster where sku does not contain 'PARENT'
-    //    $allSku = ProductMaster::where('sku', 'NOT LIKE', '%PARENT%')
-    //         ->whereNotNull('sku')  // Exclude null SKUs
-    //         ->pluck('sku')
-    //         ->filter()  // Remove any remaining null values
-    //         ->map(fn($s) => trim((string) $s))
-    //         ->filter(fn($s) => $s !== '')  // Remove empty strings after trim
-    //         ->unique()  // Remove duplicates
-    //         ->values()  // Re-index array
-    //         ->toArray();
-    // Get SKUs from ProductMaster excluding any with 'PARENT' (case-insensitive)
-    $validSkus = ProductMaster::selectRaw('DISTINCT TRIM(sku) as sku')
-        ->whereNotNull('sku')
-        ->where(function($query) {
-            $query->whereRaw('LOWER(sku) NOT LIKE ?', ['%parent%']);
-        })
-        ->whereRaw("TRIM(sku) != ''")
-        ->orderBy('sku')
-        ->pluck('sku')
-        ->map(fn($sku) => trim($sku))
-        ->filter()
-        ->unique()
-        ->values()
-        ->toArray();
-
-    Log::info('Found valid SKUs in ProductMaster: ' . count($validSkus));
-
-    // Create lookup array for fast checks
-    $validSkuLookup = array_flip($validSkus);
 
         foreach ($inventoryData as $sku => $data) {
             // Check if SKU exists in our valid SKUs list
@@ -182,21 +152,16 @@ class ShopifyApiService
                 ]
             );
         }
-
         return $inventoryData;
     }
 
     protected function sanitizeImageUrl(?string $url,$sku): ?string
-    {
-                     
-        if (empty($url)) {return null;}
-      
+    {                     
+        if (empty($url)) {return null;}      
         // Remove line breaks and spaces
         $cleanUrl = trim(preg_replace('/\s+/', '', $url));
-
         // Remove ?v= query string (Shopify versioning param)
         $cleanUrl = strtok($cleanUrl, '?');
-
         return $cleanUrl;
     }
       

@@ -23,7 +23,7 @@ class TiendamiaApiService
 
     public function getInventory(){
         $token = $this->getAccessToken();
-        if (!$token) return;
+            if (!$token) return;
         $pageToken = null;
         $page = 1;
         $allProducts = [];
