@@ -97,6 +97,7 @@ class Ebay2ApiService
             //     ['sku' => $sku],
             //     ['inventory_ebay2'=>$quantity,]
             // );
+            
             ProductStockMapping::where('sku', $sku)->update(['inventory_ebay2' => (int) $quantity]);    
         }
         return $listingData;

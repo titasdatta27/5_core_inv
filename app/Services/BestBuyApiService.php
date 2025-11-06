@@ -63,8 +63,7 @@ class BestBuyApiService
         foreach ($allProducts as $sku => $data) {
         $sku = $data['sku'] ?? null;
         $quantity =$data['quantity'];
-        
-            // ProductStockMapping::updateOrCreate(
+                    // ProductStockMapping::updateOrCreate(
             //     ['sku' => $sku],
             //     ['inventory_bestbuy'=>$quantity,]
             // );

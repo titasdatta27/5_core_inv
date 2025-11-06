@@ -105,6 +105,7 @@ $spuNames = array_filter($spuNames); // remove nulls if any
         //     ['sku' => $sku],
         //     ['inventory_shein' => $quantity]
         // );
+        
         ProductStockMapping::where('sku', $sku)->update(['inventory_shein' => (int) $quantity]);
     }
     

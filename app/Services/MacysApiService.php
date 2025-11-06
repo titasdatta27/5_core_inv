@@ -68,6 +68,7 @@ class MacysApiService
             //     ['sku' => $sku],
             //     ['inventory_macy'=>$quantity,]
             // );
+            
              ProductStockMapping::where('sku', $sku)->update(['inventory_temu' => (int) $quantity]);    
         }
         return $allProducts;

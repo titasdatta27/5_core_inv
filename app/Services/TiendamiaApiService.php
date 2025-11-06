@@ -68,6 +68,7 @@ class TiendamiaApiService
             //     ['sku' => $sku],
             //     ['inventory_tiendamia'=>$quantity,]
             // );
+            
             ProductStockMapping::where('sku', $sku)->update(['inventory_tiendamia' => (int) $quantity]);    
         }
         return $allProducts;

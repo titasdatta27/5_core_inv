@@ -96,6 +96,7 @@ class Ebay3ApiService
             //     ['sku' => $sku],
             //     ['inventory_ebay3'=>$quantity,]
             // );
+            
             ProductStockMapping::where('sku', $sku)->update(['inventory_ebay3' => (int) $quantity]);    
         }
         return $listingData;

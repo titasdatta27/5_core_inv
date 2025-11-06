@@ -194,7 +194,6 @@ protected function fetchFreshData(){
     // return $data;
 }
 
-
 protected function fetchFreshDataU($type = null)
 {
     //    $result=(new AliExpressApiService())->getInventory();

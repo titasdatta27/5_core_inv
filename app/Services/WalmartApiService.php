@@ -186,6 +186,7 @@ class WalmartApiService
             continue;
         }
    ProductStockMapping::where('sku', $sku)->update(['inventory_walmart' => (int) $quantity]);
+   
         // ProductStockMapping::updateOrCreate(
         //     ['sku' => $sku],
         //     ['inventory_walmart' => $quantity]

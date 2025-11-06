@@ -202,7 +202,7 @@ class AmazonSpApiService
             $data = array_combine($headers, $row);
 
             // Fulfillment channel filter
-            if (($data['fulfillment-channel'] ?? '') !== 'DEFAULT') continue;
+            // if (($data['fulfillment-channel'] ?? '') !== 'DEFAULT') continue;
 
             $asin = $data['asin1'] ?? null;
             $sku = isset($data['seller-sku']) ? preg_replace('/[^\x20-\x7E]/', '', trim($data['seller-sku'])) : null;
