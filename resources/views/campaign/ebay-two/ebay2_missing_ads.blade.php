@@ -599,6 +599,20 @@
                     $("#total-nra").text(totalNRA);
                     $("#total-ra").text(totalRA);
 
+
+                     $.ajax({
+                        url: "{{ route('adv-ebay2.missing.save-data') }}",
+                        method: 'GET',
+                        data: {
+                            ptMissing: ptMissing,                   
+                        },
+                        success: function(response) {
+                        },
+                        error: function(xhr) {
+                        }
+                    });
+
+
                     // Update All Missing Button Text
                     $("#all-missing-btn").on("click", function() {
                         // Clear all filters first

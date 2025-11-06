@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Cache;
 use App\Http\Controllers\ApiController;
 use App\Jobs\UpdateEbaySPriceJob;
 use App\Models\ChannelMaster;
+use App\Models\ADVMastersData;
 use App\Models\EbayPriorityReport;
 use App\Models\ProductMaster; // Add this at the top with other use statements
 use Illuminate\Support\Facades\DB;
@@ -50,6 +51,11 @@ class EbayController extends Controller
             "ebayPercentage" => $percentage,
             "ebayAdUpdates" => $adUpdates,
         ]);
+    }
+
+    public function getAdvEbayTotalSaveData(Request $request)
+    {
+        return ADVMastersData::getAdvEbayTotalSaveDataProceed($request);
     }
 
     public function ebayPricingCVR(Request $request)

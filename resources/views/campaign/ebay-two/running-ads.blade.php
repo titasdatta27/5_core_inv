@@ -781,6 +781,27 @@
                     let impL7Total = calculateTotal('IMP_L7');
                     let pmtImpL7Total = calculateTotal('pmt_impr_L7');
 
+
+                    $.ajax({
+                        url: "{{ route('adv-ebay2.ad-running.save-data') }}",
+                        method: 'GET',
+                        data: {
+                            spendL30Total: spendL30Total,
+                            pmpSpendL30Total: pmpSpendL30Total,
+                            clicksL30Total:clicksL30Total,
+                            pmtClicksL30Total:pmtClicksL30Total,
+                            salesL30Total:salesL30Total,
+                            pmtSalesL30Total:pmtSalesL30Total,
+                            soldL30Total:soldL30Total,
+                            pmpSoldL30Total:pmpSoldL30Total                         
+                        },
+                        success: function(response) {
+                        },
+                        error: function(xhr) {
+                        }
+                    });
+
+
                     document.getElementById("pmp-imp-l7-total").innerText = pmtImpL7Total > 0 ? ` (${pmtImpL7Total.toFixed(0)})` : "";
                     document.getElementById("pmp-imp-l7-total").style.display = pmtImpL7Total > 0 ? "inline" : "none";
 
@@ -858,14 +879,6 @@
 
                     document.getElementById("pmt-sold-l30-total").innerText = pmpSoldL30Total > 0 ? ` (${pmpSoldL30Total.toFixed(0)})` : "";
                     document.getElementById("pmt-sold-l30-total").style.display = pmpSoldL30Total > 0 ? "inline" : "none";
-
-                    
-               
-                    
-                    
-                     
-                    
-
 
 
                     let percentage = total > 0 ? ((filtered / total) * 100).toFixed(0) : 0;

@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Campaigns;
 
 use App\Http\Controllers\Controller;
 use App\Models\EbayTwoDataView;
+use Illuminate\Http\Request;
 use App\Models\ProductMaster;
 use App\Models\ShopifySku;
+use App\Models\ADVMastersData;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -14,6 +16,11 @@ class Ebay2MissingAdsController extends Controller
     public function index()
     {
         return view('campaign.ebay-two.ebay2_missing_ads');
+    }
+
+    public function getAdvEbay2MissingSaveData(Request $request)
+    {
+        return ADVMastersData::getAdvEbay2MissingSaveDataProceed($request);
     }
 
     public function getEbay2MissingAdsData()

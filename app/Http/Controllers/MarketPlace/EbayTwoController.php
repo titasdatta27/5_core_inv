@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Cache;
 use App\Http\Controllers\ApiController;
 use App\Models\ChannelMaster;
 use App\Models\Ebay2GeneralReport;
+use App\Models\ADVMastersData;
 use App\Models\Ebay2Metric;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -59,6 +60,10 @@ class EbayTwoController extends Controller
         ]);
     }
 
+    public function getEbay2TotsalSaleDataSave(Request $request)
+    {
+        return ADVMastersData::getEbay2TotsalSaleDataSaveProceed($request);
+    }
 
     public function EbayTwoPricingCVR(Request $request)
     {

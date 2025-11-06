@@ -902,117 +902,140 @@
                     let kwImpL7Total = calculateTotal('kw_impr_L7');
                     let pmtImpL7Total = calculateTotal('pmt_impr_L7');
 
+                    $.ajax({
+                        url: "{{ route('adv-ebay.ad-running.save-data') }}",
+                        method: 'GET',
+                        data: {
+                            spendL30Total: spendL30Total,
+                            kwSpendL30Total: kwSpendL30Total,
+                            pmtSpendL30Total:pmtSpendL30Total,
+                            clicksL30Total: clicksL30Total,
+                            kwClicksL30Total:kwClicksL30Total,
+                            pmtClicksL30Total:pmtClicksL30Total,
+                            salesL30Total : salesL30Total,
+                            kwSalesL30Total:kwSalesL30Total,
+                            pmtSalesL30Total:pmtSalesL30Total,
+                            soldL30Total:soldL30Total,
+                            kwSoldL30Total:kwSoldL30Total,
+                            pmtSoldL30Total:pmtSoldL30Total,
+                        },
+                        success: function(response) {
+                        },
+                        error: function(xhr) {
+                        }
+                    });
 
-                    document.getElementById("imp-l7-total").innerText = impL7Total > 0 ? ` (${impL7Total.toFixed(2)})` : "";
-                    document.getElementById("imp-l7-total").style.display = impL7Total > 0 ? "inline" : "none";
 
-                    document.getElementById("kw-imp-l7-total").innerText = kwImpL7Total > 0 ? ` (${kwImpL7Total.toFixed(2)})` : "";
-                    document.getElementById("kw-imp-l7-total").style.display = kwImpL7Total > 0 ? "inline" : "none";
+                document.getElementById("imp-l7-total").innerText = impL7Total > 0 ? ` (${impL7Total.toFixed(2)})` : "";
+                document.getElementById("imp-l7-total").style.display = impL7Total > 0 ? "inline" : "none";
 
-                    document.getElementById("pmt-imp-l7-total").innerText = pmtImpL7Total > 0 ? ` (${pmtImpL7Total.toFixed(2)})` : "";
-                    document.getElementById("pmt-imp-l7-total").style.display = pmtImpL7Total > 0 ? "inline" : "none";
+                document.getElementById("kw-imp-l7-total").innerText = kwImpL7Total > 0 ? ` (${kwImpL7Total.toFixed(2)})` : "";
+                document.getElementById("kw-imp-l7-total").style.display = kwImpL7Total > 0 ? "inline" : "none";
 
-
-                    document.getElementById("imp-l30-total").innerText = impL30Total > 0 ? ` (${impL30Total.toFixed(2)})` : "";
-                    document.getElementById("imp-l30-total").style.display = impL30Total > 0 ? "inline" : "none";
-
-                    document.getElementById("kw-imp-l30-total").innerText = kwImpL30Total > 0 ? ` (${kwImpL30Total.toFixed(2)})` : "";
-                    document.getElementById("kw-imp-l30-total").style.display = kwImpL30Total > 0 ? "inline" : "none";
+                document.getElementById("pmt-imp-l7-total").innerText = pmtImpL7Total > 0 ? ` (${pmtImpL7Total.toFixed(2)})` : "";
+                document.getElementById("pmt-imp-l7-total").style.display = pmtImpL7Total > 0 ? "inline" : "none";
 
 
-                    document.getElementById("pmt-imp-l30-total").innerText = pmtImpL30Total > 0 ? ` (${pmtImpL30Total.toFixed(2)})` : "";
-                    document.getElementById("pmt-imp-l30-total").style.display = pmtImpL30Total > 0 ? "inline" : "none";
+                document.getElementById("imp-l30-total").innerText = impL30Total > 0 ? ` (${impL30Total.toFixed(2)})` : "";
+                document.getElementById("imp-l30-total").style.display = impL30Total > 0 ? "inline" : "none";
+
+                document.getElementById("kw-imp-l30-total").innerText = kwImpL30Total > 0 ? ` (${kwImpL30Total.toFixed(2)})` : "";
+                document.getElementById("kw-imp-l30-total").style.display = kwImpL30Total > 0 ? "inline" : "none";
+
+
+                document.getElementById("pmt-imp-l30-total").innerText = pmtImpL30Total > 0 ? ` (${pmtImpL30Total.toFixed(2)})` : "";
+                document.getElementById("pmt-imp-l30-total").style.display = pmtImpL30Total > 0 ? "inline" : "none";
                       
 
-                    document.getElementById("clicks-l7-total").innerText = clicksL7Total > 0 ? ` (${clicksL7Total.toFixed(2)})` : "";
-                    document.getElementById("clicks-l7-total").style.display = clicksL7Total > 0 ? "inline" : "none";
+                document.getElementById("clicks-l7-total").innerText = clicksL7Total > 0 ? ` (${clicksL7Total.toFixed(2)})` : "";
+                document.getElementById("clicks-l7-total").style.display = clicksL7Total > 0 ? "inline" : "none";
 
-                    document.getElementById("kw-clicks-l7-total").innerText = kwClicksL7Total > 0 ? ` (${kwClicksL7Total.toFixed(2)})` : "";
-                    document.getElementById("kw-clicks-l7-total").style.display = kwClicksL7Total > 0 ? "inline" : "none";
-
-
-                    document.getElementById("pmt-clicks-l7-total").innerText = pmtClicksL7Total > 0 ? ` (${pmtClicksL7Total.toFixed(2)})` : "";
-                    document.getElementById("pmt-clicks-l7-total").style.display = pmtClicksL7Total > 0 ? "inline" : "none";
+                document.getElementById("kw-clicks-l7-total").innerText = kwClicksL7Total > 0 ? ` (${kwClicksL7Total.toFixed(2)})` : "";
+                document.getElementById("kw-clicks-l7-total").style.display = kwClicksL7Total > 0 ? "inline" : "none";
 
 
-                    document.getElementById("clicks-l30-total").innerText = clicksL30Total > 0 ? ` (${clicksL30Total.toFixed(2)})` : "";
-                    document.getElementById("clicks-l30-total").style.display = clicksL30Total > 0 ? "inline" : "none";
-
-                    document.getElementById("kw-clicks-l30-total").innerText = kwClicksL30Total > 0 ? ` (${kwClicksL30Total.toFixed(2)})` : "";
-                    document.getElementById("kw-clicks-l30-total").style.display = kwClicksL30Total > 0 ? "inline" : "none";
-
-                    document.getElementById("pmt-clicks-l30-total").innerText = pmtClicksL30Total > 0 ? ` (${pmtClicksL30Total.toFixed(2)})` : "";
-                    document.getElementById("pmt-clicks-l30-total").style.display = pmtClicksL30Total > 0 ? "inline" : "none";
+                document.getElementById("pmt-clicks-l7-total").innerText = pmtClicksL7Total > 0 ? ` (${pmtClicksL7Total.toFixed(2)})` : "";
+                document.getElementById("pmt-clicks-l7-total").style.display = pmtClicksL7Total > 0 ? "inline" : "none";
 
 
-                    document.getElementById("sales-l7-total").innerText = salesL7Total > 0 ? ` (${salesL7Total.toFixed(2)})` : "";
-                    document.getElementById("sales-l7-total").style.display = salesL7Total > 0 ? "inline" : "none";
+                document.getElementById("clicks-l30-total").innerText = clicksL30Total > 0 ? ` (${clicksL30Total.toFixed(2)})` : "";
+                document.getElementById("clicks-l30-total").style.display = clicksL30Total > 0 ? "inline" : "none";
 
-                    document.getElementById("kw-sales-l7-total").innerText = kwSalesL7Total > 0 ? ` (${kwSalesL7Total.toFixed(2)})` : "";
-                    document.getElementById("kw-sales-l7-total").style.display = kwSalesL7Total > 0 ? "inline" : "none";
+                document.getElementById("kw-clicks-l30-total").innerText = kwClicksL30Total > 0 ? ` (${kwClicksL30Total.toFixed(2)})` : "";
+                document.getElementById("kw-clicks-l30-total").style.display = kwClicksL30Total > 0 ? "inline" : "none";
 
-                    document.getElementById("pmt-sales-l7-total").innerText = pmtSalesL7Total > 0 ? ` (${pmtSalesL7Total.toFixed(2)})` : "";
-                    document.getElementById("pmt-sales-l7-total").style.display = pmtSalesL7Total > 0 ? "inline" : "none";
-
-
-                    document.getElementById("sales-l30-total").innerText = salesL30Total > 0 ? ` (${salesL30Total.toFixed(2)})` : "";
-                    document.getElementById("sales-l30-total").style.display = salesL30Total > 0 ? "inline" : "none";
-
-                    document.getElementById("kw-sales-l30-total").innerText = kwSalesL30Total > 0 ? ` (${kwSalesL30Total.toFixed(2)})` : "";
-                    document.getElementById("kw-sales-l30-total").style.display = kwSalesL30Total > 0 ? "inline" : "none";
+                document.getElementById("pmt-clicks-l30-total").innerText = pmtClicksL30Total > 0 ? ` (${pmtClicksL30Total.toFixed(2)})` : "";
+                document.getElementById("pmt-clicks-l30-total").style.display = pmtClicksL30Total > 0 ? "inline" : "none";
 
 
-                    document.getElementById("pmt-sales-l30-total").innerText = pmtSalesL30Total > 0 ? ` (${pmtSalesL30Total.toFixed(2)})` : "";
-                    document.getElementById("pmt-sales-l30-total").style.display = pmtSalesL30Total > 0 ? "inline" : "none";
+                document.getElementById("sales-l7-total").innerText = salesL7Total > 0 ? ` (${salesL7Total.toFixed(2)})` : "";
+                document.getElementById("sales-l7-total").style.display = salesL7Total > 0 ? "inline" : "none";
+
+                document.getElementById("kw-sales-l7-total").innerText = kwSalesL7Total > 0 ? ` (${kwSalesL7Total.toFixed(2)})` : "";
+                document.getElementById("kw-sales-l7-total").style.display = kwSalesL7Total > 0 ? "inline" : "none";
+
+                document.getElementById("pmt-sales-l7-total").innerText = pmtSalesL7Total > 0 ? ` (${pmtSalesL7Total.toFixed(2)})` : "";
+                document.getElementById("pmt-sales-l7-total").style.display = pmtSalesL7Total > 0 ? "inline" : "none";
 
 
-                    document.getElementById("sold-l7-total").innerText = soldL7Total > 0 ? ` (${soldL7Total.toFixed(2)})` : "";
-                    document.getElementById("sold-l7-total").style.display = soldL7Total > 0 ? "inline" : "none";
+                document.getElementById("sales-l30-total").innerText = salesL30Total > 0 ? ` (${salesL30Total.toFixed(2)})` : "";
+                document.getElementById("sales-l30-total").style.display = salesL30Total > 0 ? "inline" : "none";
 
-                    document.getElementById("kw-sold-l7-total").innerText = kwSoldL7Total > 0 ? ` (${kwSoldL7Total.toFixed(2)})` : "";
-                    document.getElementById("kw-sold-l7-total").style.display = kwSoldL7Total > 0 ? "inline" : "none";
-
-                    document.getElementById("pmt-sold-l7-total").innerText = pmtSoldL7Total > 0 ? ` (${pmtSoldL7Total.toFixed(2)})` : "";
-                    document.getElementById("pmt-sold-l7-total").style.display = pmtSoldL7Total > 0 ? "inline" : "none";
+                document.getElementById("kw-sales-l30-total").innerText = kwSalesL30Total > 0 ? ` (${kwSalesL30Total.toFixed(2)})` : "";
+                document.getElementById("kw-sales-l30-total").style.display = kwSalesL30Total > 0 ? "inline" : "none";
 
 
-                    document.getElementById("sold-l30-total").innerText = soldL30Total > 0 ? ` (${soldL30Total.toFixed(2)})` : "";
-                    document.getElementById("sold-l30-total").style.display = soldL30Total > 0 ? "inline" : "none";
-
-                    document.getElementById("kw-sold-l30-total").innerText = kwSoldL30Total > 0 ? ` (${kwSoldL30Total.toFixed(2)})` : "";
-                    document.getElementById("kw-sold-l30-total").style.display = kwSoldL30Total > 0 ? "inline" : "none";
+                document.getElementById("pmt-sales-l30-total").innerText = pmtSalesL30Total > 0 ? ` (${pmtSalesL30Total.toFixed(2)})` : "";
+                document.getElementById("pmt-sales-l30-total").style.display = pmtSalesL30Total > 0 ? "inline" : "none";
 
 
-                    document.getElementById("pmt-sold-l30-total").innerText = pmtSoldL30Total > 0 ? ` (${pmtSoldL30Total.toFixed(2)})` : "";
-                    document.getElementById("pmt-sold-l30-total").style.display = pmtSoldL30Total > 0 ? "inline" : "none";
+                document.getElementById("sold-l7-total").innerText = soldL7Total > 0 ? ` (${soldL7Total.toFixed(2)})` : "";
+                document.getElementById("sold-l7-total").style.display = soldL7Total > 0 ? "inline" : "none";
+
+                document.getElementById("kw-sold-l7-total").innerText = kwSoldL7Total > 0 ? ` (${kwSoldL7Total.toFixed(2)})` : "";
+                document.getElementById("kw-sold-l7-total").style.display = kwSoldL7Total > 0 ? "inline" : "none";
+
+                document.getElementById("pmt-sold-l7-total").innerText = pmtSoldL7Total > 0 ? ` (${pmtSoldL7Total.toFixed(2)})` : "";
+                document.getElementById("pmt-sold-l7-total").style.display = pmtSoldL7Total > 0 ? "inline" : "none";
 
 
-                    document.getElementById("spend-l30-total").innerText = spendL30Total > 0 ? ` (${spendL30Total.toFixed(2)})` : "";
-                    document.getElementById("spend-l30-total").style.display = spendL30Total > 0 ? "inline" : "none";
+                document.getElementById("sold-l30-total").innerText = soldL30Total > 0 ? ` (${soldL30Total.toFixed(2)})` : "";
+                document.getElementById("sold-l30-total").style.display = soldL30Total > 0 ? "inline" : "none";
 
-                    document.getElementById("kw-spend-l30-total").innerText = kwSpendL30Total > 0 ? ` (${kwSpendL30Total.toFixed(2)})` : "";
-                    document.getElementById("kw-spend-l30-total").style.display = kwSpendL30Total > 0 ? "inline" : "none";
-
-
-                    document.getElementById("pmt-spend-l30-total").innerText = pmtSpendL30Total > 0 ? ` (${pmtSpendL30Total.toFixed(2)})` : "";
-                    document.getElementById("pmt-spend-l30-total").style.display = pmtSpendL30Total > 0 ? "inline" : "none";
+                document.getElementById("kw-sold-l30-total").innerText = kwSoldL30Total > 0 ? ` (${kwSoldL30Total.toFixed(2)})` : "";
+                document.getElementById("kw-sold-l30-total").style.display = kwSoldL30Total > 0 ? "inline" : "none";
 
 
-                    document.getElementById("spend-l7-total").innerText = spendL7Total > 0 ? ` (${spendL7Total.toFixed(2)})` : "";
-                    document.getElementById("spend-l7-total").style.display = spendL7Total > 0 ? "inline" : "none";
+                document.getElementById("pmt-sold-l30-total").innerText = pmtSoldL30Total > 0 ? ` (${pmtSoldL30Total.toFixed(2)})` : "";
+                document.getElementById("pmt-sold-l30-total").style.display = pmtSoldL30Total > 0 ? "inline" : "none";
 
 
-                    document.getElementById("kw-spend-l7-total").innerText = kwSpendL7Total > 0 ? ` (${kwSpendL7Total.toFixed(2)})` : "";
-                    document.getElementById("kw-spend-l7-total").style.display = kwSpendL7Total > 0 ? "inline" : "none";
+                document.getElementById("spend-l30-total").innerText = spendL30Total > 0 ? ` (${spendL30Total.toFixed(2)})` : "";
+                document.getElementById("spend-l30-total").style.display = spendL30Total > 0 ? "inline" : "none";
+
+                document.getElementById("kw-spend-l30-total").innerText = kwSpendL30Total > 0 ? ` (${kwSpendL30Total.toFixed(2)})` : "";
+                document.getElementById("kw-spend-l30-total").style.display = kwSpendL30Total > 0 ? "inline" : "none";
 
 
-                    document.getElementById("pmt-spend-l7-total").innerText = pmtSpendL7Total > 0 ? ` (${pmtSpendL7Total.toFixed(2)})` : "";
-                    document.getElementById("pmt-spend-l7-total").style.display = pmtSpendL7Total > 0 ? "inline" : "none";
+                document.getElementById("pmt-spend-l30-total").innerText = pmtSpendL30Total > 0 ? ` (${pmtSpendL30Total.toFixed(2)})` : "";
+                document.getElementById("pmt-spend-l30-total").style.display = pmtSpendL30Total > 0 ? "inline" : "none";
 
-                  
-                    let percentage = total > 0 ? ((filtered / total) * 100).toFixed(0) : 0;
-                    document.getElementById("total-campaigns").innerText = filtered;
-                    document.getElementById("percentage-campaigns").innerText = percentage + "%";
+
+                document.getElementById("spend-l7-total").innerText = spendL7Total > 0 ? ` (${spendL7Total.toFixed(2)})` : "";
+                document.getElementById("spend-l7-total").style.display = spendL7Total > 0 ? "inline" : "none";
+
+
+                document.getElementById("kw-spend-l7-total").innerText = kwSpendL7Total > 0 ? ` (${kwSpendL7Total.toFixed(2)})` : "";
+                document.getElementById("kw-spend-l7-total").style.display = kwSpendL7Total > 0 ? "inline" : "none";
+
+
+                document.getElementById("pmt-spend-l7-total").innerText = pmtSpendL7Total > 0 ? ` (${pmtSpendL7Total.toFixed(2)})` : "";
+                document.getElementById("pmt-spend-l7-total").style.display = pmtSpendL7Total > 0 ? "inline" : "none";
+
+                
+                let percentage = total > 0 ? ((filtered / total) * 100).toFixed(0) : 0;
+                document.getElementById("total-campaigns").innerText = filtered;
+                document.getElementById("percentage-campaigns").innerText = percentage + "%";
 
                 }
 

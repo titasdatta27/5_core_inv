@@ -15,6 +15,7 @@ use App\Models\JungleScoutProductData;
 use App\Http\Controllers\ApiController;
 use App\Jobs\UpdateAmazonSPriceJob;
 use App\Models\AmazonDatasheet;
+use App\Models\ADVMastersData;
 use App\Models\AmazonSbCampaignReport;
 use App\Models\AmazonSpCampaignReport;
 use App\Models\ChannelMaster;
@@ -700,6 +701,10 @@ class OverallAmazonController extends Controller
         ]);
     }
 
+    public function getAmazonTotalSalesSaveData(Request $request)
+    {
+        return ADVMastersData::getAmazonTotalSalesSaveDataProceed($request);
+    }
 
     public function amazonPricingCVR(Request $request)
     {
