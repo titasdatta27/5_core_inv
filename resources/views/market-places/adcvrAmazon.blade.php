@@ -524,110 +524,94 @@
                             `;
                         }
                     },
-                    // {
-                    //     title: "L7 CPC",
-                    //     field: "l7_cpc",
-                    //     hozAlign: "center",
-                    //     formatter: function(cell) {
-                    //         var row = cell.getRow().getData();
-                    //         var l7_cpc = parseFloat(row.l7_cpc) || 0;
-                    //         return l7_cpc.toFixed(2);
-                    //     }
-                    // },
-                    // {
-                    //     title: "SBGT",
-                    //     field: "sbgt",
-                    //     formatter: function(cell) {
-                    //         var row = cell.getRow().getData();
-                    //         var acos = parseFloat(row.acos_L30) || 0;
-                    //         const tpft = parseFloat(row.TPFT) || 0;
-                    //         const clicks = parseFloat(row.clicks_L30) || 0;
-                    //         var tpftInt = Math.floor(tpft);
-                    //         var sbgt;
-                            
-                    //         if(clicks > 25){
-                    //             if(acos >= 100){
-                    //                 sbgt = 1;
-                    //             }else if(acos >= 50 && acos <= 100){
-                    //                 sbgt = 2;
-                    //             }else if(acos >= 40 && acos <= 50){
-                    //                 sbgt = 3;
-                    //             }else if(acos >= 35 && acos <= 40){
-                    //                 sbgt = 4;
-                    //             }else if(acos >= 30 && acos <= 35){
-                    //                 sbgt = 5;
-                    //             }else if(acos >= 25 && acos <= 30){
-                    //                 sbgt = 6;
-                    //             }else if(acos >= 20 && acos <= 25){
-                    //                 sbgt = 7;
-                    //             }else if(acos >= 15 && acos <= 20){
-                    //                 sbgt = 8;
-                    //             }else if(acos >= 10 && acos <= 15){
-                    //                 sbgt = 9;
-                    //             }else if(acos < 10 && acos > 0){
-                    //                 sbgt = 10;
-                    //             }else{
-                    //                 sbgt = 3;
-                    //             }
-
-                    //             const l30 = parseFloat(row.L30);
-                    //             const inv = parseFloat(row.INV);
-                    //             let dilColor = "";
-                    //             if (!isNaN(l30) && !isNaN(inv) && inv !== 0) {
-                    //                 const dilDecimal = l30 / inv;
-                    //                 dilColor = getDilColor(dilDecimal);
-                    //             }
-
-                    //             if ((dilColor === "red" && tpftInt > 10) ||
-                    //                 (dilColor === "yellow" && tpftInt > 22) ||
-                    //                 (dilColor === "green" && tpftInt > 26) ||
-                    //                 (dilColor === "pink" && tpftInt > 30)) {
-                    //                 sbgt = sbgt * 2;
-                    //             }
-                    //         }else{
-                    //             sbgt = 5;
-                    //         }
-
-                    //         return `
-                    //             <input type="number" class="form-control form-control-sm text-center sbgt-input"  value="${sbgt}" min="1" max="10"  data-campaign-id="${row.campaign_id}">
-                    //         `;
-                    //     },
-                    // },
-                    // {
-                    //     title: "APR BGT",
-                    //     field: "apr_bgt",
-                    //     hozAlign: "center",
-                    //     formatter: function(cell, formatterParams, onRendered) {
-                    //         var value = cell.getValue() || 0;
-                    //         return `
-                    //             <div style="align-items:center; gap:5px;">
-                    //                 <button class="btn btn-primary update-row-btn">APR BGT</button>
-                    //             </div>
-                    //         `;
-                    //     },
-                    //     cellClick: function(e, cell) {
-                    //         if (e.target.classList.contains("update-row-btn")) {
-                    //             var rowData = cell.getRow().getData();
-                    //             var acos = parseFloat(rowData.acos_L30) || 0;  
-
-                    //             if(acos > 0){   
-                    //                 var sbgtInput = cell.getRow().getElement().querySelector('.sbgt-input');
-                    //                 var sbgtValue = parseFloat(sbgtInput.value) || 0;
-
-                    //                 updateBid(sbgtValue, rowData.campaign_id);
-                    //             } else {
-                    //                 console.log("Skipped because acos_L30 = 0 for campaign:", rowData.campaign_id);
-                    //             }
-                    //         }
-                    //     }
-
-                    // },
                     {
-                        title: "ADS SOLD",
+                        title: "ACOS L30",
+                        field: "acos_L30",
+                        hozAlign: "right",
+                        formatter: function(cell) {
+                            return `
+                                <span>${parseFloat(cell.getValue() || 0).toFixed(0) + "%"}</span>
+                            `;
+                            
+                        }
+                    },
+                    {
+                        title: "SPEND L30",
+                        field: "spend_l30",
+                        hozAlign: "right",
+                        formatter: function(cell) {
+                            return `
+                                <span>${parseFloat(cell.getValue() || 0).toFixed(0)}</span>
+                            `;
+                        }
+                    },
+                    {
+                        title: "SALES L30",
+                        field: "ad_sales_l30",
+                        hozAlign: "right",
+                        formatter: function(cell) {
+                            return `
+                                <span>${parseFloat(cell.getValue() || 0).toFixed(0)}</span>
+                            `;
+                        }
+                    },
+                    {
+                        title: "CLK L30",
+                        field: "clicks_L30",
+                        hozAlign: "right",
+                        formatter: function(cell) {
+                            return `
+                                <span>${parseFloat(cell.getValue() || 0).toFixed(0)}</span>
+                            `;
+                        }
+                    },
+                    {
+                        title: "ACOS L7",
+                        field: "acos_L7",
+                        hozAlign: "right",
+                        formatter: function(cell) {
+                            return `
+                                <span>${parseFloat(cell.getValue() || 0).toFixed(0) + "%"}</span>
+                            `;
+                            
+                        }
+                    },
+                    {
+                        title: "SPEND L7",
+                        field: "spend_l7",
+                        hozAlign: "right",
+                        formatter: function(cell) {
+                            return `
+                                <span>${parseFloat(cell.getValue() || 0).toFixed(0)}</span>
+                            `;
+                        }
+                    },
+                    {
+                        title: "SALES L7",
+                        field: "ad_sales_l7",
+                        hozAlign: "right",
+                        formatter: function(cell) {
+                            return `
+                                <span>${parseFloat(cell.getValue() || 0).toFixed(0)}</span>
+                            `;
+                        }
+                    },
+                    {
+                        title: "CLK L7",
+                        field: "clicks_L7",
+                        hozAlign: "right",
+                        formatter: function(cell) {
+                            return `
+                                <span>${parseFloat(cell.getValue() || 0).toFixed(0)}</span>
+                            `;
+                        }
+                    },
+                    {
+                        title: "ADS SOLD L90",
                         field: "A_L90",
                     },
                     {
-                        title: "CVR%",
+                        title: "CVR L90",
                         field: "cvr_l90",
                         formatter: function(cell){
                             let value = parseFloat(cell.getValue()) || 0;
