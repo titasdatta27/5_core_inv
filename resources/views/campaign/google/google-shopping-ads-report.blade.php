@@ -1092,6 +1092,22 @@
                     let cpcL60Total = calculateTotal('cpc_L60');
                     let cpcL15Total = calculateTotal('cpc_L15');
                     let cpcl7Total = calculateTotal('cpc_L7');
+
+
+                    $.ajax({
+                        url: "{{ route('adv-shopify.gshopping.save-data') }}",
+                        method: 'GET',
+                        data: {
+                            spendL30Total: spendL30Total,
+                            clicksl30Total: clicksl30Total,
+                            adSalesl30Total:adSalesl30Total,
+                            adSoldl30Total:adSoldl30Total,                       
+                        },
+                        success: function(response) {
+                        },
+                        error: function(xhr) {
+                        }
+                    });
                         
 
                        

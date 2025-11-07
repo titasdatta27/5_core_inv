@@ -1421,8 +1421,9 @@
                         // Set default value for nr_req if missing and INV > 0
                         tableData = tableData.map(item => ({
                             ...item,
-                            nr_req: item.nr_req || (parseFloat(item.INV) > 0 ? 'REQ' :
-                                'NR'),
+                            // nr_req: item.nr_req || (parseFloat(item.INV) > 0 ? 'REQ' :
+                            //     'NR'),
+                            nr_req: item.nr_req === 'REQ' ? 'REQ' : item.nr_req === 'NR' ? 'NR' : '',
                             listed: item.listed || (parseFloat(item.INV) > 0 ? 'Pending' :
                                 'Listed')
                         }));

@@ -101,6 +101,7 @@ private function generateSignValue($requestBody)
                 break;
             }
 
+            // dd($response->body());
             $data = $response->json();
 
             if (!($data['success'] ?? false)) {
@@ -245,10 +246,11 @@ public function getInventory__()
     Log::info('Total Temu inventory items collected: ' . count($this->allItems));
         Log::info($this->allItems);
         foreach($this->allItems as $titem){            
-            ProductStockMapping::updateOrCreate(
-                ['sku' => $titem['outGoodsSn']],
-                ['inventory_temu' => $titem['quantity']]
-            );
+            // ProductStockMapping::updateOrCreate(
+            //     ['sku' => $titem['outGoodsSn']],
+            //     ['inventory_temu' => $titem['quantity']]
+            // );
+            ProductStockMapping::where('sku', $titem['outGoodsSn'])->update(['inventory_temu' => (int) $titem['quantity']]);    
         }
  
     return $this->allItems;
@@ -318,16 +320,16 @@ public function getInventory1()
                 'quantity' => $qty,
             ];
 
-            ProductStockMapping::updateOrCreate(
-                ['sku' => $skuId],
-                ['inventory_temu' => $qty]
-            );         
+            // ProductStockMapping::updateOrCreate(
+            //     ['sku' => $skuId],
+            //     ['inventory_temu' => $qty]
+            // );     
+            
+            ProductStockMapping::where('sku', $sku)->update(['inventory_temu' => (int) $qty]);    
         }
 
         // Stop if this is the last page (fewer items than page size)
-        if (count($items) < $pageSize) {
-            break;
-        }
+        if (count($items) < $pageSize) {break;}
 
         $pageNumber++;
 

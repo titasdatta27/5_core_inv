@@ -92,14 +92,16 @@ class Ebay3ApiService
         $sku = $data['sku'] ?? null;
         $quantity = $data['quantity'];
         
-            ProductStockMapping::updateOrCreate(
-                ['sku' => $sku],
-                ['inventory_ebay3'=>$quantity,]
-            );
+            // ProductStockMapping::updateOrCreate(
+            //     ['sku' => $sku],
+            //     ['inventory_ebay3'=>$quantity,]
+            // );
+            
+            ProductStockMapping::where('sku', $sku)->update(['inventory_ebay3' => (int) $quantity]);    
         }
         return $listingData;
         
-         \Log::info('Total Ebay3 inventory items collected: ' . count($listingData));
+            \Log::info('Total Ebay3 inventory items collected: ' . count($listingData));
         $itemIdToSku = [];       
     }
 

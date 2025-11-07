@@ -548,12 +548,14 @@ class DobaApiService
             $page++;
         } while (count($data) === 100);
         foreach ($allStock as $sku => $data) {
-              $sku = $data['sku'] ?? null;
+                $sku = $data['sku'] ?? null;
                 $quantity = $data['quantity'];
-            ProductStockMapping::updateOrCreate(
-                ['sku' => $sku],
-                ['inventory_doba'=>$quantity,]
-            );
+            // ProductStockMapping::updateOrCreate(
+            //     ['sku' => $sku],
+            //     ['inventory_doba'=>$quantity,]
+            // );
+            
+            ProductStockMapping::where('sku', $sku)->update(['inventory_doba' => (int) $quantity]);
         }
         return $allStock;
     }

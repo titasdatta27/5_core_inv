@@ -1177,7 +1177,7 @@
                                     'shopify b2c': '/shopifyB2C',
                                     'doba': '/doba',
                                     'walmart': '/walmartAnalysis',
-                                    'bestbuy usa': '/bestbuyusa-analytics',
+                                    ' usa': '/usa-analytics',
                                     'shein': '/sheinAnalysis',
                                     'tiktokshop': '/tiktokAnalysis',
                                 };

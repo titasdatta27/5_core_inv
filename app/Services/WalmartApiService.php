@@ -185,11 +185,12 @@ class WalmartApiService
             Log::warning('Missing SKU in Walmart inventory data', $item);
             continue;
         }
-
-        ProductStockMapping::updateOrCreate(
-            ['sku' => $sku],
-            ['inventory_walmart' => $quantity]
-        );
+   ProductStockMapping::where('sku', $sku)->update(['inventory_walmart' => (int) $quantity]);
+   
+        // ProductStockMapping::updateOrCreate(
+        //     ['sku' => $sku],
+        //     ['inventory_walmart' => $quantity]
+        // );
     }
 
     Log::info('Total Walmart inventory items collected: ' . count($collected));

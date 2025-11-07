@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\GoogleDataView;
 use App\Models\ProductMaster;
 use App\Models\ShopifySku;
+use App\Models\ADVMastersData;
 use Illuminate\Http\Request;
 use App\Services\GoogleAdsSbidService;
 use Illuminate\Support\Facades\DB;
@@ -41,6 +42,11 @@ class GoogleAdsController extends Controller
 
     public function googleShoppingAdsReport(){
         return view('campaign.google.google-shopping-ads-report');
+    }
+
+    public function getAdvShopifyGShoppingSaveData(Request $request)
+    {
+        return ADVMastersData::getAdvShopifyGShoppingSaveDataProceed($request);
     }
 
     public function googleSerpView(){

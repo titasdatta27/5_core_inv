@@ -66,7 +66,7 @@ class RoutingController extends Controller
     /**
      * third level route
      */
-    public function thirdLevel(Request $request, $first, $second, $third)
+    public function thirdLevelOld(Request $request, $first, $second, $third)
     {
         $mode = $request->query('mode');
         $demo = $request->query('demo');
@@ -76,4 +76,35 @@ class RoutingController extends Controller
         
         return view($first . '.' . $second . '.' . $third, ['mode' => $mode, 'demo' => $demo]);
     }
+
+    public function thirdLevel(Request $request, $first, $second, $third)
+{
+    $mode = $request->query('mode');
+    $demo = $request->query('demo');
+
+    // Block access to sensitive or invalid paths
+    if (
+        Str::startsWith($first, '.') ||          // e.g., .well-known, .env
+        in_array($first, ['storage', 'vendor', 'assets', 'admin']) ||
+        Str::contains($first . $second . $third, ['..', '~', '\\'])
+    ) {
+        abort(404);
+    }
+
+    // Optional: Block 'assets' explicitly (you already had this)
+    if ($first === 'assets') {
+        return redirect('home');
+    }
+
+    // Construct view name
+    $viewName = "$first.$second.$third";
+
+    // Only render if the view exists
+    if (!view()->exists($viewName)) {
+        abort(404);
+    }
+
+    return view($viewName, compact('mode', 'demo'));
+}
+
 }

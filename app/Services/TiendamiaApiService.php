@@ -23,7 +23,7 @@ class TiendamiaApiService
 
     public function getInventory(){
         $token = $this->getAccessToken();
-        if (!$token) return;
+            if (!$token) return;
         $pageToken = null;
         $page = 1;
         $allProducts = [];
@@ -64,10 +64,12 @@ class TiendamiaApiService
       $sku = $data['sku'] ?? null;
         $quantity =$data['quantity'];
         
-            ProductStockMapping::updateOrCreate(
-                ['sku' => $sku],
-                ['inventory_tiendamia'=>$quantity,]
-            );
+            // ProductStockMapping::updateOrCreate(
+            //     ['sku' => $sku],
+            //     ['inventory_tiendamia'=>$quantity,]
+            // );
+            
+            ProductStockMapping::where('sku', $sku)->update(['inventory_tiendamia' => (int) $quantity]);    
         }
         return $allProducts;
     }

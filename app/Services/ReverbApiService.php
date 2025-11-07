@@ -83,15 +83,16 @@ class ReverbApiService
         foreach ($inventory as $sku => $data) {
             $sku = $data['sku'] ?? null;
                     $quantity = $data['quantity'];
-             if (!$sku) {
-                Log::warning('Missing SKU in parsed Amazon data', $item);
-                continue;
-            }
-
-            ProductStockMapping::updateOrCreate(
-                ['sku' => $sku],
-                ['inventory_reverb'=>$quantity,]
-            );
+                if (!$sku) {
+                    Log::warning('Missing SKU in parsed Amazon data', $item);
+                    continue;
+                }
+                
+            ProductStockMapping::where('sku', $sku)->update(['inventory_reverb' => (int) $quantity]);
+            // ProductStockMapping::updateOrCreate(
+            //     ['sku' => $sku],
+            //     ['inventory_reverb'=>$quantity,]
+            // );
         }
         return $inventory;
 

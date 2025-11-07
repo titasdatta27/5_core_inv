@@ -166,6 +166,9 @@ foreach ($marketplaces as $key => [$model, $inventoryField]) {
 }
 
 
+
+
+
 protected function fetchFreshData(){
     ini_set('max_execution_time', 300);
 
@@ -191,12 +194,10 @@ protected function fetchFreshData(){
     // return $data;
 }
 
-
 protected function fetchFreshDataU($type = null)
 {
-
     //    $result=(new AliExpressApiService())->getInventory();
-    // dd($result);
+    // return($result);
     ini_set('max_execution_time', 1800);
     $progress = [];
       // Define all sources including Shopify
@@ -215,13 +216,14 @@ protected function fetchFreshDataU($type = null)
         'bestbuy'   => fn() => (new BestBuyApiService())->getInventory(),
         'tiendamia'   => fn() => (new TiendamiaApiService())->getInventory(),
     ];
-
+   
     if (!$type) {
         ini_set('max_execution_time', 1800);
         ProductStockMapping::truncate();
 
         // Step 1: Fetch Shopify and filter parent SKUs
         $shopifyInventoryData = $this->safeFetch($sources['shopify'], 'shopify', $progress);
+       
         $parentskuList = $this->filterParentSKU($shopifyInventoryData);
 
         // Step 2: Fetch all other platforms
@@ -243,14 +245,13 @@ protected function fetchFreshDataU($type = null)
         if (!array_key_exists($type, $sources)) {
             return ['status' => false, 'msg' => "Invalid type: $type"];
         }
-
+     
         $result = $this->safeFetch($sources[$type], $type, $progress);
-
         // Optional: handle Shopify-specific logic if needed
         // if ($type === 'shopify') {
         //     $parentskuList = $this->filterParentSKU($result);
         // }
-
+        
         return [
             'status' => true,
             'msg' => 'success',
@@ -537,6 +538,7 @@ protected function filterParentSKU(array $data): array
 
     public function refetchLiveDataU(Request $request){        
         $freshData=$this->fetchFreshDataU($request->source);   
+        return $freshData;
         if($freshData){
             return response()->json(['status' => 'success']);
         }

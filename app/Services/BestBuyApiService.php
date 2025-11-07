@@ -61,13 +61,13 @@ class BestBuyApiService
              $page++;
         } while ($pageToken);
         foreach ($allProducts as $sku => $data) {
-      $sku = $data['sku'] ?? null;
+        $sku = $data['sku'] ?? null;
         $quantity =$data['quantity'];
-        
-            ProductStockMapping::updateOrCreate(
-                ['sku' => $sku],
-                ['inventory_bestbuy'=>$quantity,]
-            );
+                    // ProductStockMapping::updateOrCreate(
+            //     ['sku' => $sku],
+            //     ['inventory_bestbuy'=>$quantity,]
+            // );
+            ProductStockMapping::where('sku', $sku)->update(['inventory_bestbuy' => (int) $quantity]);    
         }
         return $allProducts;
     }

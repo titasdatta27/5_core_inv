@@ -185,6 +185,7 @@ public function getinventory(): array
                 Log::warning('Missing SKU in parsed Amazon data', $item);
                 continue;
             }
+            
         // Only process if we have a valid SKU
         if ($sku !== null) {
             ProductStockMapping::updateOrCreate(
