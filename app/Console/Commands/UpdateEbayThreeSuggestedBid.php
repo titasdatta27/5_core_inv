@@ -2,28 +2,28 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Ebay3Metric;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Cache;
-use App\Models\EbayMetric;
 use App\Models\ProductMaster;
 use App\Models\ShopifySku;
 use Exception;
 
-class UpdateEbaySuggestedBid extends Command
+class UpdateEbayThreeSuggestedBid extends Command
 {
-    protected $signature = 'ebay:update-suggestedbid';
-    protected $description = 'Bulk update eBay ad bids using suggested_bid percentages';
+    protected $signature = 'ebay3:update-suggestedbid';
+    protected $description = 'Bulk update eBay3 ad bids using suggested_bid percentages';
 
     public function __construct()
     {
         parent::__construct();
     }
 
-    public function handle() {
-        $this->info('Starting bulk eBay ad bid update...');
+    public function handle() {  
+        $this->info('Starting bulk eBay3 ad bid update...');
 
         $accessToken = $this->getEbayAccessToken();
         if (!$accessToken) {
@@ -39,10 +39,10 @@ class UpdateEbaySuggestedBid extends Command
         $skus = $productMasters->pluck("sku")->filter()->unique()->values()->all();
 
         $shopifyData = ShopifySku::whereIn("sku", $skus)->get()->keyBy("sku");
-        $ebayMetrics = EbayMetric::whereIn("sku", $skus)->get()->keyBy("sku");
+        $ebayMetrics = Ebay3Metric::whereIn("sku", $skus)->get()->keyBy("sku");
 
         $campaignListings = DB::connection('apicentral')
-            ->table('ebay_campaign_ads_listings')
+            ->table('ebay3_campaign_ads_listings')
             ->select('listing_id', 'campaign_id')
             ->where('funding_strategy', 'COST_PER_SALE')
             ->get()
@@ -150,6 +150,7 @@ class UpdateEbaySuggestedBid extends Command
                     "sell/marketing/v1/ad_campaign/{$campaignId}/bulk_update_ads_bid_by_listing_id",
                     ['json' => ['requests' => $requests]]
                 );
+
                 $this->info("Campaign {$campaignId}: Updated " . count($requests) . " listings.");
                 Log::info("eBay campaign {$campaignId} bulk update response: " . $response->getBody()->getContents());
             } catch (\Exception $e) {
@@ -167,9 +168,9 @@ class UpdateEbaySuggestedBid extends Command
             return Cache::get('ebay_access_token');
         }
 
-        $clientId = env('EBAY_APP_ID');
-        $clientSecret = env('EBAY_CERT_ID');
-        $refreshToken = env('EBAY_REFRESH_TOKEN');
+        $clientId = env('EBAY_3_APP_ID');
+        $clientSecret = env('EBAY_3_CERT_ID');
+        $refreshToken = env('EBAY_3_REFRESH_TOKEN');
         $endpoint = "https://api.ebay.com/identity/v1/oauth2/token";
 
         $postFields = http_build_query([

@@ -55,6 +55,7 @@ class UpdateEbayTwoSuggestedBid extends Command
             $inv = $shopify->inv ?? 0;
             $l30 = $shopify->quantity ?? 0;
             $ebay_l30 = $ebayMetric->ebay_l30 ?? 0;
+            $views = $ebayMetric->views ?? 0;
 
             $ovDil = $inv > 0 ? ($l30 / $inv) : 0;
 
@@ -64,45 +65,48 @@ class UpdateEbayTwoSuggestedBid extends Command
             $sbidColor = "";
 
             if ($percent < 16.66) {
-                $sbid = 8;
                 $sbidColor = "red";
             } elseif ($percent >= 16.66 && $percent < 25) {
-                $sbid = 6;
                 $sbidColor = "yellow";
             } elseif ($percent >= 25 && $percent < 50) {
-                $sbid = 4;
                 $sbidColor = "green";
             } else {
-                $sbid = 2;
                 $sbidColor = "pink";
             }
 
-            if ($sbidColor === "pink" && $ebay_l30 === 0) {
-                $sbid = 10;
+            $viewsLow = $views < 300;
+            $noSale = $ebay_l30 === 0;
+
+            if ($sbidColor === "pink") {
+                if ($viewsLow) {
+                    $sbid = 4;
+                } else {
+                    $sbid = 2;
+                }
             }
 
-            if ($sbidColor === "green" && $ebay_l30 != 0) {
-                $sbid = 5;
+            if ($sbidColor === "green") {
+                if ($noSale) {
+                    $sbid = $viewsLow ? 10 : 7;
+                } else {
+                    $sbid = $viewsLow ? 7 : 5;
+                }
             }
 
-            if ($sbidColor === "green" && $ebay_l30 === 0) {
-                $sbid = 10;
+            if ($sbidColor === "yellow") {
+                if ($noSale) {
+                    $sbid = $viewsLow ? 12 : 10;
+                } else {
+                    $sbid = $viewsLow ? 10 : 8;
+                }
             }
 
-            if ($sbidColor === "yellow" && $ebay_l30 != 0) {
-                $sbid = 8;
-            }
-
-            if ($sbidColor === "yellow" && $ebay_l30 === 0) {
-                $sbid = 10;
-            }
-
-            if ($sbidColor === "red" && $ebay_l30 != 0) {
-                $sbid = 8;
-            }
-
-            if ($sbidColor === "red" && $ebay_l30 === 0) {
-                $sbid = 10;
+            if ($sbidColor === "red") {
+                if ($noSale) {
+                    $sbid = $viewsLow ? 15 : 12;
+                } else {
+                    $sbid = $viewsLow ? 12 : 10;
+                }
             }
 
             if ($ebayMetric && isset($campaignListings[$ebayMetric->item_id])) {

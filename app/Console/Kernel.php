@@ -231,6 +231,12 @@ class Kernel extends ConsoleKernel
         $schedule->command('ebay:update-suggestedbid')
             ->dailyAt('12:00')
             ->timezone('Asia/Kolkata');
+        $schedule->command('ebay2:update-suggestedbid')
+            ->dailyAt('12:00')
+            ->timezone('Asia/Kolkata');
+        $schedule->command('ebay3:update-suggestedbid')
+            ->dailyAt('12:00')
+            ->timezone('Asia/Kolkata');
         // end of bids update commands
         $schedule->command('sync:amazon-prices')->everyMinute();
         $schedule->command('sync:sync-temu-sip')->everyMinute();

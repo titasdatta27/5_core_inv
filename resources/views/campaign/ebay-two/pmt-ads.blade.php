@@ -2661,32 +2661,39 @@
                         sbidColor = "pink";
                     }
 
-                    if(sbidColor === "pink" && item['eBay L30'] === 0){
-                        sbid = 10;
+                    const viewsLow = item.VIEWS < 300;
+                    const noSale = item['eBay L30'] === 0;
+
+                    if (sbidColor === "pink") {
+                        if (viewsLow) {
+                            sbid = 4;
+                        } else {
+                            sbid = 2;
+                        }
                     }
 
-                    if(sbidColor === "green" && item['eBay L30'] != 0){
-                        sbid = 5;
+                    if (sbidColor === "green") {
+                        if (noSale) {
+                            sbid = viewsLow ? 10 : 7;
+                        } else {
+                            sbid = viewsLow ? 7 : 5;
+                        }
                     }
 
-                    if(sbidColor === "green" && item['eBay L30'] === 0){
-                        sbid = 10;
+                    if (sbidColor === "yellow") {
+                        if (noSale) {
+                            sbid = viewsLow ? 12 : 10;
+                        } else {
+                            sbid = viewsLow ? 10 : 8;
+                        }
                     }
 
-                    if(sbidColor === "yellow" && item['eBay L30'] != 0){
-                        sbid = 8;
-                    }
-
-                    if(sbidColor === "yellow" && item['eBay L30'] === 0){
-                        sbid = 10;
-                    }
-
-                    if(sbidColor === "red" && item['eBay L30'] != 0){
-                        sbid = 8;
-                    }
-
-                    if(sbidColor === "red" && item['eBay L30'] === 0){
-                        sbid = 10;
+                    if (sbidColor === "red") {
+                        if (noSale) {
+                            sbid = viewsLow ? 15 : 12;
+                        } else {
+                            sbid = viewsLow ? 12 : 10;
+                        }
                     }
 
                     let reqViews = item.INV * 10;
