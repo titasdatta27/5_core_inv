@@ -67,30 +67,30 @@
                 <table class="table table-bordered table-responsive display" id="adv-master-table" style="width:100%">
                     <thead>
                         <tr>
-                            <th>CHANNEL</th>
-                            <th>L30 SALES</th>
-                            <th>GPFT</th>
-                            <th>TPFT</th>
-                            <th>SPENT</th>
-                            <th>CLICKS</th>
-                            <th>AD SALES</th>
-                            <th>ACOS</th>
-                            <th>TACOS</th>     
-                            <th>AD SOLD</th>        
-                            <th>CVR</th>     
-                            <th>MISSING ADS</th>     
+                            <th class="text-center">TOTAL</th>
+                            <th class="text-center">L30 SALES <br><hr> {{ $total_l30_sales}}</th>
+                            <th class="text-center">GPFT <br><hr> 0</th>
+                            <th class="text-center">TPFT <br><hr> 0</th>
+                            <th class="text-center">SPENT <br><hr> {{ $total_spent}}</th>
+                            <th class="text-center">CLICKS <br><hr> {{ $total_clicks}}</th>
+                            <th class="text-center">AD SALES <br><hr> {{ $total_ad_sales}}</th>
+                            <th class="text-center">ACOS <br><hr> 0</th>
+                            <th class="text-center">TACOS <br><hr> 0</th>     
+                            <th class="text-center">AD SOLD <br><hr> {{ $total_ad_sold}}</th>        
+                            <th class="text-center">CVR <br><hr> 0 </th>     
+                            <th class="text-center">MISSING ADS <br><hr> {{ $total_missing}}</th>     
                         </tr>
                     </thead>
                     <tbody>
                         <tr style="background-color:#cfe2f3;" class="accordion-header">
-                            <td><b>AMAZON</b></td>
-                            <td>{{ $amazon_l30_sales }}</td>
-                            <td></td>
-                            <td></td>
-                            <td>{{ $amazon_spent }}</td>
-                            <td>{{ $amazon_clicks }}</td>
-                            <td>{{ $amazon_ad_sales }}</td>
-                            <td>
+                            <td class="text-center"><b>AMAZON</b></td>
+                            <td class="text-center">{{ $amazon_l30_sales }}</td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center">{{ $amazon_spent }}</td>
+                            <td class="text-center">{{ $amazon_clicks }}</td>
+                            <td class="text-center">{{ $amazon_ad_sales }}</td>
+                            <td class="text-center">
                                 @php
                                     if($amazon_ad_sales > 0){
                                         $acos = ($amazon_spent/$amazon_ad_sales)*100;
@@ -98,10 +98,11 @@
                                     }else{
                                         $acos = 0;
                                     }
+                                    $acos = round($acos);
                                 @endphp
-                                {{ '('.$acos.') %'  }}
+                                {{ $acos.' %'  }}
                             </td>
-                            <td>
+                            <td class="text-center">
                                 @php
                                     if($amazon_l30_sales > 0){
                                         $tacos = ($amazon_spent/$amazon_l30_sales)*100;
@@ -109,11 +110,12 @@
                                     }else{
                                         $tacos = 0;
                                     }
+                                    $tacos = round($tacos);
                                 @endphp
-                                {{ '('.$tacos.') %'  }}
+                                {{ $tacos.' %'  }}
                             </td>
-                            <td>{{ $amazon_ad_sold }}</td>
-                            <td>
+                            <td class="text-center">{{ $amazon_ad_sold }}</td>
+                            <td class="text-center">
                                 @php
                                     if($amazon_clicks > 0){
                                         $cvr = ($amazon_ad_sold/$amazon_clicks)*100;
@@ -121,21 +123,22 @@
                                     }else{
                                         $cvr = 0;
                                     }
+                                    $cvr = round($cvr);
                                 @endphp
-                                {{ '('.$cvr.') %' }}
+                                {{ $cvr.' %' }}
                             </td>
-                            <td>{{ $amazon_missing_ads }}</td>
+                            <td class="text-center">{{ $amazon_missing_ads }}</td>
                         </tr>
 
                          <tr class="accordion-body">
-                            <td><a href="{{ route('amazon.kw.ads') }}" target="_blank" style="text-decoration:none; color:#000000;">AMZ KW</a></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td>{{ $amazonkw_spent }}</td>
-                            <td>{{ $amazonkw_clicks }}</td>
-                            <td>{{ $amazonkw_ad_sales }}</td>
-                            <td>
+                            <td class="text-center"><a href="{{ route('amazon.kw.ads') }}" target="_blank" style="text-decoration:none; color:#000000;">AMZ KW</a></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center">{{ $amazonkw_spent }}</td>
+                            <td class="text-center">{{ $amazonkw_clicks }}</td>
+                            <td class="text-center">{{ $amazonkw_ad_sales }}</td>
+                            <td class="text-center">
                                 @php
                                     if($amazonkw_ad_sales > 0){
                                         $acos = ($amazonkw_spent/$amazonkw_ad_sales)*100;
@@ -143,12 +146,13 @@
                                     }else{
                                         $acos = 0;
                                     }
+                                    $acos = round($acos);
                                 @endphp
-                                {{ '('.$acos.') %'  }}
+                                {{ $acos.' %'  }}
                             </td>
-                            <td></td>
-                            <td>{{ $amazonkw_ad_sold }}</td>
-                            <td>
+                            <td class="text-center"></td>
+                            <td class="text-center">{{ $amazonkw_ad_sold }}</td>
+                            <td class="text-center">
                                 @php
                                     if($amazonkw_clicks > 0){
                                         $cvr = ($amazonkw_ad_sold/$amazonkw_clicks)*100;
@@ -156,21 +160,22 @@
                                     }else{
                                         $cvr = 0;
                                     }
+                                    $cvr = round($cvr);
                                 @endphp
-                                {{ '('.$cvr.') %' }}
+                                {{ $cvr.' %' }}
                             </td>
-                            <td>{{ $amazonkw_missing_ads }}</td>
+                            <td class="text-center">{{ $amazonkw_missing_ads }}</td>
                         </tr>
 
                          <tr class="accordion-body">
-                            <td><a href="{{ route('amazon.pt.ads') }}" target="_blank" style="text-decoration:none; color:#000000;">AMZ PT</a></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td>{{ $amazonpt_spent }}</td>
-                            <td>{{ $amazonpt_clicks }}</td>
-                            <td>{{ $amazonpt_ad_sales }}</td>
-                            <td>
+                            <td class="text-center"><a href="{{ route('amazon.pt.ads') }}" target="_blank" style="text-decoration:none; color:#000000;">AMZ PT</a></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center">{{ $amazonpt_spent }}</td>
+                            <td class="text-center">{{ $amazonpt_clicks }}</td>
+                            <td class="text-center">{{ $amazonpt_ad_sales }}</td>
+                            <td class="text-center">
                                 @php
                                     if($amazonpt_ad_sales > 0){
                                         $acos = ($amazonpt_spent/$amazonpt_ad_sales)*100;
@@ -178,12 +183,13 @@
                                     }else{
                                         $acos = 0;
                                     }
+                                    $acos = round($acos);
                                 @endphp
-                                {{ '('.$acos.') %'  }}
+                                {{ $acos.' %'  }}
                             </td>
-                            <td></td>
-                            <td>{{ $amazonpt_ad_sold }}</td>
-                            <td>
+                            <td class="text-center"></td>
+                            <td class="text-center">{{ $amazonpt_ad_sold }}</td>
+                            <td class="text-center">
                                 @php
                                     if($amazonpt_clicks > 0){
                                         $cvr = ($amazonpt_ad_sold/$amazonpt_clicks)*100;
@@ -191,21 +197,22 @@
                                     }else{
                                         $cvr = 0;
                                     }
+                                    $cvr = round($cvr);
                                 @endphp
-                                {{ '('.$cvr.') %' }}
+                                {{ $cvr.' %' }}
                             </td>
-                            <td>{{ $amazonpt_missing_ads }}</td>
+                            <td class="text-center">{{ $amazonpt_missing_ads }}</td>
                         </tr>
 
                         <tr class="accordion-body">
-                            <td><a href="{{ route('amazon.hl.ads') }}" target="_blank" style="text-decoration:none; color:#000000;">AMZ HL</a></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td>{{ $amazonhl_spent }}</td>
-                            <td>{{ $amazonhl_clicks }}</td>
-                            <td>{{ $amazonhl_ad_sales }}</td>
-                            <td>
+                            <td class="text-center"><a href="{{ route('amazon.hl.ads') }}" target="_blank" style="text-decoration:none; color:#000000;">AMZ HL</a></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center">{{ $amazonhl_spent }}</td>
+                            <td class="text-center">{{ $amazonhl_clicks }}</td>
+                            <td class="text-center">{{ $amazonhl_ad_sales }}</td>
+                            <td class="text-center">
                                 @php
                                     if($amazonhl_ad_sales > 0){
                                         $acos = ($amazonhl_spent/$amazonhl_ad_sales)*100;
@@ -213,12 +220,13 @@
                                     }else{
                                         $acos = 0;
                                     }
+                                    $acos = round($acos);
                                 @endphp
-                                {{ '('.$acos.') %'  }}
+                                {{ $acos.' %'  }}
                             </td>
-                            <td></td>
-                            <td>{{ $amazonhl_ad_sold }}</td>
-                            <td>
+                            <td class="text-center"></td>
+                            <td class="text-center">{{ $amazonhl_ad_sold }}</td>
+                            <td class="text-center">
                                 @php
                                     if($amazonhl_clicks > 0){
                                         $cvr = ($amazonhl_ad_sold/$amazonhl_clicks)*100;
@@ -226,21 +234,22 @@
                                     }else{
                                         $cvr = 0;
                                     }
+                                    $cvr = round($cvr);
                                 @endphp
-                                {{ '('.$cvr.') %' }}
+                                {{ $cvr.' %' }}
                             </td>
-                            <td></td>
+                            <td class="text-center"></td>
                         </tr>
 
                         <tr style="background-color:#cfe2f3;" class="accordion-header">
-                            <td><b>EBAY</b></td>
-                            <td>{{ $ebay_l30_sales }}</td>
-                            <td></td>
-                            <td></td>
-                            <td>{{ $ebay_spent }}</td>
-                            <td>{{ $ebay_clicks }}</td>
-                            <td>{{ $ebay_ad_sales }}</td>
-                            <td>
+                            <td class="text-center"><b>EBAY</b></td>
+                            <td class="text-center">{{ $ebay_l30_sales }}</td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center">{{ $ebay_spent }}</td>
+                            <td class="text-center">{{ $ebay_clicks }}</td>
+                            <td class="text-center">{{ $ebay_ad_sales }}</td>
+                            <td class="text-center">
                                 @php
                                     if($ebay_ad_sales > 0){
                                         $acos = ($ebay_spent/$ebay_ad_sales)*100;
@@ -248,10 +257,11 @@
                                     }else{
                                         $acos = 0;
                                     }
+                                    $acos = round($acos);
                                 @endphp
-                                {{ '('.$acos.') %'  }}
+                                {{ $acos.' %'  }}
                             </td>
-                            <td>
+                            <td class="text-center">
                                 @php
                                     if($ebay_l30_sales > 0){
                                         $tacos = ($ebay_spent/$ebay_l30_sales)*100;
@@ -259,11 +269,12 @@
                                     }else{
                                         $tacos = 0;
                                     }
+                                    $tacos = round($tacos);
                                 @endphp
-                                {{ '('.$tacos.') %'  }}
+                                {{ $tacos.' %'  }}
                             </td>
-                            <td>{{ $ebay_ad_sold }}</td>
-                            <td>
+                            <td class="text-center">{{ $ebay_ad_sold }}</td>
+                            <td class="text-center">
                                 @php
                                     if($ebay_clicks > 0){
                                         $cvr = ($ebay_ad_sold/$ebay_clicks)*100;
@@ -271,21 +282,22 @@
                                     }else{
                                         $cvr = 0;
                                     }
+                                    $cvr = round($cvr);
                                 @endphp
-                                {{ '('.$cvr.') %' }}
+                                {{ $cvr.' %' }}
                             </td>
-                            <td>{{ $ebay_missing_ads }}</td>
+                            <td class="text-center">{{ $ebay_missing_ads }}</td>
                         </tr>
 
                         <tr class="accordion-body">
-                            <td><a href="{{ route('ebay.keywords.ads') }}" target="_blank" style="text-decoration:none; color:#000000;">EB KW</a></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td>{{ $ebaykw_spent }}</td>
-                            <td>{{ $ebaykw_clicks }}</td>
-                            <td>{{ $ebaykw_ad_sales }}</td>
-                            <td>
+                            <td class="text-center"><a href="{{ route('ebay.keywords.ads') }}" target="_blank" style="text-decoration:none; color:#000000;">EB KW</a></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center">{{ $ebaykw_spent }}</td>
+                            <td class="text-center">{{ $ebaykw_clicks }}</td>
+                            <td class="text-center">{{ $ebaykw_ad_sales }}</td>
+                            <td class="text-center">
                                 @php
                                     if($ebaykw_ad_sales > 0){
                                         $acos = ($ebaykw_spent/$ebaykw_ad_sales)*100;
@@ -293,12 +305,13 @@
                                     }else{
                                         $acos = 0;
                                     }
+                                    $acos = round($acos);
                                 @endphp
-                                {{ '('.$acos.') %'  }}
+                                {{ $acos.' %'  }}
                             </td>
-                            <td></td>
-                            <td>{{ $ebaykw_ad_sold }}</td>
-                            <td>
+                            <td class="text-center"></td>
+                            <td class="text-center">{{ $ebaykw_ad_sold }}</td>
+                            <td class="text-center">
                                 @php
                                     if($ebaykw_clicks > 0){
                                         $cvr = ($ebaykw_ad_sold/$ebaykw_clicks)*100;
@@ -306,21 +319,22 @@
                                     }else{
                                         $cvr = 0;
                                     }
+                                    $cvr = round($cvr);
                                 @endphp
-                                {{ '('.$cvr.') %' }}
+                                {{ $cvr.' %' }}
                             </td>
-                            <td>{{ $ebaykw_missing_ads }}</td>
+                            <td class="text-center">{{ $ebaykw_missing_ads }}</td>
                         </tr>
 
                         <tr class="accordion-body">
-                            <td><a href="{{ route('ebay.pmp.ads') }}" target="_blank" style="text-decoration:none; color:#000000;">EB PMT</a></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td>{{ $ebaypmt_spent }}</td>
-                            <td>{{ $ebaypmt_clicks }}</td>
-                            <td>{{ $ebaypmt_ad_sales }}</td>
-                            <td>
+                            <td class="text-center"><a href="{{ route('ebay.pmp.ads') }}" target="_blank" style="text-decoration:none; color:#000000;">EB PMT</a></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center">{{ $ebaypmt_spent }}</td>
+                            <td class="text-center">{{ $ebaypmt_clicks }}</td>
+                            <td class="text-center">{{ $ebaypmt_ad_sales }}</td>
+                            <td class="text-center">
                                 @php
                                     if($ebaypmt_ad_sales > 0){
                                         $acos = ($ebaypmt_spent/$ebaypmt_ad_sales)*100;
@@ -328,12 +342,13 @@
                                     }else{
                                         $acos = 0;
                                     }
+                                    $acos = round($acos);
                                 @endphp
-                                {{ '('.$acos.') %'  }}
+                                {{ $acos.' %'  }}
                             </td>
-                            <td></td>
-                            <td>{{ $ebaypmt_ad_sold }}</td>
-                            <td>
+                            <td class="text-center"></td>
+                            <td class="text-center">{{ $ebaypmt_ad_sold }}</td>
+                            <td class="text-center">
                                 @php
                                     if($ebaypmt_clicks > 0){
                                         $cvr = ($ebaypmt_ad_sold/$ebaypmt_clicks)*100;
@@ -341,21 +356,22 @@
                                     }else{
                                         $cvr = 0;
                                     }
+                                    $cvr = round($cvr);
                                 @endphp
-                                {{ '('.$cvr.') %' }}
+                                {{ $cvr.' %' }}
                             </td>
-                            <td>{{ $ebaypmt_missing_ads }}</td>
+                            <td class="text-center">{{ $ebaypmt_missing_ads }}</td>
                         </tr>
 
                         <tr style="background-color:#cfe2f3;" class="accordion-header">
-                            <td><b>EBAY 2</b></td>
-                            <td>{{ $ebay2_l30_sales }}</td>
-                            <td></td>
-                            <td></td>
-                            <td>{{ $ebay2_spent }}</td>
-                            <td>{{ $ebay2_clicks }}</td>
-                            <td>{{ $ebay2_ad_sales }}</td>
-                            <td>
+                            <td class="text-center"><b>EBAY 2</b></td>
+                            <td class="text-center">{{ $ebay2_l30_sales }}</td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center">{{ $ebay2_spent }}</td>
+                            <td class="text-center">{{ $ebay2_clicks }}</td>
+                            <td class="text-center">{{ $ebay2_ad_sales }}</td>
+                            <td class="text-center">
                                 @php
                                     if($ebay2_ad_sales > 0){
                                         $acos = ($ebay2_spent/$ebay2_ad_sales)*100;
@@ -363,10 +379,11 @@
                                     }else{
                                         $acos = 0;
                                     }
+                                    $acos = round($acos);
                                 @endphp
-                                {{ '('.$acos.') %'  }}
+                                {{ $acos.' %'  }}
                             </td>
-                            <td>
+                            <td class="text-center">
                                 @php
                                     if($ebay2_l30_sales > 0){
                                         $tacos = ($ebay2_spent/$ebay2_l30_sales)*100;
@@ -374,11 +391,12 @@
                                     }else{
                                         $tacos = 0;
                                     }
+                                    $tacos = round($tacos);
                                 @endphp
-                                {{ '('.$tacos.') %'  }}
+                                {{ $tacos.' %'  }}
                             </td>
-                            <td>{{ $ebay2_ad_sold }}</td>
-                            <td>
+                            <td class="text-center">{{ $ebay2_ad_sold }}</td>
+                            <td class="text-center">
                                 @php
                                     if($ebay2_clicks > 0){
                                         $cvr = ($ebay2_ad_sold/$ebay2_clicks)*100;
@@ -386,21 +404,22 @@
                                     }else{
                                         $cvr = 0;
                                     }
+                                    $cvr = round($cvr);
                                 @endphp
-                                {{ '('.$cvr.') %' }}
+                                {{ $cvr.' %' }}
                             </td>
-                            <td>{{ $ebay2_missing_ads }}</td>
+                            <td class="text-center">{{ $ebay2_missing_ads }}</td>
                         </tr>
 
                         <tr class="accordion-body">
-                            <td>EB PMT</td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td>{{ $ebay2pmt_spent }}</td>
-                            <td>{{ $ebay2pmt_clicks }}</td>
-                            <td>{{ $ebay2pmt_ad_sales }}</td>
-                            <td>
+                            <td class="text-center">EB PMT</td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center">{{ $ebay2pmt_spent }}</td>
+                            <td class="text-center">{{ $ebay2pmt_clicks }}</td>
+                            <td class="text-center">{{ $ebay2pmt_ad_sales }}</td>
+                            <td class="text-center">
                                 @php
                                     if($ebay2pmt_ad_sales > 0){
                                         $acos = ($ebay2pmt_spent/$ebay2pmt_ad_sales)*100;
@@ -408,12 +427,13 @@
                                     }else{
                                         $acos = 0;
                                     }
+                                    $acos = round($acos);
                                 @endphp
-                                {{ '('.$acos.') %'  }}
+                                {{ $acos.' %'  }}
                             </td>
-                            <td></td>
-                            <td>{{ $ebay2pmt_ad_sold }}</td>
-                            <td>
+                            <td class="text-center"></td>
+                            <td class="text-center">{{ $ebay2pmt_ad_sold }}</td>
+                            <td class="text-center">
                                 @php
                                     if($ebay2pmt_clicks > 0){
                                         $cvr = ($ebay2pmt_ad_sold/$ebay2pmt_clicks)*100;
@@ -421,21 +441,22 @@
                                     }else{
                                         $cvr = 0;
                                     }
+                                    $cvr = round($cvr);
                                 @endphp
-                                {{ '('.$cvr.') %' }}
+                                {{ $cvr.' %' }}
                             </td>
-                            <td>{{ $ebay2pmt_missing_ads }}</td>
+                            <td class="text-center">{{ $ebay2pmt_missing_ads }}</td>
                         </tr>
 
                         <tr style="background-color:#cfe2f3;" class="accordion-header">
-                            <td><b>EBAY 3</b></td>
-                            <td>{{ $ebay3_l30_sales }}</td>
-                            <td></td>
-                            <td></td>
-                            <td>{{ $ebay3_spent }}</td>
-                            <td>{{ $ebay3_clicks }}</td>
-                            <td>{{ $ebay3_ad_sales }}</td>
-                            <td>
+                            <td class="text-center"><b>EBAY 3</b></td>
+                            <td class="text-center">{{ $ebay3_l30_sales }}</td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center">{{ $ebay3_spent }}</td>
+                            <td class="text-center">{{ $ebay3_clicks }}</td>
+                            <td class="text-center">{{ $ebay3_ad_sales }}</td>
+                            <td class="text-center">
                                 @php
                                     if($ebay3_ad_sales > 0){
                                         $acos = ($ebay3_spent/$ebay3_ad_sales)*100;
@@ -443,10 +464,11 @@
                                     }else{
                                         $acos = 0;
                                     }
+                                    $acos = round($acos);
                                 @endphp
-                                {{ '('.$acos.') %'  }}
+                                {{ $acos.' %'  }}
                             </td>
-                            <td>
+                            <td class="text-center">
                                 @php
                                     if($ebay3_l30_sales > 0){
                                         $tacos = ($ebay3_spent/$ebay3_l30_sales)*100;
@@ -454,11 +476,12 @@
                                     }else{
                                         $tacos = 0;
                                     }
+                                    $tacos = round($tacos);
                                 @endphp
-                                {{ '('.$tacos.') %'  }}
+                                {{ $tacos.' %'  }}
                             </td>
-                            <td>{{ $ebay3_ad_sold }}</td>
-                            <td>
+                            <td class="text-center">{{ $ebay3_ad_sold }}</td>
+                            <td class="text-center">
                                 @php
                                     if($ebay3_clicks > 0){
                                         $cvr = ($ebay3_ad_sold/$ebay3_clicks)*100;
@@ -466,21 +489,22 @@
                                     }else{
                                         $cvr = 0;
                                     }
+                                    $cvr = round($cvr);
                                 @endphp
-                                {{ '('.$cvr.') %' }}
+                                {{ $cvr.' %' }}
                             </td>
-                            <td>{{ $ebay3_missing_ads }}</td>
+                            <td class="text-center">{{ $ebay3_missing_ads }}</td>
                         </tr>
 
                          <tr class="accordion-body">
-                            <td>EB KW</td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td>{{ $ebay3kw_spent }}</td>
-                            <td>{{ $ebay3kw_clicks }}</td>
-                            <td>{{ $ebay3kw_ad_sales }}</td>
-                            <td>
+                            <td class="text-center">EB KW</td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center">{{ $ebay3kw_spent }}</td>
+                            <td class="text-center">{{ $ebay3kw_clicks }}</td>
+                            <td class="text-center">{{ $ebay3kw_ad_sales }}</td>
+                            <td class="text-center">
                                 @php
                                     if($ebay3kw_ad_sales > 0){
                                         $acos = ($ebay3kw_spent/$ebay3kw_ad_sales)*100;
@@ -488,12 +512,13 @@
                                     }else{
                                         $acos = 0;
                                     }
+                                    $acos = round($acos);
                                 @endphp
-                                {{ '('.$acos.') %'  }}
+                                {{ $acos.' %'  }}
                             </td>
-                            <td></td>
-                            <td>{{ $ebay3kw_ad_sold }}</td>
-                            <td>
+                            <td class="text-center"></td>
+                            <td class="text-center">{{ $ebay3kw_ad_sold }}</td>
+                            <td class="text-center">
                                 @php
                                     if($ebay3kw_clicks > 0){
                                         $cvr = ($ebay3kw_ad_sold/$ebay3kw_clicks)*100;
@@ -501,21 +526,22 @@
                                     }else{
                                         $cvr = 0;
                                     }
+                                    $cvr = round($cvr);
                                 @endphp
-                                {{ '('.$cvr.') %' }}
+                                {{ $cvr.' %' }}
                             </td>
-                            <td>{{ $ebay3kw_missing_ads }}</td>
+                            <td class="text-center">{{ $ebay3kw_missing_ads }}</td>
                         </tr>
 
                         <tr class="accordion-body">
-                            <td>EB PMT</td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td>{{ $ebay3pmt_spent }}</td>
-                            <td>{{ $ebay3pmt_clicks }}</td>
-                            <td>{{ $ebay3pmt_ad_sales }}</td>
-                            <td>
+                            <td class="text-center">EB PMT</td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center">{{ $ebay3pmt_spent }}</td>
+                            <td class="text-center">{{ $ebay3pmt_clicks }}</td>
+                            <td class="text-center">{{ $ebay3pmt_ad_sales }}</td>
+                            <td class="text-center">
                                 @php
                                     if($ebay3pmt_ad_sales > 0){
                                         $acos = ($ebay3pmt_spent/$ebay3pmt_ad_sales)*100;
@@ -523,12 +549,13 @@
                                     }else{
                                         $acos = 0;
                                     }
+                                    $acos = round($acos);
                                 @endphp
-                                {{ '('.$acos.') %'  }}
+                                {{ $acos.' %'  }}
                             </td>
-                            <td></td>
-                            <td>{{ $ebay3pmt_ad_sold }}</td>
-                            <td>
+                            <td class="text-center"></td>
+                            <td class="text-center">{{ $ebay3pmt_ad_sold }}</td>
+                            <td class="text-center">
                                 @php
                                     if($ebay3pmt_clicks > 0){
                                         $cvr = ($ebay3pmt_ad_sold/$ebay3pmt_clicks)*100;
@@ -536,21 +563,22 @@
                                     }else{
                                         $cvr = 0;
                                     }
+                                    $cvr = round($cvr);
                                 @endphp
-                                {{ '('.$cvr.') %' }}
+                                {{ $cvr.' %' }}
                             </td>
-                            <td>{{ $ebay3pmt_missing_ads }}</td>
+                            <td class="text-center">{{ $ebay3pmt_missing_ads }}</td>
                         </tr>
 
                         <tr style="background-color:#cfe2f3;" class="accordion-header">
-                            <td><b>WALMART</b></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td>{{ $walmart_spent }}</td>
-                            <td>{{ $walmart_clicks }}</td>
-                            <td>{{ $walmart_ad_sales }}</td>
-                            <td>
+                            <td class="text-center"><b>WALMART</b></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center">{{ $walmart_spent }}</td>
+                            <td class="text-center">{{ $walmart_clicks }}</td>
+                            <td class="text-center">{{ $walmart_ad_sales }}</td>
+                            <td class="text-center">
                                 @php
                                     if($walmart_ad_sales > 0){
                                         $acos = ($walmart_spent/$walmart_ad_sales)*100;
@@ -558,14 +586,15 @@
                                     }else{
                                         $acos = 0;
                                     }
+                                    $acos = round($acos);
                                 @endphp
-                                {{ '('.$acos.') %'  }}
+                                {{ $acos.' %'  }}
                             </td>
-                            <td>
+                            <td class="text-center">
                               
                             </td>
-                            <td>{{ $walmart_ad_sold }}</td>
-                            <td>
+                            <td class="text-center">{{ $walmart_ad_sold }}</td>
+                            <td class="text-center">
                                 @php
                                     if($walmart_clicks > 0){
                                         $cvr = ($walmart_ad_sold/$walmart_clicks)*100;
@@ -573,36 +602,37 @@
                                     }else{
                                         $cvr = 0;
                                     }
+                                    $cvr = round($cvr);
                                 @endphp
-                                {{ '('.$cvr.') %' }}
+                                {{ $cvr.' %' }}
                             </td>
-                            <td></td>
+                            <td class="text-center"></td>
                         </tr>
 
                         <tr style="background-color:#cfe2f3;" class="accordion-header">
-                            <td><b>SHOPIFY</b></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
+                            <td class="text-center"><b>SHOPIFY</b></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
                         </tr>
 
                          <tr class="accordion-body">
-                            <td>G SHOPPING</td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td>{{ $gshoping_spent }}</td>
-                            <td>{{ $gshoping_clicks }}</td>
-                            <td>{{ $gshoping_ad_sales }}</td>
-                            <td>
+                            <td class="text-center">G SHOPPING</td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center">{{ $gshoping_spent }}</td>
+                            <td class="text-center">{{ $gshoping_clicks }}</td>
+                            <td class="text-center">{{ $gshoping_ad_sales }}</td>
+                            <td class="text-center">
                                 @php
                                     if($gshoping_ad_sales > 0){
                                         $acos = ($gshoping_spent/$gshoping_ad_sales)*100;
@@ -610,12 +640,13 @@
                                     }else{
                                         $acos = 0;
                                     }
+                                    $acos = round($acos);
                                 @endphp
-                                {{ '('.$acos.') %'  }}
+                                {{ $acos.' %'  }}
                             </td>
-                            <td></td>
-                            <td>{{ $gshoping_ad_sold }}</td>
-                            <td>
+                            <td class="text-center"></td>
+                            <td class="text-center">{{ $gshoping_ad_sold }}</td>
+                            <td class="text-center">
                                 @php
                                     if($gshoping_clicks > 0){
                                         $cvr = ($gshoping_ad_sold/$gshoping_clicks)*100;
@@ -623,115 +654,116 @@
                                     }else{
                                         $cvr = 0;
                                     }
+                                    $cvr = round($cvr);
                                 @endphp
-                                {{ '('.$cvr.') %' }}
+                                {{ $cvr.' %' }}
                             </td>
-                            <td></td>
+                            <td class="text-center"></td>
                         </tr>
 
                          <tr class="accordion-body">
-                            <td>G SERP</td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
+                            <td class="text-center">G SERP</td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
                         </tr>
 
                         <tr class="accordion-body">
-                            <td>FB CARAOUSAL</td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
+                            <td class="text-center">FB CARAOUSAL</td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
                         </tr>
 
                         <tr class="accordion-body">
-                            <td>FB VIDEO</td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
+                            <td class="text-center">FB VIDEO</td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
                         </tr>
 
                         <tr class="accordion-body">
-                            <td>INSTA CARAOUSAL</td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
+                            <td class="text-center">INSTA CARAOUSAL</td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
                         </tr>
 
                         <tr class="accordion-body">
-                            <td>INSTA VIDEO</td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
+                            <td class="text-center">INSTA VIDEO</td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
                         </tr>
 
                         <tr class="accordion-body">
-                            <td>YOUTUBE</td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
+                            <td class="text-center">YOUTUBE</td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
                         </tr>
 
                         <tr style="background-color:#cfe2f3;" class="accordion-header">
-                            <td><b>TIKTOK</b></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
+                            <td class="text-center"><b>TIKTOK</b></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"></td>
                         </tr>
                     
                     </tbody>
@@ -784,7 +816,7 @@ $(document).ready(function() {
                 });
 
             };
-            document.body.appendChild(colScript); 
+            document.body.appendChild(colScript);
         };
         document.body.appendChild(dtScript); 
     }, 200); 
