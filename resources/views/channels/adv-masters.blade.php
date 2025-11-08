@@ -67,7 +67,7 @@
                 <table class="table table-bordered table-responsive display" id="adv-master-table" style="width:100%">
                     <thead>
                         <tr>
-                            <th class="text-center">TOTAL</th>
+                            <th class="text-center" style="width: 110px;">TOTAL</th>
                             <th class="text-center">L30 SALES <br><hr> {{ $total_l30_sales}}</th>
                             <th class="text-center">GPFT <br><hr> 0</th>
                             <th class="text-center">TPFT <br><hr> 0</th>
@@ -83,7 +83,7 @@
                     </thead>
                     <tbody>
                         <tr style="background-color:#cfe2f3;" class="accordion-header">
-                            <td class="text-center"><b>AMAZON</b></td>
+                            <td class="text-center"><b>AMAZON</b> <button type="button" class="btn btn-primary rounded-circle p-0 ms-2" style="width: 12px; height: 12px;" data-bs-toggle="modal" data-bs-target="#amazonModal"></button></td>
                             <td class="text-center">{{ $amazon_l30_sales }}</td>
                             <td class="text-center"></td>
                             <td class="text-center"></td>
@@ -771,6 +771,28 @@
             </div>
         </div>
     </div>
+
+    <!-- START AMAZON MODAL CODE -->
+        <div class="modal fade" id="amazonModal" tabindex="-1" aria-labelledby="largeModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">  <!-- 👈 modal-lg makes it large -->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="largeModalLabel">Large Modal Example</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>This is a large Bootstrap modal. You can place any content here — forms, charts, or tables.</p>
+                    </div>
+                    {{-- <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary">Save Changes</button>
+                    </div> --}}
+                </div>
+            </div>
+        </div>
+    <!-- END AMAZON MODAL CODE -->
+
+
 @endsection
 
 @section('script')
